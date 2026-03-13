@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Confirmar Telemóvel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h5>Confirmar novo telemóvel</h5>
+          <p>Introduza o código que recebeu por SMS no novo número.</p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Código</label>
+              <input type="text" name="code" class="form-control" required>
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-primary">Confirmar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

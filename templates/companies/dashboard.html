@@ -1,0 +1,82 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Painel da Empresa{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Painel da Empresa</h3>
+    <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Criar Vaga</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-4">
+      <aside>
+        <div class="card mb-3 p-3 text-center">
+          <div class="company-avatar mx-auto mb-3" style="width:96px;height:96px;border-radius:8px;overflow:hidden;">
+            {% if company.logo %}
+              <img src="{{ company.logo.url }}" alt="Logo" style="width:96px;height:96px;object-fit:cover;">
+            {% else %}
+              <div style="width:96px;height:96px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#555;">{{ company.nome|default:'Empresa'|slice:":2"|upper }}</div>
+            {% endif %}
+          </div>
+          <h5 class="mb-1">{{ company.nome }}</h5>
+          <p class="text-muted small mb-2">{{ company.get_setor_display|default:'' }}</p>
+          {% if company.verificada %}
+            <span class="badge bg-success">Verificada</span>
+          {% endif %}
+        </div>
+
+        <div class="card p-3 mb-3">
+          <h6>Contactos</h6>
+          <p class="mb-1 small">📞 {{ company.telefone|default:'—' }}</p>
+          <p class="mb-1 small">✉️ {{ company.email|default:'—' }}</p>
+          {% if company.website %}
+            <p class="mb-0 small">🔗 <a href="{{ company.website }}" target="_blank">Site</a></p>
+          {% endif %}
+        </div>
+
+        <div class="card p-3">
+          <h6>Estatísticas</h6>
+          <div class="d-flex justify-content-between mt-2">
+            <div>
+              <small class="text-muted">Vagas</small>
+              <div class="h5 mb-0">{{ stats.vagas_ativas|default:0 }}</div>
+            </div>
+            <div>
+              <small class="text-muted">Candidaturas</small>
+              <div class="h5 mb-0">{{ stats.candidaturas|default:0 }}</div>
+            </div>
+            <div>
+              <small class="text-muted">Visualizações</small>
+              <div class="h5 mb-0">{{ stats.visualizacoes|default:0 }}</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <main>
+        <div class="mb-3">
+          <h5>Descrição</h5>
+          <p class="text-muted">{% if company.descricao %}{{ company.descricao|linebreaksbr }}{% else %}<em>Sem descrição.</em>{% endif %}</p>
+        </div>
+
+        <div class="card p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Vagas recentes</h6>
+            <a href="{% url 'companies:job_list' %}" class="small">Ver todas</a>
+          </div>
+          {% include 'companies/job_list.html' %}
+        </div>
+
+        <div class="card p-3">
+          <h6>Pedidos de contacto</h6>
+          {% include 'companies/contact_request_list.html' %}
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}

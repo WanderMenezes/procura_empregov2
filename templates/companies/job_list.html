@@ -1,0 +1,11 @@
+{% comment %} Partial: lista de vagas usada em dashboards e listagens {% endcomment %}
+
+{% if jobs %}
+  <div class="list-group">
+    {% for job in jobs %}
+      <a class="list-group-item list-group-item-action" href="{% url 'companies:job_detail' job.id %}">{{ job.titulo }}</a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info mb-0">Nenhuma vaga encontrada.</div>
+{% endif %}

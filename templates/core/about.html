@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Sobre - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="text-center mb-4">Sobre a Base Nacional de Jovens</h1>
+                    
+                    <p class="lead text-center mb-5">
+                        Uma plataforma nacional para conectar jovens de São Tomé e Príncipe 
+                        com oportunidades de emprego, estágios e formação.
+                    </p>
+                    
+                    <h3 class="mb-3">A Nossa Missão</h3>
+                    <p>
+                        A Base Nacional de Jovens foi criada com o objetivo de facilitar a 
+                        inserção dos jovens santomenses no mercado de trabalho, promovendo 
+                        a conexão entre talentos jovens e empresas/instituições que oferecem 
+                        oportunidades de desenvolvimento profissional.
+                    </p>
+                    
+                    <h3 class="mb-3 mt-4">O Que Oferecemos</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <i class="bi bi-person-check text-primary fs-3 me-3"></i>
+                                <div>
+                                    <h5>Para Jovens</h5>
+                                    <ul class="list-unstyled text-muted">
+                                        <li><i class="bi bi-check2 me-2"></i>Registo gratuito</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Perfil profissional</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Acesso a vagas</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Visibilidade para empresas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <i class="bi bi-building-check text-success fs-3 me-3"></i>
+                                <div>
+                                    <h5>Para Empresas</h5>
+                                    <ul class="list-unstyled text-muted">
+                                        <li><i class="bi bi-check2 me-2"></i>Publicação de vagas</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Pesquisa de candidatos</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Filtros avançados</li>
+                                        <li><i class="bi bi-check2 me-2"></i>Gestão de candidaturas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mb-3 mt-4">Cobertura Nacional</h3>
+                    <p>
+                        A plataforma cobre todos os distritos de São Tomé e Príncipe, 
+                        garantindo que jovens de todas as regiões tenham acesso às 
+                        oportunidades:
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Água Grande</li>
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Cantagalo</li>
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Caué</li>
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Lembá</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Lobata</li>
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Mé-Zóchi</li>
+                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Príncipe</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mb-3 mt-4">Parceiros</h3>
+                    <p>
+                        Este projeto é desenvolvido em parceria com o Governo de São Tomé e Príncipe 
+                        e o PNUD (Programa das Nações Unidas para o Desenvolvimento), com o objetivo 
+                        de promover o emprego juvenil e o desenvolvimento económico do país.
+                    </p>
+                    
+                    <div class="text-center mt-5">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-person-plus me-2"></i>Registar-me
+                        </a>
+                        <a href="{% url 'help' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-question-circle me-2"></i>Ajuda
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

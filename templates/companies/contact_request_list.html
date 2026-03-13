@@ -1,0 +1,11 @@
+{% comment %} Partial: lista de pedidos de contacto para incluir em dashboards {% endcomment %}
+
+{% if requests %}
+  <ul class="list-group mb-0">
+    {% for r in requests %}
+      <li class="list-group-item">{{ r.youth.user.nome }} — {{ r.motivo }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="alert alert-info mb-0">Sem pedidos.</div>
+{% endif %}

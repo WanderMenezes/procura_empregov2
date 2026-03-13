@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Candidaturas{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h4>Candidaturas</h4>
+  {% if applications %}
+    <ul class="list-group">
+      {% for app in applications %}
+        <li class="list-group-item">{{ app.youth.user.nome }} — {{ app.get_estado_display }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info">Sem candidaturas.</div>
+  {% endif %}
+</div>
+{% endblock %}

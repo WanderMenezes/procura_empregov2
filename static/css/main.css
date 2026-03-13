@@ -1,0 +1,256 @@
+:root {
+    --primary-color: #0066cc;
+    --secondary-color: #00a86b;
+    --accent-color: #ff6b35;
+    --dark-color: #1a1a2e;
+    --light-bg: #f8f9fa;
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+/* include sensible box-sizing */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    background-color: var(--light-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.navbar {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0052a3 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0052a3 100%);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,102,204,0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #008f5a 100%);
+    border: none;
+    font-weight: 600;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0,102,204,0.25);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+}
+
+.footer {
+    background: var(--dark-color);
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+.footer a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0052a3 50%, var(--secondary-color) 100%);
+    color: white;
+    padding: 4rem 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.wizard-step {
+    display: none;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin: 0 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.step.completed {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+}
+
+/* Mobile-first utility helpers */
+.container { padding-left: 1rem; padding-right: 1rem; }
+.mt-2-mobile { margin-top: 0.5rem; }
+.mb-2-mobile { margin-bottom: 0.5rem; }
+
+/* Responsive tweaks for lists and forms */
+.list-group-item {
+    padding: 0.5rem 0.75rem;
+}
+
+.list-group-item .d-flex.align-items-center {
+    gap: 0.5rem;
+}
+
+/* Make list items stack on small screens */
+@media (max-width: 576px) {
+    .list-group-item.d-flex { flex-direction: column; align-items: stretch; }
+    .list-group-item .btn { width: 100%; margin-top: 0.5rem; }
+    .list-group-item .d-flex > div:last-child { margin-left: 0; }
+    .navbar .nav-link { padding: 0.5rem 0.25rem; }
+    .btn-primary { padding: 0.6rem 1rem; }
+    /* Make form controls full width */
+    .form-inline, form .row > [class*="col-"] { width: 100%; }
+}
+
+/* Buttons responsive behaviour */
+.btn { white-space: normal; }
+.bulk-actions .btn { min-width: 0; }
+@media (max-width: 576px) {
+    .bulk-actions { flex-direction: column; gap: 0.5rem; }
+    .bulk-actions .btn { width: 100%; display: block; }
+    .bulk-actions small { display: block; margin-top: 0.25rem; }
+}
+
+/* Ensure form controls don't overflow */
+.list-group-item { word-break: break-word; }
+
+/* Ensure images are responsive inside thumbnails */
+.list-group img { max-width: 100%; height: auto; display: block; }
+
+/* Full-width action buttons on very small devices */
+@media (max-width: 420px) {
+    .btn { font-size: 0.9rem; }
+    .navbar-brand { font-size: 1rem; }
+}

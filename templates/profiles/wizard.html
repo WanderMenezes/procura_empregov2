@@ -1,0 +1,326 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Completar Perfil - Passo {{ step }} de 4{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2>Completa o Teu Perfil</h2>
+                        <p class="text-muted">Passo {{ step }} de 4</p>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ progress }}%" 
+                             aria-valuenow="{{ progress }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            <span class="fw-bold">{{ progress }}%</span>
+                        </div>
+                    </div>
+                    <div class="text-end small text-muted mb-3">{{ progress }}% completo</div>
+                    
+                    <!-- Step Indicators -->
+                    <div class="step-indicator mb-4">
+                        <div class="step {% if step >= 1 %}active{% endif %} {% if step > 1 %}completed{% endif %}">
+                            {% if step > 1 %}<i class="bi bi-check"></i>{% else %}1{% endif %}
+                        </div>
+                        <div class="step {% if step >= 2 %}active{% endif %} {% if step > 2 %}completed{% endif %}">
+                            {% if step > 2 %}<i class="bi bi-check"></i>{% else %}2{% endif %}
+                        </div>
+                        <div class="step {% if step >= 3 %}active{% endif %} {% if step > 3 %}completed{% endif %}">
+                            {% if step > 3 %}<i class="bi bi-check"></i>{% else %}3{% endif %}
+                        </div>
+                        <div class="step {% if step >= 4 %}active{% endif %}">4</div>
+                    </div>
+                    
+                    <!-- Step Title -->
+                    <h4 class="text-center mb-4">
+                        {% if step == 1 %}
+                            <i class="bi bi-person me-2"></i>Dados Pessoais
+                        {% elif step == 2 %}
+                            <i class="bi bi-book me-2"></i>Educação e Skills
+                        {% elif step == 3 %}
+                            <i class="bi bi-briefcase me-2"></i>Experiência e Interesses
+                        {% elif step == 4 %}
+                            <i class="bi bi-file-earmark me-2"></i>Documentos e Consentimentos
+                        {% endif %}
+                    </h4>
+                    {% if step_stats %}
+                        <p class="text-center small text-muted mb-3">
+                            {{ step == 1|yesno:"Dados Pessoais,|" }}
+                            {% if step == 2 %}Educação e Skills{% elif step == 3 %}Experiência e Interesses{% elif step == 4 %}Documentos e Consentimentos{% elif step == 1 %}Dados Pessoais{% endif %}
+                            — {{ step_stats.filled }}/{{ step_stats.total }} preenchidos
+                        </p>
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Step 1: Dados Pessoais -->
+                        {% if step == 1 %}
+                            <div class="mb-3">
+                                <label for="id_data_nascimento" class="form-label">Data de Nascimento</label>
+                                <input type="date" name="data_nascimento" id="id_data_nascimento" 
+                                       class="form-control" value="{{ form.data_nascimento.value|default:'' }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_sexo" class="form-label">Sexo</label>
+                                <select name="sexo" id="id_sexo" class="form-select">
+                                    <option value="">Selecione...</option>
+                                    {% for value, label in form.fields.sexo.choices %}
+                                        <option value="{{ value }}" {% if form.sexo.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_localidade" class="form-label">Localidade</label>
+                                <input type="text" name="localidade" id="id_localidade" 
+                                       class="form-control" placeholder="Sua localidade"
+                                       value="{{ form.localidade.value|default:'' }}">
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Step 2: Educação e Skills -->
+                        {% if step == 2 %}
+                            <h5 class="mb-3">Educação</h5>
+                            
+                            <div class="mb-3">
+                                <label for="id_nivel" class="form-label">Nível de Educação</label>
+                                <select name="nivel" id="id_nivel" class="form-select">
+                                    <option value="">Selecione...</option>
+                                    {% for value, label in form.fields.nivel.choices %}
+                                        <option value="{{ value }}" {% if form.nivel.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_area_formacao" class="form-label">Área de Formação</label>
+                                <select name="area_formacao" id="id_area_formacao" class="form-select">
+                                    <option value="">Selecione...</option>
+                                    {% for value, label in form.fields.area_formacao.choices %}
+                                        <option value="{{ value }}" {% if form.area_formacao.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_instituicao" class="form-label">Instituição</label>
+                                <input type="text" name="instituicao" id="id_instituicao" 
+                                       class="form-control" placeholder="Nome da escola/instituição"
+                                       value="{{ form.instituicao.value|default:'' }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_ano" class="form-label">Ano de Conclusão</label>
+                                <input type="number" name="ano" id="id_ano" 
+                                       class="form-control" placeholder="Ex: 2023" min="1950" max="2030"
+                                       value="{{ form.ano.value|default:'' }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_curso" class="form-label">Curso/Especialidade</label>
+                                <input type="text" name="curso" id="id_curso" 
+                                       class="form-control" placeholder="Nome do curso"
+                                       value="{{ form.curso.value|default:'' }}">
+                            </div>
+                            
+                            <hr class="my-4">
+                            <h5 class="mb-3">Skills</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Seleciona as tuas skills</label>
+                                <div class="row">
+                                    {% for skill in form.fields.skills.queryset %}
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="skills" value="{{ skill.id }}" 
+                                                       id="skill_{{ skill.id }}"
+                                                       {% if skill.id in form.skills.value %}checked{% endif %}>
+                                                <label class="form-check-label" for="skill_{{ skill.id }}">
+                                                    {{ skill.nome }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Step 3: Experiência e Interesses -->
+                        {% if step == 3 %}
+                            <div class="mb-3">
+                                <label for="id_situacao_atual" class="form-label">Situação Atual *</label>
+                                <select name="situacao_atual" id="id_situacao_atual" class="form-select" required>
+                                    {% for value, label in form.fields.situacao_atual.choices %}
+                                        <option value="{{ value }}" {% if form.situacao_atual.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_disponibilidade" class="form-label">Disponibilidade Imediata *</label>
+                                <select name="disponibilidade" id="id_disponibilidade" class="form-select" required>
+                                    {% for value, label in form.fields.disponibilidade.choices %}
+                                        <option value="{{ value }}" {% if form.disponibilidade.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_interesse_setorial" class="form-label">Setor de Interesse</label>
+                                <select name="interesse_setorial" id="id_interesse_setorial" class="form-select">
+                                    <option value="">Selecione...</option>
+                                    {% for value, label in form.fields.interesse_setorial.choices %}
+                                        <option value="{{ value }}" {% if form.interesse_setorial.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_preferencia_oportunidade" class="form-label">Tipo de Oportunidade Preferida *</label>
+                                <select name="preferencia_oportunidade" id="id_preferencia_oportunidade" class="form-select" required>
+                                    {% for value, label in form.fields.preferencia_oportunidade.choices %}
+                                        <option value="{{ value }}" {% if form.preferencia_oportunidade.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_sobre" class="form-label">Sobre Mim</label>
+                                <textarea name="sobre" id="id_sobre" class="form-control" rows="4" 
+                                          placeholder="Fale um pouco sobre ti, tuas aspirações e objetivos profissionais...">{{ form.sobre.value|default:'' }}</textarea>
+                            </div>
+                            
+                            <hr class="my-4">
+                            <h5 class="mb-3">Experiência Profissional (Opcional)</h5>
+                            
+                            <div class="mb-3 form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="tem_experiencia" id="id_tem_experiencia"
+                                       {% if form.tem_experiencia.value %}checked{% endif %}>
+                                <label class="form-check-label" for="id_tem_experiencia">
+                                    Tenho experiência profissional
+                                </label>
+                            </div>
+                            
+                            <div id="experiencia_fields" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="id_exp_entidade" class="form-label">Empresa/Entidade</label>
+                                    <input type="text" name="exp_entidade" id="id_exp_entidade" 
+                                           class="form-control" placeholder="Nome da empresa"
+                                           value="{{ form.exp_entidade.value|default:'' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_exp_cargo" class="form-label">Cargo/Função</label>
+                                    <input type="text" name="exp_cargo" id="id_exp_cargo" 
+                                           class="form-control" placeholder="Seu cargo"
+                                           value="{{ form.exp_cargo.value|default:'' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_exp_descricao" class="form-label">Descrição das Atividades</label>
+                                    <textarea name="exp_descricao" id="id_exp_descricao" class="form-control" rows="3" 
+                                              placeholder="Descreve as tuas principais atividades...">{{ form.exp_descricao.value|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Step 4: Documentos e Consentimentos -->
+                        {% if step == 4 %}
+                            <h5 class="mb-3">Documentos (Opcional)</h5>
+                            
+                            <div class="mb-3">
+                                <label for="id_cv" class="form-label">Curriculum Vitae (PDF)</label>
+                                <input type="file" name="cv" id="id_cv" class="form-control" accept=".pdf">
+                                <div class="form-text">Tamanho máximo: 5MB</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_certificado" class="form-label">Certificado (PDF ou imagem)</label>
+                                <input type="file" name="certificado" id="id_certificado" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_bi" class="form-label">Bilhete de Identidade (opcional)</label>
+                                <input type="file" name="bi" id="id_bi" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            
+                            <hr class="my-4">
+                            <h5 class="mb-3">Visibilidade do Perfil</h5>
+                            
+                            <div class="mb-3 form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="visivel" id="id_visivel" checked>
+                                <label class="form-check-label" for="id_visivel">
+                                    Tornar o meu perfil visível para empresas
+                                </label>
+                                <div class="form-text">
+                                    Se desmarcares, as empresas não poderão encontrar o teu perfil nas pesquisas.
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Importante:</strong> Ao submeteres o teu perfil, confirmas que as informações 
+                                fornecidas são verdadeiras e autorizas a partilha dos teus dados com empresas 
+                                para fins de recrutamento.
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if step > 1 %}
+                                <button type="submit" name="prev" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Anterior
+                                </button>
+                            {% else %}
+                                <div></div>
+                            {% endif %}
+                            
+                            <div>
+                                <button type="submit" name="save" class="btn btn-outline-primary me-2">
+                                    <i class="bi bi-save me-2"></i>Guardar Rascunho
+                                </button>
+                                
+                                {% if step < 4 %}
+                                    <button type="submit" name="next" class="btn btn-primary">
+                                        Próximo<i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="submit" name="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle me-2"></i>Submeter Perfil
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle experiencia fields
+document.getElementById('id_tem_experiencia')?.addEventListener('change', function() {
+    const fields = document.getElementById('experiencia_fields');
+    fields.style.display = this.checked ? 'block' : 'none';
+});
+
+// Initialize on load
+if (document.getElementById('id_tem_experiencia')?.checked) {
+    document.getElementById('experiencia_fields').style.display = 'block';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row gy-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Meu Perfil</h4>
+      <div>
+        <a href="{% url 'accounts:notifications' %}" class="btn btn-sm btn-outline-primary me-2">Notificações</a>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-light">Atualizar</a>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-start gap-3">
+            <div>
+              <h5 class="mb-1">{{ user.nome }}</h5>
+              <p class="mb-1 text-muted">{{ user.email }}</p>
+              <p class="mb-0"><strong>Telemóvel:</strong> {{ user.telefone }}</p>
+            </div>
+          </div>
+
+          <hr>
+          {% if youth_profile %}
+            <p><strong>Localidade:</strong> {{ youth_profile.localidade }}</p>
+            <p><strong>Status:</strong> {% if youth_profile.completo %}Completo{% else %}Incompleto{% endif %}</p>
+            <a href="{% url 'profiles:edit' %}" class="btn btn-primary btn-sm mt-2">Editar Perfil</a>
+          {% elif company_profile %}
+            <p><strong>Empresa:</strong> {{ company_profile.nome }}</p>
+            <a href="{% url 'companies:profile_edit' %}" class="btn btn-primary btn-sm mt-2">Editar Perfil da Empresa</a>
+          {% else %}
+            <div class="alert alert-info">Nenhum perfil associado.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

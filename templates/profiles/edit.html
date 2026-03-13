@@ -1,0 +1,97 @@
+{% extends 'base/base.html' %}
+{% load form_tags %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Editar Perfil</h4>
+                        <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label">Nome</label>
+                                {{ user_form.nome|add_class:'form-control' }}
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                {{ user_form.email|add_class:'form-control' }}
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label">Telemóvel</label>
+                                {{ user_form.telefone|add_class:'form-control' }}
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label">Distrito</label>
+                                {{ user_form.distrito|add_class:'form-select' }}
+                            </div>
+                            <div class="col-12 mb-3 text-center">
+                                {% if profile.photo %}
+                                    <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}" class="rounded mb-2" style="width:120px;height:120px;object-fit:cover;">
+                                {% endif %}
+                                <label class="form-label d-block">Foto de Perfil</label>
+                                {{ form.photo|add_class:'form-control' }}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Data de Nascimento</label>
+                                {{ form.data_nascimento|add_class:'form-control' }}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Sexo</label>
+                                {{ form.sexo|add_class:'form-select' }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Localidade</label>
+                                {{ form.localidade|add_class:'form-control' }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Situação Atual</label>
+                                {{ form.situacao_atual|add_class:'form-select' }}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Disponibilidade</label>
+                                {{ form.disponibilidade|add_class:'form-select' }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Setor de Interesse</label>
+                                {{ form.interesse_setorial|add_class:'form-select' }}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Tipo de Oportunidade</label>
+                                {{ form.preferencia_oportunidade|add_class:'form-select' }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Sobre Mim</label>
+                                {{ form.sobre|add_class:'form-control' }}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    {{ form.visivel }}
+                                    <label class="form-check-label ms-2">Tornar visível para empresas</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

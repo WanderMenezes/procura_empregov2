@@ -1,0 +1,98 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Pesquisar Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h4>Pesquisar Jovens</h4>
+  <form method="get" class="mb-3">
+    <div class="row g-2">
+      <div class="col-md-4">
+        {{ form.q }}
+      </div>
+      <div class="col-md-3">
+        {{ form.distrito }}
+      </div>
+      <div class="col-md-3">
+        {{ form.skills }}
+      </div>
+      <div class="col-md-2 d-flex">
+        <button class="btn btn-primary w-100">Pesquisar</button>
+      </div>
+    </div>
+    </form>
+
+    <div class="row mt-2">
+      <div class="col-md-6">
+          <div id="search-results">
+            {% include 'companies/_search_results.html' %}
+          </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('selectAll')?.addEventListener('change', function(e){
+  const checked = e.target.checked;
+  document.querySelectorAll('input[name="youth_ids"]').forEach(function(cb){ cb.checked = checked; });
+});
+</script>
+<script>
+// Funções para paginação AJAX
+function attachAjaxPagination(container){
+  container.querySelectorAll('a.ajax-page').forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      const url = link.getAttribute('href');
+      const container = document.getElementById('search-results');
+      if(container){
+        container.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
+      }
+      fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+        .then(r => r.text())
+        .then(html => {
+          if(container){
+            container.innerHTML = html;
+          }
+          // reattach handlers
+          attachAjaxPagination(document.getElementById('search-results'));
+          attachSelectAll();
+          // atualizar URL sem recarregar
+          history.pushState(null, '', url);
+        });
+    });
+  });
+}
+
+function attachSelectAll(){
+  const cb = document.getElementById('selectAll');
+  if(!cb) return;
+  cb.addEventListener('change', function(e){
+    const checked = e.target.checked;
+    document.querySelectorAll('input[name="youth_ids"]').forEach(function(ch){ ch.checked = checked; });
+  });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function(){
+  attachAjaxPagination(document.getElementById('search-results'));
+  attachSelectAll();
+});
+
+// Handle back/forward navigation to reload results
+window.addEventListener('popstate', function(){
+  fetch(location.search ? location.pathname + location.search : location.pathname, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(r => r.text())
+    .then(html => {
+      const container = document.getElementById('search-results');
+      if(container){
+        container.innerHTML = html;
+        attachAjaxPagination(container);
+        attachSelectAll();
+      }
+    });
+});
+</script>
+{% endblock %}

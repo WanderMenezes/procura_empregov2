@@ -1,0 +1,224 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block title %}Base Nacional de Jovens - São Tomé e Príncipe{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">
+                    Conecta-te com Oportunidades no Teu Distrito
+                </h1>
+                <p class="lead mb-4">
+                    A Base Nacional de Jovens é a plataforma oficial de São Tomé e Príncipe 
+                    para conectar jovens com empresas, estágios, formações e empregos.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus me-2"></i>Sou Jovem
+                        </a>
+                        <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-building me-2"></i>Sou Empresa
+                        </a>
+                    {% elif user.is_jovem %}
+                        {% if not user_has_profile %}
+                            <a href="{% url 'profiles:wizard' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Completar Perfil
+                            </a>
+                        {% else %}
+                            <a href="{% url 'profiles:detail' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-person me-2"></i>Ver Meu Perfil
+                            </a>
+                        {% endif %}
+                    {% elif user.is_empresa %}
+                        <a href="{% url 'companies:search_youth' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-search me-2"></i>Pesquisar Jovens
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-people-fill" style="font-size: 15rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_jovens|intcomma }}</div>
+                    <p class="text-muted mb-0">Jovens Registados</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_vagas|intcomma }}</div>
+                    <p class="text-muted mb-0">Vagas Ativas</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_empresas|intcomma }}</div>
+                    <p class="text-muted mb-0">Empresas Parceiras</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Como Funciona -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5">Como Funciona</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4>1. Regista-te</h4>
+                    <p class="text-muted">Cria a tua conta em poucos minutos. É simples, rápido e gratuito.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-file-person-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4>2. Completa o Perfil</h4>
+                    <p class="text-muted">Adiciona a tua formação, experiências e skills para destacares-te.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-briefcase-fill text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4>3. Encontra Oportunidades</h4>
+                    <p class="text-muted">Empresas podem encontrar-te e contactar-te diretamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vagas Recentes -->
+{% if vagas_recentes %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Vagas Recentes</h2>
+            {% if user.is_empresa %}
+                <a href="{% url 'companies:job_list' %}" class="btn btn-primary">
+                    <i class="bi bi-briefcase me-2"></i>Ver Todas
+                </a>
+            {% endif %}
+        </div>
+        <div class="row g-4">
+            {% for vaga in vagas_recentes %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">{{ vaga.get_tipo_display }}</span>
+                                <small class="text-muted">{{ vaga.data_publicacao|timesince }}</small>
+                            </div>
+                            <h5 class="card-title">{{ vaga.titulo }}</h5>
+                            <p class="card-text text-muted">
+                                <i class="bi bi-building me-1"></i>{{ vaga.company.nome }}
+                            </p>
+                            <p class="card-text">
+                                <i class="bi bi-geo-alt me-1"></i>{{ vaga.distrito.nome|default:"N/A" }}
+                            </p>
+                            {% if vaga.salario %}
+                                <p class="card-text">
+                                    <i class="bi bi-cash me-1"></i>{{ vaga.salario }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            {% if user.is_jovem and user_has_profile %}
+                                <a href="#" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-send me-1"></i>Candidatar-me
+                                </a>
+                            {% else %}
+                                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Entrar para Candidatar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">És Empresa?</h2>
+        <p class="lead mb-4">
+            Encontra os melhores talentos jovens de São Tomé e Príncipe. 
+            Publica vagas, pesquisa perfis e conecta com futuros colaboradores.
+        </p>
+        <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-light btn-lg">
+            <i class="bi bi-building me-2"></i>Registar Empresa
+        </a>
+    </div>
+</section>
+
+<!-- Benefícios -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5">Porquê Usar a Base Nacional de Jovens?</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-check-circle-fill text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h5>Gratuito</h5>
+                        <p class="text-muted mb-0">Registo e uso completamente gratuitos para jovens e empresas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-shield-check text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h5>Seguro</h5>
+                        <p class="text-muted mb-0">Os teus dados estão protegidos e só são partilhados com o teu consentimento.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-phone text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h5>Mobile-Friendly</h5>
+                        <p class="text-muted mb-0">Acede e gere o teu perfil a partir de qualquer dispositivo.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-people text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h5>Nacional</h5>
+                        <p class="text-muted mb-0">Cobertura em todos os distritos de São Tomé e Príncipe.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

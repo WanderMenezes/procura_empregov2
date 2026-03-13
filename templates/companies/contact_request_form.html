@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Pedido de Contacto{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h4>Pedido de Contacto</h4>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="text-end">
+      <button class="btn btn-primary">Enviar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

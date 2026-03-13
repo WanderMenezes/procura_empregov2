@@ -1,0 +1,256 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Meu Perfil - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+                        {% endif %}
+                    </div>
+                    <h4>{{ profile.nome_completo }}</h4>
+                    {% if progress is not None %}
+                        <div class="mt-2">
+                            <div class="progress" style="height:20px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+                                    <small class="fw-bold">{{ progress }}%</small>
+                                </div>
+                            </div>
+                            <div class="small text-muted mt-1">Resumo: {% if step_stats %}Dados Pessoais — {{ step_stats.1.filled }}/{{ step_stats.1.total }}; Educação e Skills — {{ step_stats.2.filled }}/{{ step_stats.2.total }}; Experiência — {{ step_stats.3.filled }}/{{ step_stats.3.total }}; Documentos — {{ step_stats.4.filled }}/{{ step_stats.4.total }}{% endif %}</div>
+                        </div>
+                    {% endif %}
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-geo-alt me-1"></i>{{ profile.distrito.nome|default:"Distrito não definido" }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="bi bi-telephone me-1"></i>{{ profile.telefone }}
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'profiles:edit' %}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-2"></i>Editar Perfil
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <span>Perfil:</span>
+                        <span>
+                            {% if profile.completo %}
+                                <span class="badge bg-success">Completo</span>
+                            {% else %}
+                                <span class="badge bg-warning">Incompleto</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Validação:</span>
+                        <span>
+                            {% if profile.validado %}
+                                <span class="badge bg-success">Validado</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pendente</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Visibilidade:</span>
+                        <span>
+                            {% if profile.visivel %}
+                                <span class="badge bg-success">Visível</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Oculto</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumo -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Resumo</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Idade:</strong> {{ profile.idade|default:"N/A" }} anos</p>
+                    <p><strong>Sexo:</strong> {{ profile.get_sexo_display|default:"N/A" }}</p>
+                    <p><strong>Situação:</strong> {{ profile.get_situacao_atual_display }}</p>
+                    <p><strong>Disponibilidade:</strong> {{ profile.get_disponibilidade_display }}</p>
+                    <p><strong>Preferência:</strong> {{ profile.get_preferencia_oportunidade_display }}</p>
+                    {% if profile.interesse_setorial %}
+                        <p><strong>Setor de Interesse:</strong> {{ profile.get_interesse_setorial_display }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Sobre -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Sobre Mim</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile.sobre %}
+                        <p>{{ profile.sobre|linebreaks }}</p>
+                    {% else %}
+                        <p class="text-muted">Ainda não adicionaste informações sobre ti.</p>
+                        <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-plus me-1"></i>Adicionar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Educação -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-book me-2"></i>Educação</h5>
+                    <a href="{% url 'profiles:education_add' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus me-1"></i>Adicionar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if education %}
+                        {% for edu in education %}
+                            <div class="d-flex justify-content-between align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                                <div>
+                                    <h6 class="mb-1">{{ edu.get_nivel_display }}</h6>
+                                    <p class="mb-1 text-muted">{{ edu.instituicao }}</p>
+                                    <p class="mb-0">
+                                        <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
+                                        {% if edu.ano %}
+                                            <span class="badge bg-light text-dark">{{ edu.ano }}</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if edu.curso %}
+                                        <p class="mb-0 mt-1"><small>{{ edu.curso }}</small></p>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'profiles:education_delete' edu.pk %}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Tens a certeza que queres remover esta formação?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Ainda não adicionaste nenhuma formação.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Experiência -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Experiência Profissional</h5>
+                    <a href="{% url 'profiles:experience_add' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus me-1"></i>Adicionar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if experiences %}
+                        {% for exp in experiences %}
+                            <div class="d-flex justify-content-between align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                                <div>
+                                    <h6 class="mb-1">{{ exp.cargo }}</h6>
+                                    <p class="mb-1 text-muted">{{ exp.entidade }}</p>
+                                    <p class="mb-0">
+                                        <small class="text-muted">
+                                            {{ exp.inicio|date:"m/Y" }} - 
+                                            {% if exp.atual %}Atual{% else %}{{ exp.fim|date:"m/Y" }}{% endif %}
+                                            ({{ exp.duracao }})
+                                        </small>
+                                    </p>
+                                    {% if exp.descricao %}
+                                        <p class="mb-0 mt-2">{{ exp.descricao|truncatewords:30 }}</p>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'profiles:experience_delete' exp.pk %}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Tens a certeza que queres remover esta experiência?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Ainda não adicionaste nenhuma experiência profissional.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Skills -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-stars me-2"></i>Skills</h5>
+                </div>
+                <div class="card-body">
+                    {% if skills %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for youth_skill in skills %}
+                                <span class="badge bg-primary">
+                                    {{ youth_skill.skill.nome }}
+                                    <small class="ms-1">({{ youth_skill.get_nivel_display }})</small>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Ainda não adicionaste nenhuma skill.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Documentos -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documentos</h5>
+                    <a href="{% url 'profiles:document_add' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus me-1"></i>Adicionar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                        <div class="list-group">
+                            {% for doc in documents %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-text me-2"></i>
+                                        {{ doc.nome }}
+                                        <span class="badge bg-secondary ms-2">{{ doc.get_tipo_display }}</span>
+                                        {% if doc.verificado %}
+                                            <span class="badge bg-success ms-1">
+                                                <i class="bi bi-check"></i>Verificado
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <a href="{{ doc.arquivo.url }}" class="btn btn-sm btn-outline-primary me-1" target="_blank">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <a href="{% url 'profiles:document_delete' doc.pk %}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Tens a certeza que queres remover este documento?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Ainda não adicionaste nenhum documento.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

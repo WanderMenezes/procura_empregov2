@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Ajuda - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="text-center mb-5"><i class="bi bi-question-circle me-2"></i>Centro de Ajuda</h1>
+            
+            <!-- FAQ Accordion -->
+            <div class="accordion" id="faqAccordion">
+                <!-- Registo -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#registo">
+                            <i class="bi bi-person-plus me-2"></i>Como me registo?
+                        </button>
+                    </h2>
+                    <div id="registo" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <ol>
+                                <li>Clica em "Criar Conta" no menu superior</li>
+                                <li>Escolhe o tipo de perfil (Jovem ou Empresa)</li>
+                                <li>Preenche os teus dados pessoais</li>
+                                <li>Aceita os consentimentos de uso de dados</li>
+                                <li>Clica em "Criar Conta"</li>
+                            </ol>
+                            <p class="mb-0">Se és jovem, depois do registo deverás completar o teu perfil em 4 passos simples.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Perfil -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#perfil">
+                            <i class="bi bi-person me-2"></i>Como completo o meu perfil?
+                        </button>
+                    </h2>
+                    <div id="perfil" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>O perfil é completado em 4 passos:</p>
+                            <ol>
+                                <li><strong>Dados Pessoais:</strong> Data de nascimento, sexo e localidade</li>
+                                <li><strong>Educação e Skills:</strong> Nível de educação, área de formação e competências</li>
+                                <li><strong>Experiência e Interesses:</strong> Situação atual, disponibilidade e setor de interesse</li>
+                                <li><strong>Documentos:</strong> CV, certificados (opcional)</li>
+                            </ol>
+                            <p class="mb-0">Podes guardar o progresso a qualquer momento e continuar depois.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empresas -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#empresas">
+                            <i class="bi bi-building me-2"></i>Sou empresa. Como funciona?
+                        </button>
+                    </h2>
+                    <div id="empresas" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <ol>
+                                <li>Regista-te como empresa</li>
+                                <li>Completa o perfil da empresa</li>
+                                <li>Publica vagas de emprego, estágio ou formação</li>
+                                <li>Pesquisa jovens por distrito, nível de educação, skills</li>
+                                <li>Solicita contacto dos jovens que te interessam</li>
+                            </ol>
+                            <p class="mb-0">Todos os pedidos de contacto são aprovados pelo administrador antes de serem enviados.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Privacidade -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacidade">
+                            <i class="bi bi-shield-check me-2"></i>Os meus dados estão seguros?
+                        </button>
+                    </h2>
+                    <div id="privacidade" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>Sim! A proteção dos teus dados é uma prioridade:</p>
+                            <ul>
+                                <li>Os teus dados só são partilhados com empresas quando autorizas</li>
+                                <li>Podes tornar o teu perfil invisível a qualquer momento</li>
+                                <li>Os pedidos de contacto são aprovados pelo administrador</li>
+                                <li>Todos os acessos são registados em logs de auditoria</li>
+                                <li>A plataforma segue as melhores práticas de segurança</li>
+                            </ul>
+                            <p class="mb-0">Consulta a nossa <a href="{% url 'privacy' %}">Política de Privacidade</a> para mais informações.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contacto -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contacto">
+                            <i class="bi bi-envelope me-2"></i>Como entro em contacto?
+                        </button>
+                    </h2>
+                    <div id="contacto" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>Para questões ou suporte, podes contactar-nos através de:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-envelope me-2 text-primary"></i>Email: info@basenacionaljovens.st</li>
+                                <li><i class="bi bi-telephone me-2 text-primary"></i>Telefone: +239 123 4567</li>
+                                <li><i class="bi bi-geo-alt me-2 text-primary"></i>Endereço: São Tomé, São Tomé e Príncipe</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Tutorial -->
+            <div class="card mt-5">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-play-circle text-primary" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">Vídeo Tutorial</h3>
+                    <p class="text-muted">Aprende a usar a plataforma em poucos minutos</p>
+                    <div class="ratio ratio-16x9 mt-3">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                                title="Tutorial Base Nacional de Jovens" 
+                                allowfullscreen></iframe>
+                    </div>
+                    <p class="text-muted mt-3"><small>Em breve: vídeo tutorial completo em português</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block title %}Painel de Administração - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 mb-4">
+            <div class="list-group">
+                <a href="{% url 'dashboard:admin' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'dashboard:user_list' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people me-2"></i>Utilizadores
+                </a>
+                <a href="{% url 'dashboard:validate_profiles' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-check-circle me-2"></i>Validar Perfis
+                    {% if stats.jovens_completos > stats.jovens_validados %}
+                        <span class="badge bg-danger float-end">{{ stats.jovens_completos|add:"-"|add:stats.jovens_validados }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'dashboard:manage_contact_requests' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-envelope me-2"></i>Pedidos Contacto
+                    {% if stats.pedidos_contacto_pendentes > 0 %}
+                        <span class="badge bg-danger float-end">{{ stats.pedidos_contacto_pendentes }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-graph-up me-2"></i>Relatórios
+                </a>
+                <a href="{% url 'companies:export_youth_csv' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-download me-2"></i>Exportar CSV
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-10">
+            <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Painel de Administração</h2>
+            
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Jovens</h6>
+                                    <h3 class="mb-0">{{ stats.total_jovens|intcomma }}</h3>
+                                </div>
+                                <i class="bi bi-people fs-1"></i>
+                            </div>
+                            <small>{{ stats.jovens_validados }} validados</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Empresas</h6>
+                                    <h3 class="mb-0">{{ stats.total_empresas|intcomma }}</h3>
+                                </div>
+                                <i class="bi bi-building fs-1"></i>
+                            </div>
+                            <small>{{ stats.empresas_ativas }} ativas</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Vagas Ativas</h6>
+                                    <h3 class="mb-0">{{ stats.vagas_ativas|intcomma }}</h3>
+                                </div>
+                                <i class="bi bi-briefcase fs-1"></i>
+                            </div>
+                            <small>de {{ stats.total_vagas }} total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Candidaturas</h6>
+                                    <h3 class="mb-0">{{ stats.total_candidaturas|intcomma }}</h3>
+                                </div>
+                                <i class="bi bi-send fs-1"></i>
+                            </div>
+                            <small>Total recebidas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Jovens por Distrito</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if jovens_por_distrito %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Distrito</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for distrito in jovens_por_distrito %}
+                                                <tr>
+                                                    <td>{{ distrito.nome }}</td>
+                                                    <td class="text-end">{{ distrito.total }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Sem dados disponíveis.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-book me-2"></i>Por Nível de Educação</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if educacao_stats %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Nível</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for edu in educacao_stats %}
+                                                <tr>
+                                                    <td>{{ edu.nome }}</td>
+                                                    <td class="text-end">{{ edu.total }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Sem dados disponíveis.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Actions -->
+            <div class="row g-4">
+                <!-- Perfis Pendentes -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Perfis Pendentes</h5>
+                            <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-sm btn-primary">Ver Todos</a>
+                        </div>
+                        <div class="card-body">
+                            {% if perfis_pendentes %}
+                                <div class="list-group list-group-flush">
+                                    {% for perfil in perfis_pendentes|slice:":5" %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ perfil.nome_completo }}</h6>
+                                                <small class="text-muted">
+                                                    {{ perfil.distrito.nome|default:"Sem distrito" }} | 
+                                                    {{ perfil.created_at|timesince }}
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}" 
+                                                   class="btn btn-sm btn-success me-1">
+                                                    <i class="bi bi-check"></i>
+                                                </a>
+                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}" 
+                                                   class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-x"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Não há perfis pendentes de validação.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pedidos de Contacto -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Pedidos de Contacto</h5>
+                            <a href="{% url 'dashboard:manage_contact_requests' %}" class="btn btn-sm btn-primary">Ver Todos</a>
+                        </div>
+                        <div class="card-body">
+                            {% if pedidos_pendentes %}
+                                <div class="list-group list-group-flush">
+                                    {% for pedido in pedidos_pendentes|slice:":5" %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ pedido.company.nome }}</h6>
+                                                    <small class="text-muted">
+                                                        → {{ pedido.youth.nome_completo }} | 
+                                                        {{ pedido.created_at|timesince }}
+                                                    </small>
+                                                </div>
+                                                <div>
+                                                    <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}" 
+                                                       class="btn btn-sm btn-success me-1">
+                                                        <i class="bi bi-check"></i>
+                                                    </a>
+                                                    <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}" 
+                                                       class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-x"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Não há pedidos de contacto pendentes.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="row g-4 mt-2">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Jovens Recentes</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if jovens_recentes %}
+                                <div class="list-group list-group-flush">
+                                    {% for jovem in jovens_recentes|slice:":5" %}
+                                        <div class="list-group-item">
+                                            <h6 class="mb-1">{{ jovem.nome_completo }}</h6>
+                                            <small class="text-muted">{{ jovem.created_at|timesince }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Sem registos recentes.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-building me-2"></i>Empresas Recentes</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if empresas_recentes %}
+                                <div class="list-group list-group-flush">
+                                    {% for empresa in empresas_recentes|slice:":5" %}
+                                        <div class="list-group-item">
+                                            <h6 class="mb-1">{{ empresa.nome }}</h6>
+                                            <small class="text-muted">{{ empresa.created_at|timesince }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Sem registos recentes.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Vagas Recentes</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if vagas_recentes %}
+                                <div class="list-group list-group-flush">
+                                    {% for vaga in vagas_recentes|slice:":5" %}
+                                        <div class="list-group-item">
+                                            <h6 class="mb-1">{{ vaga.titulo }}</h6>
+                                            <small class="text-muted">{{ vaga.company.nome }} | {{ vaga.data_publicacao|timesince }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Sem vagas recentes.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Registar - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus text-primary" style="font-size: 3rem;"></i>
+                        <h2 class="mt-3">Criar Conta</h2>
+                        <p class="text-muted">Junta-te à Base Nacional de Jovens</p>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Tipo de Perfil -->
+                        <div class="mb-4">
+                            <label class="form-label">Tipo de Perfil</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="form-check card p-3 text-center">
+                                        <input class="form-check-input" type="radio" name="perfil" 
+                                               id="perfil_jovem" value="JO" checked>
+                                        <label class="form-check-label d-block mt-2" for="perfil_jovem">
+                                            <i class="bi bi-person fs-3 d-block mb-2"></i>
+                                            <strong>Jovem</strong>
+                                            <small class="d-block text-muted">Procuro oportunidades</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check card p-3 text-center">
+                                        <input class="form-check-input" type="radio" name="perfil" 
+                                               id="perfil_empresa" value="EMP">
+                                        <label class="form-check-label d-block mt-2" for="perfil_empresa">
+                                            <i class="bi bi-building fs-3 d-block mb-2"></i>
+                                            <strong>Empresa</strong>
+                                            <small class="d-block text-muted">Quero publicar vagas</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Nome -->
+                        <div class="mb-3">
+                            <label for="id_nome" class="form-label">Nome Completo *</label>
+                            <input type="text" name="nome" id="id_nome" 
+                                   class="form-control" placeholder="Teu nome completo" required>
+                        </div>
+                        
+                        <!-- Telefone -->
+                        <div class="mb-3">
+                            <label for="id_telefone" class="form-label">Telemóvel *</label>
+                            <input type="tel" name="telefone" id="id_telefone" 
+                                   class="form-control" placeholder="Ex: +239 123 4567" required>
+                            <div class="form-text">Será usado para login e contacto.</div>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email (opcional)</label>
+                            <input type="email" name="email" id="id_email" 
+                                   class="form-control" placeholder="teu@email.com">
+                        </div>
+
+                        <!-- Foto (opcional) -->
+                        <div class="mb-3">
+                            <label for="id_photo" class="form-label">Foto (opcional)</label>
+                            <input type="file" name="photo" id="id_photo" accept="image/*" class="form-control">
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label">Palavra-passe *</label>
+                            <div class="input-group">
+                                <input type="password" name="password1" id="id_password1" 
+                                       class="form-control" placeholder="Mínimo 8 caracteres" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password2" class="form-label">Confirmar Palavra-passe *</label>
+                            <input type="password" name="password2" id="id_password2" 
+                                   class="form-control" placeholder="Repita a palavra-passe" required>
+                        </div>
+                        
+                        <!-- Consentimentos -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="consentimento_dados" id="id_consentimento_dados" required>
+                                <label class="form-check-label" for="id_consentimento_dados">
+                                    Autorizo o uso dos meus dados para fins de empregabilidade *
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="consentimento_contacto" id="id_consentimento_contacto" required>
+                                <label class="form-check-label" for="id_consentimento_contacto">
+                                    Autorizo ser contactado por SMS/WhatsApp/email *
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Criar Conta
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">
+                            Já tens conta? 
+                            <a href="{% url 'accounts:login' %}" class="text-primary fw-semibold">Entrar</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword1').addEventListener('click', function() {
+    const passwordInput = document.getElementById('id_password1');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+});
+
+// Check URL parameter for profile type
+const urlParams = new URLSearchParams(window.location.search);
+const tipo = urlParams.get('tipo');
+if (tipo === 'EMP') {
+    document.getElementById('perfil_empresa').checked = true;
+}
+</script>
+{% endblock %}
