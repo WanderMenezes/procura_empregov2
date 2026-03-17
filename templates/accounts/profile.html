@@ -28,7 +28,7 @@
           {% if youth_profile %}
             <p><strong>Localidade:</strong> {{ youth_profile.localidade }}</p>
             <p><strong>Status:</strong> {% if youth_profile.completo %}Completo{% else %}Incompleto{% endif %}</p>
-            <a href="{% url 'profiles:edit' %}" class="btn btn-primary btn-sm mt-2">Editar Perfil</a>
+            <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-primary btn-sm mt-2">Editar perfil com Wizard</a>
           {% elif company_profile %}
             <p><strong>Empresa:</strong> {{ company_profile.nome }}</p>
             <a href="{% url 'companies:profile_edit' %}" class="btn btn-primary btn-sm mt-2">Editar Perfil da Empresa</a>

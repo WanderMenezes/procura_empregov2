@@ -77,10 +77,21 @@ def company_dashboard(request):
     total_visualizacoes = company.job_posts.aggregate(total=Sum('visualizacoes'))['total'] or 0
     pedidos_recentes = company.contact_requests.select_related('youth', 'youth__user').order_by('-created_at')[:5]
 
+    company_profile_complete = all([
+        company.nome,
+        company.setor,
+        company.telefone,
+        company.email,
+        company.distrito_id,
+        company.endereco,
+        company.descricao,
+    ])
+
     context = {
         'company': company,
         'vagas': company.job_posts.all()[:5],
         'pedidos': pedidos_recentes,
+        'company_profile_complete': company_profile_complete,
         'stats': {
             'vagas_ativas': company.vagas_ativas,
             'total_vagas': company.total_vagas,
@@ -111,7 +122,21 @@ def company_profile_edit(request):
     else:
         form = CompanyProfileForm(instance=company)
     
-    return render(request, 'companies/profile_edit.html', {'form': form, 'company': company})
+    company_profile_complete = all([
+        company.nome,
+        company.setor,
+        company.telefone,
+        company.email,
+        company.distrito_id,
+        company.endereco,
+        company.descricao,
+    ])
+
+    return render(request, 'companies/profile_edit.html', {
+        'form': form,
+        'company': company,
+        'company_profile_complete': company_profile_complete
+    })
 
 
 # Views para Vagas

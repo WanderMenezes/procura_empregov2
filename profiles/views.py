@@ -130,6 +130,83 @@ class ProfileWizardView(View):
     """Wizard de 4 passos para criar perfil do jovem"""
     
     template_name = 'profiles/wizard.html'
+    STEP_META = {
+        1: {'title': 'Dados Pessoais', 'icon': 'bi-person'},
+        2: {'title': 'Educação e Skills', 'icon': 'bi-book'},
+        3: {'title': 'Experiência e Interesses', 'icon': 'bi-briefcase'},
+        4: {'title': 'Documentos e Consentimentos', 'icon': 'bi-file-earmark'},
+    }
+
+    def _get_step_meta(self, step: int) -> dict:
+        return self.STEP_META.get(step, {'title': '', 'icon': ''})
+
+    def _profile_to_wizard_data(self, profile: YouthProfile) -> dict:
+        user = profile.user
+        edu = Education.objects.filter(profile=profile).order_by('-ano').first()
+        exp = Experience.objects.filter(profile=profile).order_by('-inicio').first()
+        skills_ids = list(YouthSkill.objects.filter(profile=profile).values_list('skill_id', flat=True))
+        docs = Document.objects.filter(profile=profile)
+
+        def to_date(value):
+            if not value:
+                return ''
+            return value.isoformat() if hasattr(value, 'isoformat') else str(value)
+
+        interesse = profile.interesse_setorial or []
+        if isinstance(interesse, str):
+            interesse = [interesse]
+
+        step1 = {
+            'nome': user.nome or '',
+            'telefone': user.telefone or '',
+            'email': user.email or '',
+            'distrito': user.distrito_id or '',
+            'data_nascimento': to_date(profile.data_nascimento),
+            'sexo': profile.sexo or '',
+            'localidade': profile.localidade or '',
+            'contacto_alternativo': profile.contacto_alternativo or '',
+        }
+
+        step2 = {
+            'nivel': edu.nivel if edu else '',
+            'area_formacao': edu.area_formacao if edu else '',
+            'instituicao': edu.instituicao if edu else '',
+            'ano': edu.ano if edu else '',
+            'curso': edu.curso if edu else '',
+            'skills': skills_ids,
+            'outra_skill_nome': '',
+            'outra_skill_tipo': ''
+        }
+
+        step3 = {
+            'situacao_atual': profile.situacao_atual or '',
+            'disponibilidade': profile.disponibilidade or '',
+            'interesse_setorial': interesse,
+            'preferencia_oportunidade': profile.preferencia_oportunidade or '',
+            'sobre': profile.sobre or '',
+            'tem_experiencia': bool(exp),
+            'exp_entidade': exp.entidade if exp else '',
+            'exp_cargo': exp.cargo if exp else '',
+            'exp_descricao': exp.descricao if exp else '',
+            'exp_inicio': to_date(exp.inicio) if exp else '',
+            'exp_fim': to_date(exp.fim) if exp and exp.fim else '',
+            'exp_atual': exp.atual if exp else False,
+        }
+
+        step4 = {
+            'visivel': profile.visivel,
+            'consentimento_sms': profile.consentimento_sms,
+            'consentimento_whatsapp': profile.consentimento_whatsapp,
+            'consentimento_email': profile.consentimento_email,
+        }
+        if docs.filter(tipo='CV').exists():
+            step4['cv'] = True
+        if docs.filter(tipo='CERT').exists():
+            step4['certificado'] = True
+        if docs.filter(tipo='BI').exists():
+            step4['bi'] = True
+
+        return {'1': step1, '2': step2, '3': step3, '4': step4}
     
     def get(self, request, step=1):
         if not request.user.is_authenticated:
@@ -139,16 +216,17 @@ class ProfileWizardView(View):
             messages.error(request, _('Apenas jovens podem criar perfil.'))
             return redirect('home')
         
-        # Verificar se já tem perfil
-        if request.user.has_youth_profile():
-            return redirect('profiles:detail')
+        profile = request.user.youth_profile if request.user.has_youth_profile() else None
+        wizard_data = request.session.get('wizard_data', {})
+        if profile and (not wizard_data or request.GET.get('reset') == '1'):
+            wizard_data = self._profile_to_wizard_data(profile)
+            request.session['wizard_data'] = wizard_data
         
         step = int(step)
         if step < 1 or step > 4:
             step = 1
         
         # Carregar dados salvos do wizard + defaults do utilizador
-        wizard_data = request.session.get('wizard_data', {})
         initial = {}
         if step == 1:
             initial = {
@@ -175,13 +253,16 @@ class ProfileWizardView(View):
 
         # passo atual stats
         step_stats = self.compute_step_progress(wizard_data).get(str(step), {'filled': 0, 'total': 0})
+        step_meta = self._get_step_meta(step)
 
         context = {
             'form': form,
             'step': step,
             'progress': progress,
             'total_steps': 4,
-            'step_stats': step_stats
+            'step_stats': step_stats,
+            'step_title': step_meta['title'],
+            'step_icon': step_meta['icon']
         }
         
         return render(request, self.template_name, context)
@@ -232,13 +313,16 @@ class ProfileWizardView(View):
         progress = self.compute_progress(wizard_data)
 
         step_stats = self.compute_step_progress(wizard_data).get(str(step), {'filled': 0, 'total': 0})
+        step_meta = self._get_step_meta(step)
 
         context = {
             'form': form,
             'step': step,
             'progress': progress,
             'total_steps': 4,
-            'step_stats': step_stats
+            'step_stats': step_stats,
+            'step_title': step_meta['title'],
+            'step_icon': step_meta['icon']
         }
         
         return render(request, self.template_name, context)
@@ -363,107 +447,174 @@ class ProfileWizardView(View):
                 user.data_consentimento = timezone.now()
             user.save()
 
-            # Criar perfil base
-            profile = YouthProfile.objects.create(
-                user=user,
-                data_nascimento=step1.get('data_nascimento'),
-                sexo=step1.get('sexo'),
-                localidade=step1.get('localidade'),
-                contacto_alternativo=step1.get('contacto_alternativo', ''),
-                situacao_atual=step3.get('situacao_atual', 'DES'),
-                disponibilidade=step3.get('disponibilidade', 'SIM'),
-                interesse_setorial=step3.get('interesse_setorial'),
-                preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
-                sobre=step3.get('sobre', ''),
-                visivel=visivel,
-                consentimento_sms=consentimento_sms,
-                consentimento_whatsapp=consentimento_whatsapp,
-                consentimento_email=consentimento_email,
-                completo=True,
-                wizard_step=4
-            )
-            
-            # Adicionar educação
-            if step2.get('nivel') and step2.get('instituicao'):
-                Education.objects.create(
-                    profile=profile,
-                    nivel=step2['nivel'],
-                    area_formacao=step2.get('area_formacao', ''),
-                    instituicao=step2['instituicao'],
-                    ano=step2.get('ano'),
-                    curso=step2.get('curso', '')
+            profile = user.youth_profile if user.has_youth_profile() else None
+            editing = profile is not None
+
+            if editing:
+                profile.data_nascimento = step1.get('data_nascimento')
+                profile.sexo = step1.get('sexo') or ''
+                profile.localidade = step1.get('localidade') or ''
+                profile.contacto_alternativo = step1.get('contacto_alternativo', '') or ''
+                profile.situacao_atual = step3.get('situacao_atual', profile.situacao_atual)
+                profile.disponibilidade = step3.get('disponibilidade', profile.disponibilidade)
+                profile.interesse_setorial = step3.get('interesse_setorial')
+                profile.preferencia_oportunidade = step3.get('preferencia_oportunidade', profile.preferencia_oportunidade)
+                profile.sobre = step3.get('sobre', '') or ''
+                profile.visivel = visivel
+                profile.consentimento_sms = consentimento_sms
+                profile.consentimento_whatsapp = consentimento_whatsapp
+                profile.consentimento_email = consentimento_email
+                profile.completo = True
+                profile.wizard_step = 4
+                profile.save()
+            else:
+                profile = YouthProfile.objects.create(
+                    user=user,
+                    data_nascimento=step1.get('data_nascimento'),
+                    sexo=step1.get('sexo'),
+                    localidade=step1.get('localidade'),
+                    contacto_alternativo=step1.get('contacto_alternativo', ''),
+                    situacao_atual=step3.get('situacao_atual', 'DES'),
+                    disponibilidade=step3.get('disponibilidade', 'SIM'),
+                    interesse_setorial=step3.get('interesse_setorial'),
+                    preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
+                    sobre=step3.get('sobre', ''),
+                    visivel=visivel,
+                    consentimento_sms=consentimento_sms,
+                    consentimento_whatsapp=consentimento_whatsapp,
+                    consentimento_email=consentimento_email,
+                    completo=True,
+                    wizard_step=4
                 )
-            
-            # Adicionar skills
-            skills_ids = step2.get('skills', [])
-            if skills_ids:
-                for skill_id in skills_ids:
-                    try:
-                        skill = Skill.objects.get(pk=skill_id)
-                        YouthSkill.objects.create(profile=profile, skill=skill, nivel=1)
-                    except Skill.DoesNotExist:
-                        pass
+
+            # Educação (atualiza ou cria)
+            edu_fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso']
+            edu_data_present = any(step2.get(f) for f in edu_fields)
+            edu = Education.objects.filter(profile=profile).order_by('-ano').first()
+            if edu_data_present:
+                if edu:
+                    if step2.get('nivel'):
+                        edu.nivel = step2.get('nivel')
+                    if 'area_formacao' in step2:
+                        edu.area_formacao = step2.get('area_formacao') or edu.area_formacao
+                    if step2.get('instituicao'):
+                        edu.instituicao = step2.get('instituicao')
+                    if step2.get('ano'):
+                        edu.ano = step2.get('ano')
+                    if 'curso' in step2:
+                        edu.curso = step2.get('curso') or ''
+                    edu.save()
+                elif step2.get('nivel') and step2.get('instituicao'):
+                    Education.objects.create(
+                        profile=profile,
+                        nivel=step2['nivel'],
+                        area_formacao=step2.get('area_formacao', ''),
+                        instituicao=step2['instituicao'],
+                        ano=step2.get('ano'),
+                        curso=step2.get('curso', '')
+                    )
+
+            # Skills (sincronizar selecao)
+            skills_ids = step2.get('skills', []) or []
+            if isinstance(skills_ids, str):
+                skills_ids = [skills_ids]
+            selected_ids = set()
+            for sid in skills_ids:
+                try:
+                    selected_ids.add(int(sid))
+                except (TypeError, ValueError):
+                    continue
+
+            existing_skills = YouthSkill.objects.filter(profile=profile)
+            existing_ids = set(existing_skills.values_list('skill_id', flat=True))
+            to_remove = existing_ids - selected_ids
+            if to_remove:
+                existing_skills.filter(skill_id__in=to_remove).delete()
+            to_add = selected_ids - existing_ids
+            for skill_id in to_add:
+                try:
+                    skill = Skill.objects.get(pk=skill_id)
+                    YouthSkill.objects.create(profile=profile, skill=skill, nivel=1)
+                except Skill.DoesNotExist:
+                    pass
 
             outra_skill_nome = step2.get('outra_skill_nome', '')
             outra_skill_tipo = step2.get('outra_skill_tipo')
             nova_skill = get_or_create_skill_by_name(outra_skill_nome, outra_skill_tipo)
             if nova_skill:
                 YouthSkill.objects.get_or_create(profile=profile, skill=nova_skill, defaults={'nivel': 1})
-            
-            # Adicionar experiência (se fornecida)
+
+            # Experiência (atualiza ou cria)
             if self._to_bool(step3.get('tem_experiencia')) and step3.get('exp_entidade') and step3.get('exp_inicio'):
                 exp_atual = self._to_bool(step3.get('exp_atual'))
                 exp_fim = step3.get('exp_fim') if not exp_atual else None
-                Experience.objects.create(
-                    profile=profile,
-                    entidade=step3['exp_entidade'],
-                    cargo=step3.get('exp_cargo', ''),
-                    descricao=step3.get('exp_descricao', ''),
-                    inicio=step3.get('exp_inicio'),
-                    fim=exp_fim,
-                    atual=exp_atual
-                )
-            
-            # Processar documentos
-            if 'cv' in request.FILES:
-                Document.objects.create(
-                    profile=profile,
-                    tipo='CV',
-                    nome='Curriculum Vitae',
-                    arquivo=request.FILES['cv']
-                )
-            if 'certificado' in request.FILES:
-                Document.objects.create(
-                    profile=profile,
-                    tipo='CERT',
-                    nome='Certificado',
-                    arquivo=request.FILES['certificado']
-                )
-            if 'bi' in request.FILES:
-                Document.objects.create(
-                    profile=profile,
-                    tipo='BI',
-                    nome='Bilhete de Identidade',
-                    arquivo=request.FILES['bi']
-                )
+                exp = Experience.objects.filter(profile=profile).order_by('-inicio').first()
+                if exp:
+                    exp.entidade = step3['exp_entidade']
+                    exp.cargo = step3.get('exp_cargo', '')
+                    exp.descricao = step3.get('exp_descricao', '')
+                    exp.inicio = step3.get('exp_inicio')
+                    exp.fim = exp_fim
+                    exp.atual = exp_atual
+                    exp.save()
+                else:
+                    Experience.objects.create(
+                        profile=profile,
+                        entidade=step3['exp_entidade'],
+                        cargo=step3.get('exp_cargo', ''),
+                        descricao=step3.get('exp_descricao', ''),
+                        inicio=step3.get('exp_inicio'),
+                        fim=exp_fim,
+                        atual=exp_atual
+                    )
+
+            # Processar documentos (substituir se existir)
+            def upsert_doc(tipo, nome, file_key):
+                if file_key not in request.FILES:
+                    return
+                doc = Document.objects.filter(profile=profile, tipo=tipo).order_by('-created_at').first()
+                if doc:
+                    doc.arquivo = request.FILES[file_key]
+                    doc.nome = nome
+                    doc.verificado = False
+                    doc.save()
+                else:
+                    Document.objects.create(
+                        profile=profile,
+                        tipo=tipo,
+                        nome=nome,
+                        arquivo=request.FILES[file_key]
+                    )
+
+            upsert_doc('CV', 'Curriculum Vitae', 'cv')
+            upsert_doc('CERT', 'Certificado', 'certificado')
+            upsert_doc('BI', 'Bilhete de Identidade', 'bi')
             
             # Limpar sessão
             if 'wizard_data' in request.session:
                 del request.session['wizard_data']
             
             # Notificação
-            Notification.objects.create(
-                user=request.user,
-                titulo=_('Perfil criado com sucesso!'),
-                mensagem=_('O teu perfil está completo e visível para empresas. Boa sorte nas oportunidades!'),
-                tipo='SUCESSO'
-            )
-            
-            messages.success(request, _('Perfil criado com sucesso!'))
+            if editing:
+                Notification.objects.create(
+                    user=request.user,
+                    titulo=_('Perfil atualizado com sucesso!'),
+                    mensagem=_('O teu perfil foi atualizado e está pronto para novas oportunidades.'),
+                    tipo='SUCESSO'
+                )
+                messages.success(request, _('Perfil atualizado com sucesso!'))
+            else:
+                Notification.objects.create(
+                    user=request.user,
+                    titulo=_('Perfil criado com sucesso!'),
+                    mensagem=_('O teu perfil está completo e visível para empresas. Boa sorte nas oportunidades!'),
+                    tipo='SUCESSO'
+                )
+                messages.success(request, _('Perfil criado com sucesso!'))
             return redirect('profiles:detail')
             
         except Exception as e:
-            messages.error(request, _('Erro ao criar perfil: {}').format(str(e)))
+            messages.error(request, _('Erro ao guardar perfil: {}').format(str(e)))
             return redirect('profiles:wizard_step', step=4)
 
 
@@ -501,74 +652,11 @@ def profile_detail(request):
 @login_required
 def profile_edit(request):
     """View para editar perfil do jovem"""
-    if not request.user.is_jovem or not request.user.has_youth_profile():
-        messages.error(request, _('Perfil não encontrado.'))
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens podem editar este perfil.'))
         return redirect('home')
-    
-    profile = request.user.youth_profile
-    
-    if request.method == 'POST':
-        profile_form = YouthProfileEditForm(request.POST, request.FILES, instance=profile)
-        user_form = UserProfileForm(request.POST, instance=request.user)
-        if profile_form.is_valid() and user_form.is_valid():
-            profile_form.save()
 
-            # Atualizar campos do User, mas tratar alteração de telefone com confirmação
-            new_phone = user_form.cleaned_data.get('telefone')
-            user = request.user
-            user.nome = user_form.cleaned_data.get('nome')
-            user.email = user_form.cleaned_data.get('email')
-            user.distrito = user_form.cleaned_data.get('distrito')
-
-            consent_sms = profile_form.cleaned_data.get('consentimento_sms')
-            consent_whatsapp = profile_form.cleaned_data.get('consentimento_whatsapp')
-            consent_email = profile_form.cleaned_data.get('consentimento_email')
-            user.consentimento_dados = profile_form.cleaned_data.get('visivel', user.consentimento_dados)
-            user.consentimento_contacto = bool(consent_sms or consent_whatsapp or consent_email)
-            if user.consentimento_dados or user.consentimento_contacto:
-                user.data_consentimento = timezone.now()
-
-            if new_phone and new_phone != user.telefone:
-                from accounts.models import PhoneChange
-                now = timezone.now()
-                min_interval = getattr(settings, 'PHONE_CHANGE_MIN_INTERVAL_SECONDS', 300)
-                limit_day = getattr(settings, 'PHONE_CHANGE_LIMIT_PER_DAY', 3)
-
-                recent = PhoneChange.objects.filter(user=request.user, created_at__gte=now - timedelta(seconds=min_interval))
-                if recent.exists():
-                    wait = min_interval
-                    messages.error(request, f'Aguarde {wait} segundos antes de pedir novo código.')
-                    return redirect('profiles:edit')
-
-                created_today = PhoneChange.objects.filter(user=request.user, created_at__gte=now - timedelta(days=1)).count()
-                if created_today >= limit_day:
-                    messages.error(request, 'Número máximo de pedidos de confirmação atingido nas últimas 24 horas.')
-                    return redirect('profiles:edit')
-
-                pc = PhoneChange.objects.create(user=request.user, new_telephone=new_phone)
-                sms_ok = send_sms(pc.new_telephone, f'Seu código de confirmação: {pc.code}')
-                if sms_ok:
-                    messages.success(request, 'Código de confirmação enviado por SMS.')
-                else:
-                    messages.error(request, 'Falha ao enviar SMS. Tente novamente mais tarde.')
-            else:
-                user.telefone = new_phone
-
-            user.save()
-
-            messages.success(request, _('Perfil atualizado com sucesso!'))
-            return redirect('profiles:detail')
-    else:
-        profile_form = YouthProfileEditForm(instance=profile)
-        user_form = UserProfileForm(instance=request.user)
-
-    context = {
-        'form': profile_form,
-        'user_form': user_form,
-        'profile': profile
-    }
-
-    return render(request, 'profiles/edit.html', context)
+    return redirect('profiles:wizard')
 
 
 # Views para Educação

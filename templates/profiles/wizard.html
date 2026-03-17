@@ -41,20 +41,13 @@
                     
                     <!-- Step Title -->
                     <h4 class="text-center mb-4">
-                        {% if step == 1 %}
-                            <i class="bi bi-person me-2"></i>Dados Pessoais
-                        {% elif step == 2 %}
-                            <i class="bi bi-book me-2"></i>Educação e Skills
-                        {% elif step == 3 %}
-                            <i class="bi bi-briefcase me-2"></i>Experiência e Interesses
-                        {% elif step == 4 %}
-                            <i class="bi bi-file-earmark me-2"></i>Documentos e Consentimentos
+                        {% if step_title %}
+                            {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
                         {% endif %}
                     </h4>
                     {% if step_stats %}
                         <p class="text-center small text-muted mb-3">
-                            {{ step == 1|yesno:"Dados Pessoais,|" }}
-                            {% if step == 2 %}Educação e Skills{% elif step == 3 %}Experiência e Interesses{% elif step == 4 %}Documentos e Consentimentos{% elif step == 1 %}Dados Pessoais{% endif %}
+                            {{ step_title }}
                             — {{ step_stats.filled }}/{{ step_stats.total }} preenchidos
                         </p>
                     {% endif %}
@@ -559,3 +552,4 @@ formEl?.addEventListener('submit', () => {
 });
 </script>
 {% endblock %}
+

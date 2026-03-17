@@ -8,7 +8,12 @@
     <div class="col-lg-8">
       <div class="card">
         <div class="card-body">
-          <h4>Editar Perfil</h4>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Editar Perfil</h4>
+            {% if not company_profile_complete %}
+              <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Continuar com o wizard</a>
+            {% endif %}
+          </div>
           <form method="post" novalidate enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">

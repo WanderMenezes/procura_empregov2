@@ -60,6 +60,9 @@
         </div>
       </div>
       <div class="d-flex gap-2">
+        {% if not company_profile_complete %}
+          <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Continuar com o wizard</a>
+        {% endif %}
         <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
         <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
       </div>
