@@ -12,20 +12,29 @@
               <span class="badge {% if vaga.estado == 'ATIVA' %}bg-success{% elif vaga.estado == 'PAUSADA' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                 {{ vaga.get_estado_display }}
               </span>
+              {% if not vaga.tem_vagas_disponiveis %}
+                <span class="badge bg-danger">Esgotada</span>
+              {% endif %}
             </div>
             <div class="small text-muted mt-1">
               {% if vaga.data_publicacao %}Publicada em {{ vaga.data_publicacao|date:"d/m/Y" }}{% endif %}
               {% if vaga.total_candidaturas %} • Candidaturas: {{ vaga.total_candidaturas }}{% else %} • Candidaturas: 0{% endif %}
-              • Visualizações: {{ vaga.visualizacoes|default:0 }}
+              • Vagas: {{ vaga.numero_vagas }} • Restantes: {{ vaga.vagas_restantes }}
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-outline-primary btn-sm" href="{% url 'companies:job_applications' vaga.id %}">
-              Candidaturas{% if vaga.total_candidaturas %} ({{ vaga.total_candidaturas }}){% endif %}
+              <i class="bi bi-people" title="Ver candidaturas" aria-label="Ver candidaturas"></i>
             </a>
-            <a class="btn btn-outline-secondary btn-sm" href="{% url 'companies:job_edit' vaga.id %}">Editar</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'companies:job_edit' vaga.id %}">
+              <i class="bi bi-pencil-square" title="Editar vaga" aria-label="Editar vaga"></i>
+            </a>
             {% if vaga.estado == 'ATIVA' %}
-              <a class="btn btn-outline-danger btn-sm" href="{% url 'companies:job_close' vaga.id %}" onclick="return confirm('Fechar esta vaga?');">Fechar</a>
+              <a class="btn btn-outline-danger btn-sm"
+                 href="{% url 'companies:job_close' vaga.id %}"
+                 onclick="return confirm('Fechar esta vaga?');">
+                <i class="bi bi-x-circle" title="Fechar vaga" aria-label="Fechar vaga"></i>
+              </a>
             {% endif %}
           </div>
         </div>

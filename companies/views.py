@@ -13,11 +13,17 @@ from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponse
 import csv
 
-from .models import Company, JobPost, Application, ContactRequest
+from .models import Company, JobPost, Application, ContactRequest, ApplicationMessage
 from .forms import CompanyProfileForm, JobPostForm, ContactRequestForm, YouthSearchForm
 from profiles.models import YouthProfile, Education
 from core.models import District, Notification
 from django.core.paginator import Paginator
+
+
+def _close_job_if_full(job):
+    if not job.tem_vagas_disponiveis and job.estado != 'FECHADA':
+        job.estado = 'FECHADA'
+        job.save(update_fields=['estado'])
 
 
 @login_required
@@ -97,6 +103,7 @@ def company_dashboard(request):
             'total_vagas': company.total_vagas,
             'candidaturas': company.total_candidaturas,
             'visualizacoes': total_visualizacoes,
+            'pedidos_total': company.contact_requests.count(),
             'pedidos_pendentes': company.contact_requests.filter(estado='PENDENTE').count(),
         }
     }
@@ -212,14 +219,49 @@ def job_applications(request, pk):
     """Ver candidaturas de uma vaga"""
     job = get_object_or_404(JobPost, pk=pk, company__user=request.user)
     
-    candidaturas = job.applications.select_related('youth', 'youth__user').all()
+    candidaturas = job.applications.select_related('youth', 'youth__user').prefetch_related('messages').all()
     
     context = {
         'job': job,
-        'candidaturas': candidaturas
+        'candidaturas': candidaturas,
+        'applications': candidaturas
     }
     
     return render(request, 'companies/job_applications.html', context)
+
+
+@login_required
+def job_apply(request, pk):
+    """Candidatar-se a uma vaga (jovens)"""
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens podem candidatar-se.'))
+        return redirect('home')
+
+    if not request.user.has_youth_profile():
+        return redirect('profiles:wizard')
+
+    if request.method != 'POST':
+        return redirect('profiles:detail')
+
+    job = get_object_or_404(JobPost, pk=pk, estado='ATIVA')
+    if not job.tem_vagas_disponiveis:
+        messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
+        return redirect('profiles:available_jobs')
+    profile = request.user.youth_profile
+
+    application, created = Application.objects.get_or_create(job=job, youth=profile)
+    if created:
+        Notification.objects.create(
+            user=job.company.user,
+            titulo=_('Nova candidatura'),
+            mensagem=_('{} candidatou-se à vaga "{}".').format(profile.nome_completo, job.titulo),
+            tipo='INFO'
+        )
+        messages.success(request, _('Candidatura enviada com sucesso!'))
+    else:
+        messages.info(request, _('Já te candidataste a esta vaga.'))
+
+    return redirect('profiles:detail')
 
 
 @login_required
@@ -228,8 +270,15 @@ def application_update(request, pk, estado):
     application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
     
     if estado in ['PENDENTE', 'EM_ANALISE', 'ACEITE', 'REJEITADA']:
+        if estado == 'ACEITE' and application.estado != 'ACEITE' and not application.job.tem_vagas_disponiveis:
+            messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
+            return redirect('companies:job_applications', pk=application.job.pk)
+
         application.estado = estado
         application.save()
+
+        if estado == 'ACEITE':
+            _close_job_if_full(application.job)
         
         # Notificar jovem
         Notification.objects.create(
@@ -245,6 +294,68 @@ def application_update(request, pk, estado):
         messages.success(request, _('Estado atualizado com sucesso!'))
     
     return redirect('companies:job_applications', pk=application.job.pk)
+
+
+@login_required
+def application_manage(request, pk):
+    """Atualizar estado e mensagem para o candidato"""
+    application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
+
+    if request.method == 'POST':
+        estado = request.POST.get('estado')
+        mensagem = (request.POST.get('resposta_empresa') or '').strip()
+
+        if estado in ['PENDENTE', 'EM_ANALISE', 'ACEITE', 'REJEITADA']:
+            if estado == 'ACEITE' and application.estado != 'ACEITE' and not application.job.tem_vagas_disponiveis:
+                messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
+                return redirect('companies:job_applications', pk=application.job.pk)
+            application.estado = estado
+        if mensagem:
+            application.resposta_empresa = mensagem
+            ApplicationMessage.objects.create(
+                application=application,
+                sender='EMP',
+                message=mensagem
+            )
+        application.save()
+        if estado == 'ACEITE':
+            _close_job_if_full(application.job)
+
+        # Notificar jovem
+        notif_msg = _('A tua candidatura para "{}" foi atualizada para: {}.').format(
+            application.job.titulo,
+            application.get_estado_display()
+        )
+        if mensagem:
+            notif_msg += ' ' + _('Mensagem da empresa: {}').format(mensagem)
+
+        Notification.objects.create(
+            user=application.youth.user,
+            titulo=_('Atualização de candidatura'),
+            mensagem=notif_msg,
+            tipo='INFO'
+        )
+
+        messages.success(request, _('Candidatura atualizada com sucesso!'))
+
+    return redirect('companies:job_applications', pk=application.job.pk)
+
+
+@login_required
+def application_messages(request, pk):
+    """Histórico de mensagens de uma candidatura (empresa)"""
+    application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
+    messages_qs = application.messages.all().order_by('-created_at')
+    paginator = Paginator(messages_qs, 10)
+    page_number = request.GET.get('page') or 1
+    messages_page = paginator.get_page(page_number)
+
+    context = {
+        'application': application,
+        'messages_page': messages_page,
+    }
+
+    return render(request, 'companies/application_messages.html', context)
 
 
 # Pesquisa de Jovens

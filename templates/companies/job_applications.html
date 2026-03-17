@@ -6,11 +6,82 @@
 <div class="container py-5">
   <h4>Candidaturas</h4>
   {% if applications %}
-    <ul class="list-group">
+    <div class="list-group">
       {% for app in applications %}
-        <li class="list-group-item">{{ app.youth.user.nome }} — {{ app.get_estado_display }}</li>
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1">{{ app.youth.user.nome }}</h6>
+              <div class="small text-muted mb-1">
+                <i class="bi bi-telephone me-1"></i>{{ app.youth.user.telefone|default:"-" }}
+              </div>
+              <div class="small text-muted mb-1">
+                <i class="bi bi-envelope me-1"></i>{{ app.youth.user.email|default:"-" }}
+              </div>
+              <div class="small text-muted">Candidatou-se em {{ app.created_at|date:"d/m/Y" }}</div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+              <span class="badge {% if app.estado == 'ACEITE' %}bg-success{% elif app.estado == 'REJEITADA' %}bg-danger{% elif app.estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {{ app.get_estado_display }}
+              </span>
+              <a href="{% url 'companies:youth_detail' app.youth.id %}"
+                 class="btn btn-outline-secondary btn-sm"
+                 title="Ver perfil"
+                 aria-label="Ver perfil">
+                <i class="bi bi-eye"></i>
+              </a>
+            </div>
+          </div>
+
+          <form method="post" action="{% url 'companies:application_manage' app.id %}" class="mt-3">
+            {% csrf_token %}
+            <div class="row g-2">
+              <div class="col-md-4">
+                <label class="form-label small mb-1">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                  {% for value,label in app.ESTADO_CHOICES %}
+                    <option value="{{ value }}" {% if app.estado == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label small mb-1">Mensagem para o candidato</label>
+                <textarea name="resposta_empresa" rows="2" class="form-control form-control-sm" placeholder="Escreva uma mensagem...">{{ app.resposta_empresa }}</textarea>
+              </div>
+            </div>
+            <div class="mt-2">
+              <button type="submit" class="btn btn-primary btn-sm" title="Guardar" aria-label="Guardar">
+                <i class="bi bi-save"></i>
+              </button>
+            </div>
+          </form>
+
+          {% if app.messages.all %}
+            {% with last_msg=app.messages.all.0 %}
+              <div class="alert alert-info py-2 mb-2 mt-3">
+                <strong>Última mensagem enviada:</strong>
+                <div class="small text-muted">{{ last_msg.created_at|date:"d/m/Y H:i" }}</div>
+                <div>{{ last_msg.message|linebreaksbr }}</div>
+              </div>
+            {% endwith %}
+            <div class="small text-muted fw-semibold mb-1">Histórico (últimas)</div>
+            <div class="list-group list-group-flush">
+              {% for msg in app.messages.all|slice:":3" %}
+                <div class="list-group-item px-0">
+                  <div class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
+                  <div>{{ msg.message|linebreaksbr }}</div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="mt-2">
+              <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-sm btn-outline-secondary">
+                Ver histórico completo
+              </a>
+            </div>
+          {% endif %}
+        </div>
       {% endfor %}
-    </ul>
+    </div>
   {% else %}
     <div class="alert alert-info">Sem candidaturas.</div>
   {% endif %}

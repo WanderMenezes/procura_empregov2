@@ -23,8 +23,9 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-people-fill me-2"></i>Base Nacional de Jovens
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
+                <img src="{% static 'img/cnj_logo.jpg' %}" alt="CNJ" class="navbar-logo">
+                <span><i class="bi bi-people-fill me-1"></i>Base Nacional de Jovens</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -42,6 +43,11 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="{% url 'profiles:detail' %}">
                                         <i class="bi bi-person me-1"></i>Meu Perfil
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'profiles:available_jobs' %}">
+                                        <i class="bi bi-briefcase me-1"></i>Vagas Disponíveis
                                     </a>
                                 </li>
                             {% else %}
@@ -86,6 +92,12 @@
                                 </a>
                             </li>
                         {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}?next={% url 'profiles:available_jobs' %}">
+                                <i class="bi bi-briefcase me-1"></i>Vagas Disponíveis
+                            </a>
+                        </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'help' %}">
@@ -205,7 +217,7 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <h5><i class="bi bi-people-fill me-2"></i>Base Nacional de Jovens</h5>
-                    <p class="text-muted">Conectando jovens de São Tomé e Príncipe com oportunidades de emprego, estágios e formação.</p>
+                    <p class="text-footer">Conectando jovens de São Tomé e Príncipe com oportunidades de emprego, estágios e formação.</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <h5>Links Úteis</h5>
@@ -218,7 +230,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <h5>Contacto</h5>
-                    <p class="text-muted">
+                    <p class="text-footer">
                         <i class="bi bi-envelope me-2"></i>info@basenacionaljovens.st<br>
                         <i class="bi bi-telephone me-2"></i>+239 123 4567<br>
                         <i class="bi bi-geo-alt me-2"></i>São Tomé, São Tomé e Príncipe
@@ -226,7 +238,7 @@
                 </div>
             </div>
             <hr class="my-3">
-            <div class="text-center text-muted">
+            <div class="text-center text-footer">
                 <small>&copy; {% now "Y" %} Base Nacional de Jovens - São Tomé e Príncipe. Todos os direitos reservados.</small>
             </div>
         </div>

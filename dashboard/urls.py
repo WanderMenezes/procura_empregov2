@@ -27,6 +27,7 @@ urlpatterns = [
     # Relatórios
     path('relatorios/', views.reports, name='reports'),
     path('relatorios/exportar-csv/', views.export_report_csv, name='export_report_csv'),
+    path('relatorios/exportar-pdf/', views.export_report_pdf, name='export_report_pdf'),
     
     # API
     path('api/estatisticas/', views.api_stats, name='api_stats'),

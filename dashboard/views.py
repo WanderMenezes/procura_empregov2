@@ -6,18 +6,63 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from django.db.models import Count, Q
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+from io import BytesIO
 import csv
 import json
+import os
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics import renderPDF
 
 from accounts.models import User
 from accounts.forms import UserRegistrationForm
 from profiles.models import YouthProfile, Education
 from companies.models import Company, JobPost, Application, ContactRequest
 from core.models import District, Notification
+
+
+def _get_date_range(request):
+    """Parse date range (data_inicio/data_fim) with sane defaults."""
+    today = timezone.localdate()
+    default_start = today - timedelta(days=30 * 6)
+
+    start_str = request.GET.get('data_inicio')
+    end_str = request.GET.get('data_fim')
+
+    start_date = default_start
+    end_date = today
+
+    if start_str:
+        try:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d").date()
+        except Exception:
+            start_date = default_start
+    if end_str:
+        try:
+            end_date = datetime.strptime(end_str, "%Y-%m-%d").date()
+        except Exception:
+            end_date = today
+
+    invalid_range = start_date > end_date
+
+    tz = timezone.get_current_timezone()
+    if invalid_range:
+        start_dt = None
+        end_dt = None
+    else:
+        start_dt = timezone.make_aware(datetime.combine(start_date, time.min), tz)
+        end_dt = timezone.make_aware(datetime.combine(end_date, time.max), tz)
+
+    return start_date, end_date, start_dt, end_dt, invalid_range
 
 
 def admin_required(view_func):
@@ -66,7 +111,14 @@ def admin_dashboard(request):
         'pedidos_contacto_pendentes': ContactRequest.objects.filter(estado='PENDENTE').count(),
         'total_utilizadores': User.objects.count(),
     }
+    stats['validacoes_pendentes'] = max(0, stats['jovens_completos'] - stats['jovens_validados'])
     
+    def _add_percent(items):
+        max_total = max([item['total'] for item in items], default=0)
+        for item in items:
+            item['percent'] = int((item['total'] / max_total) * 100) if max_total else 0
+        return items
+
     # Dados por distrito
     jovens_por_distrito = []
     for district in District.objects.all():
@@ -76,6 +128,7 @@ def admin_dashboard(request):
                 'nome': district.nome,
                 'total': count
             })
+    jovens_por_distrito = _add_percent(jovens_por_distrito)
     
     # Dados por nível de educação
     educacao_stats = []
@@ -86,17 +139,20 @@ def admin_dashboard(request):
                 'nome': nivel_nome,
                 'total': count
             })
+    educacao_stats = _add_percent(educacao_stats)
     
     # Dados por área
     area_stats = []
+    area_labels = dict(getattr(settings, 'AREAS_FORMACAO', []))
     area_counts = Education.objects.values('area_formacao').annotate(total=Count('id'))
     for item in area_counts:
         if item['area_formacao']:
             area_stats.append({
                 'codigo': item['area_formacao'],
-                'nome': dict(Education.NIVEL_CHOICES).get(item['area_formacao'], item['area_formacao']),
+                'nome': area_labels.get(item['area_formacao'], item['area_formacao']),
                 'total': item['total']
             })
+    area_stats = _add_percent(area_stats)
     
     # Jovens recentes
     jovens_recentes = YouthProfile.objects.select_related('user').order_by('-created_at')[:10]
@@ -376,20 +432,24 @@ def contact_request_action(request, pk, action):
 @admin_required
 def reports(request):
     """Página de relatórios"""
-    
-    # Período
-    meses = int(request.GET.get('meses', 6))
-    data_inicio = timezone.now() - timedelta(days=30*meses)
-    
-    # Estatísticas do período
-    jovens_novos = YouthProfile.objects.filter(created_at__gte=data_inicio).count()
-    empresas_novas = Company.objects.filter(created_at__gte=data_inicio).count()
-    vagas_novas = JobPost.objects.filter(data_publicacao__gte=data_inicio).count()
-    candidaturas_novas = Application.objects.filter(created_at__gte=data_inicio).count()
+
+    start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
+
+    if invalid_range:
+        messages.error(request, _('A data final não pode ser menor que a data inicial.'))
+        jovens_novos = empresas_novas = vagas_novas = candidaturas_novas = 0
+    else:
+        # Estatísticas do período
+        jovens_novos = YouthProfile.objects.filter(created_at__range=(start_dt, end_dt)).count()
+        empresas_novas = Company.objects.filter(created_at__range=(start_dt, end_dt)).count()
+        vagas_novas = JobPost.objects.filter(data_publicacao__range=(start_dt, end_dt)).count()
+        candidaturas_novas = Application.objects.filter(created_at__range=(start_dt, end_dt)).count()
     
     context = {
-        'meses': meses,
-        'data_inicio': data_inicio,
+        'data_inicio': start_date,
+        'data_fim': end_date,
+        'data_inicio_value': start_date.strftime('%Y-%m-%d'),
+        'data_fim_value': end_date.strftime('%Y-%m-%d'),
         'jovens_novos': jovens_novos,
         'empresas_novas': empresas_novas,
         'vagas_novas': vagas_novas,
@@ -402,7 +462,14 @@ def reports(request):
 @admin_required
 def export_report_csv(request):
     """Exportar relatório CSV"""
-    
+    start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
+    if invalid_range:
+        return HttpResponse(
+            'Data final não pode ser menor que a data inicial.',
+            status=400,
+            content_type='text/plain; charset=utf-8'
+        )
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.csv"'
     
@@ -412,7 +479,7 @@ def export_report_csv(request):
     ])
     
     # Jovens
-    for profile in YouthProfile.objects.all():
+    for profile in YouthProfile.objects.filter(created_at__range=(start_dt, end_dt)):
         writer.writerow([
             'Jovem',
             profile.id,
@@ -423,7 +490,7 @@ def export_report_csv(request):
         ])
     
     # Empresas
-    for company in Company.objects.all():
+    for company in Company.objects.filter(created_at__range=(start_dt, end_dt)):
         writer.writerow([
             'Empresa',
             company.id,
@@ -433,6 +500,218 @@ def export_report_csv(request):
             'Ativa' if company.ativa else 'Inativa'
         ])
     
+    return response
+
+
+@admin_required
+def export_report_pdf(request):
+    """Exportar relatório em PDF (resumo)"""
+    start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
+    if invalid_range:
+        return HttpResponse(
+            'Data final não pode ser menor que a data inicial.',
+            status=400,
+            content_type='text/plain; charset=utf-8'
+        )
+
+    # Totais gerais
+    total_jovens = YouthProfile.objects.filter(created_at__range=(start_dt, end_dt)).count()
+    total_empresas = Company.objects.filter(created_at__range=(start_dt, end_dt)).count()
+    total_vagas = JobPost.objects.filter(data_publicacao__range=(start_dt, end_dt)).count()
+    total_candidaturas = Application.objects.filter(created_at__range=(start_dt, end_dt)).count()
+    pedidos_contacto = ContactRequest.objects.filter(estado='PENDENTE', created_at__range=(start_dt, end_dt)).count()
+
+    jovens_novos = total_jovens
+    empresas_novas = total_empresas
+    vagas_novas = total_vagas
+    candidaturas_novas = total_candidaturas
+
+    # Dados por distrito, nível e área
+    district_counts = (
+        YouthProfile.objects
+        .filter(created_at__range=(start_dt, end_dt))
+        .values('user__distrito__nome')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    district_list = []
+    for item in district_counts:
+        nome = item.get('user__distrito__nome')
+        if nome:
+            district_list.append((nome, int(item['total'])))
+
+    level_counts = Education.objects.filter(profile__created_at__range=(start_dt, end_dt)).values('nivel').annotate(total=Count('id')).order_by('-total')
+    level_labels = dict(Education.NIVEL_CHOICES)
+    level_list = []
+    for item in level_counts:
+        if item['nivel']:
+            level_list.append((level_labels.get(item['nivel'], item['nivel']), int(item['total'])))
+
+    area_counts = Education.objects.filter(profile__created_at__range=(start_dt, end_dt)).values('area_formacao').annotate(total=Count('id')).order_by('-total')
+    area_labels = dict(getattr(settings, 'AREAS_FORMACAO', []))
+    area_list = []
+    for item in area_counts:
+        if item['area_formacao']:
+            area_list.append((area_labels.get(item['area_formacao'], item['area_formacao']), int(item['total'])))
+
+    def build_chart_data(items, max_items=6):
+        labels = []
+        values = []
+        for nome, total in items[:max_items]:
+            labels.append(str(nome))
+            values.append(total)
+        if len(items) > max_items:
+            outros = sum(total for _, total in items[max_items:])
+            labels.append("Outros")
+            values.append(outros)
+        return labels, values
+
+    def draw_header(title, subtitle):
+        header_height = 70
+        pdf.setFillColor(colors.HexColor("#0b3b6f"))
+        pdf.rect(0, height - header_height, width, header_height, fill=1, stroke=0)
+        pdf.setFillColor(colors.white)
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(margin, height - 28, title)
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(margin, height - 46, subtitle)
+
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'cnj_logo.jpg')
+        if os.path.exists(logo_path):
+            try:
+                pdf.drawImage(logo_path, width - margin - 140, height - 54, width=140, height=32,
+                              preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+        pdf.setFillColor(colors.HexColor("#1f2d3d"))
+        return height - header_height - 24
+
+    def draw_table(data, col_widths):
+        table = Table(data, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f6fb")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1f2d3d")),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#dbe3ef")),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e5e7eb")),
+            ("ALIGN", (1, 1), (1, -1), "RIGHT"),
+        ]))
+        return table
+
+    def draw_chart(labels, values, x, y, width_px=220, height_px=130):
+        if not values or max(values) == 0:
+            pdf.setFont("Helvetica", 10)
+            pdf.drawString(x, y + height_px - 12, "Sem dados.")
+            return
+        drawing = Drawing(width_px, height_px)
+        chart = VerticalBarChart()
+        chart.x = 0
+        chart.y = 16
+        chart.height = height_px - 24
+        chart.width = width_px
+        chart.data = [values]
+        chart.strokeColor = colors.HexColor("#0b5ed7")
+        chart.fillColor = colors.HexColor("#1a73e8")
+        max_val = max(values)
+        chart.valueAxis.valueMin = 0
+        chart.valueAxis.valueMax = max(5, int(max_val * 1.2))
+        chart.valueAxis.valueStep = max(1, int(max_val / 4) or 1)
+        chart.categoryAxis.categoryNames = labels
+        chart.categoryAxis.labels.boxAnchor = 'ne'
+        chart.categoryAxis.labels.angle = 30
+        chart.categoryAxis.labels.fontSize = 6
+        chart.categoryAxis.labels.dy = -2
+        chart.categoryAxis.labels.dx = -2
+        drawing.add(chart)
+        renderPDF.draw(drawing, pdf, x, y)
+
+    def draw_section(title, items, y):
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.setFillColor(colors.HexColor("#1f2d3d"))
+        pdf.drawString(margin, y, title)
+        y -= 12
+
+        table_rows = [[nome, str(total)] for nome, total in items[:10]]
+        table_height = 0
+        left_x = margin
+        right_x = margin + 270
+
+        if table_rows:
+            table = draw_table([["Categoria", "Total"]] + table_rows, [200, 60])
+            w, h = table.wrap(0, 0)
+            table_height = h
+            table.drawOn(pdf, left_x, y - h)
+        else:
+            pdf.setFont("Helvetica", 10)
+            pdf.drawString(left_x, y - 12, "Sem dados.")
+            table_height = 16
+
+        labels, values = build_chart_data(items, max_items=6)
+        chart_height = 130
+        draw_chart(labels, values, right_x, y - chart_height + 6, 220, chart_height)
+
+        return y - max(table_height, chart_height) - 24
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    margin = 56
+
+    y = draw_header(
+        "Relatório - Base Nacional de Jovens",
+        f"Período: {start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}"
+    )
+    pdf.setFont("Helvetica", 9)
+    pdf.setFillColor(colors.HexColor("#1f2d3d"))
+    pdf.drawString(margin, y + 8, f"Gerado em: {timezone.now().strftime('%d/%m/%Y %H:%M')}")
+    y -= 12
+
+    # Tabela de totais
+    totals_data = [
+        ["Indicador", "Total"],
+        ["Jovens registados", f"{total_jovens}"],
+        ["Empresas", f"{total_empresas}"],
+        ["Vagas", f"{total_vagas}"],
+        ["Candidaturas", f"{total_candidaturas}"],
+        ["Pedidos contacto pendentes", f"{pedidos_contacto}"],
+    ]
+    totals_table = draw_table(totals_data, [300, 120])
+    w, h = totals_table.wrap(0, 0)
+    totals_table.drawOn(pdf, margin, y - h)
+    y -= h + 24
+
+    # Tabela do período
+    period_data = [
+        ["Indicador", f"Últimos {meses} meses"],
+        ["Novos jovens", f"{jovens_novos}"],
+        ["Novas empresas", f"{empresas_novas}"],
+        ["Novas vagas", f"{vagas_novas}"],
+        ["Novas candidaturas", f"{candidaturas_novas}"],
+    ]
+    period_table = draw_table(period_data, [300, 120])
+    w, h = period_table.wrap(0, 0)
+    period_table.drawOn(pdf, margin, y - h)
+
+    # Nova página com gráficos e tabelas detalhadas
+    pdf.showPage()
+    y = draw_header("Relatório - Distribuições", "Resumo por distrito, nível e área")
+
+    y = draw_section("Jovens por Distrito", district_list, y)
+    if y < 200:
+        pdf.showPage()
+        y = draw_header("Relatório - Distribuições", "Resumo por distrito, nível e área")
+    y = draw_section("Por Nível de Educação", level_list, y)
+    if y < 200:
+        pdf.showPage()
+        y = draw_header("Relatório - Distribuições", "Resumo por distrito, nível e área")
+    y = draw_section("Por Área de Formação", area_list, y)
+
+    pdf.save()
+
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.pdf"'
     return response
 
 

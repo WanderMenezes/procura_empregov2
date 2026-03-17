@@ -122,6 +122,11 @@ class JobPost(models.Model):
     descricao = models.TextField(_('descrição'))
     requisitos = models.TextField(_('requisitos'))
     tipo = models.CharField(_('tipo'), max_length=3, choices=TIPO_CHOICES)
+
+    numero_vagas = models.PositiveIntegerField(
+        _('número de vagas'),
+        default=1
+    )
     
     # Localização
     distrito = models.ForeignKey(
@@ -182,6 +187,23 @@ class JobPost(models.Model):
     def total_candidaturas(self):
         """Retorna o total de candidaturas para esta vaga"""
         return self.applications.count()
+
+    @property
+    def vagas_preenchidas(self):
+        """Retorna o número de candidaturas aceites"""
+        if hasattr(self, 'aceites'):
+            return self.aceites
+        return self.applications.filter(estado='ACEITE').count()
+
+    @property
+    def vagas_restantes(self):
+        """Retorna o número de vagas ainda disponíveis"""
+        return max(self.numero_vagas - self.vagas_preenchidas, 0)
+
+    @property
+    def tem_vagas_disponiveis(self):
+        """Indica se ainda há vagas disponíveis"""
+        return self.vagas_restantes > 0
     
     def incrementar_visualizacoes(self):
         """Incrementa o contador de visualizações"""
@@ -220,6 +242,7 @@ class Application(models.Model):
     )
     
     mensagem = models.TextField(_('mensagem/motivação'), blank=True)
+    resposta_empresa = models.TextField(_('mensagem da empresa'), blank=True)
     
     # Timestamps
     created_at = models.DateTimeField(_('candidatou-se em'), auto_now_add=True)
@@ -233,6 +256,33 @@ class Application(models.Model):
     
     def __str__(self):
         return f"{self.youth.user.nome} - {self.job.titulo}"
+
+
+class ApplicationMessage(models.Model):
+    """Mensagens trocadas na candidatura"""
+
+    SENDER_CHOICES = [
+        ('EMP', _('Empresa')),
+        ('SYS', _('Sistema')),
+    ]
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name=_('candidatura')
+    )
+    sender = models.CharField(_('remetente'), max_length=3, choices=SENDER_CHOICES, default='EMP')
+    message = models.TextField(_('mensagem'))
+    created_at = models.DateTimeField(_('enviada em'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('mensagem de candidatura')
+        verbose_name_plural = _('mensagens de candidatura')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Mensagem {self.id} - {self.application}"
 
 
 class ContactRequest(models.Model):

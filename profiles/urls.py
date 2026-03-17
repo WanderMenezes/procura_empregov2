@@ -15,6 +15,11 @@ urlpatterns = [
     # Perfil
     path('meu-perfil/', views.profile_detail, name='detail'),
     path('meu-perfil/editar/', views.profile_edit, name='edit'),
+    path('candidaturas/<int:pk>/mensagens/', views.application_messages, name='application_messages'),
+    path('minhas-candidaturas/', views.my_applications, name='my_applications'),
+
+    # Vagas disponíveis
+    path('vagas-disponiveis/', views.available_jobs, name='available_jobs'),
     
     # Educação
     path('educacao/adicionar/', views.education_add, name='education_add'),
@@ -26,6 +31,7 @@ urlpatterns = [
     
     # Documentos
     path('documentos/adicionar/', views.document_add, name='document_add'),
+    path('documentos/<int:pk>/ver/', views.document_view, name='document_view'),
     path('documentos/<int:pk>/remover/', views.document_delete, name='document_delete'),
 
     # Skills

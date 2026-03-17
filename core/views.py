@@ -5,7 +5,7 @@ Views para o app core
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Count
+from django.db.models import Count, Q, F
 from django.http import JsonResponse
 
 from profiles.models import YouthProfile
@@ -28,7 +28,11 @@ def home(request):
     # Vagas recentes
     vagas_recentes = JobPost.objects.filter(
         estado='ATIVA'
-    ).select_related('company').order_by('-data_publicacao')[:6]
+    ).select_related('company').annotate(
+        aceites=Count('applications', filter=Q(applications__estado='ACEITE'), distinct=True)
+    ).filter(
+        aceites__lt=F('numero_vagas')
+    ).order_by('-data_publicacao')[:6]
     
     context = {
         'stats': stats,

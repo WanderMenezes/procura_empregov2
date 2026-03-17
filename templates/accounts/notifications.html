@@ -35,6 +35,16 @@
                     {% else %}
                       <span class="badge bg-secondary">Lida</span>
                     {% endif %}
+                    <form method="post" action="{% url 'accounts:delete_notification' n.id %}" class="mt-2">
+                      {% csrf_token %}
+                      <button type="submit"
+                              class="btn btn-sm btn-outline-danger"
+                              title="Eliminar"
+                              aria-label="Eliminar"
+                              onclick="return confirm('Eliminar esta notificação?');">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
                   </div>
                 </li>
               {% endfor %}

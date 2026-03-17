@@ -49,6 +49,7 @@ class ApplicationInline(admin.TabularInline):
 class JobPostAdmin(admin.ModelAdmin):
     list_display = [
         'titulo', 'company', 'tipo', 'distrito', 'estado',
+        'numero_vagas',
         'total_candidaturas', 'visualizacoes', 'data_publicacao'
     ]
     list_filter = ['tipo', 'estado', 'nivel_educacao', 'data_publicacao']

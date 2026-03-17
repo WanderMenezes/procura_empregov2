@@ -1,0 +1,228 @@
+{% extends 'base/base.html' %}
+{% load dict_extras %}
+
+{% block title %}Vagas Disponíveis - Base Nacional de Jovens{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">Vagas Disponíveis</h3>
+            <p class="text-muted mb-0">Explora oportunidades e candidata-te diretamente.</p>
+        </div>
+        <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-person me-1"></i>Voltar ao Perfil
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Palavra‑chave</label>
+                    <input type="text" name="q" class="form-control form-control-sm"
+                           placeholder="Título ou descrição"
+                           value="{{ selected_query }}">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Tipo</label>
+                    <select name="tipo" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        {% for value,label in tipo_choices %}
+                            <option value="{{ value }}" {% if selected_tipo == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Distrito</label>
+                    <select name="distrito" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        {% for district in districts %}
+                            <option value="{{ district.id }}" {% if selected_distrito == district.id|stringformat:"s" %}selected{% endif %}>
+                                {{ district.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Área</label>
+                    <select name="area" class="form-select form-select-sm">
+                        <option value="">Todas</option>
+                        {% for value,label in areas_formacao %}
+                            <option value="{{ value }}" {% if selected_area == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-funnel me-1"></i>Filtrar
+                    </button>
+                    <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-secondary btn-sm">Limpar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if vagas_page %}
+        <div class="row g-3">
+            {% for vaga in vagas_page %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">{{ vaga.get_tipo_display }}</span>
+                                <small class="text-muted">{{ vaga.data_publicacao|date:"d/m/Y" }}</small>
+                            </div>
+                            <h6 class="mb-1">{{ vaga.titulo }}</h6>
+                            <p class="text-muted small mb-1">
+                                <i class="bi bi-building me-1"></i>{{ vaga.company.nome }}
+                            </p>
+                            <p class="small mb-1">
+                                <i class="bi bi-geo-alt me-1"></i>{{ vaga.distrito.nome|default:"N/A" }}
+                            </p>
+                            <p class="small mb-1">
+                                <i class="bi bi-people me-1"></i>Vagas: {{ vaga.numero_vagas }} | Restantes: {{ vaga.vagas_restantes }}
+                            </p>
+                            {% if vaga.salario %}
+                                <p class="small mb-1">
+                                    <i class="bi bi-cash me-1"></i>{{ vaga.salario }}
+                                </p>
+                            {% endif %}
+                            <p class="small text-muted mb-0">{{ vaga.descricao|truncatewords:18 }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            {% if vaga.id in candidaturas_ids %}
+                                {% with estado=candidaturas_state|get_item:vaga.id %}
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="badge {% if estado == 'ACEITE' %}bg-success{% elif estado == 'REJEITADA' %}bg-danger{% elif estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                            {{ candidaturas_map|get_item:vaga.id }}
+                                        </span>
+                                        <small class="text-muted">Estado</small>
+                                    </div>
+                                {% endwith %}
+                                <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                    <i class="bi bi-check2-circle me-1"></i>Já candidatado
+                                </button>
+                            {% else %}
+                                <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
+                                    {% csrf_token %}
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm w-100"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmApplyModal"
+                                            data-form-id="apply-form-{{ vaga.id }}"
+                                            data-job-title="{{ vaga.titulo|escapejs }}"
+                                            data-company="{{ vaga.company.nome|escapejs }}"
+                                            data-district="{{ vaga.distrito.nome|default:"N/A"|escapejs }}">
+                                        <i class="bi bi-send me-1"></i>Candidatar-me
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if vagas_page.paginator.num_pages > 1 %}
+            <nav class="mt-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item {% if not vagas_page.has_previous %}disabled{% endif %}">
+                        {% if vagas_page.has_previous %}
+                            <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ vagas_page.previous_page_number }}">Anterior</a>
+                        {% else %}
+                            <span class="page-link">Anterior</span>
+                        {% endif %}
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Página {{ vagas_page.number }} de {{ vagas_page.paginator.num_pages }}
+                        </span>
+                    </li>
+                    <li class="page-item {% if not vagas_page.has_next %}disabled{% endif %}">
+                        {% if vagas_page.has_next %}
+                            <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ vagas_page.next_page_number }}">Próxima</a>
+                        {% else %}
+                            <span class="page-link">Próxima</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info mb-0">Sem vagas disponíveis no momento.</div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmação -->
+<div class="modal fade" id="confirmApplyModal" tabindex="-1" aria-labelledby="confirmApplyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmApplyLabel">Confirmar candidatura</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">
+                    Tens a certeza que queres candidatar-te à vaga
+                    <strong id="confirmApplyTitle">esta vaga</strong>?
+                </p>
+                <div class="small text-muted mb-3">
+                    <div><strong>Empresa:</strong> <span id="confirmApplyCompany">—</span></div>
+                    <div><strong>Distrito:</strong> <span id="confirmApplyDistrict">—</span></div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmApplyCheck">
+                    <label class="form-check-label" for="confirmApplyCheck">
+                        Confirmo que li a vaga
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmApplyBtn" disabled>
+                    <i class="bi bi-check2-circle me-1"></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('confirmApplyModal');
+    const confirmBtn = document.getElementById('confirmApplyBtn');
+    const titleEl = document.getElementById('confirmApplyTitle');
+    const companyEl = document.getElementById('confirmApplyCompany');
+    const districtEl = document.getElementById('confirmApplyDistrict');
+    const checkEl = document.getElementById('confirmApplyCheck');
+    let targetFormId = null;
+
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+            targetFormId = button.getAttribute('data-form-id');
+            const jobTitle = button.getAttribute('data-job-title') || 'esta vaga';
+            const company = button.getAttribute('data-company') || '—';
+            const district = button.getAttribute('data-district') || '—';
+            titleEl.textContent = jobTitle;
+            companyEl.textContent = company;
+            districtEl.textContent = district;
+            checkEl.checked = false;
+            confirmBtn.disabled = true;
+        });
+    }
+
+    checkEl.addEventListener('change', function () {
+        confirmBtn.disabled = !checkEl.checked;
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        if (!targetFormId) return;
+        const form = document.getElementById(targetFormId);
+        if (form) form.submit();
+    });
+});
+</script>
+{% endblock %}

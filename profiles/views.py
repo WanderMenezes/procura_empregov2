@@ -9,8 +9,9 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.views.generic import View, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.http import JsonResponse
-from django.db.models import Q
+from django.http import JsonResponse, FileResponse, Http404
+from django.db.models import Q, Count, F
+from django.core.paginator import Paginator
 from datetime import timedelta
 from django.conf import settings
 from django import forms as django_forms
@@ -18,6 +19,7 @@ from django import forms as django_forms
 from accounts.sms import send_sms
 
 from .models import YouthProfile, Education, Experience, Document, YouthSkill
+from companies.models import JobPost, Application
 from .forms import (
     YouthProfileStep1Form, YouthProfileStep2Form,
     YouthProfileStep3Form, YouthProfileStep4Form,
@@ -29,6 +31,8 @@ from accounts.models import User
 import random
 from accounts.models import PhoneChange
 from accounts.forms import UserProfileForm
+import mimetypes
+import os
 
 
 def get_or_create_skill_by_name(nome, tipo):
@@ -63,6 +67,13 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
     edu = Education.objects.filter(profile=profile).first()
     docs = Document.objects.filter(profile=profile)
     skills_qs = YouthSkill.objects.filter(profile=profile)
+
+    always_count_bool = {
+        'visivel',
+        'consentimento_sms',
+        'consentimento_whatsapp',
+        'consentimento_email',
+    }
 
     for step, fields in expected.items():
         total = len(fields)
@@ -113,7 +124,10 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
                     val = getattr(profile, 'consentimento_email', False)
 
             if isinstance(val, bool):
-                if val:
+                if f in always_count_bool:
+                    # For consent/visibility toggles, any choice counts as answered.
+                    filled += 1
+                elif val:
                     filled += 1
             elif isinstance(val, (list, tuple)):
                 if len(val) > 0:
@@ -121,7 +135,11 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
             elif val not in (None, '', False):
                 filled += 1
 
-        result[step] = {'filled': filled, 'total': total}
+        missing = total - filled
+        if missing < 0:
+            missing = 0
+
+        result[step] = {'filled': filled, 'total': total, 'missing': missing}
 
     return result
 
@@ -403,6 +421,13 @@ class ProfileWizardView(View):
             '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
         }
 
+        always_count_bool = {
+            'visivel',
+            'consentimento_sms',
+            'consentimento_whatsapp',
+            'consentimento_email',
+        }
+
         result = {}
         for step, fields in expected.items():
             total = len(fields)
@@ -410,7 +435,12 @@ class ProfileWizardView(View):
             step_data = wizard_data.get(step, {})
             for f in fields:
                 val = step_data.get(f)
-                if isinstance(val, list):
+                if isinstance(val, bool):
+                    if f in always_count_bool:
+                        filled += 1
+                    elif val:
+                        filled += 1
+                elif isinstance(val, list):
                     if len(val) > 0:
                         filled += 1
                 elif val not in (None, '', False):
@@ -636,6 +666,82 @@ def profile_detail(request):
     total_slots = sum(s['total'] for s in step_stats.values())
     progress = int((total_filled / total_slots) * 100) if total_slots else 0
 
+    # document-only stats for sidebar display
+    docs_qs = Document.objects.filter(profile=profile)
+    doc_filled = 0
+    if docs_qs.filter(tipo='CV').exists():
+        doc_filled += 1
+    if docs_qs.filter(tipo='CERT').exists():
+        doc_filled += 1
+    if docs_qs.filter(tipo='BI').exists():
+        doc_filled += 1
+    doc_total = 3
+    doc_missing = doc_total - doc_filled
+    if doc_missing < 0:
+        doc_missing = 0
+    doc_stats = {
+        'filled': doc_filled,
+        'total': doc_total,
+        'missing': doc_missing,
+        'total_all': docs_qs.count()
+    }
+
+    # vagas disponíveis para candidatura (com filtros e paginação)
+    vagas_qs = JobPost.objects.filter(
+        estado='ATIVA'
+    ).select_related('company', 'distrito').order_by('-data_publicacao')
+
+    q = (request.GET.get('q') or '').strip()
+    q = (request.GET.get('q') or '').strip()
+    q = (request.GET.get('q') or '').strip()
+    q = (request.GET.get('q') or '').strip()
+    q = (request.GET.get('q') or '').strip()
+    tipo = request.GET.get('tipo')
+    distrito = request.GET.get('distrito')
+    area = request.GET.get('area')
+
+    valid_tipos = {choice[0] for choice in JobPost.TIPO_CHOICES}
+    valid_areas = {choice[0] for choice in settings.AREAS_FORMACAO}
+
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if tipo in valid_tipos:
+        vagas_qs = vagas_qs.filter(tipo=tipo)
+    if distrito and distrito.isdigit():
+        vagas_qs = vagas_qs.filter(distrito_id=int(distrito))
+    if area in valid_areas:
+        vagas_qs = vagas_qs.filter(area_formacao=area)
+
+    vagas_qs = vagas_qs.annotate(
+        aceites=Count('applications', filter=Q(applications__estado='ACEITE'), distinct=True)
+    ).filter(aceites__lt=F('numero_vagas'))
+
+    paginator = Paginator(vagas_qs, 6)
+    page_number = request.GET.get('page') or 1
+    vagas_page = paginator.get_page(page_number)
+
+    applications = Application.objects.filter(youth=profile).select_related('job')
+    candidaturas_ids = list(applications.values_list('job_id', flat=True))
+    candidaturas_map = {app.job_id: app.get_estado_display() for app in applications}
+    candidaturas_state = {app.job_id: app.estado for app in applications}
+
+    filters = request.GET.copy()
+    if 'page' in filters:
+        del filters['page']
+    filters_qs = filters.urlencode()
+
+    applications = Application.objects.filter(
+        youth=profile
+    ).select_related('job', 'job__company').prefetch_related('messages').order_by('-created_at')
+
     context = {
         'profile': profile,
         'education': profile.get_education(),
@@ -643,10 +749,91 @@ def profile_detail(request):
         'documents': profile.get_documents(),
         'skills': profile.youth_skills.select_related('skill').all(),
         'progress': progress,
-        'step_stats': step_stats
+        'step_stats': step_stats,
+        'doc_stats': doc_stats,
+        'applications': applications,
+        'vagas_page': vagas_page,
+        'candidaturas_ids': candidaturas_ids,
+        'candidaturas_map': candidaturas_map,
+        'candidaturas_state': candidaturas_state,
+        'tipo_choices': JobPost.TIPO_CHOICES,
+        'areas_formacao': settings.AREAS_FORMACAO,
+        'filters_qs': filters_qs,
+        'selected_tipo': tipo or '',
+        'selected_distrito': distrito or '',
+        'selected_area': area or '',
+        'selected_query': q
     }
     
     return render(request, 'profiles/detail.html', context)
+
+
+@login_required
+def available_jobs(request):
+    """Página de vagas disponíveis para jovens"""
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens podem aceder.'))
+        return redirect('home')
+
+    if not request.user.has_youth_profile():
+        return redirect('profiles:wizard')
+
+    profile = request.user.youth_profile
+
+    vagas_qs = JobPost.objects.filter(
+        estado='ATIVA'
+    ).select_related('company', 'distrito').order_by('-data_publicacao')
+
+    q = (request.GET.get('q') or '').strip()
+    tipo = request.GET.get('tipo')
+    distrito = request.GET.get('distrito')
+    area = request.GET.get('area')
+
+    valid_tipos = {choice[0] for choice in JobPost.TIPO_CHOICES}
+    valid_areas = {choice[0] for choice in settings.AREAS_FORMACAO}
+
+    if q:
+        vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+    if tipo in valid_tipos:
+        vagas_qs = vagas_qs.filter(tipo=tipo)
+    if distrito and distrito.isdigit():
+        vagas_qs = vagas_qs.filter(distrito_id=int(distrito))
+    if area in valid_areas:
+        vagas_qs = vagas_qs.filter(area_formacao=area)
+
+    vagas_qs = vagas_qs.annotate(
+        aceites=Count('applications', filter=Q(applications__estado='ACEITE'), distinct=True)
+    ).filter(aceites__lt=F('numero_vagas'))
+
+    paginator = Paginator(vagas_qs, 9)
+    page_number = request.GET.get('page') or 1
+    vagas_page = paginator.get_page(page_number)
+
+    applications = Application.objects.filter(youth=profile).select_related('job')
+    candidaturas_ids = list(applications.values_list('job_id', flat=True))
+    candidaturas_map = {app.job_id: app.get_estado_display() for app in applications}
+    candidaturas_state = {app.job_id: app.estado for app in applications}
+
+    filters = request.GET.copy()
+    if 'page' in filters:
+        del filters['page']
+    filters_qs = filters.urlencode()
+
+    context = {
+        'vagas_page': vagas_page,
+        'candidaturas_ids': candidaturas_ids,
+        'candidaturas_map': candidaturas_map,
+        'candidaturas_state': candidaturas_state,
+        'tipo_choices': JobPost.TIPO_CHOICES,
+        'areas_formacao': settings.AREAS_FORMACAO,
+        'filters_qs': filters_qs,
+        'selected_tipo': tipo or '',
+        'selected_distrito': distrito or '',
+        'selected_area': area or '',
+        'selected_query': q
+    }
+
+    return render(request, 'profiles/vagas_disponiveis.html', context)
 
 
 @login_required
@@ -657,6 +844,32 @@ def profile_edit(request):
         return redirect('home')
 
     return redirect('profiles:wizard')
+
+
+@login_required
+def application_messages(request, pk):
+    """Histórico de mensagens de uma candidatura (jovem)"""
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens podem aceder.'))
+        return redirect('home')
+
+    if not request.user.has_youth_profile():
+        return redirect('profiles:wizard')
+
+    profile = request.user.youth_profile
+    application = get_object_or_404(Application, pk=pk, youth=profile)
+
+    messages_qs = application.messages.all().order_by('-created_at')
+    paginator = Paginator(messages_qs, 10)
+    page_number = request.GET.get('page') or 1
+    messages_page = paginator.get_page(page_number)
+
+    context = {
+        'application': application,
+        'messages_page': messages_page,
+    }
+
+    return render(request, 'profiles/application_messages.html', context)
 
 
 # Views para Educação
@@ -750,6 +963,22 @@ def document_delete(request, pk):
 
 
 @login_required
+def document_view(request, pk):
+    """Abrir documento no navegador (inline)"""
+    document = get_object_or_404(Document, pk=pk, profile__user=request.user)
+    if not document.arquivo:
+        raise Http404
+    file_handle = document.arquivo.open('rb')
+    response = FileResponse(file_handle, as_attachment=False)
+    mime, _ = mimetypes.guess_type(document.arquivo.name)
+    if mime:
+        response['Content-Type'] = mime
+    filename = os.path.basename(document.arquivo.name)
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    return response
+
+
+@login_required
 def skills_edit(request):
     """Editar skills do jovem"""
     if not request.user.is_jovem:
@@ -802,6 +1031,30 @@ def skills_edit(request):
         'selected_skill_ids': selected_skill_ids
     }
     return render(request, 'profiles/skills_form.html', context)
+
+
+@login_required
+def my_applications(request):
+    """Lista de candidaturas do jovem"""
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens podem aceder.'))
+        return redirect('home')
+
+    if not request.user.has_youth_profile():
+        return redirect('profiles:wizard')
+
+    profile = request.user.youth_profile
+    applications = Application.objects.filter(
+        youth=profile
+    ).select_related('job', 'job__company').prefetch_related('messages').order_by('-created_at')
+
+    paginator = Paginator(applications, 8)
+    page_number = request.GET.get('page') or 1
+    applications_page = paginator.get_page(page_number)
+
+    return render(request, 'profiles/my_applications.html', {
+        'applications_page': applications_page
+    })
 
 
 # Registo Assistido (Operador Distrital)

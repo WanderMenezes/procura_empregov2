@@ -3,30 +3,47 @@
 {% block title %}Completar Perfil - Passo {{ step }} de 4{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 profile-wizard">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <h2>Completa o Teu Perfil</h2>
-                        <p class="text-muted">Passo {{ step }} de 4</p>
+        <div class="col-lg-9 col-xl-8">
+            <div class="card wizard-card shadow-lg">
+                <div class="wizard-header">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div>
+                            <div class="wizard-kicker">Completar Perfil</div>
+                            <h2 class="mb-1">Completa o Teu Perfil</h2>
+                            <div class="wizard-subtitle">Passo {{ step }} de 4</div>
+                        </div>
+                        {% if step_title %}
+                            <div class="wizard-step-badge">
+                                <span class="badge bg-light text-dark">
+                                    {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
+                                </span>
+                            </div>
+                        {% endif %}
                     </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
                     
                     <!-- Progress Bar -->
-                    <div class="progress mb-2">
-                        <div id="wizard-progress" class="progress-bar" role="progressbar" 
-                             style="width: {{ progress }}%" 
-                             aria-valuenow="{{ progress }}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                            <span id="wizard-progress-label" class="fw-bold">{{ progress }}%</span>
+                    <div class="wizard-progress-wrap mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span id="wizard-progress-text">{{ progress }}% completo</span>
+                            <span>Passo {{ step }} de 4</span>
+                        </div>
+                        <div class="progress wizard-progress">
+                            <div id="wizard-progress" class="progress-bar" role="progressbar" 
+                                 style="width: {{ progress }}%" 
+                                 aria-valuenow="{{ progress }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                <span id="wizard-progress-label" class="fw-bold">{{ progress }}%</span>
+                            </div>
                         </div>
                     </div>
-                    <div id="wizard-progress-text" class="text-end small text-muted mb-3">{{ progress }}% completo</div>
                     
                     <!-- Step Indicators -->
-                    <div class="step-indicator mb-4">
+                    <div class="step-indicator wizard-stepper mb-2">
                         <div class="step {% if step >= 1 %}active{% endif %} {% if step > 1 %}completed{% endif %}">
                             {% if step > 1 %}<i class="bi bi-check"></i>{% else %}1{% endif %}
                         </div>
@@ -38,19 +55,32 @@
                         </div>
                         <div class="step {% if step >= 4 %}active{% endif %}">4</div>
                     </div>
+                    <div class="wizard-stepper-labels small text-muted mb-4">
+                        <span>Dados</span>
+                        <span>Educacao</span>
+                        <span>Experiencia</span>
+                        <span>Documentos</span>
+                    </div>
                     
                     <!-- Step Title -->
-                    <h4 class="text-center mb-4">
-                        {% if step_title %}
-                            {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
+                    <div class="wizard-step-title text-center mb-4">
+                        <h4 class="mb-1">
+                            {% if step_title %}
+                                {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
+                            {% endif %}
+                        </h4>
+                        {% if step_stats %}
+                            <div class="small text-muted">
+                                {{ step_title }}
+                                — {{ step_stats.filled }}/{{ step_stats.total }} preenchidos
+                            </div>
                         {% endif %}
-                    </h4>
-                    {% if step_stats %}
-                        <p class="text-center small text-muted mb-3">
-                            {{ step_title }}
-                            — {{ step_stats.filled }}/{{ step_stats.total }} preenchidos
-                        </p>
-                    {% endif %}
+                    </div>
+
+                    <div class="alert alert-light border small mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Campos marcados com * sao obrigatorios.
+                    </div>
                     
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}

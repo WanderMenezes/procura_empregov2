@@ -19,9 +19,12 @@ urlpatterns = [
     path('vagas/<int:pk>/editar/', views.job_edit, name='job_edit'),
     path('vagas/<int:pk>/fechar/', views.job_close, name='job_close'),
     path('vagas/<int:pk>/candidaturas/', views.job_applications, name='job_applications'),
+    path('vagas/<int:pk>/candidatar/', views.job_apply, name='job_apply'),
     
     # Candidaturas
     path('candidaturas/<int:pk>/estado/<str:estado>/', views.application_update, name='application_update'),
+    path('candidaturas/<int:pk>/atualizar/', views.application_manage, name='application_manage'),
+    path('candidaturas/<int:pk>/mensagens/', views.application_messages, name='application_messages'),
     
     # Pesquisa de jovens
     path('pesquisar-jovens/', views.search_youth, name='search_youth'),

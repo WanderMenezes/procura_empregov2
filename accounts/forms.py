@@ -167,12 +167,11 @@ class UserLoginForm(AuthenticationForm):
 class PasswordResetRequestForm(forms.Form):
     """Formulário para solicitar recuperação de senha"""
     
-    telefone = forms.CharField(
-        max_length=20,
-        label=_('Telemóvel'),
-        widget=forms.TextInput(attrs={
+    email = forms.EmailField(
+        label=_('Email'),
+        widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Seu telemóvel registado')
+            'placeholder': _('Seu email registado')
         })
     )
 

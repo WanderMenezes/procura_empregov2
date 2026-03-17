@@ -121,14 +121,9 @@
             </div>
             <div class="col-6">
               <div class="stat-tile">
-                <small class="text-muted">Pedidos pendentes</small>
-                <div class="h5 mb-0">{{ stats.pedidos_pendentes|default:0 }}</div>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="stat-tile">
-                <small class="text-muted">Visualizações</small>
-                <div class="h5 mb-0">{{ stats.visualizacoes|default:0 }}</div>
+                <small class="text-muted">Pedidos</small>
+                <div class="h5 mb-0">{{ stats.pedidos_total|default:0 }}</div>
+                <small class="text-muted">Pendentes: {{ stats.pedidos_pendentes|default:0 }}</small>
               </div>
             </div>
           </div>

@@ -14,29 +14,189 @@
     </div>
 
     <div class="col-12 col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex align-items-start gap-3">
-            <div>
-              <h5 class="mb-1">{{ user.nome }}</h5>
-              <p class="mb-1 text-muted">{{ user.email }}</p>
-              <p class="mb-0"><strong>Telemóvel:</strong> {{ user.telefone }}</p>
+      {% if youth_profile %}
+        <div class="row g-3">
+          <div class="col-12 col-lg-5">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <div class="mb-3">
+                  {% if youth_profile.photo %}
+                    <img src="{{ youth_profile.photo.url }}" alt="{{ user.nome }}" class="rounded-circle" style="width:90px;height:90px;object-fit:cover;">
+                  {% else %}
+                    <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+                  {% endif %}
+                </div>
+                <h5 class="mb-1">{{ user.nome }}</h5>
+                {% if youth_profile.idade %}
+                  <div class="text-muted small mb-2">{{ youth_profile.idade }} anos</div>
+                {% endif %}
+                <span class="badge {% if youth_profile.completo %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                  {% if youth_profile.completo %}Perfil Completo{% else %}Perfil Incompleto{% endif %}
+                </span>
+
+                <div class="list-group list-group-flush text-start mt-3">
+                  <div class="list-group-item px-0 border-0">
+                    <i class="bi bi-envelope me-2"></i>{{ user.email|default:"Email não definido" }}
+                  </div>
+                  <div class="list-group-item px-0 border-0">
+                    <i class="bi bi-telephone me-2"></i>{{ user.telefone }}
+                  </div>
+                  {% if youth_profile.contacto_alternativo %}
+                    <div class="list-group-item px-0 border-0">
+                      <i class="bi bi-person-lines-fill me-2"></i>{{ youth_profile.contacto_alternativo }}
+                    </div>
+                  {% endif %}
+                  <div class="list-group-item px-0 border-0">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    {{ youth_profile.distrito.nome|default:"Distrito não definido" }}{% if youth_profile.localidade %} - {{ youth_profile.localidade }}{% endif %}
+                  </div>
+                </div>
+
+                <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-primary btn-sm mt-3">Editar perfil com Wizard</a>
+              </div>
             </div>
           </div>
 
-          <hr>
-          {% if youth_profile %}
-            <p><strong>Localidade:</strong> {{ youth_profile.localidade }}</p>
-            <p><strong>Status:</strong> {% if youth_profile.completo %}Completo{% else %}Incompleto{% endif %}</p>
-            <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-primary btn-sm mt-2">Editar perfil com Wizard</a>
-          {% elif company_profile %}
+          <div class="col-12 col-lg-7">
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Resumo do Candidato</h6>
+              </div>
+              <div class="card-body">
+                <p class="text-muted mb-3">{{ youth_profile.sobre|default:"Sem resumo disponível." }}</p>
+                <div class="row g-2">
+                  <div class="col-12 col-md-6">
+                    <div class="small text-muted">Situação atual</div>
+                    <div>{{ youth_profile.get_situacao_atual_display }}</div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="small text-muted">Disponibilidade</div>
+                    <div>{{ youth_profile.get_disponibilidade_display }}</div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="small text-muted">Preferência</div>
+                    <div>{{ youth_profile.get_preferencia_oportunidade_display }}</div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="small text-muted">Interesses</div>
+                    <div>{{ youth_profile.interesses_setoriais_display|default:"Não definido" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-book me-2"></i>Educação</h6>
+              </div>
+              <div class="card-body">
+                {% if education %}
+                  <ul class="list-unstyled mb-0">
+                    {% for edu in education %}
+                      <li class="mb-2">
+                        <strong>{{ edu.get_nivel_display }}</strong> — {{ edu.instituicao }}
+                        {% if edu.curso %}<div class="small text-muted">{{ edu.curso }}</div>{% endif %}
+                        {% if edu.ano %}<div class="small text-muted">Conclusão: {{ edu.ano }}</div>{% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="text-muted small">Sem informação de educação.</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-briefcase me-2"></i>Experiência</h6>
+              </div>
+              <div class="card-body">
+                {% if experiences %}
+                  <ul class="list-unstyled mb-0">
+                    {% for exp in experiences %}
+                      <li class="mb-3">
+                        <strong>{{ exp.cargo }}</strong> — {{ exp.entidade }}
+                        <div class="small text-muted">
+                          {{ exp.inicio|date:"m/Y" }} — {% if exp.atual %}Atual{% elif exp.fim %}{{ exp.fim|date:"m/Y" }}{% else %}—{% endif %}
+                          {% if exp.duracao %}<span class="ms-1">({{ exp.duracao }})</span>{% endif %}
+                        </div>
+                        {% if exp.descricao %}
+                          <div class="small">{{ exp.descricao }}</div>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="text-muted small">Sem experiência registada.</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-stars me-2"></i>Skills</h6>
+              </div>
+              <div class="card-body">
+                {% if skills %}
+                  <div class="d-flex flex-wrap gap-2">
+                    {% for youth_skill in skills %}
+                      <span class="badge bg-primary">
+                        {{ youth_skill.skill.nome }}
+                        <small class="ms-1">({{ youth_skill.get_nivel_display }})</small>
+                      </span>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="text-muted small">Sem skills adicionadas.</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documentos</h6>
+              </div>
+              <div class="card-body">
+                {% if documents %}
+                  <ul class="list-unstyled mb-0">
+                    {% for doc in documents %}
+                      <li class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                          <i class="bi bi-file-earmark-text me-2"></i>{{ doc.nome }}
+                          <span class="badge bg-secondary ms-2">{{ doc.get_tipo_display }}</span>
+                        </div>
+                        <a href="{% url 'profiles:document_view' doc.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="text-muted small">Sem documentos anexados.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% elif company_profile %}
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-start gap-3">
+              <div>
+                <h5 class="mb-1">{{ company_profile.nome }}</h5>
+                <p class="mb-1 text-muted">{{ user.email }}</p>
+                <p class="mb-0"><strong>Telemóvel:</strong> {{ user.telefone }}</p>
+              </div>
+            </div>
+
+            <hr>
             <p><strong>Empresa:</strong> {{ company_profile.nome }}</p>
             <a href="{% url 'companies:profile_edit' %}" class="btn btn-primary btn-sm mt-2">Editar Perfil da Empresa</a>
-          {% else %}
-            <div class="alert alert-info">Nenhum perfil associado.</div>
-          {% endif %}
+          </div>
         </div>
-      </div>
+      {% else %}
+        <div class="alert alert-info">Nenhum perfil associado.</div>
+      {% endif %}
     </div>
   </div>
 </div>

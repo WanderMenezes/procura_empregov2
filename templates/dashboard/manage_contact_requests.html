@@ -3,34 +3,55 @@
 {% block title %}Pedidos de Contacto - Painel de Administracao{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 admin-dashboard">
     <div class="row">
         <div class="col-lg-2 mb-4">
-            <div class="list-group">
-                <a href="{% url 'dashboard:admin' %}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                </a>
-                <a href="{% url 'dashboard:user_list' %}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-people me-2"></i>Utilizadores
-                </a>
-                <a href="{% url 'dashboard:validate_profiles' %}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-check-circle me-2"></i>Validar Perfis
-                </a>
-                <a href="{% url 'dashboard:manage_contact_requests' %}" class="list-group-item list-group-item-action active">
-                    <i class="bi bi-envelope me-2"></i>Pedidos Contacto
-                </a>
-                <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-graph-up me-2"></i>Relatorios
-                </a>
+            <div class="admin-sidebar card">
+                <div class="card-body">
+                    <div class="admin-sidebar-title">
+                        <i class="bi bi-shield-check me-2"></i>Admin
+                    </div>
+                    <div class="admin-sidebar-nav">
+                        <a href="{% url 'dashboard:admin' %}" class="admin-nav-link">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="{% url 'dashboard:user_list' %}" class="admin-nav-link">
+                            <i class="bi bi-people"></i>
+                            <span>Utilizadores</span>
+                        </a>
+                        <a href="{% url 'dashboard:validate_profiles' %}" class="admin-nav-link">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Validar Perfis</span>
+                        </a>
+                        <a href="{% url 'dashboard:manage_contact_requests' %}" class="admin-nav-link active">
+                            <i class="bi bi-envelope"></i>
+                            <span>Pedidos Contacto</span>
+                        </a>
+                        <a href="{% url 'dashboard:reports' %}" class="admin-nav-link">
+                            <i class="bi bi-graph-up"></i>
+                            <span>Relatorios</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="col-lg-10">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0"><i class="bi bi-envelope me-2"></i>Pedidos de Contacto</h2>
+            <div class="card admin-hero mb-4">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="admin-kicker">Admin</div>
+                        <h2 class="mb-1"><i class="bi bi-envelope me-2"></i>Pedidos de Contacto</h2>
+                        <div class="admin-subtitle">Autorize ou rejeite pedidos de contacto das empresas.</div>
+                    </div>
+                    <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
+                    </a>
+                </div>
             </div>
 
-            <form method="get" class="card card-body mb-4">
+            <form method="get" class="card card-body mb-4 admin-filter">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-6">
                         <label class="form-label">Estado</label>
@@ -50,7 +71,7 @@
             <div class="card">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table table-hover align-middle admin-table mb-0">
                             <thead>
                                 <tr>
                                     <th>Empresa</th>
@@ -69,11 +90,17 @@
                                         <td>{{ pedido.created_at|date:"d/m/Y" }}</td>
                                         <td class="text-end">
                                             {% if pedido.estado == 'PENDENTE' %}
-                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}" class="btn btn-sm btn-success">
-                                                    Aprovar
+                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}"
+                                                   class="btn btn-sm btn-success"
+                                                   title="Aprovar"
+                                                   aria-label="Aprovar">
+                                                    <i class="bi bi-check2"></i>
                                                 </a>
-                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}" class="btn btn-sm btn-outline-danger">
-                                                    Rejeitar
+                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   title="Rejeitar"
+                                                   aria-label="Rejeitar">
+                                                    <i class="bi bi-x-lg"></i>
                                                 </a>
                                             {% else %}
                                                 <span class="text-muted">-</span>

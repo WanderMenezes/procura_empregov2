@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.views.generic import CreateView, FormView, View
@@ -181,30 +183,43 @@ class PasswordResetRequestView(FormView):
     form_class = PasswordResetRequestForm
     
     def form_valid(self, form):
-        telefone = form.cleaned_data['telefone']
+        email = form.cleaned_data['email']
         
         try:
-            user = User.objects.get(telefone=telefone)
+            user = User.objects.get(email__iexact=email)
             
             # Gerar código de 6 dígitos
             code = str(random.randint(100000, 999999))
             
             # Salvar código
-            PasswordResetCode.objects.create(user=user, code=code)
-            
-            # Aqui enviaria SMS/WhatsApp (simulação)
-            # Em produção, integrar com serviço de SMS
-            messages.info(
-                self.request,
-                _('Código de recuperação: {} (em produção seria enviado por SMS)').format(code)
-            )
+            reset_code = PasswordResetCode.objects.create(user=user, code=code)
+
+            subject = _('Código de recuperação de senha')
+            message = _('O teu código de recuperação é: {}').format(code)
+            try:
+                email_sent = send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False
+                )
+            except Exception:
+                email_sent = 0
+
+            if not email_sent:
+                reset_code.delete()
+                messages.error(self.request, _('Não foi possível enviar o email. Tenta novamente.'))
+                return self.form_invalid(form)
+
+            messages.success(self.request, _('Enviámos um código de recuperação por email.'))
             
             # Redirecionar para confirmação
-            self.request.session['reset_telefone'] = telefone
+            self.request.session['reset_email'] = user.email
             return redirect('accounts:password_reset_confirm')
             
         except User.DoesNotExist:
-            messages.error(self.request, _('Não existe conta com este telemóvel.'))
+            messages.error(self.request, _('Não existe conta com este email.'))
             return self.form_invalid(form)
 
 
@@ -215,16 +230,16 @@ class PasswordResetConfirmView(FormView):
     success_url = reverse_lazy('accounts:login')
     
     def form_valid(self, form):
-        telefone = self.request.session.get('reset_telefone')
+        email = self.request.session.get('reset_email')
         code = form.cleaned_data['code']
         new_password = form.cleaned_data['new_password']
         
-        if not telefone:
+        if not email:
             messages.error(self.request, _('Sessão expirada. Solicite novo código.'))
             return redirect('accounts:password_reset_request')
         
         try:
-            user = User.objects.get(telefone=telefone)
+            user = User.objects.get(email__iexact=email)
             reset_code = PasswordResetCode.objects.filter(
                 user=user,
                 code=code,
@@ -241,7 +256,7 @@ class PasswordResetConfirmView(FormView):
                 reset_code.save()
                 
                 # Limpar sessão
-                del self.request.session['reset_telefone']
+                del self.request.session['reset_email']
                 
                 messages.success(
                     self.request,
@@ -267,7 +282,14 @@ def profile_view(request):
     }
     
     if user.is_jovem and user.has_youth_profile():
-        context['youth_profile'] = user.youth_profile
+        profile = user.youth_profile
+        context.update({
+            'youth_profile': profile,
+            'education': profile.get_education(),
+            'experiences': profile.get_experience(),
+            'documents': profile.get_documents(),
+            'skills': profile.youth_skills.select_related('skill').all(),
+        })
     elif user.is_empresa and user.has_company_profile():
         context['company_profile'] = user.company_profile
     
@@ -331,6 +353,17 @@ def mark_notification_read(request, pk):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': True})
     
+    return redirect('accounts:notifications')
+
+
+@login_required
+def delete_notification(request, pk):
+    """Eliminar notificaÃ§Ã£o"""
+    if request.method != 'POST':
+        return redirect('accounts:notifications')
+    notification = get_object_or_404(Notification, pk=pk, user=request.user)
+    notification.delete()
+    messages.success(request, _('NotificaÃ§Ã£o eliminada.'))
     return redirect('accounts:notifications')
 
 
