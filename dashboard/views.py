@@ -53,30 +53,6 @@ def tecnico_required(view_func):
 @admin_required
 def admin_dashboard(request):
     """Dashboard do administrador"""
-    create_user_form = None
-    if request.method == 'POST' and request.POST.get('action') == 'create_user':
-        create_user_form = UserRegistrationForm(request.POST, request.FILES, user=request.user)
-        if create_user_form.is_valid():
-            user = create_user_form.save()
-            # Se for jovem, criar perfil e guardar foto opcional
-            try:
-                if user.is_jovem:
-                    photo = request.FILES.get('photo')
-                    if not user.has_youth_profile():
-                        profile = YouthProfile.objects.create(user=user)
-                    else:
-                        profile = user.youth_profile
-                    if photo:
-                        profile.photo = photo
-                        profile.save()
-            except Exception:
-                pass
-
-            messages.success(request, _('Utilizador criado com sucesso.'))
-            return redirect('dashboard:admin')
-    else:
-        create_user_form = UserRegistrationForm(user=request.user)
-
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -151,7 +127,6 @@ def admin_dashboard(request):
         'vagas_recentes': vagas_recentes,
         'pedidos_pendentes': pedidos_pendentes,
         'perfis_pendentes': perfis_pendentes,
-        'create_user_form': create_user_form,
     }
     
     return render(request, 'dashboard/admin.html', context)
@@ -206,6 +181,38 @@ def tecnico_dashboard(request):
 @admin_required
 def user_list(request):
     """Lista de utilizadores"""
+    create_user_form = None
+    if request.method == 'POST' and request.POST.get('action') == 'create_user':
+        create_user_form = UserRegistrationForm(request.POST, request.FILES, user=request.user)
+        if create_user_form.is_valid():
+            user = create_user_form.save()
+            try:
+                if user.is_jovem:
+                    photo = request.FILES.get('photo')
+                    if not user.has_youth_profile():
+                        profile = YouthProfile.objects.create(user=user)
+                    else:
+                        profile = user.youth_profile
+                    if photo:
+                        profile.photo = photo
+                        profile.save()
+                elif user.is_empresa:
+                    if not user.has_company_profile():
+                        Company.objects.create(
+                            user=user,
+                            nome=user.nome,
+                            setor='OUT',
+                            telefone=user.telefone or '',
+                            email=user.email or ''
+                        )
+            except Exception:
+                pass
+
+            messages.success(request, _('Utilizador criado com sucesso.'))
+            return redirect('dashboard:user_list')
+    else:
+        create_user_form = UserRegistrationForm(user=request.user)
+
     users = User.objects.all().order_by('-date_joined')
     
     # Filtros
@@ -221,6 +228,7 @@ def user_list(request):
         'users': users,
         'filtro_perfil': perfil,
         'filtro_ativo': ativo,
+        'create_user_form': create_user_form,
     }
     
     return render(request, 'dashboard/user_list.html', context)
