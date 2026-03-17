@@ -5,6 +5,8 @@ Views para autenticação e gestão de usuários
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -15,7 +17,8 @@ import random
 
 from .forms import (
     UserRegistrationForm, UserLoginForm,
-    PasswordResetRequestForm, PasswordResetConfirmForm
+    PasswordResetRequestForm, PasswordResetConfirmForm,
+    UserProfileForm
 )
 from .models import User, PasswordResetCode
 from core.models import Notification
@@ -30,6 +33,11 @@ class RegisterView(CreateView):
     form_class = UserRegistrationForm
     template_name = 'accounts/register.html'
     success_url = reverse_lazy('accounts:login')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def form_valid(self, form):
         user = form.save()
@@ -104,7 +112,7 @@ class LoginView(FormView):
             # Redirecionar conforme o perfil
             return self.get_success_url_for_user(user)
         else:
-            messages.error(self.request, _('Telemóvel/Email ou palavra-passe incorretos.'))
+            form.add_error(None, _('Telemóvel/Email ou palavra-passe incorretos.'))
             return self.form_invalid(form)
     
     def get_success_url_for_user(self, user):
@@ -264,6 +272,36 @@ def profile_view(request):
         context['company_profile'] = user.company_profile
     
     return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def profile_edit(request):
+    """Editar dados da conta e palavra-passe"""
+    user = request.user
+    profile_form = UserProfileForm(instance=user)
+    password_form = PasswordChangeForm(user=user)
+
+    if request.method == 'POST':
+        if 'save_profile' in request.POST:
+            profile_form = UserProfileForm(request.POST, instance=user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, _('Dados da conta atualizados com sucesso.'))
+                return redirect('accounts:profile')
+        elif 'change_password' in request.POST:
+            password_form = PasswordChangeForm(user=user, data=request.POST)
+            if password_form.is_valid():
+                updated_user = password_form.save()
+                update_session_auth_hash(request, updated_user)
+                messages.success(request, _('Palavra-passe alterada com sucesso.'))
+                return redirect('accounts:profile_edit')
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+    }
+
+    return render(request, 'accounts/profile_edit.html', context)
 
 
 @login_required

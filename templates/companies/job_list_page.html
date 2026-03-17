@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Vagas{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h4 class="mb-1">Vagas</h4>
+      <p class="text-muted mb-0">Gestão de vagas publicadas pela empresa.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
+      <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
+    </div>
+  </div>
+  {% include 'companies/job_list.html' %}
+</div>
+{% endblock %}

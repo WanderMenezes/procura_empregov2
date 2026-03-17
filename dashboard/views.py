@@ -14,6 +14,7 @@ import csv
 import json
 
 from accounts.models import User
+from accounts.forms import UserRegistrationForm
 from profiles.models import YouthProfile, Education
 from companies.models import Company, JobPost, Application, ContactRequest
 from core.models import District, Notification
@@ -24,6 +25,16 @@ def admin_required(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_admin:
             messages.error(request, _('Acesso restrito a administradores.'))
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_or_operador_required(view_func):
+    """Decorator para verificar se admin ou operador distrital"""
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not (request.user.is_admin or request.user.is_operador):
+            messages.error(request, _('Acesso restrito.'))
             return redirect('home')
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -42,7 +53,30 @@ def tecnico_required(view_func):
 @admin_required
 def admin_dashboard(request):
     """Dashboard do administrador"""
-    
+    create_user_form = None
+    if request.method == 'POST' and request.POST.get('action') == 'create_user':
+        create_user_form = UserRegistrationForm(request.POST, request.FILES, user=request.user)
+        if create_user_form.is_valid():
+            user = create_user_form.save()
+            # Se for jovem, criar perfil e guardar foto opcional
+            try:
+                if user.is_jovem:
+                    photo = request.FILES.get('photo')
+                    if not user.has_youth_profile():
+                        profile = YouthProfile.objects.create(user=user)
+                    else:
+                        profile = user.youth_profile
+                    if photo:
+                        profile.photo = photo
+                        profile.save()
+            except Exception:
+                pass
+
+            messages.success(request, _('Utilizador criado com sucesso.'))
+            return redirect('dashboard:admin')
+    else:
+        create_user_form = UserRegistrationForm(user=request.user)
+
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -117,6 +151,7 @@ def admin_dashboard(request):
         'vagas_recentes': vagas_recentes,
         'pedidos_pendentes': pedidos_pendentes,
         'perfis_pendentes': perfis_pendentes,
+        'create_user_form': create_user_form,
     }
     
     return render(request, 'dashboard/admin.html', context)
@@ -210,7 +245,7 @@ def user_toggle_active(request, pk):
 
 
 # Validação de Perfis
-@admin_required
+@admin_or_operador_required
 def validate_profiles(request):
     """Lista de perfis pendentes de validação"""
     perfis = YouthProfile.objects.filter(
@@ -224,7 +259,7 @@ def validate_profiles(request):
     return render(request, 'dashboard/validate_profiles.html', context)
 
 
-@admin_required
+@admin_or_operador_required
 def validate_profile(request, pk, action):
     """Validar ou rejeitar perfil"""
     profile = get_object_or_404(YouthProfile, pk=pk)

@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+{% load form_tags %}
+
+{% block title %}Editar Conta{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Editar Conta</h4>
+    <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-outline-secondary">Voltar</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="mb-3">Dados da Conta</h5>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ profile_form.non_field_errors }}
+
+            <div class="mb-3">
+              <label class="form-label">Nome</label>
+              {{ profile_form.nome|add_class:'form-control' }}
+              {{ profile_form.nome.errors }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              {{ profile_form.email|add_class:'form-control' }}
+              {{ profile_form.email.errors }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Telefone</label>
+              {{ profile_form.telefone|add_class:'form-control' }}
+              {{ profile_form.telefone.errors }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Distrito</label>
+              {{ profile_form.distrito|add_class:'form-select' }}
+              {{ profile_form.distrito.errors }}
+            </div>
+
+            <button type="submit" name="save_profile" class="btn btn-primary">
+              Guardar Dados
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="mb-3">Alterar Palavra-passe</h5>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ password_form.non_field_errors }}
+
+            <div class="mb-3">
+              <label class="form-label">Palavra-passe atual</label>
+              {{ password_form.old_password|add_class:'form-control' }}
+              {{ password_form.old_password.errors }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nova palavra-passe</label>
+              {{ password_form.new_password1|add_class:'form-control' }}
+              {{ password_form.new_password1.errors }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirmar nova palavra-passe</label>
+              {{ password_form.new_password2|add_class:'form-control' }}
+              {{ password_form.new_password2.errors }}
+            </div>
+
+            <button type="submit" name="change_password" class="btn btn-outline-primary">
+              Atualizar Palavra-passe
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@ class YouthProfileAdmin(admin.ModelAdmin):
         'situacao_atual', 'disponibilidade', 'completo',
         'validado', 'visivel', 'sexo', 'created_at'
     ]
-    search_fields = ['user__nome', 'user__telefone', 'user__email', 'localidade']
+    search_fields = ['user__nome', 'user__telefone', 'user__email', 'localidade', 'contacto_alternativo']
     readonly_fields = ['created_at', 'updated_at', 'idade']
     inlines = [EducationInline, ExperienceInline, DocumentInline, YouthSkillInline]
     
@@ -47,7 +47,7 @@ class YouthProfileAdmin(admin.ModelAdmin):
             'fields': ('user',)
         }),
         (_('Dados Pessoais'), {
-            'fields': ('data_nascimento', 'sexo', 'localidade')
+            'fields': ('data_nascimento', 'sexo', 'localidade', 'contacto_alternativo')
         }),
         (_('Situação Atual'), {
             'fields': ('situacao_atual', 'disponibilidade')
@@ -57,6 +57,9 @@ class YouthProfileAdmin(admin.ModelAdmin):
         }),
         (_('Status'), {
             'fields': ('completo', 'validado', 'visivel')
+        }),
+        (_('Consentimentos'), {
+            'fields': ('consentimento_sms', 'consentimento_whatsapp', 'consentimento_email')
         }),
         (_('Wizard'), {
             'fields': ('wizard_step', 'wizard_data'),

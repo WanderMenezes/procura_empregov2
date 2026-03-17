@@ -2,33 +2,118 @@
 
 {% block title %}Pesquisar Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .search-hero {
+    background: linear-gradient(135deg, rgba(0,102,204,0.12) 0%, rgba(0,168,107,0.12) 100%);
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .filter-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #0052a3;
+  }
+  .results-bar {
+    border: 1px solid rgba(0,0,0,0.06);
+    background: var(--light-bg);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+  }
+  .profile-card {
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,102,204,0.18);
+  }
+  .skill-badge {
+    background: rgba(0,102,204,0.12);
+    color: #0052a3;
+    border: 1px solid rgba(0,102,204,0.25);
+  }
+  .profile-chip {
+    background: rgba(0,168,107,0.12);
+    color: #007a4e;
+    border: 1px solid rgba(0,168,107,0.25);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
-  <h4>Pesquisar Jovens</h4>
-  <form method="get" class="mb-3">
-    <div class="row g-2">
-      <div class="col-md-4">
-        {{ form.q }}
+  <div class="search-hero rounded-4 p-3 p-md-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
+      <div>
+        <h4 class="mb-1">Pesquisar Jovens</h4>
+        <p class="text-muted mb-0">Combine filtros para encontrar perfis alinhados ao que procura.</p>
       </div>
-      <div class="col-md-3">
-        {{ form.distrito }}
-      </div>
-      <div class="col-md-3">
-        {{ form.skills }}
-      </div>
-      <div class="col-md-2 d-flex">
-        <button class="btn btn-primary w-100">Pesquisar</button>
+      <div class="d-flex gap-2">
+        <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-secondary btn-sm">Pedidos de contacto</a>
+        <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
       </div>
     </div>
-    </form>
+  </div>
 
-    <div class="row mt-2">
-      <div class="col-md-6">
-          <div id="search-results">
-            {% include 'companies/_search_results.html' %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get">
+        <div class="row g-2">
+          <div class="col-12 col-lg-4">
+            <label class="form-label filter-label" for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>
+            {{ form.q }}
           </div>
-      </div>
+          <div class="col-12 col-lg-4">
+            <label class="form-label filter-label" for="{{ form.profissao.id_for_label }}">{{ form.profissao.label }}</label>
+            {{ form.profissao }}
+          </div>
+          <div class="col-12 col-lg-4">
+            <label class="form-label filter-label" for="{{ form.skills.id_for_label }}">{{ form.skills.label }}</label>
+            {{ form.skills }}
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label filter-label" for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+            {{ form.distrito }}
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label filter-label" for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
+            {{ form.nivel }}
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label filter-label" for="{{ form.area.id_for_label }}">{{ form.area.label }}</label>
+            {{ form.area }}
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label filter-label" for="{{ form.disponibilidade.id_for_label }}">{{ form.disponibilidade.label }}</label>
+            {{ form.disponibilidade }}
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+            <div class="form-check mt-2">
+              {{ form.com_experiencia }}
+              <label class="form-check-label" for="{{ form.com_experiencia.id_for_label }}">{{ form.com_experiencia.label }}</label>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+            <button class="btn btn-primary w-100">Pesquisar</button>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+            <a class="btn btn-outline-secondary w-100" href="{% url 'companies:search_youth' %}">Limpar filtros</a>
+          </div>
+        </div>
+      </form>
+      <div class="small text-muted mt-2">Filtros combináveis: distrito, nível, área de formação, skills, disponibilidade, experiência e palavra-chave.</div>
     </div>
+  </div>
+
+  <div class="results-bar d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Resultados</h5>
+    <div class="small text-muted">{{ total|default:0 }} perfil(s) encontrado(s)</div>
+  </div>
+
+  <div id="search-results">
+    {% include 'companies/_search_results.html' %}
+  </div>
 </div>
 {% endblock %}
 
@@ -40,7 +125,7 @@ document.getElementById('selectAll')?.addEventListener('change', function(e){
 });
 </script>
 <script>
-// Funções para paginação AJAX
+// Funcoes para paginacao AJAX
 function attachAjaxPagination(container){
   container.querySelectorAll('a.ajax-page').forEach(function(link){
     link.addEventListener('click', function(e){
@@ -75,7 +160,7 @@ function attachSelectAll(){
   });
 }
 
-// Inicialização
+// Inicializacao
 document.addEventListener('DOMContentLoaded', function(){
   attachAjaxPagination(document.getElementById('search-results'));
   attachSelectAll();

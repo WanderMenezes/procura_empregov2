@@ -1,0 +1,20 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Pedidos de Contacto{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h4 class="mb-1">Pedidos de contacto</h4>
+      <p class="text-muted mb-0">Acompanhe os pedidos enviados aos jovens e o respetivo estado.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
+      <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
+    </div>
+  </div>
+  <div class="alert alert-info">Os pedidos ficam pendentes até aprovação do administrador.</div>
+  {% include 'companies/contact_request_list.html' %}
+</div>
+{% endblock %}

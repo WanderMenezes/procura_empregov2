@@ -3,13 +3,59 @@ Forms para perfis de jovens
 """
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from .models import YouthProfile, Education, Experience, Document, YouthSkill
-from core.models import Skill
+from core.models import Skill, District
 
 
 class YouthProfileStep1Form(forms.ModelForm):
     """Passo 1: Dados Pessoais"""
+
+    nome = forms.CharField(
+        label=_('Nome completo'),
+        max_length=255,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Seu nome completo')
+        })
+    )
+
+    telefone = forms.CharField(
+        label=_('Telemóvel'),
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Ex: +239 123 4567'),
+            'readonly': 'readonly'
+        })
+    )
+
+    email = forms.EmailField(
+        label=_('Email'),
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('email@exemplo.com')
+        })
+    )
+
+    contacto_alternativo = forms.CharField(
+        label=_('Contacto alternativo'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Ex: contacto de familiar, vizinho ou outro')
+        })
+    )
+
+    distrito = forms.ModelChoiceField(
+        label=_('Distrito'),
+        queryset=District.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label=_('Selecione...'),
+        required=True
+    )
     
     data_nascimento = forms.DateField(
         label=_('Data de nascimento'),
@@ -17,7 +63,7 @@ class YouthProfileStep1Form(forms.ModelForm):
             'class': 'form-control',
             'type': 'date'
         }),
-        required=False
+        required=True
     )
     
     sexo = forms.ChoiceField(
@@ -38,7 +84,7 @@ class YouthProfileStep1Form(forms.ModelForm):
     
     class Meta:
         model = YouthProfile
-        fields = ['data_nascimento', 'sexo', 'localidade']
+        fields = ['data_nascimento', 'sexo', 'localidade', 'contacto_alternativo']
 
 
 class YouthProfileStep2Form(forms.ModelForm):
@@ -107,15 +153,37 @@ class YouthProfileStep2Form(forms.ModelForm):
     
     # Skills (múltipla escolha)
     skills = forms.ModelMultipleChoiceField(
-        queryset=Skill.objects.all(),
+        queryset=Skill.objects.none(),
         label=_('Skills/Competências'),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
+
+    outra_skill_nome = forms.CharField(
+        label=_('Outra skill'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Escreve uma skill que não esteja na lista')
+        })
+    )
+
+    outra_skill_tipo = forms.ChoiceField(
+        choices=[('', _('Selecione...'))] + list(Skill.TIPO_CHOICES),
+        label=_('Tipo de skill'),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     
     class Meta:
         model = YouthProfile
-        fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills']
+        fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'outra_skill_nome', 'outra_skill_tipo']
+
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['skills'].queryset = Skill.objects.filter(aprovada=True).order_by('nome')
 
 
 class YouthProfileStep3Form(forms.ModelForm):
@@ -133,24 +201,10 @@ class YouthProfileStep3Form(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    interesse_setorial = forms.ChoiceField(
-        choices=[('', _('Selecione...'))] + list(forms.fields.ChoiceField(
-            choices=[
-                ('AGR', _('Agricultura')),
-                ('TUR', _('Turismo')),
-                ('TIC', _('Tecnologias de Informação')),
-                ('IND', _('Indústria')),
-                ('SER', _('Serviços')),
-                ('ENE', _('Energias Renováveis')),
-                ('ADM', _('Administração')),
-                ('SAU', _('Saúde')),
-                ('EDU', _('Educação')),
-                ('CON', _('Construção')),
-                ('OUT', _('Outro')),
-            ]
-        ).choices),
-        label=_('Setor de interesse'),
-        widget=forms.Select(attrs={'class': 'form-select'}),
+    interesse_setorial = forms.MultipleChoiceField(
+        choices=getattr(settings, 'AREAS_FORMACAO', []),
+        label=_('Setores de interesse'),
+        widget=forms.CheckboxSelectMultiple,
         required=False
     )
     
@@ -204,6 +258,30 @@ class YouthProfileStep3Form(forms.ModelForm):
         }),
         required=False
     )
+
+    exp_inicio = forms.DateField(
+        label=_('Data de início'),
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+
+    exp_fim = forms.DateField(
+        label=_('Data de fim'),
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+
+    exp_atual = forms.BooleanField(
+        label=_('Trabalho atual'),
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     
     class Meta:
         model = YouthProfile
@@ -211,6 +289,29 @@ class YouthProfileStep3Form(forms.ModelForm):
             'situacao_atual', 'disponibilidade', 'interesse_setorial',
             'preferencia_oportunidade', 'sobre'
         ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        tem_experiencia = cleaned_data.get('tem_experiencia')
+        if tem_experiencia:
+            exp_entidade = cleaned_data.get('exp_entidade')
+            exp_cargo = cleaned_data.get('exp_cargo')
+            exp_inicio = cleaned_data.get('exp_inicio')
+            exp_fim = cleaned_data.get('exp_fim')
+            exp_atual = cleaned_data.get('exp_atual')
+
+            if not exp_entidade:
+                self.add_error('exp_entidade', _('Indica a entidade/empresa.'))
+            if not exp_cargo:
+                self.add_error('exp_cargo', _('Indica o cargo/função.'))
+            if not exp_inicio:
+                self.add_error('exp_inicio', _('Indica a data de início.'))
+            if not exp_atual and not exp_fim:
+                self.add_error('exp_fim', _('Indica a data de fim ou marca como trabalho atual.'))
+            if exp_inicio and exp_fim and exp_fim < exp_inicio:
+                self.add_error('exp_fim', _('A data de fim deve ser igual ou posterior à data de início.'))
+
+        return cleaned_data
 
 
 class YouthProfileStep4Form(forms.ModelForm):
@@ -246,15 +347,65 @@ class YouthProfileStep4Form(forms.ModelForm):
     
     # Consentimentos
     visivel = forms.BooleanField(
-        label=_('Tornar o meu perfil visível para empresas'),
+        label=_('Autorizo a partilha do meu perfil com empresas'),
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         initial=True,
+        required=False
+    )
+
+    consentimento_sms = forms.BooleanField(
+        label=_('Autorizo contacto por SMS'),
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False
+    )
+
+    consentimento_whatsapp = forms.BooleanField(
+        label=_('Autorizo contacto por WhatsApp'),
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False
+    )
+
+    consentimento_email = forms.BooleanField(
+        label=_('Autorizo contacto por Email'),
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         required=False
     )
     
     class Meta:
         model = YouthProfile
-        fields = ['visivel']
+        fields = ['visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
+
+
+class YouthSkillsForm(forms.Form):
+    """Formulário para editar skills do jovem"""
+    skills = forms.ModelMultipleChoiceField(
+        queryset=Skill.objects.none(),
+        label=_('Skills/Competências'),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    outra_skill_nome = forms.CharField(
+        label=_('Outra skill'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Escreve uma skill que não esteja na lista')
+        })
+    )
+    outra_skill_tipo = forms.ChoiceField(
+        choices=[('', _('Selecione...'))] + list(Skill.TIPO_CHOICES),
+        label=_('Tipo de skill'),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    def __init__(self, *args, include_skill_ids=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = Skill.objects.filter(aprovada=True)
+        if include_skill_ids:
+            qs = qs | Skill.objects.filter(id__in=include_skill_ids)
+        self.fields['skills'].queryset = qs.distinct().order_by('nome')
+
 
 
 class AssistedRegistrationForm(forms.Form):
@@ -385,26 +536,37 @@ class AssistedRegistrationForm(forms.Form):
 
 class YouthProfileEditForm(forms.ModelForm):
     """Formulário para editar perfil do jovem"""
+
+    interesse_setorial = forms.MultipleChoiceField(
+        choices=getattr(settings, 'AREAS_FORMACAO', []),
+        label=_('Setores de interesse'),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
     
     class Meta:
         model = YouthProfile
         fields = [
-            'data_nascimento', 'sexo', 'localidade',
+            'data_nascimento', 'sexo', 'localidade', 'contacto_alternativo',
             'photo',
             'situacao_atual', 'disponibilidade',
             'interesse_setorial', 'preferencia_oportunidade',
-            'sobre', 'visivel'
+            'sobre', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email'
         ]
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'sexo': forms.Select(attrs={'class': 'form-select'}),
             'localidade': forms.TextInput(attrs={'class': 'form-control'}),
+            'contacto_alternativo': forms.TextInput(attrs={'class': 'form-control'}),
             'situacao_atual': forms.Select(attrs={'class': 'form-select'}),
             'disponibilidade': forms.Select(attrs={'class': 'form-select'}),
-            'interesse_setorial': forms.Select(attrs={'class': 'form-select'}),
+            'interesse_setorial': forms.CheckboxSelectMultiple,
             'preferencia_oportunidade': forms.Select(attrs={'class': 'form-select'}),
             'sobre': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'visivel': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'consentimento_sms': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'consentimento_whatsapp': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'consentimento_email': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'photo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'})
         }
 

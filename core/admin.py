@@ -15,10 +15,20 @@ class DistrictAdmin(admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'tipo', 'descricao']
-    list_filter = ['tipo']
+    list_display = ['nome', 'tipo', 'aprovada', 'descricao']
+    list_filter = ['tipo', 'aprovada']
     search_fields = ['nome']
     ordering = ['nome']
+
+    @admin.action(description='Aprovar skills selecionadas')
+    def aprovar_skills(self, request, queryset):
+        queryset.update(aprovada=True)
+
+    @admin.action(description='Despublicar skills selecionadas')
+    def despublicar_skills(self, request, queryset):
+        queryset.update(aprovada=False)
+
+    actions = ['aprovar_skills', 'despublicar_skills']
 
 
 @admin.register(AuditLog)

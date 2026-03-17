@@ -53,6 +53,10 @@
                                 <label class="form-label">Localidade</label>
                                 {{ form.localidade|add_class:'form-control' }}
                             </div>
+                            <div class="col-12">
+                                <label class="form-label">Contacto alternativo</label>
+                                {{ form.contacto_alternativo|add_class:'form-control' }}
+                            </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Situação Atual</label>
@@ -64,8 +68,10 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Setor de Interesse</label>
-                                {{ form.interesse_setorial|add_class:'form-select' }}
+                                <label class="form-label">Setores de Interesse</label>
+                                <div class="border rounded p-2">
+                                    {{ form.interesse_setorial }}
+                                </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Tipo de Oportunidade</label>
@@ -80,7 +86,22 @@
                             <div class="col-12">
                                 <div class="form-check">
                                     {{ form.visivel }}
-                                    <label class="form-check-label ms-2">Tornar visível para empresas</label>
+                                    <label class="form-check-label ms-2">Autorizar partilha do perfil com empresas</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Contactos permitidos</label>
+                                <div class="form-check">
+                                    {{ form.consentimento_sms }}
+                                    <label class="form-check-label ms-2">SMS</label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.consentimento_whatsapp }}
+                                    <label class="form-check-label ms-2">WhatsApp</label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.consentimento_email }}
+                                    <label class="form-check-label ms-2">Email</label>
                                 </div>
                             </div>
                         </div>

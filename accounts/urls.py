@@ -19,6 +19,7 @@ urlpatterns = [
     
     # Perfil
     path('perfil/', views.profile_view, name='profile'),
+    path('perfil/editar/', views.profile_edit, name='profile_edit'),
     path('notificacoes/', views.notifications_view, name='notifications'),
     path('notificacoes/<int:pk>/ler/', views.mark_notification_read, name='mark_notification_read'),
     path('confirmar-telemovel/', views.phone_confirm, name='phone_confirm'),

@@ -1,0 +1,92 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Skills{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Editar Skills</h4>
+            <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
+          </div>
+
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              Verifica os dados selecionados e tenta novamente.
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <h5 class="mb-3">Competências Técnicas</h5>
+            <div class="row">
+              {% for skill in skills %}
+                {% if skill.tipo == 'TEC' %}
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox"
+                             name="skills" value="{{ skill.id }}"
+                             id="skill_{{ skill.id }}"
+                             {% if skill.id in selected_skill_ids %}checked{% endif %}>
+                      <label class="form-check-label" for="skill_{{ skill.id }}">
+                        {{ skill.nome }}
+                      </label>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="mb-3">Competências Transversais</h5>
+            <div class="row">
+              {% for skill in skills %}
+                {% if skill.tipo == 'TRA' %}
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox"
+                             name="skills" value="{{ skill.id }}"
+                             id="skill_{{ skill.id }}"
+                             {% if skill.id in selected_skill_ids %}checked{% endif %}>
+                      <label class="form-check-label" for="skill_{{ skill.id }}">
+                        {{ skill.nome }}
+                      </label>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <hr class="my-4">
+            <h5 class="mb-3">Outra Skill</h5>
+            <div class="row">
+              <div class="col-md-8 mb-3">
+                <label for="id_outra_skill_nome" class="form-label">Indica uma skill que não está na lista</label>
+                <input type="text" name="outra_skill_nome" id="id_outra_skill_nome"
+                       class="form-control" value="{{ form.outra_skill_nome.value|default:'' }}">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="id_outra_skill_tipo" class="form-label">Tipo</label>
+                <select name="outra_skill_tipo" id="id_outra_skill_tipo" class="form-select">
+                  {% for value, label in form.fields.outra_skill_tipo.choices %}
+                    <option value="{{ value }}" {% if form.outra_skill_tipo.value == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="text-end mt-4">
+              <button class="btn btn-primary">Guardar Skills</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

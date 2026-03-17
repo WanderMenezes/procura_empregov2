@@ -8,7 +8,8 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 from django.urls import reverse_lazy
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponse
 import csv
 
@@ -73,13 +74,20 @@ def company_dashboard(request):
         return redirect('companies:complete_profile')
     
     company = request.user.company_profile
-    
+    total_visualizacoes = company.job_posts.aggregate(total=Sum('visualizacoes'))['total'] or 0
+    pedidos_recentes = company.contact_requests.select_related('youth', 'youth__user').order_by('-created_at')[:5]
+
     context = {
         'company': company,
         'vagas': company.job_posts.all()[:5],
-        'vagas_ativas': company.vagas_ativas,
-        'total_candidaturas': company.total_candidaturas,
-        'pedidos_contacto': company.contact_requests.filter(estado='PENDENTE').count(),
+        'pedidos': pedidos_recentes,
+        'stats': {
+            'vagas_ativas': company.vagas_ativas,
+            'total_vagas': company.total_vagas,
+            'candidaturas': company.total_candidaturas,
+            'visualizacoes': total_visualizacoes,
+            'pedidos_pendentes': company.contact_requests.filter(estado='PENDENTE').count(),
+        }
     }
     
     return render(request, 'companies/dashboard.html', context)
@@ -122,7 +130,7 @@ def job_list(request):
         'company': company
     }
     
-    return render(request, 'companies/job_list.html', context)
+    return render(request, 'companies/job_list_page.html', context)
 
 
 @login_required
@@ -225,7 +233,13 @@ def search_youth(request):
     form = YouthSearchForm(request.GET or None)
 
     # Lista inicial: últimos jovens visíveis e completos
-    base_qs = YouthProfile.objects.filter(visivel=True, completo=True).select_related('user').order_by('-created_at')
+    base_qs = (
+        YouthProfile.objects
+        .filter(visivel=True, completo=True)
+        .select_related('user')
+        .prefetch_related('youth_skills__skill', 'education', 'experiences')
+        .order_by('-created_at')
+    )
 
     results_qs = base_qs
 
@@ -348,6 +362,20 @@ def contact_request_create(request, youth_pk):
                 ),
                 tipo='INFO'
             )
+
+            # Notificar administradores
+            User = get_user_model()
+            admins = User.objects.filter(perfil=User.ProfileType.ADMIN, is_active=True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    titulo=_('Novo pedido de contacto'),
+                    mensagem=_('A empresa "%(empresa)s" solicitou contacto com %(jovem)s.') % {
+                        'empresa': request.user.company_profile.nome,
+                        'jovem': youth.user.nome
+                    },
+                    tipo='INFO'
+                )
             
             messages.success(request, _('Pedido de contacto enviado! Aguarda aprovação do administrador.'))
             return redirect('companies:youth_detail', pk=youth_pk)
@@ -412,6 +440,20 @@ def contact_request_bulk_create(request):
     if skipped:
         messages.warning(request, _('%(n)d jovem(s) ignorado(s) (já tinha pedido ou inválido).') % {'n': skipped})
 
+    if created:
+        User = get_user_model()
+        admins = User.objects.filter(perfil=User.ProfileType.ADMIN, is_active=True)
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                titulo=_('Novos pedidos de contacto'),
+                mensagem=_('A empresa "%(empresa)s" criou %(n)d pedido(s) de contacto.') % {
+                    'empresa': company.nome,
+                    'n': created
+                },
+                tipo='INFO'
+            )
+
     return redirect('companies:search_youth')
 
 
@@ -428,7 +470,7 @@ def contact_request_list(request):
         'pedidos': pedidos
     }
     
-    return render(request, 'companies/contact_request_list.html', context)
+    return render(request, 'companies/contact_request_page.html', context)
 
 
 # Exportação
@@ -463,7 +505,7 @@ def export_youth_csv(request):
             profile.get_disponibilidade_display(),
             educacao.get_nivel_display() if educacao else '',
             educacao.get_area_formacao_display() if educacao else '',
-            profile.get_interesse_setorial_display() if profile.interesse_setorial else '',
+            profile.interesses_setoriais_display,
             profile.get_preferencia_oportunidade_display(),
             'Sim' if profile.completo else 'Não',
             'Sim' if profile.validado else 'Não',

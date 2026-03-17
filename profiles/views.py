@@ -6,12 +6,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.views.generic import View, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db.models import Q
 from datetime import timedelta
 from django.conf import settings
+from django import forms as django_forms
 
 from accounts.sms import send_sms
 
@@ -19,7 +21,7 @@ from .models import YouthProfile, Education, Experience, Document, YouthSkill
 from .forms import (
     YouthProfileStep1Form, YouthProfileStep2Form,
     YouthProfileStep3Form, YouthProfileStep4Form,
-    AssistedRegistrationForm, YouthProfileEditForm,
+    AssistedRegistrationForm, YouthProfileEditForm, YouthSkillsForm,
     EducationForm, ExperienceForm, DocumentForm
 )
 from core.models import District, Skill, Notification
@@ -29,6 +31,19 @@ from accounts.models import PhoneChange
 from accounts.forms import UserProfileForm
 
 
+def get_or_create_skill_by_name(nome, tipo):
+    nome = (nome or '').strip()
+    if not nome:
+        return None
+    existing = Skill.objects.filter(nome__iexact=nome).first()
+    if existing:
+        return existing
+    valid_tipos = {choice[0] for choice in Skill.TIPO_CHOICES}
+    if tipo not in valid_tipos:
+        tipo = 'TEC'
+    return Skill.objects.create(nome=nome, tipo=tipo, aprovada=False)
+
+
 def compute_profile_step_progress(profile: YouthProfile) -> dict:
     """Compute per-step filled/total counts for an existing profile instance.
 
@@ -36,10 +51,10 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
     """
     # expected fields per step (mirror wizard)
     expected = {
-        '1': ['data_nascimento', 'sexo', 'localidade'],
+        '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
         '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
         '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
-        '4': ['cv', 'certificado', 'bi', 'visivel']
+        '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
     }
 
     result = {}
@@ -55,12 +70,22 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
         for f in fields:
             val = None
             if step == '1':
-                if f == 'data_nascimento':
+                if f == 'nome':
+                    val = getattr(profile.user, 'nome', '')
+                elif f == 'telefone':
+                    val = getattr(profile.user, 'telefone', '')
+                elif f == 'email':
+                    val = getattr(profile.user, 'email', '')
+                elif f == 'distrito':
+                    val = getattr(profile.user, 'distrito', None)
+                elif f == 'data_nascimento':
                     val = getattr(profile, 'data_nascimento', None)
                 elif f == 'sexo':
                     val = getattr(profile, 'sexo', '')
                 elif f == 'localidade':
                     val = getattr(profile, 'localidade', '')
+                elif f == 'contacto_alternativo':
+                    val = getattr(profile, 'contacto_alternativo', '')
             elif step == '2':
                 if f == 'skills':
                     val = skills_qs.exists()
@@ -80,6 +105,12 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
                     val = docs.filter(tipo='BI').exists()
                 elif f == 'visivel':
                     val = getattr(profile, 'visivel', False)
+                elif f == 'consentimento_sms':
+                    val = getattr(profile, 'consentimento_sms', False)
+                elif f == 'consentimento_whatsapp':
+                    val = getattr(profile, 'consentimento_whatsapp', False)
+                elif f == 'consentimento_email':
+                    val = getattr(profile, 'consentimento_email', False)
 
             if isinstance(val, bool):
                 if val:
@@ -116,12 +147,27 @@ class ProfileWizardView(View):
         if step < 1 or step > 4:
             step = 1
         
-        form = self.get_form_for_step(step)
-        
-        # Carregar dados salvos do wizard
+        # Carregar dados salvos do wizard + defaults do utilizador
         wizard_data = request.session.get('wizard_data', {})
+        initial = {}
+        if step == 1:
+            initial = {
+                'nome': request.user.nome,
+                'telefone': request.user.telefone,
+                'email': request.user.email,
+                'distrito': request.user.distrito_id,
+            }
+        elif step == 4:
+            initial = {
+                'visivel': request.user.consentimento_dados,
+                'consentimento_sms': request.user.consentimento_contacto,
+                'consentimento_whatsapp': request.user.consentimento_contacto,
+                'consentimento_email': request.user.consentimento_contacto,
+            }
         if str(step) in wizard_data:
-            form = self.get_form_for_step(step, initial=wizard_data[str(step)])
+            initial.update(wizard_data[str(step)])
+
+        form = self.get_form_for_step(step, initial=initial if initial else None)
         
         # calcular progresso real com base nos dados guardados na sessão
         wizard_data = request.session.get('wizard_data', {})
@@ -146,7 +192,24 @@ class ProfileWizardView(View):
         
         step = int(step)
         form = self.get_form_for_step(step, data=request.POST, files=request.FILES)
-        
+
+        is_autosave = 'autosave' in request.POST
+        if is_autosave:
+            wizard_data = request.session.get('wizard_data', {})
+            if form.is_valid():
+                wizard_data[str(step)] = self.get_form_data(form)
+            else:
+                wizard_data[str(step)] = self.get_raw_form_data(form, request)
+            request.session['wizard_data'] = wizard_data
+            progress = self.compute_progress(wizard_data)
+            step_stats = self.compute_step_progress(wizard_data).get(str(step), {'filled': 0, 'total': 0})
+            return JsonResponse({
+                'saved': True,
+                'progress': progress,
+                'step_filled': step_stats['filled'],
+                'step_total': step_stats['total']
+            })
+
         if form.is_valid():
             # Salvar dados na sessão
             wizard_data = request.session.get('wizard_data', {})
@@ -204,37 +267,123 @@ class ProfileWizardView(View):
             value = form.cleaned_data.get(field_name)
             if value is not None:
                 # Converter objetos para IDs serializáveis
-                if hasattr(value, 'pk'):
+                if isinstance(value, (list, tuple)):
+                    data[field_name] = list(value)
+                elif hasattr(value, 'pk'):
                     data[field_name] = value.pk
                 elif hasattr(value, 'all'):  # ManyToMany
                     data[field_name] = [item.pk for item in value.all()]
                 else:
                     data[field_name] = str(value) if value else ''
         return data
+
+    def get_raw_form_data(self, form, request):
+        """Extrai dados brutos do POST para autosave, mesmo com validação incompleta."""
+        data = {}
+        for field_name, field in form.fields.items():
+            if field_name in request.FILES:
+                continue
+            if isinstance(field, (django_forms.ModelMultipleChoiceField, django_forms.MultipleChoiceField)):
+                data[field_name] = request.POST.getlist(field_name)
+            elif isinstance(field, django_forms.BooleanField):
+                data[field_name] = 'on' if field_name in request.POST else ''
+            else:
+                data[field_name] = request.POST.get(field_name, '')
+        return data
+
+    def _to_bool(self, value):
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, int):
+            return value == 1
+        return str(value).lower() in ('1', 'true', 'sim', 'yes', 'on')
+
+    def compute_progress(self, wizard_data: dict) -> int:
+        """Calcular percentagem de conclusão com base nos campos preenchidos no wizard."""
+        step_map = self.compute_step_progress(wizard_data)
+        total = sum(s.get('total', 0) for s in step_map.values())
+        filled = sum(s.get('filled', 0) for s in step_map.values())
+
+        if total == 0:
+            return 0
+        return int((filled / total) * 100)
+
+    def compute_step_progress(self, wizard_data: dict) -> dict:
+        """Return a dict mapping step -> {'filled': int, 'total': int} based on expected fields."""
+        expected = {
+            '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
+            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
+            '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
+            '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
+        }
+
+        result = {}
+        for step, fields in expected.items():
+            total = len(fields)
+            filled = 0
+            step_data = wizard_data.get(step, {})
+            for f in fields:
+                val = step_data.get(f)
+                if isinstance(val, list):
+                    if len(val) > 0:
+                        filled += 1
+                elif val not in (None, '', False):
+                    filled += 1
+            result[step] = {'filled': filled, 'total': total}
+        return result
     
     def submit_profile(self, request):
         """Cria o perfil completo do jovem"""
         wizard_data = request.session.get('wizard_data', {})
         
         try:
+            step1 = wizard_data.get('1', {})
+            step2 = wizard_data.get('2', {})
+            step3 = wizard_data.get('3', {})
+            step4 = wizard_data.get('4', {})
+
+            visivel = self._to_bool(step4.get('visivel', True))
+            consentimento_sms = self._to_bool(step4.get('consentimento_sms'))
+            consentimento_whatsapp = self._to_bool(step4.get('consentimento_whatsapp'))
+            consentimento_email = self._to_bool(step4.get('consentimento_email'))
+
+            # Atualizar dados do utilizador
+            user = request.user
+            if step1.get('nome'):
+                user.nome = step1.get('nome')
+            if 'email' in step1:
+                user.email = step1.get('email') or ''
+            if 'distrito' in step1:
+                user.distrito_id = step1.get('distrito') or None
+            user.consentimento_dados = visivel
+            user.consentimento_contacto = consentimento_sms or consentimento_whatsapp or consentimento_email
+            if user.consentimento_dados or user.consentimento_contacto:
+                user.data_consentimento = timezone.now()
+            user.save()
+
             # Criar perfil base
             profile = YouthProfile.objects.create(
-                user=request.user,
-                data_nascimento=wizard_data.get('1', {}).get('data_nascimento'),
-                sexo=wizard_data.get('1', {}).get('sexo'),
-                localidade=wizard_data.get('1', {}).get('localidade'),
-                situacao_atual=wizard_data.get('3', {}).get('situacao_atual', 'DES'),
-                disponibilidade=wizard_data.get('3', {}).get('disponibilidade', 'SIM'),
-                interesse_setorial=wizard_data.get('3', {}).get('interesse_setorial'),
-                preferencia_oportunidade=wizard_data.get('3', {}).get('preferencia_oportunidade', 'EMP'),
-                sobre=wizard_data.get('3', {}).get('sobre', ''),
-                visivel=wizard_data.get('4', {}).get('visivel', True),
+                user=user,
+                data_nascimento=step1.get('data_nascimento'),
+                sexo=step1.get('sexo'),
+                localidade=step1.get('localidade'),
+                contacto_alternativo=step1.get('contacto_alternativo', ''),
+                situacao_atual=step3.get('situacao_atual', 'DES'),
+                disponibilidade=step3.get('disponibilidade', 'SIM'),
+                interesse_setorial=step3.get('interesse_setorial'),
+                preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
+                sobre=step3.get('sobre', ''),
+                visivel=visivel,
+                consentimento_sms=consentimento_sms,
+                consentimento_whatsapp=consentimento_whatsapp,
+                consentimento_email=consentimento_email,
                 completo=True,
                 wizard_step=4
             )
             
             # Adicionar educação
-            step2 = wizard_data.get('2', {})
             if step2.get('nivel') and step2.get('instituicao'):
                 Education.objects.create(
                     profile=profile,
@@ -254,27 +403,48 @@ class ProfileWizardView(View):
                         YouthSkill.objects.create(profile=profile, skill=skill, nivel=1)
                     except Skill.DoesNotExist:
                         pass
+
+            outra_skill_nome = step2.get('outra_skill_nome', '')
+            outra_skill_tipo = step2.get('outra_skill_tipo')
+            nova_skill = get_or_create_skill_by_name(outra_skill_nome, outra_skill_tipo)
+            if nova_skill:
+                YouthSkill.objects.get_or_create(profile=profile, skill=nova_skill, defaults={'nivel': 1})
             
             # Adicionar experiência (se fornecida)
-            step3 = wizard_data.get('3', {})
-            if step3.get('tem_experiencia') and step3.get('exp_entidade'):
+            if self._to_bool(step3.get('tem_experiencia')) and step3.get('exp_entidade') and step3.get('exp_inicio'):
+                exp_atual = self._to_bool(step3.get('exp_atual'))
+                exp_fim = step3.get('exp_fim') if not exp_atual else None
                 Experience.objects.create(
                     profile=profile,
                     entidade=step3['exp_entidade'],
                     cargo=step3.get('exp_cargo', ''),
                     descricao=step3.get('exp_descricao', ''),
-                    inicio='2020-01-01',  # Simplificado
-                    atual=True
+                    inicio=step3.get('exp_inicio'),
+                    fim=exp_fim,
+                    atual=exp_atual
                 )
             
             # Processar documentos
-            step4 = wizard_data.get('4', {})
             if 'cv' in request.FILES:
                 Document.objects.create(
                     profile=profile,
                     tipo='CV',
                     nome='Curriculum Vitae',
                     arquivo=request.FILES['cv']
+                )
+            if 'certificado' in request.FILES:
+                Document.objects.create(
+                    profile=profile,
+                    tipo='CERT',
+                    nome='Certificado',
+                    arquivo=request.FILES['certificado']
+                )
+            if 'bi' in request.FILES:
+                Document.objects.create(
+                    profile=profile,
+                    tipo='BI',
+                    nome='Bilhete de Identidade',
+                    arquivo=request.FILES['bi']
                 )
             
             # Limpar sessão
@@ -349,6 +519,14 @@ def profile_edit(request):
             user.nome = user_form.cleaned_data.get('nome')
             user.email = user_form.cleaned_data.get('email')
             user.distrito = user_form.cleaned_data.get('distrito')
+
+            consent_sms = profile_form.cleaned_data.get('consentimento_sms')
+            consent_whatsapp = profile_form.cleaned_data.get('consentimento_whatsapp')
+            consent_email = profile_form.cleaned_data.get('consentimento_email')
+            user.consentimento_dados = profile_form.cleaned_data.get('visivel', user.consentimento_dados)
+            user.consentimento_contacto = bool(consent_sms or consent_whatsapp or consent_email)
+            if user.consentimento_dados or user.consentimento_contacto:
+                user.data_consentimento = timezone.now()
 
             if new_phone and new_phone != user.telefone:
                 from accounts.models import PhoneChange
@@ -483,6 +661,61 @@ def document_delete(request, pk):
     return redirect('profiles:detail')
 
 
+@login_required
+def skills_edit(request):
+    """Editar skills do jovem"""
+    if not request.user.is_jovem:
+        messages.error(request, _('Apenas jovens têm este tipo de perfil.'))
+        return redirect('home')
+
+    if not request.user.has_youth_profile():
+        return redirect('profiles:wizard')
+
+    profile = request.user.youth_profile
+    existing_ids = list(profile.youth_skills.values_list('skill_id', flat=True))
+    skills_qs = Skill.objects.filter(aprovada=True)
+    if existing_ids:
+        skills_qs = skills_qs | Skill.objects.filter(id__in=existing_ids)
+    skills_qs = skills_qs.distinct().order_by('nome')
+
+    if request.method == 'POST':
+        form = YouthSkillsForm(request.POST, include_skill_ids=existing_ids)
+        if form.is_valid():
+            selected_ids = list(form.cleaned_data['skills'].values_list('id', flat=True))
+            selected_set = set(selected_ids)
+            outra_skill_nome = form.cleaned_data.get('outra_skill_nome', '')
+            outra_skill_tipo = form.cleaned_data.get('outra_skill_tipo')
+            nova_skill = get_or_create_skill_by_name(outra_skill_nome, outra_skill_tipo)
+            if nova_skill:
+                selected_set.add(nova_skill.id)
+            existing_set = set(existing_ids)
+
+            to_add = selected_set - existing_set
+            to_remove = existing_set - selected_set
+
+            if to_add:
+                YouthSkill.objects.bulk_create([
+                    YouthSkill(profile=profile, skill_id=skill_id, nivel=1)
+                    for skill_id in to_add
+                ])
+            if to_remove:
+                YouthSkill.objects.filter(profile=profile, skill_id__in=to_remove).delete()
+
+            messages.success(request, _('Skills atualizadas com sucesso!'))
+            return redirect('profiles:detail')
+        selected_skill_ids = [int(s) for s in request.POST.getlist('skills') if s.isdigit()]
+    else:
+        form = YouthSkillsForm(initial={'skills': existing_ids}, include_skill_ids=existing_ids)
+        selected_skill_ids = existing_ids
+
+    context = {
+        'form': form,
+        'skills': skills_qs,
+        'selected_skill_ids': selected_skill_ids
+    }
+    return render(request, 'profiles/skills_form.html', context)
+
+
 # Registo Assistido (Operador Distrital)
 @login_required
 def assisted_register(request):
@@ -522,6 +755,9 @@ def assisted_register(request):
                 situacao_atual=data['situacao_atual'],
                 disponibilidade=data['disponibilidade'],
                 preferencia_oportunidade=data['preferencia_oportunidade'],
+                consentimento_sms=True,
+                consentimento_whatsapp=True,
+                consentimento_email=True,
                 completo=True,
                 validado=False  # Aguarda validação do admin
             )
@@ -589,50 +825,3 @@ def search_youth(request):
         })
     
     return JsonResponse({'results': results})
-
-    def compute_progress(self, wizard_data: dict) -> int:
-        """Calcular percentagem de conclusão com base nos campos preenchidos no wizard.
-
-        Usa um conjunto simples de campos esperados por passo e conta quantos estão preenchidos.
-        Retorna um inteiro entre 0 e 100.
-        """
-        # definir campos esperados por passo
-        expected = {
-            '1': ['data_nascimento', 'sexo', 'localidade'],
-            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
-            '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
-            '4': ['cv', 'certificado', 'bi', 'visivel']
-        }
-
-        # use per-step computation to derive overall progress
-        step_map = self.compute_step_progress(wizard_data)
-        total = sum(s.get('total', 0) for s in step_map.values())
-        filled = sum(s.get('filled', 0) for s in step_map.values())
-
-        if total == 0:
-            return 0
-        return int((filled / total) * 100)
-
-    def compute_step_progress(self, wizard_data: dict) -> dict:
-        """Return a dict mapping step -> {'filled': int, 'total': int} based on expected fields."""
-        expected = {
-            '1': ['data_nascimento', 'sexo', 'localidade'],
-            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
-            '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
-            '4': ['cv', 'certificado', 'bi', 'visivel']
-        }
-
-        result = {}
-        for step, fields in expected.items():
-            total = len(fields)
-            filled = 0
-            step_data = wizard_data.get(step, {})
-            for f in fields:
-                val = step_data.get(f)
-                if isinstance(val, list):
-                    if len(val) > 0:
-                        filled += 1
-                elif val not in (None, '', False):
-                    filled += 1
-            result[step] = {'filled': filled, 'total': total}
-        return result

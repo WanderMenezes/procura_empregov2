@@ -1,0 +1,94 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Relatorios - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-2 mb-4">
+            <div class="list-group">
+                <a href="{% url 'dashboard:admin' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'dashboard:user_list' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people me-2"></i>Utilizadores
+                </a>
+                <a href="{% url 'dashboard:validate_profiles' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-check-circle me-2"></i>Validar Perfis
+                </a>
+                <a href="{% url 'dashboard:manage_contact_requests' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-envelope me-2"></i>Pedidos Contacto
+                </a>
+                <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-graph-up me-2"></i>Relatorios
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0"><i class="bi bi-graph-up me-2"></i>Relatorios</h2>
+                <a href="{% url 'dashboard:export_report_csv' %}" class="btn btn-outline-primary">
+                    Exportar CSV
+                </a>
+            </div>
+
+            <form method="get" class="card card-body mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label">Periodo (meses)</label>
+                        <select name="meses" class="form-select">
+                            <option value="3" {% if meses == 3 %}selected{% endif %}>Ultimos 3 meses</option>
+                            <option value="6" {% if meses == 6 %}selected{% endif %}>Ultimos 6 meses</option>
+                            <option value="12" {% if meses == 12 %}selected{% endif %}>Ultimos 12 meses</option>
+                            <option value="24" {% if meses == 24 %}selected{% endif %}>Ultimos 24 meses</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary w-100">Atualizar</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Novos Jovens</h6>
+                            <h3 class="mb-0">{{ jovens_novos }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Novas Empresas</h6>
+                            <h3 class="mb-0">{{ empresas_novas }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Novas Vagas</h6>
+                            <h3 class="mb-0">{{ vagas_novas }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Novas Candidaturas</h6>
+                            <h3 class="mb-0">{{ candidaturas_novas }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                Relatorio a partir de {{ data_inicio|date:"d/m/Y" }}.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

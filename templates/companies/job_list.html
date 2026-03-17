@@ -1,9 +1,35 @@
 {% comment %} Partial: lista de vagas usada em dashboards e listagens {% endcomment %}
 
-{% if jobs %}
+{% if vagas %}
   <div class="list-group">
-    {% for job in jobs %}
-      <a class="list-group-item list-group-item-action" href="{% url 'companies:job_detail' job.id %}">{{ job.titulo }}</a>
+    {% for vaga in vagas %}
+      <div class="list-group-item">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+          <div>
+            <div class="fw-semibold d-flex flex-wrap align-items-center gap-2">
+              <span>{{ vaga.titulo }}</span>
+              <span class="badge bg-light text-dark border">{{ vaga.get_tipo_display }}</span>
+              <span class="badge {% if vaga.estado == 'ATIVA' %}bg-success{% elif vaga.estado == 'PAUSADA' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {{ vaga.get_estado_display }}
+              </span>
+            </div>
+            <div class="small text-muted mt-1">
+              {% if vaga.data_publicacao %}Publicada em {{ vaga.data_publicacao|date:"d/m/Y" }}{% endif %}
+              {% if vaga.total_candidaturas %} • Candidaturas: {{ vaga.total_candidaturas }}{% else %} • Candidaturas: 0{% endif %}
+              • Visualizações: {{ vaga.visualizacoes|default:0 }}
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'companies:job_applications' vaga.id %}">
+              Candidaturas{% if vaga.total_candidaturas %} ({{ vaga.total_candidaturas }}){% endif %}
+            </a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'companies:job_edit' vaga.id %}">Editar</a>
+            {% if vaga.estado == 'ATIVA' %}
+              <a class="btn btn-outline-danger btn-sm" href="{% url 'companies:job_close' vaga.id %}" onclick="return confirm('Fechar esta vaga?');">Fechar</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     {% endfor %}
   </div>
 {% else %}

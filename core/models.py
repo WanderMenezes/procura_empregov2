@@ -32,6 +32,7 @@ class Skill(models.Model):
     
     nome = models.CharField(_('nome'), max_length=100)
     tipo = models.CharField(_('tipo'), max_length=3, choices=TIPO_CHOICES, default='TEC')
+    aprovada = models.BooleanField(_('aprovada'), default=False)
     descricao = models.TextField(_('descrição'), blank=True)
     
     class Meta:

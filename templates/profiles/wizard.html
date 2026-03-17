@@ -15,15 +15,15 @@
                     
                     <!-- Progress Bar -->
                     <div class="progress mb-2">
-                        <div class="progress-bar" role="progressbar" 
+                        <div id="wizard-progress" class="progress-bar" role="progressbar" 
                              style="width: {{ progress }}%" 
                              aria-valuenow="{{ progress }}" 
                              aria-valuemin="0" 
                              aria-valuemax="100">
-                            <span class="fw-bold">{{ progress }}%</span>
+                            <span id="wizard-progress-label" class="fw-bold">{{ progress }}%</span>
                         </div>
                     </div>
-                    <div class="text-end small text-muted mb-3">{{ progress }}% completo</div>
+                    <div id="wizard-progress-text" class="text-end small text-muted mb-3">{{ progress }}% completo</div>
                     
                     <!-- Step Indicators -->
                     <div class="step-indicator mb-4">
@@ -64,27 +64,72 @@
                         
                         <!-- Step 1: Dados Pessoais -->
                         {% if step == 1 %}
+                            <h5 class="mb-3">Identificação</h5>
                             <div class="mb-3">
-                                <label for="id_data_nascimento" class="form-label">Data de Nascimento</label>
-                                <input type="date" name="data_nascimento" id="id_data_nascimento" 
-                                       class="form-control" value="{{ form.data_nascimento.value|default:'' }}">
+                                <label for="id_nome" class="form-label">Nome completo *</label>
+                                <input type="text" name="nome" id="id_nome" 
+                                       class="form-control" value="{{ form.nome.value|default:'' }}" required>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_sexo" class="form-label">Sexo</label>
-                                <select name="sexo" id="id_sexo" class="form-select">
-                                    <option value="">Selecione...</option>
-                                    {% for value, label in form.fields.sexo.choices %}
-                                        <option value="{{ value }}" {% if form.sexo.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_data_nascimento" class="form-label">Data de Nascimento *</label>
+                                    <input type="date" name="data_nascimento" id="id_data_nascimento" 
+                                           class="form-control" value="{{ form.data_nascimento.value|default:'' }}" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_idade" class="form-label">Idade</label>
+                                    <input type="text" id="id_idade" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_sexo" class="form-label">Sexo</label>
+                                    <select name="sexo" id="id_sexo" class="form-select">
+                                        <option value="">Selecione...</option>
+                                        {% for value, label in form.fields.sexo.choices %}
+                                            <option value="{{ value }}" {% if form.sexo.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            
+
+                            <hr class="my-4">
+                            <h5 class="mb-3">Contactos</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_telefone" class="form-label">Telemóvel *</label>
+                                    <input type="text" name="telefone" id="id_telefone" 
+                                           class="form-control" value="{{ form.telefone.value|default:'' }}" readonly>
+                                    <div class="form-text">Usado para login e contacto.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_email" class="form-label">Email</label>
+                                    <input type="email" name="email" id="id_email" 
+                                           class="form-control" value="{{ form.email.value|default:'' }}">
+                                </div>
+                            </div>
                             <div class="mb-3">
-                                <label for="id_localidade" class="form-label">Localidade</label>
-                                <input type="text" name="localidade" id="id_localidade" 
-                                       class="form-control" placeholder="Sua localidade"
-                                       value="{{ form.localidade.value|default:'' }}">
+                                <label for="id_contacto_alternativo" class="form-label">Contacto alternativo</label>
+                                <input type="text" name="contacto_alternativo" id="id_contacto_alternativo" 
+                                       class="form-control" value="{{ form.contacto_alternativo.value|default:'' }}">
+                                <div class="form-text">Opcional, caso o teu telemóvel esteja indisponível.</div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="mb-3">Localização</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_distrito" class="form-label">Distrito *</label>
+                                    <select name="distrito" id="id_distrito" class="form-select" required>
+                                        {% for value, label in form.fields.distrito.choices %}
+                                            <option value="{{ value }}" {% if form.distrito.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_localidade" class="form-label">Localidade</label>
+                                    <input type="text" name="localidade" id="id_localidade" 
+                                           class="form-control" placeholder="Sua localidade"
+                                           value="{{ form.localidade.value|default:'' }}">
+                                </div>
                             </div>
                         {% endif %}
                         
@@ -134,24 +179,64 @@
                             </div>
                             
                             <hr class="my-4">
-                            <h5 class="mb-3">Skills</h5>
-                            
+                            <h5 class="mb-3">Competências Técnicas</h5>
                             <div class="mb-3">
-                                <label class="form-label">Seleciona as tuas skills</label>
                                 <div class="row">
                                     {% for skill in form.fields.skills.queryset %}
-                                        <div class="col-md-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" 
-                                                       name="skills" value="{{ skill.id }}" 
-                                                       id="skill_{{ skill.id }}"
-                                                       {% if skill.id in form.skills.value %}checked{% endif %}>
-                                                <label class="form-check-label" for="skill_{{ skill.id }}">
-                                                    {{ skill.nome }}
-                                                </label>
+                                        {% if skill.tipo == 'TEC' %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                           name="skills" value="{{ skill.id }}" 
+                                                           id="skill_{{ skill.id }}"
+                                                           {% if skill.id in form.skills.value or skill.id|stringformat:"s" in form.skills.value %}checked{% endif %}>
+                                                    <label class="form-check-label" for="skill_{{ skill.id }}">
+                                                        {{ skill.nome }}
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                     {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <h5 class="mb-3">Competências Transversais</h5>
+                            <div class="mb-3">
+                                <div class="row">
+                                    {% for skill in form.fields.skills.queryset %}
+                                        {% if skill.tipo == 'TRA' %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                           name="skills" value="{{ skill.id }}" 
+                                                           id="skill_{{ skill.id }}"
+                                                           {% if skill.id in form.skills.value or skill.id|stringformat:"s" in form.skills.value %}checked{% endif %}>
+                                                    <label class="form-check-label" for="skill_{{ skill.id }}">
+                                                        {{ skill.nome }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">Podes selecionar mais do que uma competência.</div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="mb-3">Outra Skill</h5>
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="id_outra_skill_nome" class="form-label">Indica uma skill que não está na lista</label>
+                                    <input type="text" name="outra_skill_nome" id="id_outra_skill_nome"
+                                           class="form-control" value="{{ form.outra_skill_nome.value|default:'' }}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_outra_skill_tipo" class="form-label">Tipo</label>
+                                    <select name="outra_skill_tipo" id="id_outra_skill_tipo" class="form-select">
+                                        {% for value, label in form.fields.outra_skill_tipo.choices %}
+                                            <option value="{{ value }}" {% if form.outra_skill_tipo.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
                         {% endif %}
@@ -177,13 +262,23 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label for="id_interesse_setorial" class="form-label">Setor de Interesse</label>
-                                <select name="interesse_setorial" id="id_interesse_setorial" class="form-select">
-                                    <option value="">Selecione...</option>
+                                <label class="form-label">Setores de Interesse</label>
+                                <div class="row">
                                     {% for value, label in form.fields.interesse_setorial.choices %}
-                                        <option value="{{ value }}" {% if form.interesse_setorial.value == value %}selected{% endif %}>{{ label }}</option>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="interesse_setorial" value="{{ value }}"
+                                                       id="interesse_{{ forloop.counter }}"
+                                                       {% if form.interesse_setorial.value and value in form.interesse_setorial.value %}checked{% endif %}>
+                                                <label class="form-check-label" for="interesse_{{ forloop.counter }}">
+                                                    {{ label }}
+                                                </label>
+                                            </div>
+                                        </div>
                                     {% endfor %}
-                                </select>
+                                </div>
+                                <div class="form-text">Podes selecionar mais do que um setor.</div>
                             </div>
                             
                             <div class="mb-3">
@@ -227,6 +322,30 @@
                                            class="form-control" placeholder="Seu cargo"
                                            value="{{ form.exp_cargo.value|default:'' }}">
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_exp_inicio" class="form-label">Data de Início</label>
+                                        <input type="date" name="exp_inicio" id="id_exp_inicio" 
+                                               class="form-control"
+                                               value="{{ form.exp_inicio.value|default:'' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3" id="exp_fim_wrap">
+                                        <label for="id_exp_fim" class="form-label">Data de Fim</label>
+                                        <input type="date" name="exp_fim" id="id_exp_fim" 
+                                               class="form-control"
+                                               value="{{ form.exp_fim.value|default:'' }}">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="exp_atual" id="id_exp_atual"
+                                           {% if form.exp_atual.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_exp_atual">
+                                        Trabalho atual
+                                    </label>
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label for="id_exp_descricao" class="form-label">Descrição das Atividades</label>
@@ -257,24 +376,51 @@
                             </div>
                             
                             <hr class="my-4">
-                            <h5 class="mb-3">Visibilidade do Perfil</h5>
+                            <h5 class="mb-3">Consentimentos</h5>
                             
                             <div class="mb-3 form-check">
                                 <input class="form-check-input" type="checkbox" 
-                                       name="visivel" id="id_visivel" checked>
+                                       name="visivel" id="id_visivel"
+                                       {% if form.visivel.value %}checked{% endif %}>
                                 <label class="form-check-label" for="id_visivel">
-                                    Tornar o meu perfil visível para empresas
+                                    Autorizo a partilha do meu perfil com empresas
                                 </label>
                                 <div class="form-text">
                                     Se desmarcares, as empresas não poderão encontrar o teu perfil nas pesquisas.
                                 </div>
                             </div>
+
+                            <div class="mb-2">Contactos permitidos</div>
+                            <div class="mb-2 form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="consentimento_sms" id="id_consentimento_sms"
+                                       {% if form.consentimento_sms.value %}checked{% endif %}>
+                                <label class="form-check-label" for="id_consentimento_sms">
+                                    Autorizo contacto por SMS
+                                </label>
+                            </div>
+                            <div class="mb-2 form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="consentimento_whatsapp" id="id_consentimento_whatsapp"
+                                       {% if form.consentimento_whatsapp.value %}checked{% endif %}>
+                                <label class="form-check-label" for="id_consentimento_whatsapp">
+                                    Autorizo contacto por WhatsApp
+                                </label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="consentimento_email" id="id_consentimento_email"
+                                       {% if form.consentimento_email.value %}checked{% endif %}>
+                                <label class="form-check-label" for="id_consentimento_email">
+                                    Autorizo contacto por Email
+                                </label>
+                            </div>
+                            <div class="form-text">Podes alterar estas preferências mais tarde no teu perfil.</div>
                             
-                            <div class="alert alert-info">
+                            <div class="alert alert-info mt-3">
                                 <i class="bi bi-info-circle me-2"></i>
                                 <strong>Importante:</strong> Ao submeteres o teu perfil, confirmas que as informações 
-                                fornecidas são verdadeiras e autorizas a partilha dos teus dados com empresas 
-                                para fins de recrutamento.
+                                fornecidas são verdadeiras.
                             </div>
                         {% endif %}
                         
@@ -312,15 +458,104 @@
 </div>
 
 <script>
-// Toggle experiencia fields
-document.getElementById('id_tem_experiencia')?.addEventListener('change', function() {
-    const fields = document.getElementById('experiencia_fields');
-    fields.style.display = this.checked ? 'block' : 'none';
-});
+const expToggle = document.getElementById('id_tem_experiencia');
+const expFields = document.getElementById('experiencia_fields');
+const expAtual = document.getElementById('id_exp_atual');
+const expFimWrap = document.getElementById('exp_fim_wrap');
 
-// Initialize on load
-if (document.getElementById('id_tem_experiencia')?.checked) {
-    document.getElementById('experiencia_fields').style.display = 'block';
-}
+const toggleExperiencia = () => {
+    if (!expFields || !expToggle) return;
+    expFields.style.display = expToggle.checked ? 'block' : 'none';
+};
+
+const toggleExpFim = () => {
+    if (!expFimWrap || !expAtual) return;
+    expFimWrap.style.display = expAtual.checked ? 'none' : 'block';
+};
+
+expToggle?.addEventListener('change', toggleExperiencia);
+expAtual?.addEventListener('change', toggleExpFim);
+toggleExperiencia();
+toggleExpFim();
+
+const dobInput = document.getElementById('id_data_nascimento');
+const ageInput = document.getElementById('id_idade');
+const updateAge = () => {
+    if (!dobInput || !ageInput) return;
+    if (!dobInput.value) {
+        ageInput.value = '';
+        return;
+    }
+    const dob = new Date(dobInput.value);
+    if (Number.isNaN(dob.getTime())) {
+        ageInput.value = '';
+        return;
+    }
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age -= 1;
+    }
+    ageInput.value = age >= 0 ? age : '';
+};
+
+dobInput?.addEventListener('change', updateAge);
+updateAge();
+
+const formEl = document.querySelector('form');
+let autosaveTimer;
+let submitting = false;
+
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+};
+
+const scheduleAutosave = () => {
+    if (!formEl || submitting) return;
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(doAutosave, 1200);
+};
+
+const doAutosave = () => {
+    if (!formEl || submitting) return;
+    const formData = new FormData(formEl);
+    formData.append('autosave', '1');
+    formEl.querySelectorAll('input[type="file"]').forEach((input) => {
+        if (input.name) formData.delete(input.name);
+    });
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (!data || typeof data.progress !== 'number') return;
+            const bar = document.getElementById('wizard-progress');
+            const label = document.getElementById('wizard-progress-label');
+            const text = document.getElementById('wizard-progress-text');
+            if (bar) {
+                bar.style.width = `${data.progress}%`;
+                bar.setAttribute('aria-valuenow', data.progress);
+            }
+            if (label) label.textContent = `${data.progress}%`;
+            if (text) text.textContent = `${data.progress}% completo`;
+        })
+        .catch(() => {});
+};
+
+formEl?.addEventListener('input', scheduleAutosave);
+formEl?.addEventListener('change', scheduleAutosave);
+formEl?.addEventListener('submit', () => {
+    submitting = true;
+});
 </script>
 {% endblock %}

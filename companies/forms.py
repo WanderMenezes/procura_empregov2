@@ -407,7 +407,7 @@ class YouthSearchForm(forms.Form):
 
     skills = forms.ModelChoiceField(
         label=_('Skill'),
-        queryset=Skill.objects.all(),
+        queryset=Skill.objects.none(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -452,3 +452,7 @@ class YouthSearchForm(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['skills'].queryset = Skill.objects.filter(aprovada=True).order_by('nome')

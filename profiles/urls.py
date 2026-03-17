@@ -27,6 +27,9 @@ urlpatterns = [
     # Documentos
     path('documentos/adicionar/', views.document_add, name='document_add'),
     path('documentos/<int:pk>/remover/', views.document_delete, name='document_delete'),
+
+    # Skills
+    path('skills/editar/', views.skills_edit, name='skills_edit'),
     
     # Registo assistido
     path('registo-assistido/', views.assisted_register, name='assisted_register'),

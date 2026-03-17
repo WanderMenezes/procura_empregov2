@@ -1,0 +1,107 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Utilizadores - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-2 mb-4">
+            <div class="list-group">
+                <a href="{% url 'dashboard:admin' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'dashboard:user_list' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-people me-2"></i>Utilizadores
+                </a>
+                <a href="{% url 'dashboard:validate_profiles' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-check-circle me-2"></i>Validar Perfis
+                </a>
+                <a href="{% url 'dashboard:manage_contact_requests' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-envelope me-2"></i>Pedidos Contacto
+                </a>
+                <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-graph-up me-2"></i>Relatorios
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0"><i class="bi bi-people me-2"></i>Utilizadores</h2>
+            </div>
+
+            <form method="get" class="card card-body mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Perfil</label>
+                        <select name="perfil" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="JO" {% if filtro_perfil == 'JO' %}selected{% endif %}>Jovem</option>
+                            <option value="OP" {% if filtro_perfil == 'OP' %}selected{% endif %}>Operador</option>
+                            <option value="EMP" {% if filtro_perfil == 'EMP' %}selected{% endif %}>Empresa</option>
+                            <option value="ADM" {% if filtro_perfil == 'ADM' %}selected{% endif %}>Administrador</option>
+                            <option value="TEC" {% if filtro_perfil == 'TEC' %}selected{% endif %}>Tecnico</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ativo</label>
+                        <select name="ativo" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="sim" {% if filtro_ativo == 'sim' %}selected{% endif %}>Ativos</option>
+                            <option value="nao" {% if filtro_ativo == 'nao' %}selected{% endif %}>Inativos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
+                                    <th>Perfil</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Acao</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.nome }}</td>
+                                        <td>{{ user.telefone }}</td>
+                                        <td>{{ user.email|default:"-" }}</td>
+                                        <td>{{ user.get_perfil_display }}</td>
+                                        <td>
+                                            {% if user.is_active %}
+                                                <span class="badge bg-success">Ativo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inativo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'dashboard:user_toggle' user.pk %}" class="btn btn-sm btn-outline-primary">
+                                                {% if user.is_active %}Desativar{% else %}Ativar{% endif %}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">Nenhum utilizador encontrado.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

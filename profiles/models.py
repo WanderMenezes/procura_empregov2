@@ -50,6 +50,7 @@ class YouthProfile(models.Model):
     data_nascimento = models.DateField(_('data de nascimento'), null=True, blank=True)
     sexo = models.CharField(_('sexo'), max_length=1, choices=SEXO_CHOICES, blank=True)
     localidade = models.CharField(_('localidade'), max_length=255, blank=True)
+    contacto_alternativo = models.CharField(_('contacto alternativo'), max_length=255, blank=True)
     
     # Situação atual
     situacao_atual = models.CharField(
@@ -66,10 +67,9 @@ class YouthProfile(models.Model):
     )
     
     # Interesses
-    interesse_setorial = models.CharField(
-        _('setor de interesse'),
-        max_length=3,
-        choices=settings.AREAS_FORMACAO,
+    interesse_setorial = models.JSONField(
+        _('setores de interesse'),
+        default=list,
         blank=True
     )
     preferencia_oportunidade = models.CharField(
@@ -94,6 +94,9 @@ class YouthProfile(models.Model):
     completo = models.BooleanField(_('perfil completo'), default=False)
     validado = models.BooleanField(_('validado'), default=False)
     visivel = models.BooleanField(_('visível para empresas'), default=True)
+    consentimento_sms = models.BooleanField(_('consentimento para contacto por SMS'), default=False)
+    consentimento_whatsapp = models.BooleanField(_('consentimento para contacto por WhatsApp'), default=False)
+    consentimento_email = models.BooleanField(_('consentimento para contacto por Email'), default=False)
     
     # Timestamps
     created_at = models.DateTimeField(_('criado em'), auto_now_add=True)
@@ -137,6 +140,15 @@ class YouthProfile(models.Model):
     @property
     def distrito(self):
         return self.user.distrito
+
+    @property
+    def interesses_setoriais_display(self):
+        codes = self.interesse_setorial or []
+        if isinstance(codes, str):
+            codes = [codes]
+        mapping = dict(getattr(settings, 'AREAS_FORMACAO', []))
+        labels = [mapping.get(code, code) for code in codes if code]
+        return ', '.join(labels)
     
     def get_skills(self):
         """Retorna todas as skills do jovem"""

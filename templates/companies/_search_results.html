@@ -4,46 +4,78 @@
 {% if results %}
   <form method="post" action="{% url 'companies:contact_request_bulk_create' %}" id="bulkForm">
     {% csrf_token %}
-    <div class="mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-2 bulk-actions">
-        <div>
-          <button type="submit" class="btn btn-primary btn-sm">Solicitar contacto aos selecionados</button>
-          <small class="text-muted ms-2">Selecione os jovens e clique para enviar pedidos.</small>
-        </div>
-        <div>
-          <input id="selectAll" type="checkbox"> <label for="selectAll" class="small">Selecionar todos</label>
-        </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button type="submit" class="btn btn-primary btn-sm">Solicitar contacto aos selecionados</button>
+        <small class="text-muted">Use a seleção para pedidos em massa.</small>
+      </div>
+      <div class="form-check">
+        <input id="selectAll" type="checkbox" class="form-check-input">
+        <label for="selectAll" class="form-check-label small">Selecionar todos</label>
       </div>
     </div>
     <div class="mb-3">
       <label class="form-label">Mensagem (opcional)</label>
       <textarea name="motivo" class="form-control" rows="2" placeholder="Mensagem a enviar aos jovens (opcional)"></textarea>
     </div>
-    <div class="list-group">
+
+    <div class="row g-3">
       {% for r in results %}
-        <label class="list-group-item">
-          <div class="row align-items-center g-2">
-            <div class="col-auto">
-              <input type="checkbox" name="youth_ids" value="{{ r.id }}" class="form-check-input" aria-label="Selecionar {{ r.nome_completo }}">
-            </div>
-            <div class="col-auto">
-              <div style="width:56px;height:56px;overflow:hidden;border-radius:6px;">
-                {% if r.photo %}
-                  <img src="{{ r.photo.url }}" alt="{{ r.nome_completo }}" style="width:56px;height:56px;object-fit:cover;">
-                {% else %}
-                  <div style="width:56px;height:56px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;color:#666;font-weight:600;">{{ r.nome_completo|slice:":2"|upper }}</div>
-                {% endif %}
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card h-100 profile-card">
+            <div class="card-body">
+              <div class="d-flex align-items-start gap-3">
+                <div style="width:64px;height:64px;overflow:hidden;border-radius:8px;">
+                  {% if r.photo %}
+                    <img src="{{ r.photo.url }}" alt="{{ r.nome_completo }}" style="width:64px;height:64px;object-fit:cover;">
+                  {% else %}
+                    <div style="width:64px;height:64px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;color:#666;font-weight:600;">
+                      {{ r.nome_completo|slice:":2"|upper }}
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                      <h6 class="mb-1">{{ r.nome_completo }}</h6>
+                      <div class="small text-muted">
+                        {{ r.localidade|default:'-' }}{% if r.distrito %}, {{ r.distrito.nome }}{% endif %}
+                      </div>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" name="youth_ids" value="{{ r.id }}" class="form-check-input" aria-label="Selecionar {{ r.nome_completo }}">
+                    </div>
+                  </div>
+                  <div class="small text-muted mt-2">
+                    {{ r.get_situacao_atual_display }} • {{ r.get_disponibilidade_display }}{% if r.idade %} • {{ r.idade }} anos{% endif %}
+                  </div>
+                  <div class="d-flex flex-wrap gap-1 mt-2">
+                    <span class="badge profile-chip">{{ r.get_preferencia_oportunidade_display }}</span>
+                    {% if r.experiences.all %}
+                      <span class="badge profile-chip">Com experiência</span>
+                    {% else %}
+                      <span class="badge profile-chip">Sem experiência</span>
+                    {% endif %}
+                  </div>
+                  {% if r.sobre %}
+                    <p class="small text-muted mt-2 mb-2">{{ r.sobre|truncatechars:120 }}</p>
+                  {% endif %}
+                  <div class="mt-2">
+                    {% for ys in r.youth_skills.all|slice:":4" %}
+                      <span class="badge skill-badge me-1">{{ ys.skill.nome }}</span>
+                    {% empty %}
+                      <span class="text-muted small">Sem skills listadas</span>
+                    {% endfor %}
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="col">
-              <strong>{{ r.nome_completo }}</strong>
-              <div class="small text-muted">{{ r.localidade|default:'-' }} • {{ r.get_sexo_display|default:'' }}</div>
-            </div>
-            <div class="col-auto">
-              <a href="{% url 'companies:youth_detail' r.id %}" class="btn btn-outline-secondary btn-sm d-block d-sm-inline-block">Ver</a>
+            <div class="card-footer bg-white d-flex justify-content-between">
+              <a href="{% url 'companies:youth_detail' r.id %}" class="btn btn-outline-secondary btn-sm">Ver perfil</a>
+              <a href="{% url 'companies:contact_request_create' r.id %}" class="btn btn-primary btn-sm">Solicitar contacto</a>
             </div>
           </div>
-        </label>
+        </div>
       {% endfor %}
     </div>
 
@@ -52,8 +84,8 @@
         <ul class="pagination">
           {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link ajax-page" href="{% query_string page_obj.previous_page_number %}">Anterior</a>
-              </li>
+              <a class="page-link ajax-page" href="{% query_string page_obj.previous_page_number %}">Anterior</a>
+            </li>
           {% else %}
             <li class="page-item disabled"><span class="page-link">Anterior</span></li>
           {% endif %}
@@ -67,7 +99,7 @@
           {% endfor %}
 
           {% if page_obj.has_next %}
-              <li class="page-item">
+            <li class="page-item">
               <a class="page-link ajax-page" href="{% query_string page_obj.next_page_number %}">Seguinte</a>
             </li>
           {% else %}

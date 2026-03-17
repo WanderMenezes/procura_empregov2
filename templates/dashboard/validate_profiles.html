@@ -1,0 +1,71 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Validar Perfis - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-2 mb-4">
+            <div class="list-group">
+                <a href="{% url 'dashboard:admin' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'dashboard:user_list' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people me-2"></i>Utilizadores
+                </a>
+                <a href="{% url 'dashboard:validate_profiles' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-check-circle me-2"></i>Validar Perfis
+                </a>
+                <a href="{% url 'dashboard:manage_contact_requests' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-envelope me-2"></i>Pedidos Contacto
+                </a>
+                <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-graph-up me-2"></i>Relatorios
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-10">
+            <h2 class="mb-3"><i class="bi bi-check-circle me-2"></i>Perfis Pendentes</h2>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Jovem</th>
+                                    <th>Distrito</th>
+                                    <th>Data</th>
+                                    <th class="text-end">Acoes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for perfil in perfis %}
+                                    <tr>
+                                        <td>{{ perfil.nome_completo }}</td>
+                                        <td>{{ perfil.distrito.nome|default:"-" }}</td>
+                                        <td>{{ perfil.created_at|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}" class="btn btn-sm btn-success">
+                                                Aprovar
+                                            </a>
+                                            <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}" class="btn btn-sm btn-outline-danger">
+                                                Rejeitar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Nao existem perfis pendentes.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

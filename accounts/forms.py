@@ -13,13 +13,20 @@ User = get_user_model()
 class UserRegistrationForm(UserCreationForm):
     """Formulário de registo de usuário"""
     
-    PERFIL_CHOICES = [
+    PERFIL_CHOICES_PUBLIC = [
         ('JO', _('Jovem (Procuro oportunidades)')),
         ('EMP', _('Empresa (Quero publicar vagas)')),
     ]
+
+    PERFIL_CHOICES_ADMIN = [
+        ('JO', _('Jovem (Procuro oportunidades)')),
+        ('EMP', _('Empresa (Quero publicar vagas)')),
+        ('OP', _('Operador Distrital')),
+        ('TEC', _('Técnico PNUD')),
+    ]
     
     perfil = forms.ChoiceField(
-        choices=PERFIL_CHOICES,
+        choices=PERFIL_CHOICES_PUBLIC,
         widget=forms.RadioSelect,
         label=_('Tipo de perfil')
     )
@@ -90,6 +97,30 @@ class UserRegistrationForm(UserCreationForm):
         fields = ['perfil', 'nome', 'telefone', 'email', 'password1', 'password2',
                   'consentimento_dados', 'consentimento_contacto']
     
+    def __init__(self, *args, **kwargs):
+        self.request_user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if self.request_user and getattr(self.request_user, 'is_admin', False):
+            self.fields['perfil'].choices = self.PERFIL_CHOICES_ADMIN
+        else:
+            self.fields['perfil'].choices = self.PERFIL_CHOICES_PUBLIC
+
+        perfil_data = self.data.get('perfil') if self.is_bound else None
+        if self.request_user and getattr(self.request_user, 'is_admin', False) and perfil_data in {'OP', 'TEC'}:
+            self.fields['consentimento_dados'].required = False
+            self.fields['consentimento_contacto'].required = False
+
+    def clean_perfil(self):
+        perfil = self.cleaned_data.get('perfil')
+        if self.request_user and getattr(self.request_user, 'is_admin', False):
+            allowed = {choice[0] for choice in self.PERFIL_CHOICES_ADMIN}
+        else:
+            allowed = {choice[0] for choice in self.PERFIL_CHOICES_PUBLIC}
+        if perfil not in allowed:
+            raise forms.ValidationError(_('Tipo de perfil inválido.'))
+        return perfil
+
     def clean_telefone(self):
         telefone = self.cleaned_data.get('telefone')
         if User.objects.filter(telefone=telefone).exists():
