@@ -2,91 +2,235 @@
 
 {% block title %}Editar Skills{% endblock %}
 
+{% block extra_css %}
+<style>
+  .skills-page { color: #122033; }
+  .skills-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 32%), linear-gradient(135deg, rgba(13,37,66,.98), rgba(14,111,147,.94) 54%, rgba(39,161,116,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .skills-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .skills-hero > * { position: relative; z-index: 1; }
+  .skills-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .skills-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .skills-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .skills-subtitle { margin: 0; max-width: 68ch; color: rgba(255,255,255,.86); }
+  .skills-chips, .skills-actions, .skills-stats, .skills-profile-tags, .skills-footer { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .skills-chips { margin-top: 1rem; }
+  .skills-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .88rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .skills-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .skills-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .skills-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .skills-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .skills-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .skills-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .skills-stat-meta { color: rgba(255,255,255,.84); font-size: .84rem; }
+  .skills-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .skills-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .skills-panel { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .skills-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .skills-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
+  .skills-panel-subtitle, .skills-copy, .skills-note, .skills-empty-copy, .skills-field-help { color: #66768c; }
+  .skills-profile { display: flex; gap: .9rem; align-items: center; }
+  .skills-avatar { width: 72px; height: 72px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.35rem; font-weight: 800; }
+  .skills-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .skills-profile-name { font-size: 1.02rem; font-weight: 700; margin-bottom: .12rem; }
+  .skills-profile-line { color: #66768c; margin: 0; }
+  .skills-profile-tags { margin-top: .9rem; }
+  .skills-tag { display: inline-flex; align-items: center; gap: .4rem; padding: .42rem .72rem; border-radius: 999px; background: rgba(14,111,147,.1); border: 1px solid rgba(14,111,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600; }
+  .skills-tag.highlight { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .skills-tag.muted { background: #f7fafc; color: #607086; border-color: rgba(18,32,51,.08); }
+  .skills-tip { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fbfdff, #f7fafc); border: 1px solid rgba(18,32,51,.07); }
+  .skills-tip + .skills-tip { margin-top: .8rem; }
+  .skills-tip strong { display: block; margin-bottom: .18rem; color: #122033; }
+  .skills-error { margin-bottom: 1rem; padding: 1rem 1.1rem; border-radius: 18px; background: rgba(220,53,69,.08); border: 1px solid rgba(220,53,69,.14); color: #9e2230; }
+  .skills-section { margin-bottom: 1.4rem; }
+  .skills-section:last-child { margin-bottom: 0; }
+  .skills-section-label { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0e7193; margin-bottom: .4rem; }
+  .skills-section-title { font-size: 1.18rem; font-weight: 700; margin-bottom: .2rem; }
+  .skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .9rem; margin-top: 1rem; }
+  .skills-card { display: flex; gap: .75rem; align-items: flex-start; padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #fbfdff); border: 1px solid rgba(18,32,51,.08); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; cursor: pointer; min-height: 100%; }
+  .skills-card:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(18,32,51,.08); border-color: rgba(14,111,147,.22); }
+  .skills-card input { width: 1.08rem; height: 1.08rem; margin-top: .2rem; flex-shrink: 0; }
+  .skills-card-title { font-size: .96rem; font-weight: 700; color: #122033; margin-bottom: .18rem; }
+  .skills-card-copy { color: #66768c; font-size: .88rem; line-height: 1.5; }
+  .skills-card.selected { border-color: rgba(34,166,120,.24); background: linear-gradient(180deg, rgba(34,166,120,.08), #fff); }
+  .skills-field-grid { display: grid; grid-template-columns: minmax(0,1fr) 220px; gap: 1rem; margin-top: 1rem; }
+  .skills-field label { display: block; font-size: .9rem; font-weight: 700; color: #233246; margin-bottom: .42rem; }
+  .skills-field .form-control, .skills-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; }
+  .skills-field-error { color: #b42333; font-size: .84rem; margin-top: .35rem; }
+  .skills-empty { border-radius: 20px; padding: 1.1rem; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14); text-align: center; }
+  .skills-footer { justify-content: space-between; align-items: center; margin-top: 1.6rem; padding-top: 1.15rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .skills-footer .btn { border-radius: 14px; }
+  @media (max-width: 991.98px) { .skills-shell, .skills-stats { grid-template-columns: 1fr; } .skills-sidebar { position: static; } .skills-hero-head { flex-direction: column; align-items: stretch; } .skills-actions .btn { width: 100%; } }
+  @media (max-width: 767.98px) { .skills-grid, .skills-field-grid { grid-template-columns: 1fr; } .skills-footer { flex-direction: column; align-items: stretch; } .skills-footer .btn { width: 100%; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card shadow">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">Editar Skills</h4>
-            <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
-          </div>
-
-          {% if form.errors %}
-            <div class="alert alert-danger">
-              Verifica os dados selecionados e tenta novamente.
-            </div>
-          {% endif %}
-
-          <form method="post" novalidate>
-            {% csrf_token %}
-
-            <h5 class="mb-3">Competências Técnicas</h5>
-            <div class="row">
-              {% for skill in skills %}
-                {% if skill.tipo == 'TEC' %}
-                  <div class="col-md-6">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox"
-                             name="skills" value="{{ skill.id }}"
-                             id="skill_{{ skill.id }}"
-                             {% if skill.id in selected_skill_ids %}checked{% endif %}>
-                      <label class="form-check-label" for="skill_{{ skill.id }}">
-                        {{ skill.nome }}
-                      </label>
-                    </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-
-            <hr class="my-4">
-
-            <h5 class="mb-3">Competências Transversais</h5>
-            <div class="row">
-              {% for skill in skills %}
-                {% if skill.tipo == 'TRA' %}
-                  <div class="col-md-6">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox"
-                             name="skills" value="{{ skill.id }}"
-                             id="skill_{{ skill.id }}"
-                             {% if skill.id in selected_skill_ids %}checked{% endif %}>
-                      <label class="form-check-label" for="skill_{{ skill.id }}">
-                        {{ skill.nome }}
-                      </label>
-                    </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-
-            <hr class="my-4">
-            <h5 class="mb-3">Outra Skill</h5>
-            <div class="row">
-              <div class="col-md-8 mb-3">
-                <label for="id_outra_skill_nome" class="form-label">Indica uma skill que não está na lista</label>
-                <input type="text" name="outra_skill_nome" id="id_outra_skill_nome"
-                       class="form-control" value="{{ form.outra_skill_nome.value|default:'' }}">
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="id_outra_skill_tipo" class="form-label">Tipo</label>
-                <select name="outra_skill_tipo" id="id_outra_skill_tipo" class="form-select">
-                  {% for value, label in form.fields.outra_skill_tipo.choices %}
-                    <option value="{{ value }}" {% if form.outra_skill_tipo.value == value %}selected{% endif %}>{{ label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-
-            <div class="text-end mt-4">
-              <button class="btn btn-primary">Guardar Skills</button>
-            </div>
-          </form>
+<div class="skills-page container py-4 py-lg-5">
+  <section class="skills-hero mb-4">
+    <div class="skills-hero-head">
+      <div>
+        <div class="skills-kicker">Competencias do perfil</div>
+        <h1 class="skills-title">Editar skills</h1>
+        <p class="skills-subtitle">Seleciona as competencias que melhor representam o teu perfil e adiciona uma skill nova quando ainda nao existir na lista.</p>
+        <div class="skills-chips">
+          <span class="skills-chip"><i class="bi bi-stars"></i>{{ selected_total_count }} skill{{ selected_total_count|pluralize }} selecionada{{ selected_total_count|pluralize }}</span>
+          <span class="skills-chip"><i class="bi bi-tools"></i>{{ selected_technical_count }} tecnica{{ selected_technical_count|pluralize }}</span>
+          <span class="skills-chip"><i class="bi bi-people"></i>{{ selected_transversal_count }} transversal{{ selected_transversal_count|pluralize }}</span>
+          <span class="skills-chip"><i class="bi bi-grid"></i>{{ available_skill_count }} opcao{{ available_skill_count|pluralize }} disponive{{ available_skill_count|pluralize:"l,is" }}</span>
         </div>
       </div>
+      <div class="skills-actions">
+        <a href="{% url 'profiles:detail' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar ao perfil</a>
+        <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-outline-light"><i class="bi bi-magic me-2"></i>Atualizar perfil</a>
+      </div>
     </div>
+
+    <div class="skills-stats">
+      <div class="skills-stat"><span class="skills-stat-label">Selecionadas</span><span class="skills-stat-value">{{ selected_total_count }}</span><span class="skills-stat-meta">ja ligadas ao teu perfil</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Tecnicas</span><span class="skills-stat-value">{{ technical_skills|length }}</span><span class="skills-stat-meta">ferramentas, oficios e software</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Transversais</span><span class="skills-stat-value">{{ transversal_skills|length }}</span><span class="skills-stat-meta">comunicacao e colaboracao</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Nova skill</span><span class="skills-stat-value">+</span><span class="skills-stat-meta">podes sugerir uma que falte</span></div>
+    </div>
+  </section>
+
+  <div class="skills-shell">
+    <aside class="skills-sidebar">
+      <section class="skills-panel">
+        <div class="skills-panel-head">
+          <div>
+            <h2 class="skills-panel-title">Resumo do perfil</h2>
+            <p class="skills-panel-subtitle">Contexto rapido para organizares melhor as competencias.</p>
+          </div>
+        </div>
+        <div class="skills-profile">
+          <div class="skills-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ user.nome }}">
+            {% else %}
+              {{ user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="skills-profile-name">{{ user.nome }}</div>
+            <p class="skills-profile-line">{% if profile.distrito %}Distrito {{ profile.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+            <p class="skills-profile-line">{% if profile.completo %}Perfil completo{% else %}Perfil em progresso{% endif %}</p>
+          </div>
+        </div>
+        <div class="skills-profile-tags">
+          <span class="skills-tag highlight"><i class="bi bi-stars"></i>{{ selected_total_count }} selecionada{{ selected_total_count|pluralize }}</span>
+          <span class="skills-tag"><i class="bi bi-tools"></i>{{ selected_technical_count }} tecnicas</span>
+          <span class="skills-tag muted"><i class="bi bi-people"></i>{{ selected_transversal_count }} transversais</span>
+        </div>
+      </section>
+
+      <section class="skills-panel">
+        <div class="skills-panel-head">
+          <div>
+            <h2 class="skills-panel-title">Dicas para escolher</h2>
+            <p class="skills-panel-subtitle">Mantem a lista relevante e facil de ler.</p>
+          </div>
+        </div>
+        <div class="skills-tip">
+          <strong>Prioriza o que realmente sabes usar.</strong>
+          <div class="skills-copy">Seleciona primeiro as competencias que consegues demonstrar em entrevista, teste ou experiencia pratica.</div>
+        </div>
+        <div class="skills-tip">
+          <strong>Mistura tecnica com transversal.</strong>
+          <div class="skills-copy">Um perfil equilibrado costuma combinar capacidade pratica com comunicacao, responsabilidade e trabalho em equipa.</div>
+        </div>
+        <div class="skills-tip">
+          <strong>Sugere uma skill nova quando faltar algo importante.</strong>
+          <div class="skills-copy">Usa o campo extra apenas para competencias que ainda nao existem na plataforma.</div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="skills-panel">
+      {% if form.errors %}
+        <div class="skills-error">
+          Verifica os campos abaixo antes de guardar. Se adicionaste uma skill nova, confirma tambem o tipo selecionado.
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="skills-section">
+          <div class="skills-section-label"><i class="bi bi-tools"></i>Competencias tecnicas</div>
+          <h2 class="skills-section-title">Ferramentas, software e saber fazer tecnico</h2>
+          <p class="skills-note mb-0">Marca as competencias ligadas a funcao, oficio, tecnologia ou processo que ja consegues executar.</p>
+          {% if technical_skills %}
+            <div class="skills-grid">
+              {% for skill in technical_skills %}
+                <label class="skills-card {% if skill.id in selected_skill_ids %}selected{% endif %}">
+                  <input class="form-check-input" type="checkbox" name="skills" value="{{ skill.id }}" id="skill_{{ skill.id }}" {% if skill.id in selected_skill_ids %}checked{% endif %}>
+                  <div>
+                    <div class="skills-card-title">{{ skill.nome }}</div>
+                    <div class="skills-card-copy">Skill tecnica para tarefas, ferramentas ou especialidade pratica.</div>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="skills-empty">
+              <div class="skills-empty-copy">Ainda nao existem skills tecnicas aprovadas para selecionar.</div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="skills-section">
+          <div class="skills-section-label"><i class="bi bi-people"></i>Competencias transversais</div>
+          <h2 class="skills-section-title">Comunicacao, colaboracao e comportamento profissional</h2>
+          <p class="skills-note mb-0">Seleciona as competencias que mostram como trabalhas, aprendes e te relacionas em contexto profissional.</p>
+          {% if transversal_skills %}
+            <div class="skills-grid">
+              {% for skill in transversal_skills %}
+                <label class="skills-card {% if skill.id in selected_skill_ids %}selected{% endif %}">
+                  <input class="form-check-input" type="checkbox" name="skills" value="{{ skill.id }}" id="skill_{{ skill.id }}" {% if skill.id in selected_skill_ids %}checked{% endif %}>
+                  <div>
+                    <div class="skills-card-title">{{ skill.nome }}</div>
+                    <div class="skills-card-copy">Skill transversal importante para ambiente de trabalho, equipa e adaptacao.</div>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="skills-empty">
+              <div class="skills-empty-copy">Ainda nao existem skills transversais aprovadas para selecionar.</div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="skills-section">
+          <div class="skills-section-label"><i class="bi bi-plus-circle"></i>Skill em falta</div>
+          <h2 class="skills-section-title">Sugerir outra skill</h2>
+          <p class="skills-note mb-0">Se a competencia nao existir na lista, escreve aqui e escolhe o tipo certo para ela entrar corretamente no teu perfil.</p>
+          <div class="skills-field-grid">
+            <div class="skills-field">
+              <label for="id_outra_skill_nome">Indica uma skill que nao esta na lista</label>
+              {{ form.outra_skill_nome }}
+              <div class="skills-field-help">Exemplo: Canva, Soldadura, Atendimento ao cliente, Controlo de stock.</div>
+              {% if form.outra_skill_nome.errors %}<div class="skills-field-error">{{ form.outra_skill_nome.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="skills-field">
+              <label for="id_outra_skill_tipo">Tipo</label>
+              {{ form.outra_skill_tipo }}
+              {% if form.outra_skill_tipo.errors %}<div class="skills-field-error">{{ form.outra_skill_tipo.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="skills-footer">
+          <div class="skills-copy">
+            Guardamos as skills selecionadas e removemos do perfil as que deixares desmarcadas.
+          </div>
+          <div class="skills-actions">
+            <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-floppy me-2"></i>Guardar skills</button>
+          </div>
+        </div>
+      </form>
+    </section>
   </div>
 </div>
 {% endblock %}

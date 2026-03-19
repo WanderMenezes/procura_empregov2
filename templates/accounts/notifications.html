@@ -1,60 +1,222 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Notificações{% endblock %}
+{% block title %}Notificacoes{% endblock %}
+
+{% block extra_css %}
+<style>
+  .notifications-page { color: #122033; }
+  .notifications-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.3), transparent 32%), linear-gradient(135deg, rgba(15,45,78,.98), rgba(16,110,136,.95) 55%, rgba(40,156,108,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .notifications-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .notifications-hero > * { position: relative; z-index: 1; }
+  .notifications-hero-head, .notifications-panel-head, .notification-card-top, .notification-card-footer {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+  }
+  .notifications-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .notifications-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .notifications-subtitle { max-width: 64ch; margin: 0; color: rgba(255,255,255,.86); }
+  .notifications-chips, .notifications-actions, .notifications-tags, .notification-card-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .notifications-chips { margin-top: 1rem; }
+  .notifications-chip, .notifications-tag {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .84rem; font-weight: 600;
+  }
+  .notifications-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; }
+  .notifications-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .notifications-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .notifications-stats { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .9rem; margin-top: 1.1rem; }
+  .notifications-stat {
+    border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px);
+  }
+  .notifications-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .notifications-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .notifications-stat-meta { color: rgba(255,255,255,.82); font-size: .84rem; }
+  .notifications-panel {
+    border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .notifications-panel-head h5 { margin-bottom: .2rem; }
+  .notifications-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .notifications-toolbar { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .65rem; }
+  .notifications-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .notifications-list { display: grid; gap: 1rem; }
+  .notification-card {
+    border-radius: 24px; padding: 1.15rem; background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid rgba(18,32,51,.08);
+  }
+  .notification-card-head { display: flex; gap: .95rem; align-items: flex-start; }
+  .notification-card-icon {
+    width: 54px; height: 54px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.15rem;
+  }
+  .notification-card-icon.info { background: rgba(13,110,253,.12); color: #0d6efd; }
+  .notification-card-icon.success { background: rgba(25,135,84,.12); color: #198754; }
+  .notification-card-icon.alert { background: rgba(255,193,7,.16); color: #9a6d00; }
+  .notification-card-icon.error { background: rgba(220,53,69,.12); color: #dc3545; }
+  .notification-card-title { font-size: 1.04rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
+  .notification-card-subline, .notification-card-copy { color: #66768c; }
+  .notification-card-copy { margin-top: .9rem; line-height: 1.7; }
+  .notification-status {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+  }
+  .notification-status.unread { background: rgba(220,53,69,.1); color: #a02834; border: 1px solid rgba(220,53,69,.18); }
+  .notification-status.read { background: #f7fafc; color: #5b6e86; border: 1px solid rgba(18,32,51,.08); }
+  .notification-type {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; font-size: .8rem; font-weight: 600;
+  }
+  .notification-card-actions form { margin: 0; }
+  .notification-card-actions .btn { border-radius: 12px; }
+  .notifications-empty {
+    border-radius: 24px; padding: 1.5rem; text-align: center; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14); color: #66768c;
+  }
+  .notifications-empty i { display: block; font-size: 1.8rem; color: var(--primary-color); margin-bottom: .55rem; }
+  @media (max-width: 991.98px) {
+    .notifications-hero-head, .notifications-panel-head, .notification-card-top, .notification-card-footer { flex-direction: column; align-items: stretch; }
+    .notifications-actions .btn { width: 100%; }
+    .notifications-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    .notifications-hero { padding: 1.35rem; }
+    .notifications-stats { grid-template-columns: 1fr; }
+    .notification-card-head { flex-direction: column; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row">
-    <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
-      <h4 class="mb-0">Notificações</h4>
+<div class="notifications-page container py-4 py-lg-5">
+  <section class="notifications-hero mb-4">
+    <div class="notifications-hero-head">
       <div>
-        <a href="#" class="btn btn-sm btn-outline-secondary me-2">Marcar todas como lidas</a>
-        <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-light">Voltar</a>
+        <div class="notifications-kicker">Centro de alertas</div>
+        <h1 class="notifications-title">Notificacoes</h1>
+        <p class="notifications-subtitle">
+          Acompanhe mensagens do sistema, respostas importantes e atualizacoes da plataforma num unico painel mais claro.
+        </p>
+        <div class="notifications-chips">
+          <span class="notifications-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_perfil_display }}</span>
+          <span class="notifications-chip"><i class="bi bi-bell"></i>{{ unread_count|default:0 }} por ler</span>
+          <span class="notifications-chip"><i class="bi bi-clock-history"></i>Ultimas {{ notifications|length }} notificacoes</span>
+        </div>
+      </div>
+      <div class="notifications-actions">
+        <form method="post" action="{% url 'accounts:mark_all_notifications_read' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-light">
+            <i class="bi bi-check2-all me-2"></i>Marcar todas como lidas
+          </button>
+        </form>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-light">
+          <i class="bi bi-arrow-left me-2"></i>Voltar ao perfil
+        </a>
       </div>
     </div>
 
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          {% if notifications %}
-            <ul class="list-group list-group-flush">
-              {% for n in notifications %}
-                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start">
-                  <div class="w-100">
-                    <div class="d-flex justify-content-between">
-                      <div>
-                        <strong>{{ n.titulo }}</strong>
-                        <div class="small text-muted">{{ n.created_at|date:"d/m/Y H:i" }}</div>
-                      </div>
-                    </div>
-                    <div class="mt-2">{{ n.mensagem }}</div>
-                  </div>
-                  <div class="ms-md-3 mt-2 mt-md-0">
-                    {% if not n.lida %}
-                      <span class="badge bg-danger">Nova</span>
-                    {% else %}
-                      <span class="badge bg-secondary">Lida</span>
-                    {% endif %}
-                    <form method="post" action="{% url 'accounts:delete_notification' n.id %}" class="mt-2">
-                      {% csrf_token %}
-                      <button type="submit"
-                              class="btn btn-sm btn-outline-danger"
-                              title="Eliminar"
-                              aria-label="Eliminar"
-                              onclick="return confirm('Eliminar esta notificação?');">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
-                  </div>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <div class="alert alert-info mb-0">Não há notificações.</div>
-          {% endif %}
-        </div>
+    <div class="notifications-stats">
+      <div class="notifications-stat">
+        <span class="notifications-stat-label">Total</span>
+        <span class="notifications-stat-value">{{ notification_summary.total|default:0 }}</span>
+        <span class="notifications-stat-meta">notificacoes disponiveis</span>
+      </div>
+      <div class="notifications-stat">
+        <span class="notifications-stat-label">Por ler</span>
+        <span class="notifications-stat-value">{{ unread_count|default:0 }}</span>
+        <span class="notifications-stat-meta">itens que ainda pedem atencao</span>
+      </div>
+      <div class="notifications-stat">
+        <span class="notifications-stat-label">Sucesso</span>
+        <span class="notifications-stat-value">{{ notification_summary.success|default:0 }}</span>
+        <span class="notifications-stat-meta">confirmacoes e progresso</span>
+      </div>
+      <div class="notifications-stat">
+        <span class="notifications-stat-label">Alertas</span>
+        <span class="notifications-stat-value">{{ notification_summary.alert|default:0 }}</span>
+        <span class="notifications-stat-meta">pedidos de atencao</span>
+      </div>
+      <div class="notifications-stat">
+        <span class="notifications-stat-label">Erros</span>
+        <span class="notifications-stat-value">{{ notification_summary.error|default:0 }}</span>
+        <span class="notifications-stat-meta">eventos com mais risco</span>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="notifications-panel">
+    <div class="notifications-panel-head">
+      <div>
+        <h5>Historico recente</h5>
+        <p class="notifications-panel-subtitle">A lista abaixo mostra as notificacoes mais recentes da tua conta, com tipo, estado e acoes por item.</p>
+      </div>
+    </div>
+    <div class="notifications-toolbar">
+      <span class="notifications-tag"><i class="bi bi-info-circle"></i>Informacao</span>
+      <span class="notifications-tag"><i class="bi bi-check2-circle"></i>Sucesso</span>
+      <span class="notifications-tag"><i class="bi bi-exclamation-triangle"></i>Alerta</span>
+      <span class="notifications-tag"><i class="bi bi-x-circle"></i>Erro</span>
+    </div>
+
+    <div class="mt-4">
+      {% if notifications %}
+        <div class="notifications-list">
+          {% for n in notifications %}
+            <article class="notification-card">
+              <div class="notification-card-top">
+                <div class="notification-card-head">
+                  <span class="notification-card-icon {% if n.tipo == 'SUCESSO' %}success{% elif n.tipo == 'ALERTA' %}alert{% elif n.tipo == 'ERRO' %}error{% else %}info{% endif %}">
+                    <i class="bi {% if n.tipo == 'SUCESSO' %}bi-check2-circle{% elif n.tipo == 'ALERTA' %}bi-exclamation-triangle{% elif n.tipo == 'ERRO' %}bi-x-circle{% else %}bi-info-circle{% endif %}"></i>
+                  </span>
+                  <div>
+                    <div class="notification-card-title">{{ n.titulo }}</div>
+                    <div class="notification-card-subline">{{ n.created_at|date:"d/m/Y H:i" }}</div>
+                  </div>
+                </div>
+                <div class="notifications-tags">
+                  <span class="notification-type"><i class="bi bi-tag"></i>{{ n.get_tipo_display }}</span>
+                  <span class="notification-status {% if n.lida %}read{% else %}unread{% endif %}">
+                    <i class="bi {% if n.lida %}bi-check2{% else %}bi-dot{% endif %}"></i>
+                    {% if n.lida %}Lida{% else %}Nova{% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="notification-card-copy">{{ n.mensagem|linebreaksbr }}</div>
+
+              <div class="notification-card-footer mt-3">
+                <div class="notifications-tags">
+                  {% if not n.lida %}
+                    <span class="notifications-tag"><i class="bi bi-bell-fill"></i>Por ler</span>
+                  {% else %}
+                    <span class="notifications-tag"><i class="bi bi-check2-all"></i>Ja revista</span>
+                  {% endif %}
+                </div>
+                <div class="notification-card-actions">
+                  {% if not n.lida %}
+                    <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-check2 me-1"></i>Marcar como lida
+                      </button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{% url 'accounts:delete_notification' n.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-outline-danger btn-sm"
+                            onclick="return confirm('Eliminar esta notificacao?');">
+                      <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="notifications-empty">
+          <i class="bi bi-bell-slash"></i>
+          Nao ha notificacoes neste momento.
+        </div>
+      {% endif %}
+    </div>
+  </section>
 </div>
 {% endblock %}

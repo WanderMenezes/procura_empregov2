@@ -2,19 +2,147 @@
 
 {% block title %}Pedidos de Contacto{% endblock %}
 
+{% block extra_css %}
+<style>
+  .contact-requests-page { color: #122033; }
+  .contact-requests-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.28), transparent 32%), linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .contact-requests-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .contact-requests-hero > * { position: relative; z-index: 1; }
+  .contact-requests-hero-head, .contact-requests-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .contact-requests-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .contact-requests-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .contact-requests-subtitle { margin: 0; max-width: 64ch; color: rgba(255,255,255,.86); }
+  .contact-requests-chips, .contact-requests-actions, .contact-requests-toolbar { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .contact-requests-chips { margin-top: 1rem; }
+  .contact-requests-chip, .contact-requests-pill { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .84rem; font-weight: 600; }
+  .contact-requests-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; }
+  .contact-requests-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .contact-requests-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .contact-requests-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.1rem; }
+  .contact-requests-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .contact-requests-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .contact-requests-stat-value { display: block; font-size: 1.65rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .contact-requests-stat-meta { color: rgba(255,255,255,.82); font-size: .84rem; }
+  .contact-requests-panel { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .contact-requests-panel-head h5 { margin-bottom: .2rem; }
+  .contact-requests-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .contact-requests-toolbar { margin: 1rem 0 0; }
+  .contact-requests-pill { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .contact-request-grid { display: grid; gap: 1rem; }
+  .contact-request-card { border-radius: 24px; padding: 1.15rem; background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid rgba(18,32,51,.08); }
+  .contact-request-top, .contact-request-footer { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .contact-request-identity { display: flex; gap: .95rem; align-items: flex-start; }
+  .contact-request-avatar {
+    width: 70px; height: 70px; border-radius: 20px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(14,113,147,.12), rgba(34,166,120,.14));
+    color: #0e7193; font-size: 1.05rem; font-weight: 700; letter-spacing: .05em;
+  }
+  .contact-request-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .contact-request-name { font-size: 1.05rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
+  .contact-request-subline, .contact-request-copy, .contact-request-status-copy, .contact-request-feedback { color: #66768c; }
+  .contact-request-subline { margin-bottom: .35rem; }
+  .contact-request-tags, .contact-request-meta, .contact-request-inline { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .contact-request-tags { margin-bottom: .95rem; }
+  .contact-request-tag, .contact-request-status {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+  }
+  .contact-request-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .contact-request-status.pending { background: rgba(255,193,7,.16); color: #8f6a00; border: 1px solid rgba(255,193,7,.24); }
+  .contact-request-status.approved { background: rgba(25,135,84,.12); color: #146c43; border: 1px solid rgba(25,135,84,.2); }
+  .contact-request-status.rejected { background: rgba(220,53,69,.1); color: #a02834; border: 1px solid rgba(220,53,69,.18); }
+  .contact-request-body { display: grid; gap: .95rem; }
+  .contact-request-block { border-radius: 18px; padding: .95rem 1rem; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .contact-request-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #7b8798; margin-bottom: .25rem; }
+  .contact-request-meta { margin-top: .95rem; color: #738196; font-size: .88rem; }
+  .contact-request-inline-item { padding: .78rem .85rem; border-radius: 16px; background: #fff; border: 1px solid rgba(18,32,51,.08); min-width: 180px; }
+  .contact-request-footer { margin-top: 1rem; }
+  .contact-request-footer .btn { border-radius: 12px; }
+  .contact-request-empty { border-radius: 24px; padding: 1.6rem; text-align: center; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14); color: #66768c; }
+  .contact-request-empty i { display: block; font-size: 1.9rem; color: var(--primary-color); margin-bottom: .55rem; }
+  @media (max-width: 991.98px) {
+    .contact-requests-hero-head, .contact-requests-panel-head { flex-direction: column; align-items: stretch; }
+    .contact-requests-actions .btn { width: 100%; }
+    .contact-requests-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    .contact-requests-hero { padding: 1.35rem; }
+    .contact-requests-stats { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767.98px) {
+    .contact-request-top, .contact-request-footer { flex-direction: column; align-items: stretch; }
+    .contact-request-footer .btn { width: 100%; }
+    .contact-request-inline { display: grid; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-      <h4 class="mb-1">Pedidos de contacto</h4>
-      <p class="text-muted mb-0">Acompanhe os pedidos enviados aos jovens e o respetivo estado.</p>
+<div class="contact-requests-page container py-4 py-lg-5">
+  <section class="contact-requests-hero mb-4">
+    <div class="contact-requests-hero-head">
+      <div>
+        <div class="contact-requests-kicker">Gestao de relacionamento</div>
+        <h1 class="contact-requests-title">Pedidos de contacto</h1>
+        <p class="contact-requests-subtitle">
+          Acompanhe os pedidos enviados aos jovens, veja quando o contacto foi liberado e mantenha contexto de cada abordagem.
+        </p>
+        <div class="contact-requests-chips">
+          <span class="contact-requests-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="contact-requests-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
+          <span class="contact-requests-chip"><i class="bi bi-shield-check"></i>{{ contact_summary.responded|default:0 }} respondido{{ contact_summary.responded|default:0|pluralize }}</span>
+        </div>
+      </div>
+      <div class="contact-requests-actions">
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-light"><i class="bi bi-search me-2"></i>Pesquisar jovens</a>
+        <a href="{% url 'companies:job_create' %}" class="btn btn-outline-light"><i class="bi bi-plus-circle me-2"></i>Publicar vaga</a>
+        <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-light"><i class="bi bi-grid me-2"></i>Painel</a>
+      </div>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
-      <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
+
+    <div class="contact-requests-stats">
+      <div class="contact-requests-stat">
+        <span class="contact-requests-stat-label">Total</span>
+        <span class="contact-requests-stat-value">{{ contact_summary.total|default:0 }}</span>
+        <span class="contact-requests-stat-meta">pedidos enviados pela empresa</span>
+      </div>
+      <div class="contact-requests-stat">
+        <span class="contact-requests-stat-label">Pendentes</span>
+        <span class="contact-requests-stat-value">{{ contact_summary.pending|default:0 }}</span>
+        <span class="contact-requests-stat-meta">a aguardar analise do admin</span>
+      </div>
+      <div class="contact-requests-stat">
+        <span class="contact-requests-stat-label">Aprovados</span>
+        <span class="contact-requests-stat-value">{{ contact_summary.approved|default:0 }}</span>
+        <span class="contact-requests-stat-meta">com contacto liberado</span>
+      </div>
+      <div class="contact-requests-stat">
+        <span class="contact-requests-stat-label">Rejeitados</span>
+        <span class="contact-requests-stat-value">{{ contact_summary.rejected|default:0 }}</span>
+        <span class="contact-requests-stat-meta">com resposta administrativa</span>
+      </div>
     </div>
-  </div>
-  <div class="alert alert-info">Os pedidos ficam pendentes até aprovação do administrador.</div>
-  {% include 'companies/contact_request_list.html' %}
+  </section>
+
+  <section class="contact-requests-panel">
+    <div class="contact-requests-panel-head">
+      <div>
+        <h5>Historico de pedidos</h5>
+        <p class="contact-requests-panel-subtitle">Cada pedido mostra o jovem, o motivo enviado, o estado atual e os proximos sinais de acao.</p>
+      </div>
+    </div>
+    <div class="contact-requests-toolbar">
+      <span class="contact-requests-pill"><i class="bi bi-lock"></i>Contacto direto so apos aprovacao</span>
+      <span class="contact-requests-pill"><i class="bi bi-chat-left-text"></i>Resposta do admin visivel no proprio pedido</span>
+      <span class="contact-requests-pill"><i class="bi bi-person-badge"></i>Atalho rapido para rever o perfil do jovem</span>
+    </div>
+
+    <div class="mt-4">
+      {% include 'companies/contact_request_list.html' %}
+    </div>
+  </section>
 </div>
 {% endblock %}

@@ -2,92 +2,351 @@
 
 {% block title %}Minhas Candidaturas - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .apps-page { color: #122033; }
+  .apps-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 32%), linear-gradient(135deg, rgba(13,37,66,.98), rgba(14,111,147,.94) 54%, rgba(39,161,116,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .apps-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .apps-hero > * { position: relative; z-index: 1; }
+  .apps-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .apps-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .apps-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .apps-subtitle { margin: 0; max-width: 68ch; color: rgba(255,255,255,.86); }
+  .apps-chips, .apps-actions, .apps-stats, .apps-profile-tags, .app-card-tags, .app-card-meta, .app-card-footer { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .apps-chips { margin-top: 1rem; }
+  .apps-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .88rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .apps-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .apps-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .apps-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .apps-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .apps-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .apps-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .apps-stat-meta { color: rgba(255,255,255,.84); font-size: .84rem; }
+  .apps-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .apps-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .apps-panel, .app-card { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .apps-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .apps-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
+  .apps-panel-subtitle, .apps-copy, .app-card-copy, .app-message-copy, .app-message-meta, .apps-empty-copy { color: #66768c; }
+  .apps-profile { display: flex; gap: .9rem; align-items: center; }
+  .apps-avatar { width: 72px; height: 72px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.35rem; font-weight: 800; }
+  .apps-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .apps-profile-name { font-size: 1.02rem; font-weight: 700; margin-bottom: .12rem; }
+  .apps-profile-line { color: #66768c; margin: 0; }
+  .apps-profile-tags { margin-top: .9rem; }
+  .apps-tag, .app-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .42rem .72rem; border-radius: 999px; background: rgba(14,111,147,.1); border: 1px solid rgba(14,111,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600; }
+  .apps-tag.muted, .app-pill.muted { background: #f7fafc; color: #607086; border-color: rgba(18,32,51,.08); }
+  .apps-tag.highlight, .app-pill.highlight { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .app-pill.warning { background: rgba(247,180,51,.16); color: #8a6111; border-color: rgba(247,180,51,.2); }
+  .app-pill.danger { background: rgba(220,53,69,.1); color: #b42333; border-color: rgba(220,53,69,.16); }
+  .apps-filter-grid { display: grid; gap: .95rem; }
+  .apps-field { display: grid; gap: .42rem; }
+  .apps-field label { font-size: .88rem; font-weight: 700; color: #233246; }
+  .apps-field .form-control, .apps-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; }
+  .apps-filter-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .apps-filter-actions .btn { border-radius: 14px; }
+  .apps-insight { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fbfdff, #f7fafc); border: 1px solid rgba(18,32,51,.07); }
+  .apps-insight + .apps-insight { margin-top: .8rem; }
+  .apps-insight strong { display: block; margin-bottom: .18rem; color: #122033; }
+  .apps-results-head { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+  .apps-results-title { margin: 0; font-size: 1.12rem; font-weight: 700; }
+  .apps-results-grid { display: grid; gap: 1rem; }
+  .app-card { display: flex; flex-direction: column; gap: 1rem; }
+  .app-card-top { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .app-company { display: flex; gap: .8rem; align-items: center; }
+  .app-company-logo { width: 54px; height: 54px; border-radius: 18px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f4f7fb; border: 1px solid rgba(18,32,51,.08); color: #0e7193; font-weight: 800; }
+  .app-company-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .app-company-name { font-size: .92rem; color: #66768c; margin-bottom: .16rem; }
+  .app-title { font-size: 1.08rem; font-weight: 700; margin-bottom: .12rem; color: #122033; }
+  .app-card-meta { color: #66768c; font-size: .88rem; }
+  .app-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .8rem; }
+  .app-fact { padding: .9rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .app-fact-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #708096; margin-bottom: .2rem; }
+  .app-fact-value { color: #122033; font-weight: 700; }
+  .app-message-box { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #f7fbfd); border: 1px solid rgba(18,32,51,.08); }
+  .app-message-head { display: flex; justify-content: space-between; gap: .8rem; align-items: flex-start; margin-bottom: .55rem; }
+  .app-message-title { font-size: .94rem; font-weight: 700; color: #122033; margin-bottom: .12rem; }
+  .app-message-copy { margin: 0; line-height: 1.7; }
+  .app-card-footer { justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .app-card-footer .btn { border-radius: 14px; }
+  .apps-empty { border-radius: 24px; padding: 2.3rem 1.5rem; text-align: center; background: linear-gradient(180deg, #fff, #f7fafc); border: 1px dashed rgba(18,32,51,.14); box-shadow: 0 20px 38px rgba(18,32,51,.06); }
+  .apps-empty i { font-size: 2rem; color: #0e7193; display: block; margin-bottom: .8rem; }
+  .pagination .page-link { border-radius: 12px; margin: 0 .18rem; border-color: rgba(18,32,51,.12); color: #0e7193; }
+  @media (max-width: 991.98px) { .apps-shell, .apps-stats, .app-grid { grid-template-columns: 1fr; } .apps-sidebar { position: static; } .apps-hero-head, .apps-results-head { flex-direction: column; align-items: stretch; } .apps-actions .btn, .apps-filter-actions .btn { width: 100%; } }
+  @media (max-width: 575.98px) { .apps-hero { padding: 1.35rem; } .app-card-top, .app-card-footer { flex-direction: column; align-items: stretch; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-        <div>
-            <h3 class="mb-1">Minhas Candidaturas</h3>
-            <p class="text-muted mb-0">Acompanha o estado das tuas candidaturas e mensagens.</p>
+<div class="apps-page container py-4 py-lg-5">
+  <section class="apps-hero mb-4">
+    <div class="apps-hero-head">
+      <div>
+        <div class="apps-kicker">Seguimento das candidaturas</div>
+        <h1 class="apps-title">Minhas candidaturas</h1>
+        <p class="apps-subtitle">Acompanha o pipeline das vagas a que te candidataste, revê a ultima interacao com as empresas e foca-te primeiro no que precisa de resposta.</p>
+        <div class="apps-chips">
+          <span class="apps-chip"><i class="bi bi-send-check"></i>{{ total_applications }} candidaturas</span>
+          <span class="apps-chip"><i class="bi bi-chat-square-text"></i>{{ with_messages_count }} com mensagens</span>
+          <span class="apps-chip"><i class="bi bi-activity"></i>{{ recent_updates_count }} com atividade recente</span>
+          {% if has_active_filters %}<span class="apps-chip"><i class="bi bi-funnel"></i>{{ active_filter_count }} filtros ativos</span>{% endif %}
         </div>
-        <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-person me-1"></i>Voltar ao Perfil
-        </a>
+      </div>
+      <div class="apps-actions">
+        <a href="{% url 'profiles:available_jobs' %}" class="btn btn-light"><i class="bi bi-briefcase me-2"></i>Ver vagas</a>
+        <a href="{% url 'profiles:detail' %}" class="btn btn-outline-light"><i class="bi bi-person me-2"></i>Meu perfil</a>
+        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Inicio</a>
+      </div>
     </div>
 
-    {% if applications_page %}
-        <div class="list-group">
-            {% for app in applications_page %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="mb-1">{{ app.job.titulo }}</h6>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-building me-1"></i>{{ app.job.company.nome }}
-                            </p>
-                        </div>
-                        <span class="badge {% if app.estado == 'ACEITE' %}bg-success{% elif app.estado == 'REJEITADA' %}bg-danger{% elif app.estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
-                            {{ app.get_estado_display }}
-                        </span>
-                    </div>
-                    <div class="small text-muted mb-2">
-                        Candidataste-te em {{ app.created_at|date:"d/m/Y" }}
-                    </div>
-                    {% if app.messages.all %}
-                        {% with last_msg=app.messages.all.0 %}
-                            <div class="alert alert-info py-2 mb-2">
-                                <strong>Última mensagem da empresa:</strong>
-                                <div class="small text-muted">{{ last_msg.created_at|date:"d/m/Y H:i" }}</div>
-                                <div>{{ last_msg.message|linebreaksbr }}</div>
-                            </div>
-                        {% endwith %}
-                        <div class="small text-muted fw-semibold mb-1">Histórico (últimas)</div>
-                        <div class="list-group list-group-flush">
-                            {% for msg in app.messages.all|slice:":3" %}
-                                <div class="list-group-item px-0">
-                                    <div class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
-                                    <div>{{ msg.message|linebreaksbr }}</div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="mt-2">
-                            <a href="{% url 'profiles:application_messages' app.id %}" class="btn btn-sm btn-outline-secondary">
-                                Ver histórico completo
-                            </a>
-                        </div>
+    <div class="apps-stats">
+      <div class="apps-stat"><span class="apps-stat-label">Pendentes</span><span class="apps-stat-value">{{ pending_count }}</span><span class="apps-stat-meta">aguardam primeira analise</span></div>
+      <div class="apps-stat"><span class="apps-stat-label">Em analise</span><span class="apps-stat-value">{{ analysis_count }}</span><span class="apps-stat-meta">com avaliacao em curso</span></div>
+      <div class="apps-stat"><span class="apps-stat-label">Aceites</span><span class="apps-stat-value">{{ accepted_count }}</span><span class="apps-stat-meta">com resposta positiva</span></div>
+      <div class="apps-stat"><span class="apps-stat-label">Rejeitadas</span><span class="apps-stat-value">{{ rejected_count }}</span><span class="apps-stat-meta">fechadas no processo</span></div>
+    </div>
+  </section>
+
+  <div class="apps-shell">
+    <aside class="apps-sidebar">
+      <section class="apps-panel">
+        <div class="apps-panel-head">
+          <div>
+            <h2 class="apps-panel-title">Resumo do teu perfil</h2>
+            <p class="apps-panel-subtitle">Contexto rapido para acompanhar o pipeline.</p>
+          </div>
+        </div>
+        <div class="apps-profile">
+          <div class="apps-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ user.nome }}">
+            {% else %}
+              {{ user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="apps-profile-name">{{ user.nome }}</div>
+            <p class="apps-profile-line">{% if profile.distrito %}Distrito {{ profile.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+            <p class="apps-profile-line">{% if profile.completo %}Perfil completo{% else %}Perfil em progresso{% endif %}</p>
+          </div>
+        </div>
+        <div class="apps-profile-tags">
+          <span class="apps-tag highlight"><i class="bi bi-send-check"></i>{{ total_applications }} no total</span>
+          <span class="apps-tag"><i class="bi bi-chat-square-text"></i>{{ with_messages_count }} com retorno</span>
+          <span class="apps-tag muted"><i class="bi bi-clock-history"></i>{{ recent_updates_count }} ativas esta semana</span>
+        </div>
+        <div class="apps-insight">
+          <strong>Como priorizar</strong>
+          <div class="apps-copy">Comeca pelas candidaturas em analise e pelas que receberam mensagem recentemente. Sao as que mais pedem acompanhamento agora.</div>
+        </div>
+        <div class="apps-insight">
+          <strong>Leitura dos estados</strong>
+          <div class="apps-copy">Pendente significa envio concluido. Em analise indica avaliacao ativa. Aceite e rejeitada mostram o desfecho do processo.</div>
+        </div>
+      </section>
+
+      <section class="apps-panel">
+        <div class="apps-panel-head">
+          <div>
+            <h2 class="apps-panel-title">Filtrar candidaturas</h2>
+            <p class="apps-panel-subtitle">Procura por vaga ou empresa e filtra por estado.</p>
+          </div>
+          {% if has_active_filters %}
+            <span class="apps-tag"><i class="bi bi-funnel"></i>{{ active_filter_count }}</span>
+          {% endif %}
+        </div>
+
+        <form method="get" class="apps-filter-grid">
+          <div class="apps-field">
+            <label for="applications-query">Palavra-chave</label>
+            <input id="applications-query" type="text" name="q" class="form-control" placeholder="Titulo da vaga ou empresa" value="{{ selected_query }}">
+          </div>
+          <div class="apps-field">
+            <label for="applications-status">Estado</label>
+            <select id="applications-status" name="estado" class="form-select">
+              <option value="">Todos</option>
+              {% for value,label in status_choices %}
+                <option value="{{ value }}" {% if selected_estado == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="apps-filter-actions">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-2"></i>Aplicar filtros</button>
+            <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-secondary">Limpar</a>
+          </div>
+        </form>
+      </section>
+    </aside>
+
+    <section>
+      <div class="apps-results-head">
+        <div>
+          <h2 class="apps-results-title">Pipeline de candidaturas</h2>
+          <p class="apps-panel-subtitle mb-0">{% if has_active_filters %}Encontramos {{ filtered_count }} candidatura{{ filtered_count|pluralize }} para os filtros atuais.{% else %}Aqui tens a visao completa das tuas candidaturas, ordenadas da mais recente para a mais antiga.{% endif %}</p>
+        </div>
+        <div class="apps-profile-tags">
+          <span class="apps-tag muted"><i class="bi bi-grid"></i>Pagina {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span>
+        </div>
+      </div>
+
+      {% if applications_page.object_list %}
+        <div class="apps-results-grid">
+          {% for app in applications_page %}
+            <article class="app-card">
+              <div class="app-card-top">
+                <div class="app-company">
+                  <div class="app-company-logo" aria-hidden="true">
+                    {% if app.job.company.logo %}
+                      <img src="{{ app.job.company.logo.url }}" alt="{{ app.job.company.nome }}">
                     {% else %}
-                        <div class="text-muted small">Sem mensagem da empresa.</div>
+                      {{ app.company_initials }}
                     {% endif %}
+                  </div>
+                  <div>
+                    <div class="app-company-name">{{ app.job.company.nome }}</div>
+                    <div class="app-title">{{ app.job.titulo }}</div>
+                    <div class="app-card-meta">
+                      <span><i class="bi bi-calendar-event me-1"></i>{{ app.created_at|date:"d/m/Y" }}</span>
+                      <span><i class="bi bi-geo-alt me-1"></i>{{ app.job.distrito.nome|default:"Sem distrito" }}</span>
+                      <span><i class="bi bi-briefcase me-1"></i>{{ app.job.get_tipo_display }}</span>
+                    </div>
+                  </div>
                 </div>
-            {% endfor %}
+
+                <div class="app-card-tags">
+                  <span class="app-pill {% if app.estado == 'ACEITE' %}highlight{% elif app.estado == 'REJEITADA' %}danger{% elif app.estado == 'EM_ANALISE' %}warning{% else %}muted{% endif %}">
+                    <i class="bi bi-check2-circle"></i>{{ app.get_estado_display }}
+                  </span>
+                  {% if app.is_recent %}
+                    <span class="app-pill"><i class="bi bi-lightning-charge"></i>Recente</span>
+                  {% endif %}
+                  {% if app.job.estado == 'ATIVA' %}
+                    <span class="app-pill highlight"><i class="bi bi-broadcast"></i>Vaga ativa</span>
+                  {% else %}
+                    <span class="app-pill muted"><i class="bi bi-pause-circle"></i>{{ app.job.get_estado_display }}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="app-grid">
+                <div class="app-fact">
+                  <span class="app-fact-label">Area</span>
+                  <span class="app-fact-value">{% if app.job.area_formacao %}{{ app.job.get_area_formacao_display }}{% else %}Nao indicada{% endif %}</span>
+                </div>
+                <div class="app-fact">
+                  <span class="app-fact-label">Mensagens</span>
+                  <span class="app-fact-value">{{ app.total_messages_count }}</span>
+                </div>
+                <div class="app-fact">
+                  <span class="app-fact-label">Remuneracao</span>
+                  <span class="app-fact-value">{% if app.job.salario %}{{ app.job.salario }}{% else %}A combinar{% endif %}</span>
+                </div>
+                <div class="app-fact">
+                  <span class="app-fact-label">Ultima atividade</span>
+                  <span class="app-fact-value">{{ app.latest_touch|date:"d/m/Y H:i" }}</span>
+                </div>
+              </div>
+
+              {% if app.mensagem %}
+                <div class="app-message-box">
+                  <div class="app-message-head">
+                    <div>
+                      <div class="app-message-title">Mensagem enviada por ti</div>
+                      <div class="app-message-meta">Incluida no momento da candidatura.</div>
+                    </div>
+                    <span class="app-pill muted"><i class="bi bi-chat-dots"></i>Apresentacao</span>
+                  </div>
+                  <p class="app-message-copy">{{ app.mensagem|truncatewords:28 }}</p>
+                </div>
+              {% endif %}
+
+              {% if app.latest_message %}
+                <div class="app-message-box">
+                  <div class="app-message-head">
+                    <div>
+                      <div class="app-message-title">Ultima interacao</div>
+                      <div class="app-message-meta">{{ app.latest_message.get_sender_display }} em {{ app.latest_message.created_at|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <span class="app-pill {% if app.latest_message.sender == 'EMP' %}highlight{% else %}muted{% endif %}">
+                      <i class="bi bi-chat-left-text"></i>{{ app.company_messages_count }} da empresa
+                    </span>
+                  </div>
+                  <p class="app-message-copy">{{ app.latest_message.message|truncatewords:34 }}</p>
+                </div>
+              {% elif app.resposta_empresa %}
+                <div class="app-message-box">
+                  <div class="app-message-head">
+                    <div>
+                      <div class="app-message-title">Resposta da empresa</div>
+                      <div class="app-message-meta">Mensagem guardada diretamente na candidatura.</div>
+                    </div>
+                    <span class="app-pill highlight"><i class="bi bi-building"></i>Empresa</span>
+                  </div>
+                  <p class="app-message-copy">{{ app.resposta_empresa|truncatewords:34 }}</p>
+                </div>
+              {% else %}
+                <div class="app-message-box">
+                  <div class="app-message-head">
+                    <div>
+                      <div class="app-message-title">Sem resposta ainda</div>
+                      <div class="app-message-meta">A candidatura foi registada e aguarda nova atualizacao.</div>
+                    </div>
+                    <span class="app-pill muted"><i class="bi bi-hourglass-split"></i>A aguardar</span>
+                  </div>
+                  <p class="app-message-copy">Enquanto isso, vale a pena continuar a explorar novas vagas e manter o teu perfil atualizado.</p>
+                </div>
+              {% endif %}
+
+              <div class="app-card-footer">
+                <div class="app-card-tags">
+                  {% if app.job.data_fecho %}
+                    <span class="app-pill {% if app.days_until_close >= 0 and app.days_until_close <= 7 %}warning{% else %}muted{% endif %}">
+                      <i class="bi bi-clock"></i>Prazo {{ app.job.data_fecho|date:"d/m/Y" }}
+                    </span>
+                  {% endif %}
+                  {% if app.has_messages %}
+                    <span class="app-pill highlight"><i class="bi bi-envelope"></i>{{ app.total_messages_count }} troca{{ app.total_messages_count|pluralize }}</span>
+                  {% endif %}
+                </div>
+                <div class="apps-actions">
+                  <a href="{% url 'profiles:application_messages' app.id %}" class="btn btn-outline-secondary"><i class="bi bi-chat-square-text me-2"></i>Ver historico</a>
+                  <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary"><i class="bi bi-briefcase me-2"></i>Mais vagas</a>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
         </div>
 
         {% if applications_page.paginator.num_pages > 1 %}
-            <nav class="mt-3">
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <li class="page-item {% if not applications_page.has_previous %}disabled{% endif %}">
-                        {% if applications_page.has_previous %}
-                            <a class="page-link" href="?page={{ applications_page.previous_page_number }}">Anterior</a>
-                        {% else %}
-                            <span class="page-link">Anterior</span>
-                        {% endif %}
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">
-                            Página {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}
-                        </span>
-                    </li>
-                    <li class="page-item {% if not applications_page.has_next %}disabled{% endif %}">
-                        {% if applications_page.has_next %}
-                            <a class="page-link" href="?page={{ applications_page.next_page_number }}">Próxima</a>
-                        {% else %}
-                            <span class="page-link">Próxima</span>
-                        {% endif %}
-                    </li>
-                </ul>
-            </nav>
+          <nav class="mt-4" aria-label="Paginacao de candidaturas">
+            <ul class="pagination justify-content-center mb-0">
+              <li class="page-item {% if not applications_page.has_previous %}disabled{% endif %}">
+                {% if applications_page.has_previous %}
+                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ applications_page.previous_page_number }}">Anterior</a>
+                {% else %}
+                  <span class="page-link">Anterior</span>
+                {% endif %}
+              </li>
+              <li class="page-item disabled"><span class="page-link">Pagina {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span></li>
+              <li class="page-item {% if not applications_page.has_next %}disabled{% endif %}">
+                {% if applications_page.has_next %}
+                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ applications_page.next_page_number }}">Proxima</a>
+                {% else %}
+                  <span class="page-link">Proxima</span>
+                {% endif %}
+              </li>
+            </ul>
+          </nav>
         {% endif %}
-    {% else %}
-        <div class="alert alert-info mb-0">Ainda não tens candidaturas.</div>
-    {% endif %}
+      {% else %}
+        <div class="apps-empty">
+          <i class="bi bi-send-x"></i>
+          <h2 class="apps-results-title mb-2">Ainda nao tens candidaturas nesta vista</h2>
+          <p class="apps-empty-copy mb-3">{% if has_active_filters %}Os filtros atuais nao devolveram resultados. Tenta limpar os filtros para voltares a ver todo o historico.{% else %}Quando te candidatares a uma vaga, o processo vai aparecer aqui com estado, mensagens e proximos passos.{% endif %}</p>
+          <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary">Explorar vagas</a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

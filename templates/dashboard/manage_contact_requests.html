@@ -4,72 +4,116 @@
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
-    <div class="row">
-        <div class="col-lg-2 mb-4">
-            <div class="admin-sidebar card">
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='contacts' %}
+        </aside>
+
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4">
                 <div class="card-body">
-                    <div class="admin-sidebar-title">
-                        <i class="bi bi-shield-check me-2"></i>Admin
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Autorizacoes</div>
+                        <h1 class="admin-page-title">Pedidos de contacto</h1>
+                        <p class="admin-subtitle mb-0">
+                            Centralize a aprovacao ou rejeicao dos pedidos feitos pelas empresas antes do contacto direto.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-hourglass-split"></i>
+                                {{ contact_summary.pendentes }} pendente{{ contact_summary.pendentes|pluralize }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-check2-circle"></i>
+                                {{ contact_summary.aprovados }} aprovados
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-funnel"></i>
+                                {{ contact_summary.filtrados }} no filtro atual
+                            </span>
+                        </div>
                     </div>
-                    <div class="admin-sidebar-nav">
-                        <a href="{% url 'dashboard:admin' %}" class="admin-nav-link">
-                            <i class="bi bi-speedometer2"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="{% url 'dashboard:user_list' %}" class="admin-nav-link">
-                            <i class="bi bi-people"></i>
-                            <span>Utilizadores</span>
-                        </a>
-                        <a href="{% url 'dashboard:validate_profiles' %}" class="admin-nav-link">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Validar Perfis</span>
-                        </a>
-                        <a href="{% url 'dashboard:manage_contact_requests' %}" class="admin-nav-link active">
-                            <i class="bi bi-envelope"></i>
-                            <span>Pedidos Contacto</span>
-                        </a>
-                        <a href="{% url 'dashboard:reports' %}" class="admin-nav-link">
-                            <i class="bi bi-graph-up"></i>
-                            <span>Relatorios</span>
+
+                    <div class="admin-hero-actions">
+                        <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-10">
-            <div class="card admin-hero mb-4">
-                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <div>
-                        <div class="admin-kicker">Admin</div>
-                        <h2 class="mb-1"><i class="bi bi-envelope me-2"></i>Pedidos de Contacto</h2>
-                        <div class="admin-subtitle">Autorize ou rejeite pedidos de contacto das empresas.</div>
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Pendentes</div>
+                            <div class="admin-summary-value">{{ contact_summary.pendentes }}</div>
+                            <small class="text-muted">Aguardam decisao</small>
+                        </div>
                     </div>
-                    <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
-                        <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
-                    </a>
+                </div>
+                <div class="col-md-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Aprovados</div>
+                            <div class="admin-summary-value">{{ contact_summary.aprovados }}</div>
+                            <small class="text-muted">Contactos autorizados</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Rejeitados</div>
+                            <div class="admin-summary-value">{{ contact_summary.rejeitados }}</div>
+                            <small class="text-muted">Pedidos travados</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Filtrados</div>
+                            <div class="admin-summary-value">{{ contact_summary.filtrados }}</div>
+                            <small class="text-muted">Itens na vista atual</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <form method="get" class="card card-body mb-4 admin-filter">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label">Estado</label>
-                        <select name="estado" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="PENDENTE" {% if filtro_estado == 'PENDENTE' %}selected{% endif %}>Pendente</option>
-                            <option value="APROVADO" {% if filtro_estado == 'APROVADO' %}selected{% endif %}>Aprovado</option>
-                            <option value="REJEITADO" {% if filtro_estado == 'REJEITADO' %}selected{% endif %}>Rejeitado</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <button class="btn btn-primary w-100">Filtrar</button>
+            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-7">
+                            <label class="form-label">Pesquisar</label>
+                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Empresa, jovem ou telefone">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select name="estado" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="PENDENTE" {% if filtro_estado == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                                <option value="APROVADO" {% if filtro_estado == 'APROVADO' %}selected{% endif %}>Aprovado</option>
+                                <option value="REJEITADO" {% if filtro_estado == 'REJEITADO' %}selected{% endif %}>Rejeitado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-grid gap-2">
+                            <button class="btn btn-primary">Aplicar</button>
+                            <a href="{% url 'dashboard:manage_contact_requests' %}" class="btn btn-outline-secondary">Limpar</a>
+                        </div>
                     </div>
                 </div>
             </form>
 
-            <div class="card">
+            <div class="card admin-panel">
                 <div class="card-body p-0">
+                    <div class="admin-table-header">
+                        <div>
+                            <h5 class="mb-1">Lista de pedidos</h5>
+                            <p class="text-muted mb-0">Acompanhe o estado de cada solicitacao.</p>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover align-middle admin-table mb-0">
                             <thead>
@@ -77,39 +121,56 @@
                                     <th>Empresa</th>
                                     <th>Jovem</th>
                                     <th>Estado</th>
-                                    <th>Data</th>
-                                    <th class="text-end">Acoes</th>
+                                    <th>Pedido</th>
+                                    <th>Resposta</th>
+                                    <th class="text-end">Acao</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for pedido in pedidos %}
                                     <tr>
-                                        <td>{{ pedido.company.nome }}</td>
-                                        <td>{{ pedido.youth.nome_completo }}</td>
-                                        <td>{{ pedido.get_estado_display }}</td>
-                                        <td>{{ pedido.created_at|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ pedido.company.nome }}</div>
+                                                <div class="admin-table-meta">{{ pedido.company.telefone|default:pedido.company.user.telefone|default:"-" }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ pedido.youth.nome_completo }}</div>
+                                                <div class="admin-table-meta">{{ pedido.youth.telefone|default:"-" }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="admin-status-pill {% if pedido.estado == 'PENDENTE' %}pending{% elif pedido.estado == 'APROVADO' %}success{% else %}neutral{% endif %}">
+                                                {{ pedido.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ pedido.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ pedido.responded_at|date:"d/m/Y H:i"|default:"-" }}</td>
                                         <td class="text-end">
                                             {% if pedido.estado == 'PENDENTE' %}
-                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}"
-                                                   class="btn btn-sm btn-success"
-                                                   title="Aprovar"
-                                                   aria-label="Aprovar">
-                                                    <i class="bi bi-check2"></i>
-                                                </a>
-                                                <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}"
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   title="Rejeitar"
-                                                   aria-label="Rejeitar">
-                                                    <i class="bi bi-x-lg"></i>
-                                                </a>
+                                                <div class="admin-queue-actions justify-content-end">
+                                                    <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
+                                                        <i class="bi bi-check2"></i>
+                                                    </a>
+                                                    <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </a>
+                                                </div>
                                             {% else %}
-                                                <span class="text-muted">-</span>
+                                                <span class="text-muted">Concluido</span>
                                             {% endif %}
                                         </td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">Nao existem pedidos.</td>
+                                        <td colspan="6">
+                                            <div class="admin-empty-state">
+                                                <i class="bi bi-envelope-paper"></i>
+                                                <p class="mb-0">Nao existem pedidos de contacto com os filtros atuais.</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

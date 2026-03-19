@@ -38,7 +38,7 @@ class Company(models.Model):
     # Dados da empresa
     nome = models.CharField(_('nome da empresa'), max_length=255)
     nif = models.CharField(_('NIF'), max_length=20, blank=True)
-    setor = models.CharField(_('setor de atividade'), max_length=3, choices=SETOR_CHOICES)
+    setor = models.JSONField(_('setores de atividade'), default=list, blank=True)
     descricao = models.TextField(_('descrição'), blank=True)
     
     # Contactos
@@ -79,6 +79,40 @@ class Company(models.Model):
     
     def __str__(self):
         return self.nome
+
+    @classmethod
+    def get_setor_mapping(cls):
+        return dict(cls.SETOR_CHOICES)
+
+    @property
+    def setor_codes(self):
+        codes = self.setor or []
+        if isinstance(codes, str):
+            codes = [codes] if codes else []
+        elif isinstance(codes, (tuple, set)):
+            codes = list(codes)
+        elif not isinstance(codes, list):
+            codes = [str(codes)] if codes else []
+
+        normalized = []
+        for code in codes:
+            value = str(code).strip()
+            if value and value not in normalized:
+                normalized.append(value)
+        return normalized
+
+    @property
+    def setores_display(self):
+        mapping = self.get_setor_mapping()
+        labels = [str(mapping.get(code, code)) for code in self.setor_codes]
+        return ', '.join(labels)
+
+    def get_setor_display(self):
+        return self.setores_display
+
+    def save(self, *args, **kwargs):
+        self.setor = self.setor_codes
+        super().save(*args, **kwargs)
     
     @property
     def total_vagas(self):

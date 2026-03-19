@@ -4,178 +4,773 @@
 
 {% block extra_css %}
 <style>
-  .search-hero {
-    background: linear-gradient(135deg, rgba(0,102,204,0.12) 0%, rgba(0,168,107,0.12) 100%);
-    border: 1px solid rgba(0,0,0,0.08);
+  .talent-search-page {
+    color: #122033;
   }
-  .filter-label {
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
+
+  .talent-search-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    padding: 1.8rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.3), transparent 32%),
+      linear-gradient(135deg, rgba(10, 52, 86, 0.98), rgba(14, 113, 147, 0.95) 55%, rgba(34, 166, 120, 0.88));
+    box-shadow: 0 24px 52px rgba(10, 52, 86, 0.18);
+  }
+
+  .talent-search-hero::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    bottom: -130px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .talent-search-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .talent-search-hero-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .talent-search-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
     text-transform: uppercase;
-    color: #0052a3;
+    letter-spacing: 0.12em;
+    opacity: 0.82;
+    margin-bottom: 0.4rem;
   }
-  .results-bar {
-    border: 1px solid rgba(0,0,0,0.06);
-    background: var(--light-bg);
+
+  .talent-search-title {
+    font-size: clamp(1.95rem, 2.5vw, 2.7rem);
+    line-height: 1.04;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  .talent-search-subtitle {
+    max-width: 64ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .talent-search-chips,
+  .talent-search-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .talent-search-chips {
+    margin-top: 1rem;
+  }
+
+  .talent-search-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .talent-search-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .talent-search-actions .btn-outline-light {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .talent-search-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+  }
+
+  .talent-search-stat {
+    border-radius: 20px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+  }
+
+  .talent-search-stat-label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.76);
+    margin-bottom: 0.25rem;
+  }
+
+  .talent-search-stat-value {
+    display: block;
+    font-size: 1.7rem;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .talent-search-stat-meta {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.84rem;
+  }
+
+  .talent-search-shell {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .talent-panel {
+    border-radius: 24px;
+    padding: 1.35rem;
+    background: #fff;
+    border: 1px solid rgba(18, 32, 51, 0.07);
+    box-shadow: 0 20px 38px rgba(18, 32, 51, 0.08);
+  }
+
+  .talent-filter-panel {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .talent-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .talent-panel-head h5,
+  .talent-panel-head h6 {
+    margin-bottom: 0.2rem;
+  }
+
+  .talent-panel-subtitle {
+    margin: 0;
+    color: #66768c;
+    font-size: 0.92rem;
+  }
+
+  .talent-filter-section + .talent-filter-section {
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .talent-filter-label {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #0b5ed7;
+    margin-bottom: 0.35rem;
+  }
+
+  .talent-filter-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #122033;
+    margin-bottom: 0.25rem;
+  }
+
+  .talent-filter-copy {
+    color: #66768c;
+    margin-bottom: 0.9rem;
+  }
+
+  .talent-filter-grid {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .talent-field label {
+    display: block;
+    font-weight: 700;
+    color: #1f2d3d;
+    margin-bottom: 0.45rem;
+  }
+
+  .talent-field .form-control,
+  .talent-field .form-select {
+    border-radius: 14px;
+    min-height: 48px;
+    border-color: rgba(18, 32, 51, 0.12);
+    box-shadow: none;
+  }
+
+  .talent-field .form-control:focus,
+  .talent-field .form-select:focus {
+    border-color: rgba(14, 113, 147, 0.45);
+    box-shadow: 0 0 0 0.2rem rgba(14, 113, 147, 0.12);
+  }
+
+  .talent-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 16px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .talent-check .form-check-input {
+    margin-top: 0;
+  }
+
+  .talent-filter-actions {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .talent-filter-actions .btn {
+    border-radius: 14px;
+  }
+
+  .talent-filter-note {
+    margin-top: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(14, 113, 147, 0.08), rgba(34, 166, 120, 0.1));
+    color: #516175;
+    font-size: 0.92rem;
+  }
+
+  .talent-results-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .talent-results-meta {
+    color: #66768c;
+    font-size: 0.92rem;
+  }
+
+  .talent-results-meta strong {
+    color: #122033;
+  }
+
+  .talent-results-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .talent-results-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.08);
+    color: #4f6178;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .talent-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .talent-card {
+    border-radius: 24px;
+    padding: 1.1rem;
+    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    border: 1px solid rgba(18, 32, 51, 0.08);
+    height: 100%;
+  }
+
+  .talent-card-top {
+    display: flex;
+    gap: 0.95rem;
+    align-items: flex-start;
+    margin-bottom: 0.9rem;
+  }
+
+  .talent-card-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(14, 113, 147, 0.12), rgba(34, 166, 120, 0.14));
+    color: #0e7193;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .talent-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .talent-card-name {
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: #132133;
+    margin-bottom: 0.25rem;
+  }
+
+  .talent-card-subline,
+  .talent-card-copy {
+    color: #66768c;
+    font-size: 0.9rem;
+  }
+
+  .talent-card-subline {
+    margin-bottom: 0.35rem;
+  }
+
+  .talent-card-tags,
+  .talent-card-skills,
+  .talent-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .talent-card-tags {
+    margin-bottom: 0.8rem;
+  }
+
+  .talent-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .talent-tag-primary {
+    background: rgba(14, 113, 147, 0.12);
+    color: #0e7193;
+    border: 1px solid rgba(14, 113, 147, 0.18);
+  }
+
+  .talent-tag-success {
+    background: rgba(34, 166, 120, 0.12);
+    color: #15815c;
+    border: 1px solid rgba(34, 166, 120, 0.18);
+  }
+
+  .talent-tag-neutral {
+    background: #f7fafc;
+    color: #5b6e86;
+    border: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .talent-card-copy {
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+  }
+
+  .talent-card-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .talent-card-meta-item {
+    padding: 0.75rem 0.8rem;
+    border-radius: 18px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .talent-card-meta-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7a8798;
+    margin-bottom: 0.2rem;
+  }
+
+  .talent-card-meta-value {
+    color: #132133;
+    font-weight: 600;
+  }
+
+  .talent-card-skills {
+    margin-bottom: 0.95rem;
+  }
+
+  .talent-skill {
+    background: rgba(14, 113, 147, 0.1);
+    color: #0e7193;
+    border: 1px solid rgba(14, 113, 147, 0.16);
+    border-radius: 999px;
+    padding: 0.34rem 0.58rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .talent-card-actions .btn {
+    border-radius: 14px;
+    padding-inline: 0.95rem;
+  }
+
+  .talent-bulk-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.05rem;
+    margin-bottom: 1rem;
+    border-radius: 20px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .talent-bulk-copy {
+    color: #5a6a80;
+    font-size: 0.9rem;
+  }
+
+  .talent-bulk-message {
+    margin-bottom: 1rem;
+  }
+
+  .talent-bulk-message textarea {
+    border-radius: 16px;
+    min-height: 96px;
+  }
+
+  .talent-empty {
+    border-radius: 24px;
+    padding: 1.5rem;
+    text-align: center;
+    background: #f7fafc;
+    border: 1px dashed rgba(18, 32, 51, 0.14);
+    color: #66768c;
+  }
+
+  .talent-empty i {
+    display: block;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 0.55rem;
+  }
+
+  .talent-pagination .pagination {
+    margin-bottom: 0;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .talent-pagination .page-link {
+    border: 0;
     border-radius: 12px;
-    padding: 0.75rem 1rem;
+    color: #0e7193;
+    background: #f7fafc;
+    padding: 0.55rem 0.82rem;
   }
-  .profile-card {
-    border: 1px solid rgba(0,0,0,0.08);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  .talent-pagination .page-item.active .page-link {
+    background: #0e7193;
+    color: #fff;
   }
-  .profile-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0,102,204,0.18);
+
+  @media (max-width: 991.98px) {
+    .talent-search-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .talent-filter-panel {
+      position: static;
+    }
+
+    .talent-search-hero-head,
+    .talent-results-bar,
+    .talent-bulk-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .talent-search-actions .btn {
+      width: 100%;
+    }
+
+    .talent-search-stat-grid,
+    .talent-card-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
-  .skill-badge {
-    background: rgba(0,102,204,0.12);
-    color: #0052a3;
-    border: 1px solid rgba(0,102,204,0.25);
-  }
-  .profile-chip {
-    background: rgba(0,168,107,0.12);
-    color: #007a4e;
-    border: 1px solid rgba(0,168,107,0.25);
+
+  @media (max-width: 575.98px) {
+    .talent-search-stat-grid,
+    .talent-card-grid,
+    .talent-card-meta {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="search-hero rounded-4 p-3 p-md-4 mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
+<div class="talent-search-page container py-4 py-lg-5">
+  <section class="talent-search-hero mb-4">
+    <div class="talent-search-hero-head">
       <div>
-        <h4 class="mb-1">Pesquisar Jovens</h4>
-        <p class="text-muted mb-0">Combine filtros para encontrar perfis alinhados ao que procura.</p>
+        <div class="talent-search-kicker">Pesquisa de talentos</div>
+        <h1 class="talent-search-title">Pesquisar jovens</h1>
+        <p class="talent-search-subtitle">
+          Cruze filtros, encontre perfis com melhor aderencia ao que a empresa procura e avance para pedidos de contacto com mais contexto.
+        </p>
+        <div class="talent-search-chips">
+          <span class="talent-search-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="talent-search-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
+          <span class="talent-search-chip"><i class="bi bi-funnel"></i>{{ search_summary.active_filters|default:0 }} filtro{{ search_summary.active_filters|default:0|pluralize }} ativo{{ search_summary.active_filters|default:0|pluralize }}</span>
+        </div>
       </div>
-      <div class="d-flex gap-2">
-        <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-secondary btn-sm">Pedidos de contacto</a>
-        <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
+      <div class="talent-search-actions">
+        <a href="{% url 'companies:contact_request_list' %}" class="btn btn-light">
+          <i class="bi bi-chat-left-text me-2"></i>Pedidos de contacto
+        </a>
+        <a href="{% url 'companies:job_create' %}" class="btn btn-outline-light">
+          <i class="bi bi-plus-circle me-2"></i>Publicar vaga
+        </a>
+        <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-light">
+          <i class="bi bi-grid me-2"></i>Painel
+        </a>
       </div>
     </div>
-  </div>
 
-  <div class="card mb-4">
-    <div class="card-body">
+    <div class="talent-search-stat-grid">
+      <div class="talent-search-stat">
+        <span class="talent-search-stat-label">Base visivel</span>
+        <span class="talent-search-stat-value">{{ search_summary.base_total|default:0 }}</span>
+        <span class="talent-search-stat-meta">Perfis completos e disponiveis para pesquisa</span>
+      </div>
+      <div class="talent-search-stat">
+        <span class="talent-search-stat-label">Resultados</span>
+        <span class="talent-search-stat-value">{{ total|default:0 }}</span>
+        <span class="talent-search-stat-meta">Perfis encontrados com os filtros atuais</span>
+      </div>
+      <div class="talent-search-stat">
+        <span class="talent-search-stat-label">Disponiveis agora</span>
+        <span class="talent-search-stat-value">{{ search_summary.available_now|default:0 }}</span>
+        <span class="talent-search-stat-meta">Jovens com disponibilidade imediata</span>
+      </div>
+      <div class="talent-search-stat">
+        <span class="talent-search-stat-label">Com experiencia</span>
+        <span class="talent-search-stat-value">{{ search_summary.with_experience|default:0 }}</span>
+        <span class="talent-search-stat-meta">Perfis com historico profissional registado</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="talent-search-shell">
+    <aside class="talent-panel talent-filter-panel">
+      <div class="talent-panel-head">
+        <div>
+          <h5>Filtros</h5>
+          <p class="talent-panel-subtitle">Ajuste os criterios e refine os resultados sem perder contexto.</p>
+        </div>
+      </div>
+
       <form method="get">
-        <div class="row g-2">
-          <div class="col-12 col-lg-4">
-            <label class="form-label filter-label" for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>
-            {{ form.q }}
-          </div>
-          <div class="col-12 col-lg-4">
-            <label class="form-label filter-label" for="{{ form.profissao.id_for_label }}">{{ form.profissao.label }}</label>
-            {{ form.profissao }}
-          </div>
-          <div class="col-12 col-lg-4">
-            <label class="form-label filter-label" for="{{ form.skills.id_for_label }}">{{ form.skills.label }}</label>
-            {{ form.skills }}
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label class="form-label filter-label" for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
-            {{ form.distrito }}
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label class="form-label filter-label" for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
-            {{ form.nivel }}
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label class="form-label filter-label" for="{{ form.area.id_for_label }}">{{ form.area.label }}</label>
-            {{ form.area }}
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label class="form-label filter-label" for="{{ form.disponibilidade.id_for_label }}">{{ form.disponibilidade.label }}</label>
-            {{ form.disponibilidade }}
-          </div>
-          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
-            <div class="form-check mt-2">
-              {{ form.com_experiencia }}
-              <label class="form-check-label" for="{{ form.com_experiencia.id_for_label }}">{{ form.com_experiencia.label }}</label>
+        <section class="talent-filter-section">
+          <div class="talent-filter-label">Pesquisa</div>
+          <div class="talent-filter-title">Comece pelo essencial</div>
+          <div class="talent-filter-copy">Pesquise por nome, localidade, profissao ou skill principal.</div>
+          <div class="talent-filter-grid">
+            <div class="talent-field">
+              <label for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>
+              {{ form.q }}
+            </div>
+            <div class="talent-field">
+              <label for="{{ form.profissao.id_for_label }}">{{ form.profissao.label }}</label>
+              {{ form.profissao }}
+            </div>
+            <div class="talent-field">
+              <label for="{{ form.skills.id_for_label }}">{{ form.skills.label }}</label>
+              {{ form.skills }}
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
-            <button class="btn btn-primary w-100">Pesquisar</button>
+        </section>
+
+        <section class="talent-filter-section">
+          <div class="talent-filter-label">Perfil</div>
+          <div class="talent-filter-title">Aperte a selecao</div>
+          <div class="talent-filter-copy">Cruze localizacao, formacao e disponibilidade para ganhar mais aderencia.</div>
+          <div class="talent-filter-grid">
+            <div class="talent-field">
+              <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+              {{ form.distrito }}
+            </div>
+            <div class="talent-field">
+              <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
+              {{ form.nivel }}
+            </div>
+            <div class="talent-field">
+              <label for="{{ form.area.id_for_label }}">{{ form.area.label }}</label>
+              {{ form.area }}
+            </div>
+            <div class="talent-field">
+              <label for="{{ form.disponibilidade.id_for_label }}">{{ form.disponibilidade.label }}</label>
+              {{ form.disponibilidade }}
+            </div>
+            <div class="talent-check">
+              {{ form.com_experiencia }}
+              <label class="mb-0 fw-semibold" for="{{ form.com_experiencia.id_for_label }}">{{ form.com_experiencia.label }}</label>
+            </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
-            <a class="btn btn-outline-secondary w-100" href="{% url 'companies:search_youth' %}">Limpar filtros</a>
-          </div>
+        </section>
+
+        <div class="talent-filter-actions">
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-search me-2"></i>Pesquisar jovens
+          </button>
+          <a class="btn btn-outline-secondary" href="{% url 'companies:search_youth' %}">
+            <i class="bi bi-arrow-counterclockwise me-2"></i>Limpar filtros
+          </a>
         </div>
       </form>
-      <div class="small text-muted mt-2">Filtros combináveis: distrito, nível, área de formação, skills, disponibilidade, experiência e palavra-chave.</div>
-    </div>
-  </div>
 
-  <div class="results-bar d-flex flex-wrap justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">Resultados</h5>
-    <div class="small text-muted">{{ total|default:0 }} perfil(s) encontrado(s)</div>
-  </div>
+      <div class="talent-filter-note">
+        Os pedidos de contacto continuam a passar por aprovacao administrativa antes do acesso direto ao jovem.
+      </div>
+    </aside>
 
-  <div id="search-results">
-    {% include 'companies/_search_results.html' %}
+    <section class="talent-panel">
+      <div class="talent-results-bar">
+        <div>
+          <h5 class="mb-1">Resultados</h5>
+          <div class="talent-results-meta">
+            <strong>{{ total|default:0 }}</strong> perfil{{ total|default:0|pluralize }} encontrado{{ total|default:0|pluralize }}
+            de {{ search_summary.base_total|default:0 }} perfil{{ search_summary.base_total|default:0|pluralize }} disponive{{ search_summary.base_total|default:0|pluralize:"l,is" }}.
+          </div>
+        </div>
+        <div class="talent-results-toolbar">
+          <span class="talent-results-pill"><i class="bi bi-lightning-charge"></i>Ajax na paginacao</span>
+          <span class="talent-results-pill"><i class="bi bi-shield-check"></i>Contacto mediante aprovacao</span>
+        </div>
+      </div>
+
+      <div id="search-results">
+        {% include 'companies/_search_results.html' %}
+      </div>
+    </section>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('selectAll')?.addEventListener('change', function(e){
-  const checked = e.target.checked;
-  document.querySelectorAll('input[name="youth_ids"]').forEach(function(cb){ cb.checked = checked; });
-});
-</script>
-<script>
-// Funcoes para paginacao AJAX
-function attachAjaxPagination(container){
-  container.querySelectorAll('a.ajax-page').forEach(function(link){
-    link.addEventListener('click', function(e){
+function updateSelectionState() {
+  const selected = document.querySelectorAll('input[name="youth_ids"]:checked').length;
+  const counter = document.getElementById('selectedCount');
+  if (counter) {
+    counter.textContent = selected;
+  }
+
+  const all = Array.from(document.querySelectorAll('input[name="youth_ids"]'));
+  const selectAll = document.getElementById('selectAll');
+  if (selectAll) {
+    selectAll.checked = all.length > 0 && selected === all.length;
+    selectAll.indeterminate = selected > 0 && selected < all.length;
+  }
+}
+
+function attachBulkSelection(container) {
+  const selectAll = document.getElementById('selectAll');
+  if (selectAll) {
+    selectAll.addEventListener('change', function (e) {
+      const checked = e.target.checked;
+      container.querySelectorAll('input[name="youth_ids"]').forEach(function (cb) {
+        cb.checked = checked;
+      });
+      updateSelectionState();
+    });
+  }
+
+  container.querySelectorAll('input[name="youth_ids"]').forEach(function (cb) {
+    cb.addEventListener('change', updateSelectionState);
+  });
+
+  updateSelectionState();
+}
+
+function attachAjaxPagination(container) {
+  container.querySelectorAll('a.ajax-page').forEach(function (link) {
+    link.addEventListener('click', function (e) {
       e.preventDefault();
       const url = link.getAttribute('href');
-      const container = document.getElementById('search-results');
-      if(container){
-        container.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
+      const resultsContainer = document.getElementById('search-results');
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
       }
-      fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-        .then(r => r.text())
-        .then(html => {
-          if(container){
-            container.innerHTML = html;
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          if (resultsContainer) {
+            resultsContainer.innerHTML = html;
+            attachAjaxPagination(resultsContainer);
+            attachBulkSelection(resultsContainer);
           }
-          // reattach handlers
-          attachAjaxPagination(document.getElementById('search-results'));
-          attachSelectAll();
-          // atualizar URL sem recarregar
           history.pushState(null, '', url);
         });
     });
   });
 }
 
-function attachSelectAll(){
-  const cb = document.getElementById('selectAll');
-  if(!cb) return;
-  cb.addEventListener('change', function(e){
-    const checked = e.target.checked;
-    document.querySelectorAll('input[name="youth_ids"]').forEach(function(ch){ ch.checked = checked; });
-  });
-}
-
-// Inicializacao
-document.addEventListener('DOMContentLoaded', function(){
-  attachAjaxPagination(document.getElementById('search-results'));
-  attachSelectAll();
+document.addEventListener('DOMContentLoaded', function () {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+  attachAjaxPagination(container);
+  attachBulkSelection(container);
 });
 
-// Handle back/forward navigation to reload results
-window.addEventListener('popstate', function(){
-  fetch(location.search ? location.pathname + location.search : location.pathname, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-    .then(r => r.text())
-    .then(html => {
+window.addEventListener('popstate', function () {
+  fetch(location.search ? location.pathname + location.search : location.pathname, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(function (response) { return response.text(); })
+    .then(function (html) {
       const container = document.getElementById('search-results');
-      if(container){
+      if (container) {
         container.innerHTML = html;
         attachAjaxPagination(container);
-        attachSelectAll();
+        attachBulkSelection(container);
       }
     });
 });

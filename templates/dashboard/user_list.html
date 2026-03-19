@@ -1,253 +1,414 @@
 {% extends 'base/base.html' %}
+{% load humanize %}
 
 {% block title %}Utilizadores - Painel de Administracao{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
-    <div class="row">
-        <div class="col-lg-2 mb-4">
-            <div class="admin-sidebar card">
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='users' %}
+        </aside>
+
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4">
                 <div class="card-body">
-                    <div class="admin-sidebar-title">
-                        <i class="bi bi-shield-check me-2"></i>Admin
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Gestao central</div>
+                        <h1 class="admin-page-title">Utilizadores</h1>
+                        <p class="admin-subtitle mb-0">
+                            Crie novas contas, pesquise rapidamente e mantenha o estado dos acessos sob controlo.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-people"></i>
+                                {{ user_summary.total|intcomma }} utilizadores no sistema
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-funnel"></i>
+                                {{ user_summary.filtrados|intcomma }} resultado{{ user_summary.filtrados|pluralize }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-person-plus"></i>
+                                {{ user_summary.novos_7d|intcomma }} novos nos ultimos 7 dias
+                            </span>
+                        </div>
                     </div>
-                    <div class="admin-sidebar-nav">
-                        <a href="{% url 'dashboard:admin' %}" class="admin-nav-link">
-                            <i class="bi bi-speedometer2"></i>
-                            <span>Dashboard</span>
+
+                    <div class="admin-hero-actions">
+                        <a href="#criar-utilizador" class="btn btn-light btn-sm">
+                            <i class="bi bi-person-plus me-1"></i>Criar utilizador
                         </a>
-                        <a href="{% url 'dashboard:user_list' %}" class="admin-nav-link active">
-                            <i class="bi bi-people"></i>
-                            <span>Utilizadores</span>
-                        </a>
-                        <a href="{% url 'dashboard:validate_profiles' %}" class="admin-nav-link">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Validar Perfis</span>
-                        </a>
-                        <a href="{% url 'dashboard:manage_contact_requests' %}" class="admin-nav-link">
-                            <i class="bi bi-envelope"></i>
-                            <span>Pedidos Contacto</span>
-                        </a>
-                        <a href="{% url 'dashboard:reports' %}" class="admin-nav-link">
-                            <i class="bi bi-graph-up"></i>
-                            <span>Relatorios</span>
+                        <a href="#lista-utilizadores" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-table me-1"></i>Ver lista
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-10">
-            <div class="card admin-hero mb-4">
-                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <div>
-                        <div class="admin-kicker">Admin</div>
-                        <h2 class="mb-1"><i class="bi bi-people me-2"></i>Utilizadores</h2>
-                        <div class="admin-subtitle">Criar, filtrar e gerir contas do sistema.</div>
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Total de contas</div>
+                            <div class="admin-summary-value">{{ user_summary.total|intcomma }}</div>
+                            <small class="text-muted">Base completa de utilizadores</small>
+                        </div>
                     </div>
-                    <a href="#criar-utilizador" class="btn btn-light btn-sm">
-                        <i class="bi bi-person-plus me-1"></i>Criar utilizador
-                    </a>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Ativos</div>
+                            <div class="admin-summary-value">{{ user_summary.ativos|intcomma }}</div>
+                            <small class="text-muted">Contas com acesso liberado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Empresas</div>
+                            <div class="admin-summary-value">{{ user_summary.empresas|intcomma }}</div>
+                            <small class="text-muted">Perfis empresariais registados</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Equipa interna</div>
+                            <div class="admin-summary-value">{{ user_summary.equipa|intcomma }}</div>
+                            <small class="text-muted">Admins, operadores e tecnicos</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card mb-4" id="criar-utilizador">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Registar Utilizador</h5>
-                    <small class="text-muted">Apenas Admin</small>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="create_user">
-
-                        {% if create_user_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ create_user_form.non_field_errors|striptags }}
+            <div class="row g-4 mb-4" id="criar-utilizador">
+                <div class="col-xl-8">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Novo acesso</div>
+                                    <h5 class="mb-1">Criar utilizador</h5>
+                                    <p class="text-muted mb-0">Registe a conta base e adapte os campos ao tipo de perfil escolhido.</p>
+                                </div>
                             </div>
-                        {% endif %}
 
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de perfil</label>
-                            {% if create_user_form.perfil.errors %}
-                                <div class="text-danger small">{{ create_user_form.perfil.errors|striptags }}</div>
-                            {% endif %}
-                            {% with selected=create_user_form.perfil.value|default:'JO' %}
-                                <div class="row g-2">
-                                    {% for value,label in create_user_form.perfil.field.choices %}
-                                        <div class="col-6 col-md-3">
-                                            <div class="form-check card p-2 text-center h-100">
-                                                <input class="form-check-input" type="radio" name="perfil"
-                                                       id="admin_perfil_{{ value }}" value="{{ value }}"
-                                                       {% if selected == value %}checked{% endif %}>
-                                                <label class="form-check-label d-block mt-2" for="admin_perfil_{{ value }}">
-                                                    <i class="bi {% if value == 'JO' %}bi-person{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up{% else %}bi-person{% endif %} fs-4 d-block mb-1"></i>
-                                                    <strong>
-                                                        {% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador{% elif value == 'TEC' %}Técnico{% else %}{{ label }}{% endif %}
-                                                    </strong>
+                            <form method="post" enctype="multipart/form-data" novalidate class="admin-form-stack">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="create_user">
+
+                                {% if create_user_form.non_field_errors %}
+                                    <div class="alert alert-danger mb-0">
+                                        {{ create_user_form.non_field_errors|striptags }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="admin-form-section">
+                                    <div class="admin-form-section-label">Perfil</div>
+                                    {% if create_user_form.perfil.errors %}
+                                        <div class="text-danger small mb-2">{{ create_user_form.perfil.errors|striptags }}</div>
+                                    {% endif %}
+                                    {% with selected=create_user_form.perfil.value|default:'JO' %}
+                                        <div class="row g-3">
+                                            {% for value,label in create_user_form.perfil.field.choices %}
+                                                <div class="col-sm-6 col-lg-3">
+                                                    <div class="admin-radio-card">
+                                                        <input class="form-check-input" type="radio" name="perfil"
+                                                               id="admin_perfil_{{ value }}" value="{{ value }}"
+                                                               {% if selected == value %}checked{% endif %}>
+                                                        <label class="form-check-label" for="admin_perfil_{{ value }}">
+                                                            <span class="admin-radio-icon">
+                                                                <i class="bi {% if value == 'JO' %}bi-person{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up{% else %}bi-person{% endif %}"></i>
+                                                            </span>
+                                                            <span class="admin-radio-title">
+                                                                {% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador{% elif value == 'TEC' %}Tecnico{% else %}{{ label }}{% endif %}
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endwith %}
+                                </div>
+
+                                <div class="admin-form-section">
+                                    <div class="admin-form-section-label">Identidade e contacto</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="id_nome" class="form-label" id="admin_name_label">Nome completo *</label>
+                                            <input type="text" name="nome" id="id_nome"
+                                                   class="form-control{% if create_user_form.nome.errors %} is-invalid{% endif %}"
+                                                   value="{{ create_user_form.nome.value|default_if_none:'' }}"
+                                                   placeholder="Nome completo"
+                                                   required>
+                                            {% if create_user_form.nome.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.nome.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_telefone" class="form-label">Telemovel *</label>
+                                            <input type="tel" name="telefone" id="id_telefone"
+                                                   class="form-control{% if create_user_form.telefone.errors %} is-invalid{% endif %}"
+                                                   value="{{ create_user_form.telefone.value|default_if_none:'' }}"
+                                                   placeholder="+239 xxx xxxx"
+                                                   required>
+                                            {% if create_user_form.telefone.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.telefone.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_email" class="form-label">Email</label>
+                                            <input type="email" name="email" id="id_email"
+                                                   class="form-control{% if create_user_form.email.errors %} is-invalid{% endif %}"
+                                                   value="{{ create_user_form.email.value|default_if_none:'' }}"
+                                                   placeholder="nome@dominio.com">
+                                            {% if create_user_form.email.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.email.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6" id="admin_photo_group">
+                                            <label for="id_photo" class="form-label">Foto</label>
+                                            <input type="file" name="photo" id="id_photo" class="form-control" accept="image/*">
+                                        </div>
+                                        <div class="col-md-6" id="admin_nif_group">
+                                            <label for="id_nif" class="form-label">NIF *</label>
+                                            <input type="text" name="nif" id="id_nif"
+                                                   class="form-control{% if create_user_form.nif.errors %} is-invalid{% endif %}"
+                                                   value="{{ create_user_form.nif.value|default_if_none:'' }}"
+                                                   placeholder="NIF da empresa">
+                                            {% if create_user_form.nif.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.nif.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6" id="admin_bi_group">
+                                            <label for="id_bi_numero" class="form-label">Numero do BI *</label>
+                                            <input type="text" name="bi_numero" id="id_bi_numero"
+                                                   class="form-control{% if create_user_form.bi_numero.errors %} is-invalid{% endif %}"
+                                                   value="{{ create_user_form.bi_numero.value|default_if_none:'' }}"
+                                                   placeholder="Numero do BI">
+                                            {% if create_user_form.bi_numero.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.bi_numero.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-section">
+                                    <div class="admin-form-section-label">Acesso e consentimento</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="id_password1" class="form-label">Palavra-passe *</label>
+                                            <input type="password" name="password1" id="id_password1"
+                                                   class="form-control{% if create_user_form.password1.errors %} is-invalid{% endif %}"
+                                                   required>
+                                            {% if create_user_form.password1.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.password1.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_password2" class="form-label">Confirmar palavra-passe *</label>
+                                            <input type="password" name="password2" id="id_password2"
+                                                   class="form-control{% if create_user_form.password2.errors %} is-invalid{% endif %}"
+                                                   required>
+                                            {% if create_user_form.password2.errors %}
+                                                <div class="invalid-feedback d-block">{{ create_user_form.password2.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-12" id="consent-block">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="consentimento_dados" id="id_consentimento_dados"
+                                                       {% if create_user_form.consentimento_dados.value %}checked{% endif %}>
+                                                <label class="form-check-label" for="id_consentimento_dados">
+                                                    Autorizo o uso dos meus dados para fins de empregabilidade
                                                 </label>
                                             </div>
+                                            {% if create_user_form.consentimento_dados.errors %}
+                                                <div class="text-danger small mt-1">{{ create_user_form.consentimento_dados.errors|striptags }}</div>
+                                            {% endif %}
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input" type="checkbox" name="consentimento_contacto" id="id_consentimento_contacto"
+                                                       {% if create_user_form.consentimento_contacto.value %}checked{% endif %}>
+                                                <label class="form-check-label" for="id_consentimento_contacto">
+                                                    Autorizo ser contactado por SMS, WhatsApp ou email
+                                                </label>
+                                            </div>
+                                            {% if create_user_form.consentimento_contacto.errors %}
+                                                <div class="text-danger small mt-1">{{ create_user_form.consentimento_contacto.errors|striptags }}</div>
+                                            {% endif %}
                                         </div>
-                                    {% endfor %}
+                                    </div>
                                 </div>
-                            {% endwith %}
-                        </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="id_nome" class="form-label">Nome Completo *</label>
-                                <input type="text" name="nome" id="id_nome"
-                                       class="form-control{% if create_user_form.nome.errors %} is-invalid{% endif %}"
-                                       value="{{ create_user_form.nome.value|default_if_none:'' }}"
-                                       required>
-                                {% if create_user_form.nome.errors %}
-                                    <div class="invalid-feedback d-block">{{ create_user_form.nome.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_telefone" class="form-label">Telemóvel *</label>
-                                <input type="tel" name="telefone" id="id_telefone"
-                                       class="form-control{% if create_user_form.telefone.errors %} is-invalid{% endif %}"
-                                       value="{{ create_user_form.telefone.value|default_if_none:'' }}"
-                                       required>
-                                {% if create_user_form.telefone.errors %}
-                                    <div class="invalid-feedback d-block">{{ create_user_form.telefone.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_email" class="form-label">Email (opcional)</label>
-                                <input type="email" name="email" id="id_email"
-                                       class="form-control{% if create_user_form.email.errors %} is-invalid{% endif %}"
-                                       value="{{ create_user_form.email.value|default_if_none:'' }}">
-                                {% if create_user_form.email.errors %}
-                                    <div class="invalid-feedback d-block">{{ create_user_form.email.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_photo" class="form-label">Foto (opcional)</label>
-                                <input type="file" name="photo" id="id_photo" class="form-control" accept="image/*">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_password1" class="form-label">Palavra-passe *</label>
-                                <input type="password" name="password1" id="id_password1"
-                                       class="form-control{% if create_user_form.password1.errors %} is-invalid{% endif %}" required>
-                                {% if create_user_form.password1.errors %}
-                                    <div class="invalid-feedback d-block">{{ create_user_form.password1.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_password2" class="form-label">Confirmar Palavra-passe *</label>
-                                <input type="password" name="password2" id="id_password2"
-                                       class="form-control{% if create_user_form.password2.errors %} is-invalid{% endif %}" required>
-                                {% if create_user_form.password2.errors %}
-                                    <div class="invalid-feedback d-block">{{ create_user_form.password2.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-12" id="consent-block">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="consentimento_dados" id="id_consentimento_dados"
-                                           {% if create_user_form.consentimento_dados.value %}checked{% endif %}>
-                                    <label class="form-check-label" for="id_consentimento_dados">
-                                        Autorizo o uso dos meus dados para fins de empregabilidade *
-                                    </label>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-person-plus me-1"></i>Criar utilizador
+                                    </button>
                                 </div>
-                                {% if create_user_form.consentimento_dados.errors %}
-                                    <div class="text-danger small">{{ create_user_form.consentimento_dados.errors|striptags }}</div>
-                                {% endif %}
-                                <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" name="consentimento_contacto" id="id_consentimento_contacto"
-                                           {% if create_user_form.consentimento_contacto.value %}checked{% endif %}>
-                                    <label class="form-check-label" for="id_consentimento_contacto">
-                                        Autorizo ser contactado por SMS/WhatsApp/email *
-                                    </label>
-                                </div>
-                                {% if create_user_form.consentimento_contacto.errors %}
-                                    <div class="text-danger small">{{ create_user_form.consentimento_contacto.errors|striptags }}</div>
-                                {% endif %}
-                                <div class="small text-muted mt-2">Consentimentos aplicam-se apenas a Jovem/Empresa.</div>
-                            </div>
+                            </form>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="d-flex justify-content-end mt-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-person-plus me-1"></i>Criar Utilizador
-                            </button>
+                <div class="col-xl-4">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Resumo do perfil</div>
+                                    <h5 class="mb-1" id="admin_profile_title">Conta para jovem</h5>
+                                    <p class="text-muted mb-0" id="admin_profile_text">Ideal para candidaturas, documentos e validacao individual.</p>
+                                </div>
+                            </div>
+                            <div class="admin-profile-preview">
+                                <span class="admin-status-pill pending" id="admin_profile_badge">Jovem</span>
+                                <div class="admin-inline-stat-list">
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Documento pedido</span>
+                                        <strong id="admin_profile_document">BI obrigatorio</strong>
+                                    </div>
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Consentimentos</span>
+                                        <strong id="admin_profile_consent">Obrigatorios</strong>
+                                    </div>
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Foto</span>
+                                        <strong id="admin_profile_photo">Opcional</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="admin-note-card">
+                                <h6 class="mb-2">Boas praticas</h6>
+                                <ul class="admin-note-list mb-0">
+                                    <li>Use o telemovel como identificador principal do acesso.</li>
+                                    <li>Para empresas, confirme o nome comercial e o NIF antes de criar a conta.</li>
+                                    <li>Perfis internos podem ser criados sem consentimentos de contacto.</li>
+                                </ul>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
-            <form method="get" class="card card-body mb-4 admin-filter">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label">Perfil</label>
-                        <select name="perfil" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="JO" {% if filtro_perfil == 'JO' %}selected{% endif %}>Jovem</option>
-                            <option value="OP" {% if filtro_perfil == 'OP' %}selected{% endif %}>Operador</option>
-                            <option value="EMP" {% if filtro_perfil == 'EMP' %}selected{% endif %}>Empresa</option>
-                            <option value="ADM" {% if filtro_perfil == 'ADM' %}selected{% endif %}>Administrador</option>
-                            <option value="TEC" {% if filtro_perfil == 'TEC' %}selected{% endif %}>Tecnico</option>
-                        </select>
+            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+                <div class="card-body">
+                    <div class="admin-section-head compact">
+                        <div>
+                            <div class="admin-section-kicker">Pesquisa</div>
+                            <h5 class="mb-1">Filtrar lista</h5>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Ativo</label>
-                        <select name="ativo" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="sim" {% if filtro_ativo == 'sim' %}selected{% endif %}>Ativos</option>
-                            <option value="nao" {% if filtro_ativo == 'nao' %}selected{% endif %}>Inativos</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-primary w-100">Filtrar</button>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label">Pesquisar</label>
+                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Nome, telefone, email, NIF ou BI">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Perfil</label>
+                            <select name="perfil" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="JO" {% if filtro_perfil == 'JO' %}selected{% endif %}>Jovem</option>
+                                <option value="EMP" {% if filtro_perfil == 'EMP' %}selected{% endif %}>Empresa</option>
+                                <option value="OP" {% if filtro_perfil == 'OP' %}selected{% endif %}>Operador</option>
+                                <option value="ADM" {% if filtro_perfil == 'ADM' %}selected{% endif %}>Administrador</option>
+                                <option value="TEC" {% if filtro_perfil == 'TEC' %}selected{% endif %}>Tecnico</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado</label>
+                            <select name="ativo" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="sim" {% if filtro_ativo == 'sim' %}selected{% endif %}>Ativos</option>
+                                <option value="nao" {% if filtro_ativo == 'nao' %}selected{% endif %}>Inativos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-grid gap-2">
+                            <button class="btn btn-primary">Aplicar</button>
+                            <a href="{% url 'dashboard:user_list' %}" class="btn btn-outline-secondary">Limpar</a>
+                        </div>
                     </div>
                 </div>
             </form>
 
-            <div class="card">
+            <div class="card admin-panel" id="lista-utilizadores">
                 <div class="card-body p-0">
+                    <div class="admin-table-header">
+                        <div>
+                            <h5 class="mb-1">Lista de utilizadores</h5>
+                            <p class="text-muted mb-0">{{ user_summary.filtrados|intcomma }} registo{{ user_summary.filtrados|pluralize }} visivel{{ user_summary.filtrados|pluralize }}</p>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover align-middle admin-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Telefone</th>
-                                    <th>Email</th>
+                                    <th>Utilizador</th>
                                     <th>Perfil</th>
-                                    <th>Status</th>
+                                    <th>Documento</th>
+                                    <th>Distrito</th>
+                                    <th>Estado</th>
+                                    <th>Registo</th>
                                     <th class="text-end">Acao</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for user in users %}
                                     <tr>
-                                        <td>{{ user.nome }}</td>
-                                        <td>{{ user.telefone }}</td>
-                                        <td>{{ user.email|default:"-" }}</td>
-                                        <td>{{ user.get_perfil_display }}</td>
                                         <td>
-                                            {% if user.is_active %}
-                                                <span class="badge bg-success">Ativo</span>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ user.nome }}</div>
+                                                <div class="admin-table-meta">{{ user.telefone }}{% if user.email %} - {{ user.email }}{% endif %}</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="admin-status-pill info">{{ user.get_perfil_display }}</span></td>
+                                        <td>
+                                            {% if user.perfil == 'EMP' %}
+                                                {{ user.nif|default:"-" }}
+                                            {% elif user.perfil == 'JO' %}
+                                                {{ user.bi_numero|default:"-" }}
                                             {% else %}
-                                                <span class="badge bg-secondary">Inativo</span>
+                                                -
                                             {% endif %}
                                         </td>
+                                        <td>{{ user.distrito.nome|default:"-" }}</td>
+                                        <td>
+                                            <span class="admin-status-pill {% if user.is_active %}success{% else %}neutral{% endif %}">
+                                                {% if user.is_active %}Ativo{% else %}Inativo{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>{{ user.date_joined|date:"d/m/Y" }}</td>
                                         <td class="text-end">
-                                            <a href="{% url 'dashboard:user_toggle' user.pk %}"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="{% if user.is_active %}Desativar{% else %}Ativar{% endif %}"
-                                               aria-label="{% if user.is_active %}Desativar{% else %}Ativar{% endif %}">
-                                                {% if user.is_active %}
-                                                    <i class="bi bi-person-dash"></i>
-                                                {% else %}
-                                                    <i class="bi bi-person-check"></i>
-                                                {% endif %}
-                                            </a>
+                                            <div class="admin-queue-actions justify-content-end">
+                                                <a href="{% url 'dashboard:user_edit' user.pk %}?next={{ request.get_full_path|urlencode }}"
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="Editar utilizador">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <a href="{% url 'dashboard:user_toggle' user.pk %}?next={{ request.get_full_path|urlencode }}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="{% if user.is_active %}Desativar{% else %}Ativar{% endif %}">
+                                                    {% if user.is_active %}
+                                                        <i class="bi bi-person-dash"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-person-check"></i>
+                                                    {% endif %}
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">Nenhum utilizador encontrado.</td>
+                                        <td colspan="7">
+                                            <div class="admin-empty-state">
+                                                <i class="bi bi-search"></i>
+                                                <p class="mb-0">Nenhum utilizador corresponde aos filtros aplicados.</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -258,21 +419,117 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-function toggleConsentBlock() {
-    const selected = document.querySelector('input[name="perfil"]:checked');
-    const block = document.getElementById('consent-block');
-    if (!selected || !block) return;
-    const show = selected.value === 'JO' || selected.value === 'EMP';
-    block.style.display = show ? '' : 'none';
-}
+document.addEventListener('DOMContentLoaded', function () {
+    const profileInputs = document.querySelectorAll('input[name="perfil"]');
+    const nameLabel = document.getElementById('admin_name_label');
+    const nameInput = document.getElementById('id_nome');
+    const nifGroup = document.getElementById('admin_nif_group');
+    const biGroup = document.getElementById('admin_bi_group');
+    const photoGroup = document.getElementById('admin_photo_group');
+    const nifInput = document.getElementById('id_nif');
+    const biInput = document.getElementById('id_bi_numero');
+    const consentBlock = document.getElementById('consent-block');
+    const consentDados = document.getElementById('id_consentimento_dados');
+    const consentContacto = document.getElementById('id_consentimento_contacto');
+    const profileTitle = document.getElementById('admin_profile_title');
+    const profileText = document.getElementById('admin_profile_text');
+    const profileBadge = document.getElementById('admin_profile_badge');
+    const profileDocument = document.getElementById('admin_profile_document');
+    const profileConsent = document.getElementById('admin_profile_consent');
+    const profilePhoto = document.getElementById('admin_profile_photo');
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('input[name="perfil"]').forEach(function(radio) {
-        radio.addEventListener('change', toggleConsentBlock);
+    const config = {
+        JO: {
+            nameLabel: 'Nome completo *',
+            namePlaceholder: 'Nome completo',
+            title: 'Conta para jovem',
+            text: 'Ideal para candidaturas, documentos e validacao individual.',
+            badge: 'Jovem',
+            document: 'BI obrigatorio',
+            consent: 'Obrigatorios',
+            photo: 'Opcional',
+            showNif: false,
+            showBi: true,
+            showPhoto: true,
+            showConsent: true
+        },
+        EMP: {
+            nameLabel: 'Nome da empresa *',
+            namePlaceholder: 'Nome da empresa',
+            title: 'Conta para empresa',
+            text: 'Preparada para criar perfil empresarial, publicar vagas e pedir contactos.',
+            badge: 'Empresa',
+            document: 'NIF obrigatorio',
+            consent: 'Obrigatorios',
+            photo: 'Nao aplicavel',
+            showNif: true,
+            showBi: false,
+            showPhoto: false,
+            showConsent: true
+        },
+        OP: {
+            nameLabel: 'Nome completo *',
+            namePlaceholder: 'Nome do operador',
+            title: 'Conta para operador',
+            text: 'Indicada para apoio a registos assistidos e validacao local.',
+            badge: 'Operador',
+            document: 'Nao obrigatorio',
+            consent: 'Nao exigidos',
+            photo: 'Nao aplicavel',
+            showNif: false,
+            showBi: false,
+            showPhoto: false,
+            showConsent: false
+        },
+        TEC: {
+            nameLabel: 'Nome completo *',
+            namePlaceholder: 'Nome do tecnico',
+            title: 'Conta para tecnico',
+            text: 'Focada em leitura de indicadores, monitorizacao e acompanhamento.',
+            badge: 'Tecnico',
+            document: 'Nao obrigatorio',
+            consent: 'Nao exigidos',
+            photo: 'Nao aplicavel',
+            showNif: false,
+            showBi: false,
+            showPhoto: false,
+            showConsent: false
+        }
+    };
+
+    function updateCreateUserForm() {
+        const selected = document.querySelector('input[name="perfil"]:checked');
+        const current = config[selected ? selected.value : 'JO'];
+
+        if (nameLabel) nameLabel.textContent = current.nameLabel;
+        if (nameInput) nameInput.placeholder = current.namePlaceholder;
+        if (profileTitle) profileTitle.textContent = current.title;
+        if (profileText) profileText.textContent = current.text;
+        if (profileBadge) profileBadge.textContent = current.badge;
+        if (profileDocument) profileDocument.textContent = current.document;
+        if (profileConsent) profileConsent.textContent = current.consent;
+        if (profilePhoto) profilePhoto.textContent = current.photo;
+
+        if (nifGroup) nifGroup.hidden = !current.showNif;
+        if (biGroup) biGroup.hidden = !current.showBi;
+        if (photoGroup) photoGroup.hidden = !current.showPhoto;
+        if (consentBlock) consentBlock.style.display = current.showConsent ? '' : 'none';
+
+        if (nifInput) nifInput.required = current.showNif;
+        if (biInput) biInput.required = current.showBi;
+        if (consentDados) consentDados.required = current.showConsent;
+        if (consentContacto) consentContacto.required = current.showConsent;
+    }
+
+    profileInputs.forEach(function (input) {
+        input.addEventListener('change', updateCreateUserForm);
     });
-    toggleConsentBlock();
+
+    updateCreateUserForm();
 });
 </script>
 {% endblock %}

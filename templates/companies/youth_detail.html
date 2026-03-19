@@ -1,157 +1,481 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Jovem - Perfil{% endblock %}
+{% block title %}Perfil do Jovem{% endblock %}
 
 {% block extra_css %}
 <style>
-  .profile-hero {
-    background: linear-gradient(135deg, rgba(0,102,204,0.12) 0%, rgba(0,168,107,0.12) 100%);
-    border: 1px solid rgba(0,0,0,0.08);
+  .talent-detail-page { color: #122033; }
+  .talent-detail-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255,255,255,.28), transparent 32%),
+      linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
   }
-  .profile-chip {
-    background: rgba(0,168,107,0.12);
-    color: #007a4e;
-    border: 1px solid rgba(0,168,107,0.25);
+  .talent-detail-hero::after {
+    content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px;
+    border-radius: 999px; background: rgba(255,255,255,.08);
   }
-  .skill-badge {
-    background: rgba(0,102,204,0.12);
-    color: #0052a3;
-    border: 1px solid rgba(0,102,204,0.25);
+  .talent-detail-hero > * { position: relative; z-index: 1; }
+  .talent-detail-hero-head, .talent-detail-panel-head, .talent-detail-entry-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
   }
-  .section-card {
-    border: 1px solid rgba(0,0,0,0.08);
+  .talent-detail-identity { display: flex; align-items: flex-start; gap: 1rem; }
+  .talent-detail-avatar {
+    width: 96px; height: 96px; border-radius: 28px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22); color: #fff; font-size: 1.9rem; font-weight: 700;
   }
-  .timeline-item {
-    border-left: 2px solid rgba(0,102,204,0.35);
-    padding-left: 1rem;
-    margin-bottom: 1rem;
+  .talent-detail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .talent-detail-kicker {
+    font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem;
   }
-  .timeline-item:last-child {
-    margin-bottom: 0;
+  .talent-detail-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .talent-detail-subtitle { margin: 0; max-width: 62ch; color: rgba(255,255,255,.86); }
+  .talent-detail-chips, .talent-detail-actions, .talent-detail-tags, .talent-detail-doc-actions {
+    display: flex; flex-wrap: wrap; gap: .65rem;
+  }
+  .talent-detail-chips { margin-top: 1rem; }
+  .talent-detail-chip {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600;
+  }
+  .talent-detail-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .talent-detail-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .talent-detail-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .talent-detail-stat {
+    border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px);
+  }
+  .talent-detail-stat-label {
+    display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem;
+  }
+  .talent-detail-stat-value { display: block; font-size: 1.7rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .talent-detail-stat-meta { color: rgba(255,255,255,.8); font-size: .84rem; }
+  .talent-detail-shell { display: grid; grid-template-columns: minmax(290px, 340px) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+  .talent-detail-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .talent-detail-panel {
+    border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07);
+    box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .talent-detail-panel-head h5, .talent-detail-panel-head h6 { margin-bottom: .2rem; }
+  .talent-detail-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .talent-detail-summary-row {
+    display: flex; justify-content: space-between; gap: .9rem; padding-bottom: .75rem; margin-bottom: .75rem;
+    border-bottom: 1px solid rgba(18,32,51,.08);
+  }
+  .talent-detail-summary-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
+  .talent-detail-summary-row span:first-child { color: #68788f; }
+  .talent-detail-summary-row span:last-child { text-align: right; font-weight: 600; }
+  .talent-detail-status {
+    border-radius: 22px; padding: 1rem; border: 1px solid rgba(18,32,51,.08); background: linear-gradient(180deg, #fff, #fbfdff);
+  }
+  .talent-detail-badge {
+    display: inline-flex; align-items: center; gap: .42rem; padding: .42rem .75rem; border-radius: 999px;
+    font-size: .8rem; font-weight: 700; margin-bottom: .8rem;
+  }
+  .talent-detail-badge.approved { background: rgba(25,135,84,.12); color: #146c43; border: 1px solid rgba(25,135,84,.2); }
+  .talent-detail-badge.pending { background: rgba(255,193,7,.16); color: #8f6a00; border: 1px solid rgba(255,193,7,.24); }
+  .talent-detail-badge.rejected, .talent-detail-badge.locked { background: rgba(220,53,69,.1); color: #a02834; border: 1px solid rgba(220,53,69,.18); }
+  .talent-detail-status p, .talent-detail-about, .talent-detail-copy { color: #4f6178; }
+  .talent-detail-contact-list, .talent-detail-note-list, .talent-detail-list, .talent-detail-doc-list, .talent-detail-skill-grid {
+    display: grid; gap: .85rem;
+  }
+  .talent-detail-contact, .talent-detail-note {
+    display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border-radius: 18px;
+    background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .talent-detail-icon {
+    width: 2.2rem; height: 2.2rem; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(14,113,147,.1); color: #0e7193; flex-shrink: 0;
+  }
+  .talent-detail-icon-label {
+    display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+    color: #7b8798; margin-bottom: .18rem;
+  }
+  .talent-detail-tag {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .42rem .72rem; border-radius: 999px;
+    background: rgba(14,113,147,.1); border: 1px solid rgba(14,113,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600;
+  }
+  .talent-detail-tag.muted { background: #f7fafc; color: #5b6e86; border-color: rgba(18,32,51,.08); }
+  .talent-detail-entry, .talent-detail-doc, .talent-detail-skill {
+    border-radius: 22px; padding: 1rem; background: linear-gradient(180deg, #fff, #fbfdff); border: 1px solid rgba(18,32,51,.07);
+  }
+  .talent-detail-entry { border-left: 4px solid #0e7193; padding-left: 1.05rem; }
+  .talent-detail-entry-title, .talent-detail-doc-title, .talent-detail-skill-title { font-size: 1rem; font-weight: 700; color: #122033; margin-bottom: .2rem; }
+  .talent-detail-entry-subtitle, .talent-detail-entry-copy, .talent-detail-doc-meta { color: #66768c; }
+  .talent-detail-entry-meta, .talent-detail-doc-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; font-size: .88rem; }
+  .talent-detail-entry-meta .badge, .talent-detail-doc-meta .badge { border-radius: 999px; padding: .42rem .68rem; font-weight: 600; }
+  .talent-detail-skill-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .talent-detail-skill-level {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .64rem; border-radius: 999px;
+    background: rgba(34,166,120,.12); color: #15815c; border: 1px solid rgba(34,166,120,.18); font-size: .8rem; font-weight: 700;
+  }
+  .talent-detail-doc { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+  .talent-detail-doc-preview {
+    width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; background: #f4f7fb;
+    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(18,32,51,.08);
+  }
+  .talent-detail-doc-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .talent-detail-doc-preview i { font-size: 1.5rem; color: #0e7193; }
+  .talent-detail-doc-actions { margin-left: auto; }
+  .talent-detail-empty {
+    border-radius: 22px; padding: 1.3rem; text-align: center; background: #f7fafc;
+    border: 1px dashed rgba(18,32,51,.14); color: #66768c;
+  }
+  .talent-detail-empty i { display: block; font-size: 1.7rem; color: #0e7193; margin-bottom: .55rem; }
+  @media (max-width: 991.98px) {
+    .talent-detail-shell { grid-template-columns: 1fr; }
+    .talent-detail-sidebar { position: static; }
+    .talent-detail-hero-head, .talent-detail-entry-head { flex-direction: column; align-items: stretch; }
+    .talent-detail-actions .btn { width: 100%; }
+    .talent-detail-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    .talent-detail-hero { padding: 1.35rem; }
+    .talent-detail-identity { flex-direction: column; }
+    .talent-detail-stats, .talent-detail-skill-grid { grid-template-columns: 1fr; }
+    .talent-detail-doc-actions { margin-left: 0; width: 100%; }
+    .talent-detail-doc-actions .btn { flex: 1 1 auto; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="profile-hero rounded-4 p-3 p-md-4 mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
+<div class="talent-detail-page container py-4 py-lg-5">
+  <section class="talent-detail-hero mb-4">
+    <div class="talent-detail-hero-head">
       <div>
-        <h3 class="mb-1">Perfil do jovem</h3>
-        <p class="text-muted mb-0">Resumo completo para avaliação rápida e solicitação de contacto.</p>
-      </div>
-      <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Voltar à pesquisa</a>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <div class="col-12 col-lg-4">
-      <div class="card section-card p-3 text-center">
-        <div class="mx-auto mb-3" style="width:140px;height:140px;border-radius:14px;overflow:hidden;">
-          {% if profile.photo %}
-            <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}" style="width:140px;height:140px;object-fit:cover;">
-          {% else %}
-            <div style="width:140px;height:140px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:40px;color:#555;">
+        <div class="talent-detail-identity">
+          <div class="talent-detail-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}">
+            {% else %}
               {{ profile.nome_completo|slice:":2"|upper }}
-            </div>
-          {% endif %}
-        </div>
-
-        <h4 class="mb-1">{{ profile.nome_completo }}</h4>
-        <div class="text-muted small mb-2">
-          {{ profile.localidade|default:'-' }}{% if profile.distrito %}, {{ profile.distrito.nome }}{% endif %}
-        </div>
-
-        <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-          <span class="badge profile-chip">{{ profile.get_disponibilidade_display }}</span>
-          <span class="badge profile-chip">{{ profile.get_situacao_atual_display }}</span>
-          {% if profile.idade %}
-            <span class="badge profile-chip">{{ profile.idade }} anos</span>
-          {% endif %}
-        </div>
-
-        <div class="mb-3">
-          {% if existing_request %}
-            <span class="badge {% if existing_request.estado == 'APROVADO' %}bg-success{% elif existing_request.estado == 'PENDENTE' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-              Pedido: {{ existing_request.get_estado_display }}
-            </span>
-            {% if existing_request.estado != 'APROVADO' %}
-              <div class="small text-muted mt-2">O contacto é liberado após aprovação do administrador.</div>
             {% endif %}
-          {% else %}
-            <a href="{% url 'companies:contact_request_create' profile.id %}" class="btn btn-primary btn-sm">Solicitar contacto</a>
-          {% endif %}
+          </div>
+          <div>
+            <div class="talent-detail-kicker">Talento em destaque</div>
+            <h1 class="talent-detail-title">{{ profile.nome_completo }}</h1>
+            <p class="talent-detail-subtitle">
+              {{ profile.distrito.nome|default:"Distrito nao definido" }}
+              {% if profile.localidade %}<span class="mx-1">&middot;</span>{{ profile.localidade }}{% endif %}
+              <span class="mx-1">&middot;</span>Perfil pronto para avaliacao, contacto e enquadramento em oportunidades.
+            </p>
+            <div class="talent-detail-chips">
+              <span class="talent-detail-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+              <span class="talent-detail-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
+              <span class="talent-detail-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
+              <span class="talent-detail-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
+              {% if profile.idade %}<span class="talent-detail-chip"><i class="bi bi-person"></i>{{ profile.idade }} anos</span>{% endif %}
+            </div>
+          </div>
         </div>
-
-        <hr>
-
-        <div class="text-start">
-          <h6>Contacto</h6>
-          <p class="mb-1 small"><strong>Telefone:</strong> {{ profile.telefone|default:'-' }}</p>
-          <p class="mb-0 small"><strong>Email:</strong> {{ profile.email|default:'-' }}</p>
-        </div>
+      </div>
+      <div class="talent-detail-actions">
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar a pesquisa</a>
+        <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-light"><i class="bi bi-chat-left-text me-2"></i>Pedidos de contacto</a>
+        {% if not existing_request %}
+          <a href="{% url 'companies:contact_request_create' profile.id %}" class="btn btn-dark"><i class="bi bi-send-check me-2"></i>Solicitar contacto</a>
+        {% endif %}
       </div>
     </div>
 
-    <div class="col-12 col-lg-8">
-      <div class="card section-card p-3 mb-3">
-        <h5>Sobre</h5>
-        <p class="text-muted mb-0">{{ profile.sobre|default:'Sem descrição disponível.' }}</p>
+    <div class="talent-detail-stats">
+      <div class="talent-detail-stat">
+        <span class="talent-detail-stat-label">Formacao</span>
+        <span class="talent-detail-stat-value">{{ education|length }}</span>
+        <span class="talent-detail-stat-meta">registo{{ education|length|pluralize }} academico{{ education|length|pluralize }}</span>
       </div>
+      <div class="talent-detail-stat">
+        <span class="talent-detail-stat-label">Experiencia</span>
+        <span class="talent-detail-stat-value">{{ experiences|length }}</span>
+        <span class="talent-detail-stat-meta">trajeto profissional registado</span>
+      </div>
+      <div class="talent-detail-stat">
+        <span class="talent-detail-stat-label">Skills</span>
+        <span class="talent-detail-stat-value">{{ skills|length }}</span>
+        <span class="talent-detail-stat-meta">competencia{{ skills|length|pluralize }} associada{{ skills|length|pluralize }}</span>
+      </div>
+      <div class="talent-detail-stat">
+        <span class="talent-detail-stat-label">Documentos</span>
+        <span class="talent-detail-stat-value">{{ documents|length }}</span>
+        <span class="talent-detail-stat-meta">anexo{{ documents|length|pluralize }} disponive{{ documents|length|pluralize:"l,is" }}</span>
+      </div>
+    </div>
+  </section>
 
-      <div class="card section-card p-3 mb-3">
-        <h5>Competências</h5>
-        <div class="d-flex flex-wrap gap-2">
-          {% for ys in skills %}
-            <span class="badge skill-badge">{{ ys.skill.nome }} ({{ ys.get_nivel_display }})</span>
-          {% empty %}
-            <span class="text-muted">Sem competências registadas.</span>
-          {% endfor %}
+  <div class="talent-detail-shell">
+    <aside class="talent-detail-sidebar">
+      <section class="talent-detail-panel">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h5>Estado do contacto</h5>
+            <p class="talent-detail-panel-subtitle">Acesso direto e proximos passos para a empresa.</p>
+          </div>
+        </div>
+
+        {% if can_view_contact %}
+          <div class="talent-detail-status">
+            <span class="talent-detail-badge approved"><i class="bi bi-check-circle"></i>{{ existing_request.get_estado_display }}</span>
+            <p>O pedido foi aprovado e os dados de contacto estao liberados para a equipa seguir com a conversa.</p>
+            <div class="talent-detail-contact-list">
+              <div class="talent-detail-contact">
+                <span class="talent-detail-icon"><i class="bi bi-telephone"></i></span>
+                <div><span class="talent-detail-icon-label">Telefone</span>{{ profile.telefone|default:"Nao informado" }}</div>
+              </div>
+              <div class="talent-detail-contact">
+                <span class="talent-detail-icon"><i class="bi bi-envelope"></i></span>
+                <div><span class="talent-detail-icon-label">Email</span>{{ profile.email|default:"Nao informado" }}</div>
+              </div>
+              {% if profile.contacto_alternativo %}
+                <div class="talent-detail-contact">
+                  <span class="talent-detail-icon"><i class="bi bi-person-lines-fill"></i></span>
+                  <div><span class="talent-detail-icon-label">Contacto alternativo</span>{{ profile.contacto_alternativo }}</div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% elif existing_request %}
+          <div class="talent-detail-status">
+            <span class="talent-detail-badge {% if existing_request.estado == 'PENDENTE' %}pending{% else %}rejected{% endif %}">
+              <i class="bi {% if existing_request.estado == 'PENDENTE' %}bi-hourglass-split{% else %}bi-x-circle{% endif %}"></i>{{ existing_request.get_estado_display }}
+            </span>
+            {% if existing_request.estado == 'PENDENTE' %}
+              <p>O pedido ja foi enviado e aguarda analise administrativa. Assim que for aprovado, o contacto direto sera liberado aqui.</p>
+            {% else %}
+              <p>O pedido nao foi aprovado. Vale acompanhar a resposta administrativa antes de insistir numa nova abordagem.</p>
+            {% endif %}
+            <div class="talent-detail-note-list">
+              <div class="talent-detail-note">
+                <span class="talent-detail-icon"><i class="bi bi-calendar-event"></i></span>
+                <div><span class="talent-detail-icon-label">Pedido criado</span>{{ existing_request.created_at|date:"d/m/Y" }}</div>
+              </div>
+              {% if existing_request.responded_at %}
+                <div class="talent-detail-note">
+                  <span class="talent-detail-icon"><i class="bi bi-clock-history"></i></span>
+                  <div><span class="talent-detail-icon-label">Ultima resposta</span>{{ existing_request.responded_at|date:"d/m/Y H:i" }}</div>
+                </div>
+              {% endif %}
+              {% if existing_request.resposta_admin %}
+                <div class="talent-detail-note">
+                  <span class="talent-detail-icon"><i class="bi bi-shield-check"></i></span>
+                  <div><span class="talent-detail-icon-label">Observacao do admin</span>{{ existing_request.resposta_admin }}</div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div class="talent-detail-status">
+            <span class="talent-detail-badge locked"><i class="bi bi-lock"></i>Sem pedido ativo</span>
+            <p>Os dados diretos do jovem ficam protegidos ate existir um pedido de contacto submetido e aprovado.</p>
+            <div class="talent-detail-note-list">
+              <div class="talent-detail-note">
+                <span class="talent-detail-icon"><i class="bi bi-search"></i></span>
+                <div><span class="talent-detail-icon-label">Passo 1</span>Avaliar experiencia, formacao, skills e documentos do perfil.</div>
+              </div>
+              <div class="talent-detail-note">
+                <span class="talent-detail-icon"><i class="bi bi-send-check"></i></span>
+                <div><span class="talent-detail-icon-label">Passo 2</span>Enviar o pedido com contexto claro sobre o interesse da empresa.</div>
+              </div>
+            </div>
+            <a href="{% url 'companies:contact_request_create' profile.id %}" class="btn btn-primary btn-sm mt-3"><i class="bi bi-chat-left-text me-1"></i>Solicitar contacto</a>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="talent-detail-panel">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h6>Resumo rapido</h6>
+            <p class="talent-detail-panel-subtitle">Leitura compacta para decisao rapida.</p>
+          </div>
+        </div>
+        <div class="talent-detail-summary-row"><span>Idade</span><span>{% if profile.idade %}{{ profile.idade }} anos{% else %}Nao informada{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"Nao informado" }}</span></div>
+        <div class="talent-detail-summary-row"><span>Localizacao</span><span>{{ profile.distrito.nome|default:"Nao definida" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Situacao</span><span>{{ profile.get_situacao_atual_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Validacao</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
+      </section>
+
+      <section class="talent-detail-panel">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h6>Interesses e canais</h6>
+            <p class="talent-detail-panel-subtitle">Sinais uteis para encaixe e abordagem.</p>
+          </div>
+        </div>
+        {% if profile.interesses_setoriais_display %}
+          <div class="talent-detail-contact mb-3">
+            <span class="talent-detail-icon"><i class="bi bi-bullseye"></i></span>
+            <div><span class="talent-detail-icon-label">Setores de interesse</span>{{ profile.interesses_setoriais_display }}</div>
+          </div>
+        {% else %}
+          <div class="talent-detail-empty mb-3"><i class="bi bi-compass"></i>O jovem ainda nao definiu setores de interesse.</div>
+        {% endif %}
+        <div class="talent-detail-tags">
+          {% if profile.consentimento_sms %}<span class="talent-detail-tag"><i class="bi bi-chat-dots"></i>SMS</span>{% endif %}
+          {% if profile.consentimento_whatsapp %}<span class="talent-detail-tag"><i class="bi bi-whatsapp"></i>WhatsApp</span>{% endif %}
+          {% if profile.consentimento_email %}<span class="talent-detail-tag"><i class="bi bi-envelope-check"></i>Email</span>{% endif %}
+          {% if not profile.consentimento_sms and not profile.consentimento_whatsapp and not profile.consentimento_email %}
+            <span class="talent-detail-tag muted"><i class="bi bi-shield-exclamation"></i>Sem canais extra ativos</span>
+          {% endif %}
+        </div>
+      </section>
+    </aside>
+
+    <section>
+      <section class="talent-detail-panel mb-4">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h5>Sobre o jovem</h5>
+            <p class="talent-detail-panel-subtitle">Resumo pessoal para perceber contexto, motivacao e objetivos.</p>
+          </div>
+        </div>
+        <div class="talent-detail-about">
+          {% if profile.sobre %}
+            {{ profile.sobre|linebreaks }}
+          {% else %}
+            <div class="talent-detail-empty"><i class="bi bi-person-lines-fill"></i>Este perfil ainda nao tem uma apresentacao pessoal escrita.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <div class="row g-4">
+        <div class="col-12 col-xl-5">
+          <section class="talent-detail-panel h-100">
+            <div class="talent-detail-panel-head">
+              <div>
+                <h5>Skills</h5>
+                <p class="talent-detail-panel-subtitle">Competencias registadas para leitura rapida.</p>
+              </div>
+            </div>
+            {% if skills %}
+              <div class="talent-detail-skill-grid">
+                {% for youth_skill in skills %}
+                  <article class="talent-detail-skill">
+                    <div class="talent-detail-skill-title">{{ youth_skill.skill.nome }}</div>
+                    <span class="talent-detail-skill-level"><i class="bi bi-bar-chart"></i>{{ youth_skill.get_nivel_display }}</span>
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="talent-detail-empty"><i class="bi bi-stars"></i>Sem skills registadas neste momento.</div>
+            {% endif %}
+          </section>
+        </div>
+
+        <div class="col-12 col-xl-7">
+          <section class="talent-detail-panel h-100">
+            <div class="talent-detail-panel-head">
+              <div>
+                <h5>Formacao</h5>
+                <p class="talent-detail-panel-subtitle">Percurso academico e tecnico informado no perfil.</p>
+              </div>
+            </div>
+            {% if education %}
+              <div class="talent-detail-list">
+                {% for edu in education %}
+                  <article class="talent-detail-entry">
+                    <div class="talent-detail-entry-title">{{ edu.get_nivel_display }}</div>
+                    <div class="talent-detail-entry-subtitle">{{ edu.instituicao|default:"Instituicao nao informada" }}</div>
+                    {% if edu.curso %}<p class="talent-detail-entry-copy mb-0">{{ edu.curso }}</p>{% endif %}
+                    <div class="talent-detail-entry-meta">
+                      <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
+                      {% if edu.ano %}<span class="badge bg-light text-dark border">{{ edu.ano }}</span>{% endif %}
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="talent-detail-empty"><i class="bi bi-book"></i>Sem formacao registada.</div>
+            {% endif %}
+          </section>
         </div>
       </div>
 
-      <div class="card section-card p-3 mb-3">
-        <h5>Formação</h5>
-        {% if education %}
-          <div class="list-group list-group-flush">
-            {% for edu in education %}
-              <div class="list-group-item px-0">
-                <div class="fw-semibold">{{ edu.instituicao|default:'-' }}</div>
-                <div class="small text-muted">
-                  {{ edu.get_nivel_display }} • {{ edu.get_area_formacao_display }}{% if edu.ano %} • {{ edu.ano }}{% endif %}
+      <section class="talent-detail-panel mt-4">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h5>Experiencia profissional</h5>
+            <p class="talent-detail-panel-subtitle">Historico de trabalho, estagio ou outras experiencias relevantes.</p>
+          </div>
+        </div>
+        {% if experiences %}
+          <div class="talent-detail-list">
+            {% for exp in experiences %}
+              <article class="talent-detail-entry">
+                <div class="talent-detail-entry-head">
+                  <div>
+                    <div class="talent-detail-entry-title">{{ exp.cargo }}</div>
+                    <div class="talent-detail-entry-subtitle">{{ exp.entidade|default:"Entidade nao informada" }}</div>
+                    {% if exp.descricao %}<p class="talent-detail-entry-copy mb-0">{{ exp.descricao }}</p>{% endif %}
+                  </div>
                 </div>
-                {% if edu.curso %}
-                  <div class="small">Curso: {{ edu.curso }}</div>
-                {% endif %}
-              </div>
+                <div class="talent-detail-entry-meta">
+                  <span class="badge bg-light text-dark border">{{ exp.inicio|date:"m/Y" }} - {% if exp.atual %}Atual{% elif exp.fim %}{{ exp.fim|date:"m/Y" }}{% else %}-{% endif %}</span>
+                  <span class="badge bg-secondary">{{ exp.duracao }}</span>
+                </div>
+              </article>
             {% endfor %}
           </div>
         {% else %}
-          <p class="text-muted mb-0">Sem informação de formação registada.</p>
+          <div class="talent-detail-empty"><i class="bi bi-briefcase"></i>Sem experiencia profissional registada.</div>
         {% endif %}
-      </div>
+      </section>
 
-      <div class="card section-card p-3">
-        <h5>Experiências</h5>
-        {% if experiences %}
-          {% for exp in experiences %}
-            <div class="timeline-item">
-              <div class="fw-semibold">{{ exp.cargo }}</div>
-              <div class="text-muted small">{{ exp.entidade|default:'-' }}</div>
-              <div class="small text-muted">
-                {{ exp.inicio|date:"m/Y" }} - {% if exp.atual %}Presente{% elif exp.fim %}{{ exp.fim|date:"m/Y" }}{% else %}-{% endif %}
-                • {{ exp.duracao }}
-              </div>
-              {% if exp.descricao %}
-                <p class="small mt-2 mb-0">{{ exp.descricao }}</p>
-              {% endif %}
-            </div>
-          {% endfor %}
+      <section class="talent-detail-panel mt-4">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h5>Documentos</h5>
+            <p class="talent-detail-panel-subtitle">Anexos que ajudam a validar o perfil e o percurso do jovem.</p>
+          </div>
+        </div>
+        {% if documents %}
+          <div class="talent-detail-doc-list">
+            {% for doc in documents %}
+              <article class="talent-detail-doc">
+                <div class="talent-detail-doc-preview">
+                  {% with file_url=doc.arquivo.name|lower %}
+                    {% if ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}
+                      <img src="{% url 'profiles:document_view' doc.pk %}" alt="{{ doc.nome }}" loading="lazy">
+                    {% elif ".pdf" in file_url %}
+                      <i class="bi bi-file-earmark-pdf"></i>
+                    {% else %}
+                      <i class="bi bi-file-earmark-text"></i>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                <div>
+                  <div class="talent-detail-doc-title">{{ doc.nome }}</div>
+                  <div class="talent-detail-doc-meta">
+                    <span class="badge bg-secondary">{{ doc.get_tipo_display }}</span>
+                    {% if doc.verificado %}<span class="badge bg-success"><i class="bi bi-check me-1"></i>Verificado</span>{% endif %}
+                    <span class="badge bg-light text-dark border">{{ doc.created_at|date:"d/m/Y" }}</span>
+                  </div>
+                </div>
+                <div class="talent-detail-doc-actions">
+                  {% with file_url=doc.arquivo.name|lower %}
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#docPreviewModal"
+                            data-doc-url="{% url 'profiles:document_view' doc.pk %}"
+                            data-doc-name="{{ doc.nome }}"
+                            data-doc-type="{% if ".pdf" in file_url %}pdf{% elif ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}image{% else %}other{% endif %}">
+                      <i class="bi bi-eye me-1"></i>Abrir
+                    </button>
+                  {% endwith %}
+                  <a href="{% url 'profiles:document_download' doc.pk %}" class="btn btn-outline-secondary btn-sm" download><i class="bi bi-download me-1"></i>Baixar</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
         {% else %}
-          <p class="text-muted mb-0">Sem experiências registadas.</p>
+          <div class="talent-detail-empty"><i class="bi bi-file-earmark"></i>Sem documentos anexados neste perfil.</div>
         {% endif %}
-      </div>
-    </div>
+      </section>
+    </section>
   </div>
 </div>
 {% endblock %}

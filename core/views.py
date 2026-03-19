@@ -9,7 +9,7 @@ from django.db.models import Count, Q, F
 from django.http import JsonResponse
 
 from profiles.models import YouthProfile
-from companies.models import JobPost
+from companies.models import Company, JobPost
 from core.models import District
 
 
@@ -20,15 +20,14 @@ def home(request):
     stats = {
         'total_jovens': YouthProfile.objects.filter(completo=True).count(),
         'total_vagas': JobPost.objects.filter(estado='ATIVA').count(),
-        'total_empresas': YouthProfile.objects.filter(
-            user__company_profile__isnull=False
-        ).count(),
+        'total_empresas': Company.objects.filter(ativa=True).count(),
+        'total_distritos': District.objects.count(),
     }
     
     # Vagas recentes
     vagas_recentes = JobPost.objects.filter(
         estado='ATIVA'
-    ).select_related('company').annotate(
+    ).select_related('company', 'distrito').annotate(
         aceites=Count('applications', filter=Q(applications__estado='ACEITE'), distinct=True)
     ).filter(
         aceites__lt=F('numero_vagas')

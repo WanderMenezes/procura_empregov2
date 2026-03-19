@@ -2,6 +2,7 @@
 Admin para o app companies
 """
 
+from django import forms
 from django.contrib import admin
 from .models import Company, JobPost, Application, ContactRequest
 from django.utils.translation import gettext_lazy as _
@@ -13,13 +14,41 @@ class JobPostInline(admin.TabularInline):
     readonly_fields = ['data_publicacao']
 
 
+class CompanyAdminForm(forms.ModelForm):
+    setor = forms.MultipleChoiceField(
+        label=_('Setores de atividade'),
+        choices=Company.SETOR_CHOICES,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        model = Company
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        setor_value = self.initial.get('setor')
+        if setor_value is None and getattr(self.instance, 'pk', None):
+            setor_value = self.instance.setor
+
+        if isinstance(setor_value, str):
+            self.initial['setor'] = [setor_value] if setor_value else []
+        elif setor_value is None:
+            self.initial['setor'] = []
+
+    def clean_setor(self):
+        return list(dict.fromkeys(self.cleaned_data.get('setor') or []))
+
+
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
+    form = CompanyAdminForm
     list_display = [
-        'nome', 'nif', 'setor', 'distrito', 'ativa',
+        'nome', 'nif', 'setores_display_admin', 'distrito', 'ativa',
         'verificada', 'total_vagas', 'vagas_ativas', 'created_at'
     ]
-    list_filter = ['ativa', 'verificada', 'setor', 'created_at']
+    list_filter = ['ativa', 'verificada', 'created_at']
     search_fields = ['nome', 'nif', 'user__telefone', 'user__email']
     readonly_fields = ['created_at', 'updated_at']
     inlines = [JobPostInline]
@@ -37,6 +66,10 @@ class CompanyAdmin(admin.ModelAdmin):
     def desativar_empresas(self, request, queryset):
         queryset.update(ativa=False)
     desativar_empresas.short_description = _('Desativar empresas')
+
+    @admin.display(description=_('setores'))
+    def setores_display_admin(self, obj):
+        return obj.setores_display or '-'
 
 
 class ApplicationInline(admin.TabularInline):

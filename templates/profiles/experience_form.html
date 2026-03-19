@@ -1,24 +1,269 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Adicionar Experiência{% endblock %}
+{% block title %}Adicionar Experiencia{% endblock %}
+
+{% block extra_css %}
+<style>
+  .experience-page { color: #122033; }
+  .experience-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 32%), linear-gradient(135deg, rgba(13,37,66,.98), rgba(14,111,147,.94) 54%, rgba(39,161,116,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .experience-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .experience-hero > * { position: relative; z-index: 1; }
+  .experience-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .experience-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .experience-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .experience-subtitle { margin: 0; max-width: 68ch; color: rgba(255,255,255,.86); }
+  .experience-chips, .experience-actions, .experience-stats, .experience-tags, .experience-footer { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .experience-chips { margin-top: 1rem; }
+  .experience-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .88rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .experience-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .experience-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .experience-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .experience-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .experience-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .experience-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .experience-stat-meta { color: rgba(255,255,255,.84); font-size: .84rem; }
+  .experience-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .experience-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .experience-panel { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .experience-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .experience-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
+  .experience-panel-subtitle, .experience-copy, .experience-note, .experience-field-help { color: #66768c; }
+  .experience-profile { display: flex; gap: .9rem; align-items: center; }
+  .experience-avatar { width: 72px; height: 72px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.35rem; font-weight: 800; }
+  .experience-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .experience-profile-name { font-size: 1.02rem; font-weight: 700; margin-bottom: .12rem; }
+  .experience-profile-line { color: #66768c; margin: 0; }
+  .experience-tags { margin-top: .9rem; }
+  .experience-tag { display: inline-flex; align-items: center; gap: .4rem; padding: .42rem .72rem; border-radius: 999px; background: rgba(14,111,147,.1); border: 1px solid rgba(14,111,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600; }
+  .experience-tag.highlight { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .experience-tag.muted { background: #f7fafc; color: #607086; border-color: rgba(18,32,51,.08); }
+  .experience-tip { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fbfdff, #f7fafc); border: 1px solid rgba(18,32,51,.07); }
+  .experience-tip + .experience-tip { margin-top: .8rem; }
+  .experience-tip strong { display: block; margin-bottom: .18rem; color: #122033; }
+  .experience-error { margin-bottom: 1rem; padding: 1rem 1.1rem; border-radius: 18px; background: rgba(220,53,69,.08); border: 1px solid rgba(220,53,69,.14); color: #9e2230; }
+  .experience-section { margin-bottom: 1.45rem; }
+  .experience-section:last-child { margin-bottom: 0; }
+  .experience-section-label { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0e7193; margin-bottom: .4rem; }
+  .experience-section-title { font-size: 1.18rem; font-weight: 700; margin-bottom: .2rem; }
+  .experience-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; margin-top: 1rem; }
+  .experience-field { display: grid; gap: .42rem; }
+  .experience-field.full { grid-column: 1 / -1; }
+  .experience-field label { font-size: .9rem; font-weight: 700; color: #233246; }
+  .experience-field .form-control, .experience-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; }
+  .experience-field textarea.form-control { min-height: 150px; }
+  .experience-field-error { color: #b42333; font-size: .84rem; }
+  .experience-toggle { display: flex; gap: .85rem; align-items: flex-start; padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #f7fbfd); border: 1px solid rgba(18,32,51,.08); margin-top: 1rem; }
+  .experience-toggle input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; flex-shrink: 0; }
+  .experience-summary { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #f7fbfd); border: 1px solid rgba(18,32,51,.07); }
+  .experience-summary-title { font-size: .98rem; font-weight: 700; color: #122033; margin-bottom: .2rem; }
+  .experience-footer { justify-content: space-between; align-items: center; margin-top: 1.6rem; padding-top: 1.15rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .experience-footer .btn { border-radius: 14px; }
+  @media (max-width: 991.98px) { .experience-shell, .experience-stats { grid-template-columns: 1fr; } .experience-sidebar { position: static; } .experience-hero-head { flex-direction: column; align-items: stretch; } .experience-actions .btn { width: 100%; } }
+  @media (max-width: 767.98px) { .experience-grid { grid-template-columns: 1fr; } .experience-footer { flex-direction: column; align-items: stretch; } .experience-footer .btn { width: 100%; } }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <h4>Adicionar Experiência</h4>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">Adicionar</button>
-            </div>
-          </form>
+<div class="experience-page container py-4 py-lg-5">
+  <section class="experience-hero mb-4">
+    <div class="experience-hero-head">
+      <div>
+        <div class="experience-kicker">Percurso profissional</div>
+        <h1 class="experience-title">Adicionar experiencia</h1>
+        <p class="experience-subtitle">Regista um trabalho, estagio, voluntariado ou colaboracao relevante para mostrar como ja aplicaste as tuas competencias na pratica.</p>
+        <div class="experience-chips">
+          <span class="experience-chip"><i class="bi bi-briefcase"></i>{{ experience_count }} experiencia{{ experience_count|pluralize }} registada{{ experience_count|pluralize }}</span>
+          {% if latest_experience %}
+            <span class="experience-chip"><i class="bi bi-building"></i>{{ latest_experience.entidade }}</span>
+          {% endif %}
+          {% if profile.distrito %}
+            <span class="experience-chip"><i class="bi bi-geo-alt"></i>{{ profile.distrito.nome }}</span>
+          {% endif %}
+          <span class="experience-chip"><i class="bi bi-person-badge"></i>{{ user.nome }}</span>
         </div>
       </div>
+      <div class="experience-actions">
+        <a href="{% url 'profiles:detail' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar ao perfil</a>
+        <a href="{% url 'profiles:skills_edit' %}" class="btn btn-outline-light"><i class="bi bi-stars me-2"></i>Editar skills</a>
+      </div>
     </div>
+
+    <div class="experience-stats">
+      <div class="experience-stat"><span class="experience-stat-label">Registos</span><span class="experience-stat-value">{{ experience_count }}</span><span class="experience-stat-meta">experiencias no teu perfil</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Ultima entidade</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.entidade|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">referencia profissional mais recente</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Ultimo cargo</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.cargo|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">funcao registada por ultimo</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Objetivo</span><span class="experience-stat-value">+</span><span class="experience-stat-meta">dar contexto pratico ao teu perfil</span></div>
+    </div>
+  </section>
+
+  <div class="experience-shell">
+    <aside class="experience-sidebar">
+      <section class="experience-panel">
+        <div class="experience-panel-head">
+          <div>
+            <h2 class="experience-panel-title">Resumo do perfil</h2>
+            <p class="experience-panel-subtitle">Contexto rapido antes de registar a experiencia.</p>
+          </div>
+        </div>
+        <div class="experience-profile">
+          <div class="experience-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ user.nome }}">
+            {% else %}
+              {{ user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="experience-profile-name">{{ user.nome }}</div>
+            <p class="experience-profile-line">{% if profile.distrito %}Distrito {{ profile.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+            <p class="experience-profile-line">{% if profile.completo %}Perfil completo{% else %}Perfil em progresso{% endif %}</p>
+          </div>
+        </div>
+        <div class="experience-tags">
+          <span class="experience-tag highlight"><i class="bi bi-briefcase"></i>{{ experience_count }} experiencia{{ experience_count|pluralize }}</span>
+          {% if latest_experience %}
+            <span class="experience-tag"><i class="bi bi-clock-history"></i>{{ latest_experience.duracao }}</span>
+          {% else %}
+            <span class="experience-tag muted"><i class="bi bi-plus-circle"></i>Primeiro registo</span>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="experience-panel">
+        <div class="experience-panel-head">
+          <div>
+            <h2 class="experience-panel-title">Dicas para preencher</h2>
+            <p class="experience-panel-subtitle">Mantem a experiencia facil de ler e credivel.</p>
+          </div>
+        </div>
+        <div class="experience-tip">
+          <strong>Inclui experiencias reais e relevantes.</strong>
+          <div class="experience-copy">Pode ser emprego, estagio, voluntariado, projeto comunitario ou colaboracao profissional com responsabilidade clara.</div>
+        </div>
+        <div class="experience-tip">
+          <strong>Explica o que fazias.</strong>
+          <div class="experience-copy">Nao basta dizer o cargo. Uma boa descricao ajuda a mostrar competencias, autonomia e resultados.</div>
+        </div>
+        <div class="experience-tip">
+          <strong>Usa “trabalho atual” quando ainda estas la.</strong>
+          <div class="experience-copy">Assim a pagina adapta o periodo e evita pedir data de fim desnecessariamente.</div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="experience-panel">
+      {% if form.errors %}
+        <div class="experience-error">
+          Verifica os campos abaixo antes de guardar esta experiencia.
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="experience-section">
+          <div class="experience-section-label"><i class="bi bi-building"></i>Entidade e funcao</div>
+          <h2 class="experience-section-title">Onde trabalhaste e em que papel</h2>
+          <p class="experience-note mb-0">Usa o nome da entidade e um cargo ou papel que descreva bem a tua contribuicao.</p>
+          <div class="experience-grid">
+            <div class="experience-field">
+              <label for="{{ form.entidade.id_for_label }}">{{ form.entidade.label }}</label>
+              {{ form.entidade }}
+              {% if form.entidade.errors %}<div class="experience-field-error">{{ form.entidade.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="experience-field">
+              <label for="{{ form.cargo.id_for_label }}">{{ form.cargo.label }}</label>
+              {{ form.cargo }}
+              {% if form.cargo.errors %}<div class="experience-field-error">{{ form.cargo.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="experience-section">
+          <div class="experience-section-label"><i class="bi bi-calendar-range"></i>Periodo</div>
+          <h2 class="experience-section-title">Quando aconteceu esta experiencia</h2>
+          <div class="experience-grid">
+            <div class="experience-field">
+              <label for="{{ form.inicio.id_for_label }}">{{ form.inicio.label }}</label>
+              {{ form.inicio }}
+              {% if form.inicio.errors %}<div class="experience-field-error">{{ form.inicio.errors|striptags }}</div>{% endif %}
+            </div>
+            <div id="experience-end-wrap" class="experience-field">
+              <label for="{{ form.fim.id_for_label }}">{{ form.fim.label }}</label>
+              {{ form.fim }}
+              <div class="experience-field-help">Se ainda estas nesta experiencia, ativa a opcao abaixo e a data final deixa de ser necessaria.</div>
+              {% if form.fim.errors %}<div class="experience-field-error">{{ form.fim.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+
+          <label class="experience-toggle">
+            {{ form.atual }}
+            <div>
+              <div class="experience-section-title mb-1">{{ form.atual.label }}</div>
+              <div class="experience-copy">Marca esta opcao se continuas nesta funcao ou colaboracao.</div>
+              {% if form.atual.errors %}<div class="experience-field-error mt-2">{{ form.atual.errors|striptags }}</div>{% endif %}
+            </div>
+          </label>
+        </div>
+
+        <div class="experience-section">
+          <div class="experience-section-label"><i class="bi bi-card-text"></i>Responsabilidades</div>
+          <h2 class="experience-section-title">O que fizeste nesta experiencia</h2>
+          <div class="experience-grid">
+            <div class="experience-field full">
+              <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+              {{ form.descricao }}
+              <div class="experience-field-help">Foca nas tarefas principais, ferramentas usadas, tipo de publico atendido ou resultados que conseguiste.</div>
+              {% if form.descricao.errors %}<div class="experience-field-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if latest_experience %}
+          <div class="experience-summary">
+            <div class="experience-summary-title">Ultima experiencia registada</div>
+            <div class="experience-copy">
+              {{ latest_experience.cargo }} em {{ latest_experience.entidade }}
+              {% if latest_experience.inicio %} desde {{ latest_experience.inicio|date:"d/m/Y" }}{% endif %}
+              {% if latest_experience.atual %}
+                ate ao presente.
+              {% elif latest_experience.fim %}
+                ate {{ latest_experience.fim|date:"d/m/Y" }}.
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="experience-footer">
+          <div class="experience-copy">
+            Depois de guardar, esta experiencia aparece no teu perfil e reforca a leitura pratica do teu percurso.
+          </div>
+          <div class="experience-actions">
+            <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-floppy me-2"></i>Guardar experiencia</button>
+          </div>
+        </div>
+      </form>
+    </section>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const atualInput = document.getElementById('id_atual');
+    const endWrap = document.getElementById('experience-end-wrap');
+
+    function toggleEndDate() {
+      if (!atualInput || !endWrap) return;
+      endWrap.style.display = atualInput.checked ? 'none' : 'grid';
+    }
+
+    toggleEndDate();
+    if (atualInput) {
+      atualInput.addEventListener('change', toggleEndDate);
+    }
+  });
+</script>
 {% endblock %}

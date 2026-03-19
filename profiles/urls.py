@@ -32,6 +32,7 @@ urlpatterns = [
     # Documentos
     path('documentos/adicionar/', views.document_add, name='document_add'),
     path('documentos/<int:pk>/ver/', views.document_view, name='document_view'),
+    path('documentos/<int:pk>/download/', views.document_download, name='document_download'),
     path('documentos/<int:pk>/remover/', views.document_delete, name='document_delete'),
 
     # Skills

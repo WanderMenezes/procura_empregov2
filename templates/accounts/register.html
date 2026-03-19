@@ -2,203 +2,754 @@
 
 {% block title %}Registar - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+    .register-page {
+        background:
+            radial-gradient(circle at top left, rgba(15, 90, 159, 0.14) 0%, transparent 34%),
+            linear-gradient(180deg, #f5f9fc 0%, #eef3f8 100%);
+    }
+
+    .register-banner,
+    .register-form-card {
+        border: 0;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+
+    .register-banner {
+        margin-bottom: 1.5rem;
+        background: linear-gradient(145deg, #0b3b6f 0%, #0f5a9f 55%, #1e8c6c 100%);
+        color: #ffffff;
+    }
+
+    .register-banner-copy,
+    .register-banner-side {
+        padding: 2rem;
+    }
+
+    .register-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 1rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .register-banner h1 {
+        font-size: clamp(2rem, 2.8vw, 3rem);
+        line-height: 1.05;
+        margin-bottom: 1rem;
+        max-width: 12ch;
+    }
+
+    .register-banner p,
+    .register-banner small {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .register-profile-summary,
+    .register-stat-list {
+        padding: 1rem 1.1rem;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+    }
+
+    .register-profile-summary {
+        display: flex;
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .register-profile-icon {
+        width: 54px;
+        height: 54px;
+        flex: 0 0 54px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.16);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+    .register-summary-badge,
+    .register-section-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .register-summary-badge {
+        margin-bottom: 0.45rem;
+        background: rgba(255, 255, 255, 0.14);
+        color: rgba(255, 255, 255, 0.86);
+    }
+
+    .register-stat-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .register-stat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .register-stat-item strong {
+        font-size: 1.08rem;
+    }
+
+    .register-form-card .card-body {
+        padding: 2rem;
+    }
+
+    .register-form-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .register-form-head h2 {
+        margin-bottom: 0.4rem;
+        color: #11263c;
+    }
+
+    .register-form-head p,
+    .register-help {
+        color: #64748b;
+    }
+
+    .register-login-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.75rem 1rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #0f172a;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .register-section {
+        padding: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        margin-bottom: 1rem;
+    }
+
+    .register-section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .register-section-head h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+        color: #11263c;
+    }
+
+    .register-section-head p {
+        margin-bottom: 0;
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .register-section-badge {
+        background: #e9f4ff;
+        color: #0f5a9f;
+    }
+
+    .register-input-label {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.45rem;
+    }
+
+    .register-form-card .form-control,
+    .register-form-card .input-group .btn {
+        min-height: 3rem;
+        border-radius: 16px;
+    }
+
+    .register-form-card .form-control {
+        border-color: rgba(148, 163, 184, 0.34);
+    }
+
+    .register-form-card .form-control:focus {
+        border-color: #0f5a9f;
+        box-shadow: 0 0 0 0.25rem rgba(15, 90, 159, 0.14);
+    }
+
+    .profile-option {
+        display: block;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .profile-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .profile-card {
+        position: relative;
+        display: flex;
+        gap: 0.9rem;
+        min-height: 100%;
+        padding: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 22px;
+        background: #ffffff;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .profile-option:hover .profile-card,
+    .profile-option input:checked + .profile-card {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 36px rgba(15, 90, 159, 0.14);
+        border-color: #0f5a9f;
+    }
+
+    .profile-icon {
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        border-radius: 16px;
+        background: #eff6ff;
+        color: #0f5a9f;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .register-photo-box,
+    .register-consent-box {
+        padding: 1rem;
+        border-radius: 20px;
+        border: 1px dashed rgba(148, 163, 184, 0.45);
+        background: #fbfdff;
+    }
+
+    .register-photo-box {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .register-photo-preview {
+        width: 88px;
+        height: 88px;
+        flex: 0 0 88px;
+        border-radius: 24px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #d9eaf8 0%, #ebfff6 100%);
+        color: #0f5a9f;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .register-photo-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .register-password-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0;
+        display: grid;
+        gap: 0.55rem;
+    }
+
+    .register-password-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        color: #64748b;
+    }
+
+    .register-password-list li.is-valid,
+    .register-password-list li.is-valid i {
+        color: #0f7a52;
+    }
+
+    .register-submit {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .register-submit .btn {
+        min-width: 220px;
+        border-radius: 18px;
+        padding: 0.95rem 1.2rem;
+        font-weight: 700;
+    }
+
+    @media (max-width: 991.98px) {
+        .register-banner-copy,
+        .register-banner-side,
+        .register-form-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .register-form-head,
+        .register-section-head,
+        .register-submit,
+        .register-photo-box {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .register-submit .btn {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const root = document.getElementById('registerPageRoot');
+        const isBoundForm = root && root.dataset.formBound === '1';
+        const radios = Array.from(document.querySelectorAll('input[name="perfil"]'));
+        const summary = {
+            icon: document.getElementById('profileSummaryIcon'),
+            badge: document.getElementById('profileSummaryBadge'),
+            title: document.getElementById('profileSummaryTitle'),
+            text: document.getElementById('profileSummaryText'),
+            step: document.getElementById('profileSummaryStep')
+        };
+        const consentInputs = [document.getElementById('id_consentimento_dados'), document.getElementById('id_consentimento_contacto')].filter(Boolean);
+        const consentBadge = document.getElementById('consentBadge');
+        const consentTitle = document.getElementById('consentTitle');
+        const consentHelpText = document.getElementById('consentHelpText');
+        const nameFieldLabel = document.getElementById('nameFieldLabel');
+        const nameFieldHelp = document.getElementById('nameFieldHelp');
+        const nameInput = document.getElementById('id_nome');
+        const nifWrap = document.getElementById('nifFieldWrap');
+        const nifInput = document.getElementById('id_nif');
+        const biWrap = document.getElementById('biFieldWrap');
+        const biInput = document.getElementById('id_bi_numero');
+        const photoSection = document.getElementById('photoSection');
+        const photoInput = document.getElementById('id_photo');
+        const photoHelperText = document.getElementById('photoHelperText');
+        const photoPreviewImage = document.getElementById('photoPreviewImage');
+        const photoPreviewIcon = document.getElementById('photoPreviewIcon');
+        const password1 = document.getElementById('id_password1');
+        const password2 = document.getElementById('id_password2');
+        let photoObjectUrl = null;
+
+        function togglePassword(buttonId, inputId) {
+            const button = document.getElementById(buttonId);
+            const input = document.getElementById(inputId);
+            if (!button || !input) return;
+
+            button.addEventListener('click', function () {
+                const icon = button.querySelector('i');
+                const show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                if (icon) {
+                    icon.classList.toggle('bi-eye', !show);
+                    icon.classList.toggle('bi-eye-slash', show);
+                }
+            });
+        }
+
+        function setRuleState(id, valid) {
+            const item = document.getElementById(id);
+            if (item) item.classList.toggle('is-valid', Boolean(valid));
+        }
+
+        function updatePasswordRules() {
+            const first = password1 ? password1.value : '';
+            const second = password2 ? password2.value : '';
+            setRuleState('passwordRuleLength', first.length >= 8);
+            setRuleState('passwordRuleLetter', /[A-Za-z]/.test(first));
+            setRuleState('passwordRuleNumber', /\d/.test(first));
+            setRuleState('passwordRuleMatch', first.length > 0 && first === second);
+        }
+
+        function updatePhotoPreview() {
+            if (!photoInput || !photoPreviewImage || !photoPreviewIcon) return;
+            const file = photoInput.files && photoInput.files[0];
+
+            if (photoObjectUrl) {
+                URL.revokeObjectURL(photoObjectUrl);
+                photoObjectUrl = null;
+            }
+
+            if (!file) {
+                photoPreviewImage.src = '';
+                photoPreviewImage.classList.add('d-none');
+                photoPreviewIcon.classList.remove('d-none');
+                return;
+            }
+
+            photoObjectUrl = URL.createObjectURL(file);
+            photoPreviewImage.src = photoObjectUrl;
+            photoPreviewImage.alt = file.name || 'Preview da foto';
+            photoPreviewImage.classList.remove('d-none');
+            photoPreviewIcon.classList.add('d-none');
+        }
+
+        function applyProfile(value) {
+            const selected = document.querySelector('input[name="perfil"]:checked') || document.getElementById('perfil_' + value);
+            if (!selected) return;
+
+            if (summary.icon) summary.icon.className = 'bi ' + (selected.dataset.profileIcon || 'bi-person');
+            if (summary.badge) summary.badge.textContent = selected.dataset.profileBadge || 'Perfil selecionado';
+            if (summary.title) summary.title.textContent = selected.dataset.profileName || 'Conta';
+            if (summary.text) summary.text.textContent = selected.dataset.profileCopy || '';
+            if (summary.step) summary.step.textContent = selected.dataset.profileStep || '';
+
+            const internal = value === 'OP' || value === 'TEC';
+            consentInputs.forEach(function (input) { input.required = !internal; });
+            if (consentBadge) consentBadge.textContent = internal ? 'Opcional' : 'Obrigatorio';
+            if (consentTitle) consentTitle.textContent = internal ? 'Consentimentos opcionais para perfis internos' : 'Consentimentos ativos para esta conta';
+            if (consentHelpText) consentHelpText.textContent = internal ? 'Perfis internos podem prosseguir sem estes consentimentos.' : 'Para perfis publicos, estes campos sao obrigatorios.';
+
+            const company = value === 'EMP';
+            const youth = value === 'JO';
+
+            if (nameFieldLabel) {
+                nameFieldLabel.textContent = company ? 'Nome da empresa *' : 'Nome completo *';
+            }
+
+            if (nameFieldHelp) {
+                nameFieldHelp.textContent = company
+                    ? 'Usa o nome oficial da empresa como vai aparecer na plataforma.'
+                    : 'Usa o nome da pessoa que vai aceder a plataforma.';
+            }
+
+            if (nameInput) {
+                nameInput.placeholder = company ? 'Nome da empresa' : 'Teu nome completo';
+                nameInput.autocomplete = company ? 'organization' : 'name';
+            }
+
+            if (nifWrap) {
+                nifWrap.classList.toggle('d-none', !company);
+            }
+            if (nifInput) {
+                nifInput.required = company;
+                nifInput.disabled = !company;
+            }
+
+            if (biWrap) {
+                biWrap.classList.toggle('d-none', !youth);
+            }
+            if (biInput) {
+                biInput.required = youth;
+                biInput.disabled = !youth;
+            }
+
+            if (photoSection) photoSection.classList.toggle('d-none', !youth);
+            if (photoInput) photoInput.disabled = !youth;
+            if (photoHelperText) photoHelperText.textContent = youth ? 'Uma foto nitida ajuda a tornar o perfil mais completo.' : 'A foto so sera usada quando o perfil jovem estiver selecionado.';
+        }
+
+        togglePassword('togglePassword1', 'id_password1');
+        togglePassword('togglePassword2', 'id_password2');
+        if (password1) password1.addEventListener('input', updatePasswordRules);
+        if (password2) password2.addEventListener('input', updatePasswordRules);
+        if (photoInput) photoInput.addEventListener('change', updatePhotoPreview);
+        radios.forEach(function (radio) {
+            radio.addEventListener('change', function () { applyProfile(radio.value); });
+        });
+
+        const tipo = new URLSearchParams(window.location.search).get('tipo');
+        const urlRadio = tipo ? document.getElementById('perfil_' + tipo) : null;
+        if (!isBoundForm && urlRadio) urlRadio.checked = true;
+
+        const active = document.querySelector('input[name="perfil"]:checked') || radios[0];
+        if (active) applyProfile(active.value);
+        updatePasswordRules();
+        updatePhotoPreview();
+    });
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <i class="bi bi-person-plus text-primary" style="font-size: 3rem;"></i>
-                        <h2 class="mt-3">Criar Conta</h2>
-                        <p class="text-muted">Junta-te à Base Nacional de Jovens</p>
+<section class="register-page py-5">
+    <div class="container" data-form-bound="{% if form.is_bound %}1{% else %}0{% endif %}" id="registerPageRoot">
+        <div class="card register-banner">
+            <div class="row g-0">
+                <div class="col-lg-7">
+                    <div class="register-banner-copy">
+                        <div class="register-kicker"><i class="bi bi-stars"></i>Novo registo</div>
+                        <h1>Abre a tua conta com mais contexto desde o primeiro passo.</h1>
+                        <p class="mb-0">A pagina de registo agora ajuda-te a escolher o perfil certo, perceber o que muda em cada tipo de conta e preencher tudo com menos atrito.</p>
                     </div>
-
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors|striptags }}
+                </div>
+                <div class="col-lg-5">
+                    <div class="register-banner-side">
+                        <div class="register-profile-summary">
+                            <div class="register-profile-icon">
+                                <i id="profileSummaryIcon" class="bi bi-person-heart"></i>
                             </div>
-                        {% endif %}
-
-                        <!-- Tipo de Perfil -->
-                        <div class="mb-4">
-                            <label class="form-label">Tipo de Perfil</label>
-                            {% if form.perfil.errors %}
-                                <div class="text-danger small">{{ form.perfil.errors|striptags }}</div>
-                            {% endif %}
-                            {% with selected=form.perfil.value|default:'JO' %}
-                                <div class="row g-2">
-                                    {% for value,label in form.perfil.field.choices %}
-                                        <div class="col-6 col-md-4">
-                                            <div class="form-check card p-3 text-center">
-                                                <input class="form-check-input" type="radio" name="perfil"
-                                                       id="perfil_{{ value }}" value="{{ value }}"
-                                                       {% if selected == value %}checked{% endif %}>
-                                                <label class="form-check-label d-block mt-2" for="perfil_{{ value }}">
-                                                    <i class="bi {% if value == 'JO' %}bi-person{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up{% else %}bi-person{% endif %} fs-3 d-block mb-2"></i>
-                                                    <strong>
-                                                        {% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador Distrital{% elif value == 'TEC' %}Técnico PNUD{% else %}{{ label }}{% endif %}
-                                                    </strong>
-                                                    <small class="d-block text-muted">
-                                                        {% if value == 'JO' %}Procuro oportunidades
-                                                        {% elif value == 'EMP' %}Quero publicar vagas
-                                                        {% elif value == 'OP' %}Registo assistido
-                                                        {% elif value == 'TEC' %}Acompanha indicadores
-                                                        {% else %}{{ label }}{% endif %}
-                                                    </small>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endwith %}
-                        </div>
-
-                        <!-- Nome -->
-                        <div class="mb-3">
-                            <label for="id_nome" class="form-label">Nome Completo *</label>
-                            <input type="text" name="nome" id="id_nome"
-                                   class="form-control{% if form.nome.errors %} is-invalid{% endif %}"
-                                   placeholder="Teu nome completo"
-                                   value="{{ form.nome.value|default_if_none:'' }}"
-                                   required>
-                            {% if form.nome.errors %}
-                                <div class="invalid-feedback d-block">{{ form.nome.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Telefone -->
-                        <div class="mb-3">
-                            <label for="id_telefone" class="form-label">Telemóvel *</label>
-                            <input type="tel" name="telefone" id="id_telefone"
-                                   class="form-control{% if form.telefone.errors %} is-invalid{% endif %}"
-                                   placeholder="Ex: +239 123 4567"
-                                   value="{{ form.telefone.value|default_if_none:'' }}"
-                                   required>
-                            <div class="form-text">Será usado para login e contacto.</div>
-                            {% if form.telefone.errors %}
-                                <div class="invalid-feedback d-block">{{ form.telefone.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Email -->
-                        <div class="mb-3">
-                            <label for="id_email" class="form-label">Email (opcional)</label>
-                            <input type="email" name="email" id="id_email"
-                                   class="form-control{% if form.email.errors %} is-invalid{% endif %}"
-                                   placeholder="teu@email.com"
-                                   value="{{ form.email.value|default_if_none:'' }}">
-                            {% if form.email.errors %}
-                                <div class="invalid-feedback d-block">{{ form.email.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Foto (opcional) -->
-                        <div class="mb-3">
-                            <label for="id_photo" class="form-label">Foto (opcional)</label>
-                            <input type="file" name="photo" id="id_photo" accept="image/*" class="form-control">
-                        </div>
-
-                        <!-- Password -->
-                        <div class="mb-3">
-                            <label for="id_password1" class="form-label">Palavra-passe *</label>
-                            <div class="input-group">
-                                <input type="password" name="password1" id="id_password1"
-                                       class="form-control{% if form.password1.errors %} is-invalid{% endif %}"
-                                       placeholder="Mínimo 8 caracteres" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                            <div>
+                                <div class="register-summary-badge" id="profileSummaryBadge">Perfil selecionado</div>
+                                <strong id="profileSummaryTitle" class="d-block mb-1">Jovem</strong>
+                                <p id="profileSummaryText" class="mb-1">Ideal para candidaturas, estagios e programas de formacao.</p>
+                                <small id="profileSummaryStep">Depois do registo podes completar o perfil e anexar documentos.</small>
                             </div>
-                            {% if form.password1.errors %}
-                                <div class="invalid-feedback d-block">{{ form.password1.errors|striptags }}</div>
-                            {% endif %}
                         </div>
-
-                        <div class="mb-3">
-                            <label for="id_password2" class="form-label">Confirmar Palavra-passe *</label>
-                            <input type="password" name="password2" id="id_password2"
-                                   class="form-control{% if form.password2.errors %} is-invalid{% endif %}"
-                                   placeholder="Repita a palavra-passe" required>
-                            {% if form.password2.errors %}
-                                <div class="invalid-feedback d-block">{{ form.password2.errors|striptags }}</div>
-                            {% endif %}
+                        <div class="register-stat-list">
+                            <div class="register-stat-item"><span>Tempo medio</span><strong>2 min</strong></div>
+                            <div class="register-stat-item"><span>Registo</span><strong>Gratis</strong></div>
+                            <div class="register-stat-item"><span>Acesso</span><strong>Telemovel</strong></div>
                         </div>
-
-                        <!-- Consentimentos -->
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       name="consentimento_dados" id="id_consentimento_dados"
-                                       {% if form.consentimento_dados.value %}checked{% endif %} required>
-                                <label class="form-check-label" for="id_consentimento_dados">
-                                    Autorizo o uso dos meus dados para fins de empregabilidade *
-                                </label>
-                            </div>
-                            {% if form.consentimento_dados.errors %}
-                                <div class="text-danger small">{{ form.consentimento_dados.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       name="consentimento_contacto" id="id_consentimento_contacto"
-                                       {% if form.consentimento_contacto.value %}checked{% endif %} required>
-                                <label class="form-check-label" for="id_consentimento_contacto">
-                                    Autorizo ser contactado por SMS/WhatsApp/email *
-                                </label>
-                            </div>
-                            {% if form.consentimento_contacto.errors %}
-                                <div class="text-danger small">{{ form.consentimento_contacto.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-person-plus me-2"></i>Criar Conta
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="mb-0">
-                            Já tens conta?
-                            <a href="{% url 'accounts:login' %}" class="text-primary fw-semibold">Entrar</a>
-                        </p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="card register-form-card">
+            <div class="card-body">
+                <div class="register-form-head">
+                    <div>
+                        <h2>Criar conta</h2>
+                        <p>Preenche os dados essenciais para entrares na Base Nacional de Jovens com o perfil certo.</p>
+                    </div>
+                    <a href="{% url 'accounts:login' %}" class="register-login-link">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Ja tenho conta
+                    </a>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger rounded-4">{{ form.non_field_errors|striptags }}</div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" novalidate id="registerForm">
+                    {% csrf_token %}
+
+                    <div class="register-section">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>1. Tipo de perfil</h3>
+                                <p>Seleciona o caminho que melhor representa o uso da tua conta.</p>
+                            </div>
+                            <span class="register-section-badge">Perfil</span>
+                        </div>
+
+                        {% if form.perfil.errors %}
+                            <div class="text-danger small mb-3">{{ form.perfil.errors|striptags }}</div>
+                        {% endif %}
+
+                        {% with selected=form.perfil.value|default:'JO' %}
+                            <div class="row g-3">
+                                {% for value,label in form.perfil.field.choices %}
+                                    <div class="col-md-6">
+                                        <label class="profile-option">
+                                            <input type="radio"
+                                                   name="perfil"
+                                                   id="perfil_{{ value }}"
+                                                   value="{{ value }}"
+                                                   data-profile-name="{% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador distrital{% elif value == 'TEC' %}Tecnico PNUD{% else %}{{ label }}{% endif %}"
+                                                   data-profile-badge="{% if value == 'JO' %}Perfil selecionado{% elif value == 'EMP' %}Conta empresarial{% elif value == 'OP' %}Registo assistido{% elif value == 'TEC' %}Conta tecnica{% else %}Perfil selecionado{% endif %}"
+                                                   data-profile-copy="{% if value == 'JO' %}Ideal para candidaturas, estagios e programas de formacao.{% elif value == 'EMP' %}Pensado para empresas que publicam vagas e acompanham candidaturas.{% elif value == 'OP' %}Perfeito para apoio local e registo assistido.{% elif value == 'TEC' %}Focado em leitura de indicadores e acompanhamento.{% else %}{{ label }}{% endif %}"
+                                                   data-profile-step="{% if value == 'JO' %}Depois do registo podes completar o perfil e anexar documentos.{% elif value == 'EMP' %}Depois do registo podes configurar a empresa e publicar vagas.{% elif value == 'OP' %}Depois do registo teras acesso ao fluxo de registo assistido.{% elif value == 'TEC' %}Depois do registo podes acompanhar paineis e relatorios.{% else %}Continua apos criar a conta.{% endif %}"
+                                                   data-profile-icon="{% if value == 'JO' %}bi-person-heart{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up-arrow{% else %}bi-person{% endif %}"
+                                                   {% if selected == value %}checked{% endif %}>
+                                            <span class="profile-card">
+                                                <span class="profile-icon"><i class="bi {% if value == 'JO' %}bi-person-heart{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up-arrow{% else %}bi-person{% endif %}"></i></span>
+                                                <span>
+                                                    <strong class="d-block mb-1">{% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador distrital{% elif value == 'TEC' %}Tecnico PNUD{% else %}{{ label }}{% endif %}</strong>
+                                                    <small class="register-help">{% if value == 'JO' %}Procuro oportunidades e quero construir o meu perfil.{% elif value == 'EMP' %}Quero publicar vagas e gerir candidaturas.{% elif value == 'OP' %}Faco apoio local e orientacao de registos.{% elif value == 'TEC' %}Preciso acompanhar indicadores e relatarios.{% else %}{{ label }}{% endif %}</small>
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endwith %}
+                    </div>
+
+                    <div class="register-section">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>2. Dados da conta</h3>
+                                <p>Estes dados identificam a conta e tornam o contacto mais facil.</p>
+                            </div>
+                            <span class="register-section-badge">Conta</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="id_nome" class="register-input-label" id="nameFieldLabel">Nome completo *</label>
+                                <input type="text" name="nome" id="id_nome" class="form-control{% if form.nome.errors %} is-invalid{% endif %}" placeholder="Teu nome completo" value="{{ form.nome.value|default_if_none:'' }}" autocomplete="name" required>
+                                <div class="register-help mt-2" id="nameFieldHelp">Usa o nome da pessoa que vai aceder a plataforma.</div>
+                                {% if form.nome.errors %}<div class="invalid-feedback d-block">{{ form.nome.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_telefone" class="register-input-label">Telemovel *</label>
+                                <input type="tel" name="telefone" id="id_telefone" class="form-control{% if form.telefone.errors %} is-invalid{% endif %}" placeholder="Ex: +239 123 4567" value="{{ form.telefone.value|default_if_none:'' }}" autocomplete="tel" required>
+                                <div class="register-help mt-2">Vai servir como login principal e para contacto direto.</div>
+                                {% if form.telefone.errors %}<div class="invalid-feedback d-block">{{ form.telefone.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email" class="register-input-label">Email</label>
+                                <input type="email" name="email" id="id_email" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="teu@email.com" value="{{ form.email.value|default_if_none:'' }}" autocomplete="email">
+                                <div class="register-help mt-2">Opcional, mas util para notificacoes e recuperacao.</div>
+                                {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6{% if form.perfil.value != 'EMP' %} d-none{% endif %}" id="nifFieldWrap">
+                                <label for="id_nif" class="register-input-label">NIF *</label>
+                                <input type="text" name="nif" id="id_nif" class="form-control{% if form.nif.errors %} is-invalid{% endif %}" placeholder="NIF da empresa" value="{{ form.nif.value|default_if_none:'' }}" autocomplete="off">
+                                <div class="register-help mt-2">Obrigatorio para contas de empresa.</div>
+                                {% if form.nif.errors %}<div class="invalid-feedback d-block">{{ form.nif.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6{% if form.perfil.value and form.perfil.value != 'JO' %} d-none{% endif %}" id="biFieldWrap">
+                                <label for="id_bi_numero" class="register-input-label">Numero do BI *</label>
+                                <input type="text" name="bi_numero" id="id_bi_numero" class="form-control{% if form.bi_numero.errors %} is-invalid{% endif %}" placeholder="Numero do Bilhete de Identidade" value="{{ form.bi_numero.value|default_if_none:'' }}" autocomplete="off">
+                                <div class="register-help mt-2">Obrigatorio para registo de candidato.</div>
+                                {% if form.bi_numero.errors %}<div class="invalid-feedback d-block">{{ form.bi_numero.errors|striptags }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="register-section" id="photoSection">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>3. Foto de perfil</h3>
+                                <p>Mais util para o perfil jovem. Podes carregar agora ou deixar para depois.</p>
+                            </div>
+                            <span class="register-section-badge">Opcional</span>
+                        </div>
+
+                        <div class="register-photo-box">
+                            <div class="register-photo-preview" id="photoPreviewBox">
+                                <i class="bi bi-camera" id="photoPreviewIcon"></i>
+                                <img id="photoPreviewImage" src="" alt="" class="d-none">
+                            </div>
+                            <div class="flex-grow-1">
+                                <label for="id_photo" class="register-input-label">Carregar foto</label>
+                                <input type="file" name="photo" id="id_photo" accept="image/*" class="form-control{% if form.photo.errors %} is-invalid{% endif %}">
+                                <div class="register-help mt-2" id="photoHelperText">Uma foto nitida ajuda a tornar o perfil mais completo.</div>
+                                {% if form.photo.errors %}<div class="invalid-feedback d-block">{{ form.photo.errors|striptags }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="register-section">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>4. Palavra-passe</h3>
+                                <p>Cria uma chave de acesso segura e confirma no segundo campo.</p>
+                            </div>
+                            <span class="register-section-badge">Seguranca</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_password1" class="register-input-label">Palavra-passe *</label>
+                                <div class="input-group">
+                                    <input type="password" name="password1" id="id_password1" class="form-control{% if form.password1.errors %} is-invalid{% endif %}" placeholder="Minimo 8 caracteres" autocomplete="new-password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword1"><i class="bi bi-eye"></i></button>
+                                </div>
+                                {% if form.password1.errors %}<div class="invalid-feedback d-block">{{ form.password1.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_password2" class="register-input-label">Confirmar palavra-passe *</label>
+                                <div class="input-group">
+                                    <input type="password" name="password2" id="id_password2" class="form-control{% if form.password2.errors %} is-invalid{% endif %}" placeholder="Repete a palavra-passe" autocomplete="new-password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword2"><i class="bi bi-eye"></i></button>
+                                </div>
+                                {% if form.password2.errors %}<div class="invalid-feedback d-block">{{ form.password2.errors|striptags }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <ul class="register-password-list">
+                            <li id="passwordRuleLength"><i class="bi bi-check2-circle"></i>Pelo menos 8 caracteres</li>
+                            <li id="passwordRuleLetter"><i class="bi bi-check2-circle"></i>Inclui pelo menos uma letra</li>
+                            <li id="passwordRuleNumber"><i class="bi bi-check2-circle"></i>Inclui pelo menos um numero</li>
+                            <li id="passwordRuleMatch"><i class="bi bi-check2-circle"></i>As duas palavras-passe coincidem</li>
+                        </ul>
+                    </div>
+
+                    <div class="register-section">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>5. Consentimentos</h3>
+                                <p>Usados para operacao da conta, contacto e fins de empregabilidade.</p>
+                            </div>
+                            <span class="register-section-badge" id="consentBadge">Obrigatorio</span>
+                        </div>
+
+                        <div class="register-consent-box mb-3" id="consentBox">
+                            <strong class="d-block mb-1" id="consentTitle">Consentimentos ativos para esta conta</strong>
+                            <div class="register-help" id="consentHelpText">Para perfis publicos, estes campos sao obrigatorios.</div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-4 h-100">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="consentimento_dados" id="id_consentimento_dados" {% if form.consentimento_dados.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="id_consentimento_dados">Autorizo o uso dos meus dados para fins de empregabilidade</label>
+                                    </div>
+                                    <div class="register-help mt-2">Permite tratar o teu perfil, candidaturas e visibilidade na plataforma.</div>
+                                    {% if form.consentimento_dados.errors %}<div class="text-danger small mt-2">{{ form.consentimento_dados.errors|striptags }}</div>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-4 h-100">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="consentimento_contacto" id="id_consentimento_contacto" {% if form.consentimento_contacto.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="id_consentimento_contacto">Autorizo ser contactado por SMS, WhatsApp ou email</label>
+                                    </div>
+                                    <div class="register-help mt-2">Usado para mensagens de conta, atualizacoes e comunicacoes relevantes.</div>
+                                    {% if form.consentimento_contacto.errors %}<div class="text-danger small mt-2">{{ form.consentimento_contacto.errors|striptags }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="register-submit">
+                        <div class="register-help">
+                            Ao continuar, confirmas a
+                            <a href="{% url 'privacy' %}" class="text-decoration-none fw-semibold">politica de privacidade</a>
+                            e os
+                            <a href="{% url 'terms' %}" class="text-decoration-none fw-semibold">termos de uso</a>.
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus me-2"></i>Criar conta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</div>
-
-<script>
-document.getElementById('togglePassword1').addEventListener('click', function() {
-    const passwordInput = document.getElementById('id_password1');
-    const icon = this.querySelector('i');
-
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-});
-
-const urlParams = new URLSearchParams(window.location.search);
-const tipo = urlParams.get('tipo');
-if (tipo) {
-    const el = document.getElementById(`perfil_${tipo}`);
-    if (el) {
-        el.checked = true;
-    }
-}
-</script>
+</section>
 {% endblock %}

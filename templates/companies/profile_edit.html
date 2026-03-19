@@ -2,40 +2,616 @@
 
 {% block title %}Editar Perfil da Empresa{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">Editar Perfil</h4>
-            {% if not company_profile_complete %}
-              <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Continuar com o wizard</a>
-            {% endif %}
-          </div>
-          <form method="post" novalidate enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-              {% if company.logo %}
-                <label class="form-label">Logo atual</label>
-                <div class="mb-2">
-                  <img src="{{ company.logo.url }}" alt="Logo" style="max-width:120px;max-height:120px;border-radius:6px;">
-                </div>
-              {% endif %}
-              <label class="form-label">Logo (opcional)</label>
-              {{ form.logo }}
-            </div>
+{% block extra_css %}
+<style>
+  .company-edit-page {
+    color: #122033;
+  }
 
-            {{ form.non_field_errors }}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">Guardar</button>
-            </div>
-          </form>
+  .company-edit-hero {
+    border-radius: 28px;
+    padding: 1.7rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.34), transparent 30%),
+      linear-gradient(135deg, rgba(11, 59, 111, 0.98), rgba(15, 90, 159, 0.94) 55%, rgba(30, 140, 108, 0.82));
+    box-shadow: 0 22px 45px rgba(16, 38, 62, 0.18);
+  }
+
+  .company-edit-hero-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .company-edit-kicker {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.8;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-edit-title {
+    font-size: clamp(1.8rem, 2vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-edit-subtitle {
+    max-width: 62ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .company-edit-hero-badges,
+  .company-edit-hero-actions,
+  .company-edit-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .company-edit-hero-badges {
+    margin-top: 1rem;
+  }
+
+  .company-edit-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.42rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .company-edit-hero-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .company-edit-hero-actions .btn-outline-light {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .company-edit-shell {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .company-edit-panel {
+    border-radius: 24px;
+    padding: 1.3rem;
+    background: #fff;
+    border: 1px solid rgba(18, 32, 51, 0.07);
+    box-shadow: 0 20px 38px rgba(18, 32, 51, 0.08);
+  }
+
+  .company-edit-sidebar {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .company-edit-logo-card {
+    text-align: center;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+    margin-bottom: 1.2rem;
+  }
+
+  .company-edit-logo-frame {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 1rem;
+    border-radius: 28px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(11, 59, 111, 0.12), rgba(30, 140, 108, 0.14));
+    border: 1px solid rgba(18, 32, 51, 0.08);
+    color: #0f5a9f;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .company-edit-logo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .company-edit-company-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #122033;
+    margin-bottom: 0.2rem;
+  }
+
+  .company-edit-company-meta {
+    color: #6b7a90;
+    margin-bottom: 0;
+  }
+
+  .company-edit-checklist {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .company-edit-check {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .company-edit-check-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .company-edit-check.is-done .company-edit-check-icon {
+    background: rgba(0, 168, 107, 0.12);
+    color: var(--secondary-color);
+  }
+
+  .company-edit-check.is-pending .company-edit-check-icon {
+    background: rgba(255, 193, 7, 0.16);
+    color: #ab7a00;
+  }
+
+  .company-edit-check strong {
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .company-edit-check p,
+  .company-edit-note {
+    color: #516175;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .company-edit-note {
+    margin-top: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(11, 94, 215, 0.06), rgba(30, 140, 108, 0.08));
+  }
+
+  .company-edit-form-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .company-edit-form-head h4 {
+    margin-bottom: 0.2rem;
+  }
+
+  .company-edit-form-subtitle {
+    color: #66768c;
+    margin: 0;
+  }
+
+  .company-edit-form-section + .company-edit-form-section {
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .company-edit-section-label {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0b5ed7;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-edit-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #122033;
+    margin-bottom: 0.25rem;
+  }
+
+  .company-edit-section-copy {
+    color: #66768c;
+    margin-bottom: 1rem;
+  }
+
+  .company-edit-field {
+    margin-bottom: 1rem;
+  }
+
+  .company-edit-field label {
+    display: block;
+    font-weight: 700;
+    color: #1f2d3d;
+    margin-bottom: 0.45rem;
+  }
+
+  .company-edit-field .form-control,
+  .company-edit-field .form-select {
+    border-radius: 14px;
+    min-height: 48px;
+    border-color: rgba(18, 32, 51, 0.12);
+    box-shadow: none;
+  }
+
+  .company-edit-field textarea.form-control {
+    min-height: 120px;
+  }
+
+  .company-sector-grid {
+    margin: 0;
+  }
+
+  .company-sector-grid #id_setor {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.55rem;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  .company-sector-grid #id_setor > div {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .company-sector-grid #id_setor label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.55rem 0.7rem;
+    border-radius: 14px;
+    border: 1px solid rgba(18, 32, 51, 0.12);
+    background: #f8fbff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #1f2d3d;
+  }
+
+  .company-sector-grid #id_setor input[type="checkbox"] {
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+
+  .company-sector-grid #id_setor label:hover {
+    border-color: rgba(11, 94, 215, 0.35);
+    background: #f3f8ff;
+  }
+
+  .company-edit-field .form-control:focus,
+  .company-edit-field .form-select:focus {
+    border-color: rgba(11, 94, 215, 0.45);
+    box-shadow: 0 0 0 0.2rem rgba(11, 94, 215, 0.12);
+  }
+
+  .company-edit-error {
+    margin-top: 0.45rem;
+    color: #b42318;
+    font-size: 0.88rem;
+  }
+
+  .company-edit-help {
+    margin-top: 0.45rem;
+    color: #6b7a90;
+    font-size: 0.84rem;
+  }
+
+  .company-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 1.35rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .company-edit-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .company-edit-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .company-edit-sidebar {
+      position: static;
+    }
+
+    .company-edit-hero-head,
+    .company-edit-form-head,
+    .company-edit-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .company-edit-hero-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="company-edit-page container py-4 py-lg-5">
+  <section class="company-edit-hero mb-4">
+    <div class="company-edit-hero-head">
+      <div>
+        <div class="company-edit-kicker">Perfil da empresa</div>
+        <h1 class="company-edit-title">Editar perfil empresarial</h1>
+        <p class="company-edit-subtitle">
+          Organize os dados publicos da empresa, mantenha os contactos atualizados e deixe o perfil pronto para vagas e pedidos de contacto.
+        </p>
+        <div class="company-edit-hero-badges">
+          <span class="company-edit-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="company-edit-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
+          <span class="company-edit-chip"><i class="bi bi-shield-check"></i>{% if company_profile_complete %}Perfil pronto{% else %}Faltam dados{% endif %}</span>
         </div>
       </div>
+      <div class="company-edit-hero-actions">
+        <a href="{% url 'companies:dashboard' %}" class="btn btn-light">
+          <i class="bi bi-arrow-left me-2"></i>Voltar ao painel
+        </a>
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
+          <i class="bi bi-search me-2"></i>Pesquisar jovens
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="company-edit-shell">
+    <aside class="company-edit-panel company-edit-sidebar">
+      <div class="company-edit-logo-card">
+        <div class="company-edit-logo-frame">
+          {% if company.logo %}
+            <img id="companyLogoPreview" src="{{ company.logo.url }}" alt="{{ company.nome }}">
+          {% else %}
+            <span id="companyLogoFallback">{{ company.nome|default:"EM"|slice:":2"|upper }}</span>
+            <img id="companyLogoPreview" src="" alt="{{ company.nome }}" class="d-none">
+          {% endif %}
+        </div>
+        <div class="company-edit-company-name">{{ company.nome|default:"Empresa sem nome" }}</div>
+        <p class="company-edit-company-meta">
+          {{ company.get_setor_display|default:"Setores por definir" }}
+          {% if company.distrito %}
+            <span class="mx-1">&middot;</span>{{ company.distrito.nome }}
+          {% endif %}
+        </p>
+        <div class="company-edit-status mt-3">
+          <span class="badge {% if company.verificada %}bg-success{% else %}bg-warning text-dark{% endif %}">
+            {% if company.verificada %}Verificada{% else %}Validacao pendente{% endif %}
+          </span>
+          <span class="badge {% if company.ativa %}bg-primary{% else %}bg-secondary{% endif %}">
+            {% if company.ativa %}Ativa{% else %}Pausada{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="company-edit-checklist">
+        <div class="company-edit-check {% if company.nome and company.setor %}is-done{% else %}is-pending{% endif %}">
+          <span class="company-edit-check-icon"><i class="bi {% if company.nome and company.setor %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+          <div>
+            <strong>Identidade da empresa</strong>
+            <p>Nome, NIF e setores ajudam a dar confianca ao perfil.</p>
+          </div>
+        </div>
+        <div class="company-edit-check {% if company.telefone and company.email %}is-done{% else %}is-pending{% endif %}">
+          <span class="company-edit-check-icon"><i class="bi {% if company.telefone and company.email %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+          <div>
+            <strong>Contactos principais</strong>
+            <p>Telefone e email devem estar atualizados para resposta rapida.</p>
+          </div>
+        </div>
+        <div class="company-edit-check {% if company.distrito and company.endereco %}is-done{% else %}is-pending{% endif %}">
+          <span class="company-edit-check-icon"><i class="bi {% if company.distrito and company.endereco %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+          <div>
+            <strong>Localizacao</strong>
+            <p>Distrito e endereco ajudam na leitura das vagas e da operacao.</p>
+          </div>
+        </div>
+        <div class="company-edit-check {% if company.descricao %}is-done{% else %}is-pending{% endif %}">
+          <span class="company-edit-check-icon"><i class="bi {% if company.descricao %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+          <div>
+            <strong>Descricao</strong>
+            <p>Um resumo claro melhora a qualidade do perfil e das oportunidades.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="company-edit-note">
+        {% if company_profile_complete %}
+          O perfil ja tem a base essencial pronta. Vale manter descricao, website e logo sempre atuais.
+        {% else %}
+          Ainda faltam alguns dados importantes. Completar tudo aqui deixa a empresa pronta para publicar e receber melhor.
+        {% endif %}
+      </div>
+    </aside>
+
+    <div class="company-edit-panel">
+      <div class="company-edit-form-head">
+        <div>
+          <h4 class="mb-1">Dados da empresa</h4>
+          <p class="company-edit-form-subtitle">Preencha os campos abaixo e guarde as alteracoes quando terminar.</p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger rounded-4 mb-4">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+
+      <form method="post" novalidate enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <section class="company-edit-form-section">
+          <div class="company-edit-section-label">Identidade</div>
+          <div class="company-edit-section-title">Quem e a empresa</div>
+          <div class="company-edit-section-copy">Estes dados sao os primeiros a aparecer para candidatos e equipa tecnica.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-edit-field">
+                <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}<div class="company-edit-error">{{ form.nome.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="company-edit-field">
+                <label for="{{ form.nif.id_for_label }}">{{ form.nif.label }}</label>
+                {{ form.nif }}
+                {% if form.nif.errors %}<div class="company-edit-error">{{ form.nif.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-edit-field">
+                <label for="{{ form.setor.id_for_label }}">{{ form.setor.label }}</label>
+                <div class="company-sector-grid">{{ form.setor }}</div>
+                {% if form.setor.errors %}<div class="company-edit-error">{{ form.setor.errors|striptags }}</div>{% endif %}
+                {% if form.setor.help_text %}<div class="company-edit-help">{{ form.setor.help_text }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-edit-field">
+                <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}<div class="company-edit-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-edit-form-section">
+          <div class="company-edit-section-label">Contacto</div>
+          <div class="company-edit-section-title">Como falar com a empresa</div>
+          <div class="company-edit-section-copy">Use canais reais e atualizados para facilitar resposta a pedidos e candidaturas.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-edit-field">
+                <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+                {{ form.telefone }}
+                {% if form.telefone.errors %}<div class="company-edit-error">{{ form.telefone.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="company-edit-field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="company-edit-error">{{ form.email.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-edit-field">
+                <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+                {{ form.website }}
+                {% if form.website.errors %}<div class="company-edit-error">{{ form.website.errors|striptags }}</div>{% endif %}
+                <div class="company-edit-help">Se existir site ou pagina institucional, vale colocar aqui.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-edit-form-section">
+          <div class="company-edit-section-label">Localizacao</div>
+          <div class="company-edit-section-title">Onde a empresa opera</div>
+          <div class="company-edit-section-copy">A localizacao ajuda candidatos a avaliar melhor as oportunidades.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-edit-field">
+                <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+                {{ form.distrito }}
+                {% if form.distrito.errors %}<div class="company-edit-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-edit-field">
+                <label for="{{ form.endereco.id_for_label }}">{{ form.endereco.label }}</label>
+                {{ form.endereco }}
+                {% if form.endereco.errors %}<div class="company-edit-error">{{ form.endereco.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-edit-form-section">
+          <div class="company-edit-section-label">Imagem</div>
+          <div class="company-edit-section-title">Logo e identidade visual</div>
+          <div class="company-edit-section-copy">Pode manter o logo atual ou carregar uma nova imagem.</div>
+          <div class="company-edit-field mb-0">
+            <label for="{{ form.logo.id_for_label }}">{{ form.logo.label }}</label>
+            {{ form.logo }}
+            {% if form.logo.errors %}<div class="company-edit-error">{{ form.logo.errors|striptags }}</div>{% endif %}
+            <div class="company-edit-help">Formatos de imagem usuais funcionam melhor. Se carregar um ficheiro novo, o preview muda aqui ao lado.</div>
+          </div>
+        </section>
+
+        <div class="company-edit-actions">
+          <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Cancelar
+          </a>
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-check2-circle me-2"></i>Guardar alteracoes
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('{{ form.logo.id_for_label }}');
+  const preview = document.getElementById('companyLogoPreview');
+  const fallback = document.getElementById('companyLogoFallback');
+
+  if (!input || !preview) return;
+
+  input.addEventListener('change', function (event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+      if (fallback) fallback.classList.add('d-none');
+    };
+    reader.readAsDataURL(file);
+  });
+});
+</script>
 {% endblock %}

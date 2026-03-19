@@ -2,15 +2,213 @@
 
 {% block title %}Pedido de Contacto{% endblock %}
 
+{% block extra_css %}
+<style>
+  .contact-form-page { color: #122033; }
+  .contact-form-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.3), transparent 32%), linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .contact-form-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .contact-form-hero > * { position: relative; z-index: 1; }
+  .contact-form-hero-head, .contact-form-panel-head, .contact-form-youth { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .contact-form-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .contact-form-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .contact-form-subtitle { max-width: 64ch; margin: 0; color: rgba(255,255,255,.86); }
+  .contact-form-chips, .contact-form-actions, .contact-form-tags, .contact-form-skill-list { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .contact-form-chips { margin-top: 1rem; }
+  .contact-form-chip, .contact-form-tag, .contact-form-skill {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .84rem; font-weight: 600;
+  }
+  .contact-form-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; }
+  .contact-form-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .contact-form-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .contact-form-shell { display: grid; grid-template-columns: minmax(290px, 340px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .contact-form-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .contact-form-panel {
+    border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .contact-form-panel-head h5, .contact-form-panel-head h6 { margin-bottom: .2rem; }
+  .contact-form-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .contact-form-avatar {
+    width: 78px; height: 78px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(14,113,147,.12), rgba(34,166,120,.14)); color: #0e7193; font-size: 1.1rem; font-weight: 700; letter-spacing: .05em;
+  }
+  .contact-form-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .contact-form-youth-name { font-size: 1.1rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
+  .contact-form-youth-meta, .contact-form-copy { color: #66768c; }
+  .contact-form-info-list, .contact-form-checklist { display: grid; gap: .8rem; }
+  .contact-form-info-item, .contact-form-check {
+    display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .contact-form-icon, .contact-form-check-icon {
+    width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .contact-form-icon { background: rgba(14,113,147,.1); color: #0e7193; }
+  .contact-form-check-icon { background: rgba(0,168,107,.12); color: var(--secondary-color); }
+  .contact-form-check strong, .contact-form-info-item strong { display: block; margin-bottom: .2rem; }
+  .contact-form-check p, .contact-form-info-item p { margin: 0; color: #516175; font-size: .92rem; }
+  .contact-form-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .contact-form-skill { background: rgba(14,113,147,.1); border: 1px solid rgba(14,113,147,.16); color: #0e7193; }
+  .contact-form-block {
+    border-radius: 18px; padding: .95rem 1rem; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); margin-top: .95rem;
+  }
+  .contact-form-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #7b8798; margin-bottom: .25rem; }
+  .contact-form-field { margin-bottom: 1rem; }
+  .contact-form-field label { display: block; font-weight: 700; color: #1f2d3d; margin-bottom: .45rem; }
+  .contact-form-field .form-control { border-radius: 14px; min-height: 140px; border-color: rgba(18,32,51,.12); box-shadow: none; }
+  .contact-form-field .form-control:focus { border-color: rgba(14,113,147,.45); box-shadow: 0 0 0 .2rem rgba(14,113,147,.12); }
+  .contact-form-error { margin-top: .45rem; color: #b42318; font-size: .88rem; }
+  .contact-form-help { margin-top: .45rem; color: #6b7a90; font-size: .84rem; }
+  .contact-form-actions-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .85rem; margin-top: 1.35rem; padding-top: 1.2rem; border-top: 1px solid rgba(18,32,51,.08);
+  }
+  .contact-form-actions-row .btn { border-radius: 14px; padding-inline: 1rem; }
+  @media (max-width: 991.98px) {
+    .contact-form-shell { grid-template-columns: 1fr; }
+    .contact-form-sidebar { position: static; }
+    .contact-form-hero-head, .contact-form-youth, .contact-form-actions-row { flex-direction: column; align-items: stretch; }
+    .contact-form-actions .btn { width: 100%; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <h4>Pedido de Contacto</h4>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="text-end">
-      <button class="btn btn-primary">Enviar</button>
+<div class="contact-form-page container py-4 py-lg-5">
+  <section class="contact-form-hero mb-4">
+    <div class="contact-form-hero-head">
+      <div>
+        <div class="contact-form-kicker">Abertura de contacto</div>
+        <h1 class="contact-form-title">Solicitar contacto com jovem</h1>
+        <p class="contact-form-subtitle">
+          Explique o interesse da empresa com clareza. O pedido segue para analise administrativa antes de libertar o contacto direto.
+        </p>
+        <div class="contact-form-chips">
+          <span class="contact-form-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="contact-form-chip"><i class="bi bi-person-badge"></i>{{ youth.user.nome }}</span>
+          <span class="contact-form-chip"><i class="bi bi-shield-check"></i>Aprovacao obrigatoria</span>
+        </div>
+      </div>
+      <div class="contact-form-actions">
+        <a href="{% url 'companies:youth_detail' youth.id %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar ao perfil</a>
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light"><i class="bi bi-search me-2"></i>Pesquisar jovens</a>
+      </div>
     </div>
-  </form>
+  </section>
+
+  <div class="contact-form-shell">
+    <aside class="contact-form-sidebar">
+      <section class="contact-form-panel">
+        <div class="contact-form-youth">
+          <div class="contact-form-avatar" aria-hidden="true">
+            {% if youth.photo %}
+              <img src="{{ youth.photo.url }}" alt="{{ youth.user.nome }}">
+            {% else %}
+              {{ youth.user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="contact-form-youth-name">{{ youth.user.nome }}</div>
+            <div class="contact-form-youth-meta">
+              {{ youth.distrito.nome|default:"Distrito nao definido" }}{% if youth.localidade %} - {{ youth.localidade }}{% endif %}
+            </div>
+            <div class="contact-form-tags mt-3">
+              {% if youth.idade %}<span class="contact-form-tag"><i class="bi bi-person"></i>{{ youth.idade }} anos</span>{% endif %}
+              <span class="contact-form-tag"><i class="bi bi-briefcase"></i>{{ youth.get_situacao_atual_display }}</span>
+              <span class="contact-form-tag"><i class="bi bi-lightning-charge"></i>{{ youth.get_disponibilidade_display }}</span>
+            </div>
+          </div>
+        </div>
+
+        {% if youth.sobre %}
+          <div class="contact-form-block">
+            <span class="contact-form-label">Resumo do jovem</span>
+            <div class="contact-form-copy">{{ youth.sobre|truncatewords:34 }}</div>
+          </div>
+        {% endif %}
+
+        <div class="contact-form-block">
+          <span class="contact-form-label">Sinais rapidos</span>
+          <div class="contact-form-tags">
+            <span class="contact-form-tag"><i class="bi bi-book"></i>{{ education|length }} formacao{{ education|length|pluralize }}</span>
+            <span class="contact-form-tag"><i class="bi bi-briefcase"></i>{{ experiences|length }} experiencia{{ experiences|length|pluralize }}</span>
+            <span class="contact-form-tag"><i class="bi bi-file-earmark"></i>{{ documents|length }} documento{{ documents|length|pluralize }}</span>
+          </div>
+        </div>
+
+        {% if skills %}
+          <div class="contact-form-block">
+            <span class="contact-form-label">Skills em destaque</span>
+            <div class="contact-form-skill-list">
+              {% for item in skills|slice:":6" %}
+                <span class="contact-form-skill">{{ item.skill.nome }} ({{ item.get_nivel_display }})</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="contact-form-panel">
+        <div class="contact-form-panel-head">
+          <div>
+            <h6>Como este pedido funciona</h6>
+            <p class="contact-form-panel-subtitle">Traga contexto e acelere a avaliacao.</p>
+          </div>
+        </div>
+        <div class="contact-form-checklist">
+          <div class="contact-form-check">
+            <span class="contact-form-check-icon"><i class="bi bi-1-circle"></i></span>
+            <div><strong>Explique o interesse</strong><p>Diga que tipo de oportunidade existe e porque este perfil faz sentido.</p></div>
+          </div>
+          <div class="contact-form-check">
+            <span class="contact-form-check-icon"><i class="bi bi-2-circle"></i></span>
+            <div><strong>Seja concreto</strong><p>Contexto claro ajuda o admin e melhora a percecao do pedido.</p></div>
+          </div>
+          <div class="contact-form-check">
+            <span class="contact-form-check-icon"><i class="bi bi-3-circle"></i></span>
+            <div><strong>Aguarde aprovacao</strong><p>O contacto direto so aparece depois da validacao administrativa.</p></div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="contact-form-panel">
+      <div class="contact-form-panel-head">
+        <div>
+          <h5>Motivo do contacto</h5>
+          <p class="contact-form-panel-subtitle">Escreva uma mensagem clara sobre a oportunidade, o contexto da empresa e o que pretende propor ao jovem.</p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger rounded-4 mb-4">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="contact-form-field">
+          <label for="{{ form.motivo.id_for_label }}">{{ form.motivo.label }}</label>
+          {{ form.motivo }}
+          {% if form.motivo.errors %}<div class="contact-form-error">{{ form.motivo.errors|striptags }}</div>{% endif %}
+          <div class="contact-form-help">
+            Exemplo: area da vaga, formato da oportunidade, local de trabalho, porque este perfil chamou a atencao e que proximo passo a empresa quer dar.
+          </div>
+        </div>
+
+        <div class="contact-form-block">
+          <span class="contact-form-label">Antes de enviar</span>
+          <div class="contact-form-copy">
+            O texto deve ajudar o jovem e o administrador a perceberem que existe um interesse real e bem enquadrado. Quanto mais objetivo, melhor.
+          </div>
+        </div>
+
+        <div class="contact-form-actions-row">
+          <a href="{% url 'companies:youth_detail' youth.id %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Cancelar</a>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-send-check me-2"></i>Enviar pedido</button>
+        </div>
+      </form>
+    </section>
+  </div>
 </div>
 {% endblock %}

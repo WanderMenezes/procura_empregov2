@@ -71,6 +71,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Empresa
     nome_empresa = models.CharField(_('nome da empresa'), max_length=255, blank=True)
     nif = models.CharField(_('NIF'), max_length=20, blank=True)
+    bi_numero = models.CharField(_('número do BI'), max_length=50, blank=True)
     setor_empresa = models.CharField(_('setor'), max_length=100, blank=True)
     
     # Operador Distrital

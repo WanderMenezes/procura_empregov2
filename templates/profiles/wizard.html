@@ -1,585 +1,631 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Completar Perfil - Passo {{ step }} de 4{% endblock %}
+{% block title %}Completar Perfil - Passo {{ step }} de {{ total_steps }}{% endblock %}
 
-{% block content %}
-<div class="container py-5 profile-wizard">
-    <div class="row justify-content-center">
-        <div class="col-lg-9 col-xl-8">
-            <div class="card wizard-card shadow-lg">
-                <div class="wizard-header">
-                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                        <div>
-                            <div class="wizard-kicker">Completar Perfil</div>
-                            <h2 class="mb-1">Completa o Teu Perfil</h2>
-                            <div class="wizard-subtitle">Passo {{ step }} de 4</div>
-                        </div>
-                        {% if step_title %}
-                            <div class="wizard-step-badge">
-                                <span class="badge bg-light text-dark">
-                                    {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
-                                </span>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="card-body p-4 p-md-5">
-                    
-                    <!-- Progress Bar -->
-                    <div class="wizard-progress-wrap mb-3">
-                        <div class="d-flex justify-content-between small text-muted mb-1">
-                            <span id="wizard-progress-text">{{ progress }}% completo</span>
-                            <span>Passo {{ step }} de 4</span>
-                        </div>
-                        <div class="progress wizard-progress">
-                            <div id="wizard-progress" class="progress-bar" role="progressbar" 
-                                 style="width: {{ progress }}%" 
-                                 aria-valuenow="{{ progress }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                                <span id="wizard-progress-label" class="fw-bold">{{ progress }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Step Indicators -->
-                    <div class="step-indicator wizard-stepper mb-2">
-                        <div class="step {% if step >= 1 %}active{% endif %} {% if step > 1 %}completed{% endif %}">
-                            {% if step > 1 %}<i class="bi bi-check"></i>{% else %}1{% endif %}
-                        </div>
-                        <div class="step {% if step >= 2 %}active{% endif %} {% if step > 2 %}completed{% endif %}">
-                            {% if step > 2 %}<i class="bi bi-check"></i>{% else %}2{% endif %}
-                        </div>
-                        <div class="step {% if step >= 3 %}active{% endif %} {% if step > 3 %}completed{% endif %}">
-                            {% if step > 3 %}<i class="bi bi-check"></i>{% else %}3{% endif %}
-                        </div>
-                        <div class="step {% if step >= 4 %}active{% endif %}">4</div>
-                    </div>
-                    <div class="wizard-stepper-labels small text-muted mb-4">
-                        <span>Dados</span>
-                        <span>Educacao</span>
-                        <span>Experiencia</span>
-                        <span>Documentos</span>
-                    </div>
-                    
-                    <!-- Step Title -->
-                    <div class="wizard-step-title text-center mb-4">
-                        <h4 class="mb-1">
-                            {% if step_title %}
-                                {% if step_icon %}<i class="bi {{ step_icon }} me-2"></i>{% endif %}{{ step_title }}
-                            {% endif %}
-                        </h4>
-                        {% if step_stats %}
-                            <div class="small text-muted">
-                                {{ step_title }}
-                                — {{ step_stats.filled }}/{{ step_stats.total }} preenchidos
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="alert alert-light border small mb-4">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Campos marcados com * sao obrigatorios.
-                    </div>
-                    
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        
-                        <!-- Step 1: Dados Pessoais -->
-                        {% if step == 1 %}
-                            <h5 class="mb-3">Identificação</h5>
-                            <div class="mb-3">
-                                <label for="id_nome" class="form-label">Nome completo *</label>
-                                <input type="text" name="nome" id="id_nome" 
-                                       class="form-control" value="{{ form.nome.value|default:'' }}" required>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_data_nascimento" class="form-label">Data de Nascimento *</label>
-                                    <input type="date" name="data_nascimento" id="id_data_nascimento" 
-                                           class="form-control" value="{{ form.data_nascimento.value|default:'' }}" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="id_idade" class="form-label">Idade</label>
-                                    <input type="text" id="id_idade" class="form-control" readonly>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="id_sexo" class="form-label">Sexo</label>
-                                    <select name="sexo" id="id_sexo" class="form-select">
-                                        <option value="">Selecione...</option>
-                                        {% for value, label in form.fields.sexo.choices %}
-                                            <option value="{{ value }}" {% if form.sexo.value == value %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-                            <h5 class="mb-3">Contactos</h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_telefone" class="form-label">Telemóvel *</label>
-                                    <input type="text" name="telefone" id="id_telefone" 
-                                           class="form-control" value="{{ form.telefone.value|default:'' }}" readonly>
-                                    <div class="form-text">Usado para login e contacto.</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_email" class="form-label">Email</label>
-                                    <input type="email" name="email" id="id_email" 
-                                           class="form-control" value="{{ form.email.value|default:'' }}">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="id_contacto_alternativo" class="form-label">Contacto alternativo</label>
-                                <input type="text" name="contacto_alternativo" id="id_contacto_alternativo" 
-                                       class="form-control" value="{{ form.contacto_alternativo.value|default:'' }}">
-                                <div class="form-text">Opcional, caso o teu telemóvel esteja indisponível.</div>
-                            </div>
-
-                            <hr class="my-4">
-                            <h5 class="mb-3">Localização</h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_distrito" class="form-label">Distrito *</label>
-                                    <select name="distrito" id="id_distrito" class="form-select" required>
-                                        {% for value, label in form.fields.distrito.choices %}
-                                            <option value="{{ value }}" {% if form.distrito.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_localidade" class="form-label">Localidade</label>
-                                    <input type="text" name="localidade" id="id_localidade" 
-                                           class="form-control" placeholder="Sua localidade"
-                                           value="{{ form.localidade.value|default:'' }}">
-                                </div>
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Step 2: Educação e Skills -->
-                        {% if step == 2 %}
-                            <h5 class="mb-3">Educação</h5>
-                            
-                            <div class="mb-3">
-                                <label for="id_nivel" class="form-label">Nível de Educação</label>
-                                <select name="nivel" id="id_nivel" class="form-select">
-                                    <option value="">Selecione...</option>
-                                    {% for value, label in form.fields.nivel.choices %}
-                                        <option value="{{ value }}" {% if form.nivel.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_area_formacao" class="form-label">Área de Formação</label>
-                                <select name="area_formacao" id="id_area_formacao" class="form-select">
-                                    <option value="">Selecione...</option>
-                                    {% for value, label in form.fields.area_formacao.choices %}
-                                        <option value="{{ value }}" {% if form.area_formacao.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_instituicao" class="form-label">Instituição</label>
-                                <input type="text" name="instituicao" id="id_instituicao" 
-                                       class="form-control" placeholder="Nome da escola/instituição"
-                                       value="{{ form.instituicao.value|default:'' }}">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_ano" class="form-label">Ano de Conclusão</label>
-                                <input type="number" name="ano" id="id_ano" 
-                                       class="form-control" placeholder="Ex: 2023" min="1950" max="2030"
-                                       value="{{ form.ano.value|default:'' }}">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_curso" class="form-label">Curso/Especialidade</label>
-                                <input type="text" name="curso" id="id_curso" 
-                                       class="form-control" placeholder="Nome do curso"
-                                       value="{{ form.curso.value|default:'' }}">
-                            </div>
-                            
-                            <hr class="my-4">
-                            <h5 class="mb-3">Competências Técnicas</h5>
-                            <div class="mb-3">
-                                <div class="row">
-                                    {% for skill in form.fields.skills.queryset %}
-                                        {% if skill.tipo == 'TEC' %}
-                                            <div class="col-md-6">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" 
-                                                           name="skills" value="{{ skill.id }}" 
-                                                           id="skill_{{ skill.id }}"
-                                                           {% if skill.id in form.skills.value or skill.id|stringformat:"s" in form.skills.value %}checked{% endif %}>
-                                                    <label class="form-check-label" for="skill_{{ skill.id }}">
-                                                        {{ skill.nome }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            
-                            <h5 class="mb-3">Competências Transversais</h5>
-                            <div class="mb-3">
-                                <div class="row">
-                                    {% for skill in form.fields.skills.queryset %}
-                                        {% if skill.tipo == 'TRA' %}
-                                            <div class="col-md-6">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" 
-                                                           name="skills" value="{{ skill.id }}" 
-                                                           id="skill_{{ skill.id }}"
-                                                           {% if skill.id in form.skills.value or skill.id|stringformat:"s" in form.skills.value %}checked{% endif %}>
-                                                    <label class="form-check-label" for="skill_{{ skill.id }}">
-                                                        {{ skill.nome }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                                <div class="form-text">Podes selecionar mais do que uma competência.</div>
-                            </div>
-
-                            <hr class="my-4">
-                            <h5 class="mb-3">Outra Skill</h5>
-                            <div class="row">
-                                <div class="col-md-8 mb-3">
-                                    <label for="id_outra_skill_nome" class="form-label">Indica uma skill que não está na lista</label>
-                                    <input type="text" name="outra_skill_nome" id="id_outra_skill_nome"
-                                           class="form-control" value="{{ form.outra_skill_nome.value|default:'' }}">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="id_outra_skill_tipo" class="form-label">Tipo</label>
-                                    <select name="outra_skill_tipo" id="id_outra_skill_tipo" class="form-select">
-                                        {% for value, label in form.fields.outra_skill_tipo.choices %}
-                                            <option value="{{ value }}" {% if form.outra_skill_tipo.value == value %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Step 3: Experiência e Interesses -->
-                        {% if step == 3 %}
-                            <div class="mb-3">
-                                <label for="id_situacao_atual" class="form-label">Situação Atual *</label>
-                                <select name="situacao_atual" id="id_situacao_atual" class="form-select" required>
-                                    {% for value, label in form.fields.situacao_atual.choices %}
-                                        <option value="{{ value }}" {% if form.situacao_atual.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_disponibilidade" class="form-label">Disponibilidade Imediata *</label>
-                                <select name="disponibilidade" id="id_disponibilidade" class="form-select" required>
-                                    {% for value, label in form.fields.disponibilidade.choices %}
-                                        <option value="{{ value }}" {% if form.disponibilidade.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Setores de Interesse</label>
-                                <div class="row">
-                                    {% for value, label in form.fields.interesse_setorial.choices %}
-                                        <div class="col-md-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                       name="interesse_setorial" value="{{ value }}"
-                                                       id="interesse_{{ forloop.counter }}"
-                                                       {% if form.interesse_setorial.value and value in form.interesse_setorial.value %}checked{% endif %}>
-                                                <label class="form-check-label" for="interesse_{{ forloop.counter }}">
-                                                    {{ label }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="form-text">Podes selecionar mais do que um setor.</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_preferencia_oportunidade" class="form-label">Tipo de Oportunidade Preferida *</label>
-                                <select name="preferencia_oportunidade" id="id_preferencia_oportunidade" class="form-select" required>
-                                    {% for value, label in form.fields.preferencia_oportunidade.choices %}
-                                        <option value="{{ value }}" {% if form.preferencia_oportunidade.value == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_sobre" class="form-label">Sobre Mim</label>
-                                <textarea name="sobre" id="id_sobre" class="form-control" rows="4" 
-                                          placeholder="Fale um pouco sobre ti, tuas aspirações e objetivos profissionais...">{{ form.sobre.value|default:'' }}</textarea>
-                            </div>
-                            
-                            <hr class="my-4">
-                            <h5 class="mb-3">Experiência Profissional (Opcional)</h5>
-                            
-                            <div class="mb-3 form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       name="tem_experiencia" id="id_tem_experiencia"
-                                       {% if form.tem_experiencia.value %}checked{% endif %}>
-                                <label class="form-check-label" for="id_tem_experiencia">
-                                    Tenho experiência profissional
-                                </label>
-                            </div>
-                            
-                            <div id="experiencia_fields" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="id_exp_entidade" class="form-label">Empresa/Entidade</label>
-                                    <input type="text" name="exp_entidade" id="id_exp_entidade" 
-                                           class="form-control" placeholder="Nome da empresa"
-                                           value="{{ form.exp_entidade.value|default:'' }}">
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="id_exp_cargo" class="form-label">Cargo/Função</label>
-                                    <input type="text" name="exp_cargo" id="id_exp_cargo" 
-                                           class="form-control" placeholder="Seu cargo"
-                                           value="{{ form.exp_cargo.value|default:'' }}">
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="id_exp_inicio" class="form-label">Data de Início</label>
-                                        <input type="date" name="exp_inicio" id="id_exp_inicio" 
-                                               class="form-control"
-                                               value="{{ form.exp_inicio.value|default:'' }}">
-                                    </div>
-                                    <div class="col-md-6 mb-3" id="exp_fim_wrap">
-                                        <label for="id_exp_fim" class="form-label">Data de Fim</label>
-                                        <input type="date" name="exp_fim" id="id_exp_fim" 
-                                               class="form-control"
-                                               value="{{ form.exp_fim.value|default:'' }}">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3 form-check">
-                                    <input class="form-check-input" type="checkbox" 
-                                           name="exp_atual" id="id_exp_atual"
-                                           {% if form.exp_atual.value %}checked{% endif %}>
-                                    <label class="form-check-label" for="id_exp_atual">
-                                        Trabalho atual
-                                    </label>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="id_exp_descricao" class="form-label">Descrição das Atividades</label>
-                                    <textarea name="exp_descricao" id="id_exp_descricao" class="form-control" rows="3" 
-                                              placeholder="Descreve as tuas principais atividades...">{{ form.exp_descricao.value|default:'' }}</textarea>
-                                </div>
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Step 4: Documentos e Consentimentos -->
-                        {% if step == 4 %}
-                            <h5 class="mb-3">Documentos (Opcional)</h5>
-                            
-                            <div class="mb-3">
-                                <label for="id_cv" class="form-label">Curriculum Vitae (PDF)</label>
-                                <input type="file" name="cv" id="id_cv" class="form-control" accept=".pdf">
-                                <div class="form-text">Tamanho máximo: 5MB</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_certificado" class="form-label">Certificado (PDF ou imagem)</label>
-                                <input type="file" name="certificado" id="id_certificado" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="id_bi" class="form-label">Bilhete de Identidade (opcional)</label>
-                                <input type="file" name="bi" id="id_bi" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                            </div>
-                            
-                            <hr class="my-4">
-                            <h5 class="mb-3">Consentimentos</h5>
-                            
-                            <div class="mb-3 form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       name="visivel" id="id_visivel"
-                                       {% if form.visivel.value %}checked{% endif %}>
-                                <label class="form-check-label" for="id_visivel">
-                                    Autorizo a partilha do meu perfil com empresas
-                                </label>
-                                <div class="form-text">
-                                    Se desmarcares, as empresas não poderão encontrar o teu perfil nas pesquisas.
-                                </div>
-                            </div>
-
-                            <div class="mb-2">Contactos permitidos</div>
-                            <div class="mb-2 form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       name="consentimento_sms" id="id_consentimento_sms"
-                                       {% if form.consentimento_sms.value %}checked{% endif %}>
-                                <label class="form-check-label" for="id_consentimento_sms">
-                                    Autorizo contacto por SMS
-                                </label>
-                            </div>
-                            <div class="mb-2 form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       name="consentimento_whatsapp" id="id_consentimento_whatsapp"
-                                       {% if form.consentimento_whatsapp.value %}checked{% endif %}>
-                                <label class="form-check-label" for="id_consentimento_whatsapp">
-                                    Autorizo contacto por WhatsApp
-                                </label>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       name="consentimento_email" id="id_consentimento_email"
-                                       {% if form.consentimento_email.value %}checked{% endif %}>
-                                <label class="form-check-label" for="id_consentimento_email">
-                                    Autorizo contacto por Email
-                                </label>
-                            </div>
-                            <div class="form-text">Podes alterar estas preferências mais tarde no teu perfil.</div>
-                            
-                            <div class="alert alert-info mt-3">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <strong>Importante:</strong> Ao submeteres o teu perfil, confirmas que as informações 
-                                fornecidas são verdadeiras.
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Navigation Buttons -->
-                        <div class="d-flex justify-content-between mt-4">
-                            {% if step > 1 %}
-                                <button type="submit" name="prev" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-2"></i>Anterior
-                                </button>
-                            {% else %}
-                                <div></div>
-                            {% endif %}
-                            
-                            <div>
-                                <button type="submit" name="save" class="btn btn-outline-primary me-2">
-                                    <i class="bi bi-save me-2"></i>Guardar Rascunho
-                                </button>
-                                
-                                {% if step < 4 %}
-                                    <button type="submit" name="next" class="btn btn-primary">
-                                        Próximo<i class="bi bi-arrow-right ms-2"></i>
-                                    </button>
-                                {% else %}
-                                    <button type="submit" name="submit" class="btn btn-success">
-                                        <i class="bi bi-check-circle me-2"></i>Submeter Perfil
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-const expToggle = document.getElementById('id_tem_experiencia');
-const expFields = document.getElementById('experiencia_fields');
-const expAtual = document.getElementById('id_exp_atual');
-const expFimWrap = document.getElementById('exp_fim_wrap');
-
-const toggleExperiencia = () => {
-    if (!expFields || !expToggle) return;
-    expFields.style.display = expToggle.checked ? 'block' : 'none';
-};
-
-const toggleExpFim = () => {
-    if (!expFimWrap || !expAtual) return;
-    expFimWrap.style.display = expAtual.checked ? 'none' : 'block';
-};
-
-expToggle?.addEventListener('change', toggleExperiencia);
-expAtual?.addEventListener('change', toggleExpFim);
-toggleExperiencia();
-toggleExpFim();
-
-const dobInput = document.getElementById('id_data_nascimento');
-const ageInput = document.getElementById('id_idade');
-const updateAge = () => {
-    if (!dobInput || !ageInput) return;
-    if (!dobInput.value) {
-        ageInput.value = '';
-        return;
-    }
-    const dob = new Date(dobInput.value);
-    if (Number.isNaN(dob.getTime())) {
-        ageInput.value = '';
-        return;
-    }
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-        age -= 1;
-    }
-    ageInput.value = age >= 0 ? age : '';
-};
-
-dobInput?.addEventListener('change', updateAge);
-updateAge();
-
-const formEl = document.querySelector('form');
-let autosaveTimer;
-let submitting = false;
-
-const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return '';
-};
-
-const scheduleAutosave = () => {
-    if (!formEl || submitting) return;
-    clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(doAutosave, 1200);
-};
-
-const doAutosave = () => {
-    if (!formEl || submitting) return;
-    const formData = new FormData(formEl);
-    formData.append('autosave', '1');
-    formEl.querySelectorAll('input[type="file"]').forEach((input) => {
-        if (input.name) formData.delete(input.name);
-    });
-    fetch(window.location.href, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: formData,
-        credentials: 'same-origin'
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (!data || typeof data.progress !== 'number') return;
-            const bar = document.getElementById('wizard-progress');
-            const label = document.getElementById('wizard-progress-label');
-            const text = document.getElementById('wizard-progress-text');
-            if (bar) {
-                bar.style.width = `${data.progress}%`;
-                bar.setAttribute('aria-valuenow', data.progress);
-            }
-            if (label) label.textContent = `${data.progress}%`;
-            if (text) text.textContent = `${data.progress}% completo`;
-        })
-        .catch(() => {});
-};
-
-formEl?.addEventListener('input', scheduleAutosave);
-formEl?.addEventListener('change', scheduleAutosave);
-formEl?.addEventListener('submit', () => {
-    submitting = true;
-});
-</script>
+{% block extra_css %}
+<style>
+  .wizard-page { color: #122033; }
+  .wizard-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 30%), linear-gradient(135deg, rgba(16,35,65,.98), rgba(14,111,147,.94) 56%, rgba(36,161,113,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .wizard-hero::after { content: ""; position: absolute; right: -90px; bottom: -120px; width: 250px; height: 250px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .wizard-hero > * { position: relative; z-index: 1; }
+  .wizard-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .wizard-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .wizard-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .wizard-subtitle { max-width: 68ch; color: rgba(255,255,255,.84); margin: 0; }
+  .wizard-chips, .wizard-actions, .wizard-inline-meta, .wizard-nav { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .wizard-chips { margin-top: 1rem; }
+  .wizard-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .85rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .wizard-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .wizard-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .wizard-shell { display: grid; grid-template-columns: minmax(300px, 340px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .wizard-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .wizard-panel { border-radius: 26px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 40px rgba(18,32,51,.08); }
+  .wizard-user { display: flex; gap: .95rem; align-items: center; }
+  .wizard-avatar { width: 72px; height: 72px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.4rem; font-weight: 800; flex-shrink: 0; }
+  .wizard-user-name { font-size: 1.05rem; font-weight: 700; margin-bottom: .15rem; }
+  .wizard-user-copy, .wizard-panel-copy, .wizard-field-help, .wizard-error-summary p { color: #66768c; margin: 0; }
+  .wizard-step-list, .wizard-tip-list { display: grid; gap: .85rem; }
+  .wizard-step-card { display: flex; gap: .9rem; align-items: flex-start; padding: 1rem; border-radius: 20px; background: #fbfdff; border: 1px solid rgba(18,32,51,.07); text-decoration: none; color: inherit; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .wizard-step-card:hover { transform: translateY(-2px); box-shadow: 0 18px 32px rgba(18,32,51,.08); border-color: rgba(14,111,147,.24); }
+  .wizard-step-card.active { background: linear-gradient(180deg, rgba(14,111,147,.09), rgba(255,255,255,.96)); border-color: rgba(14,111,147,.24); }
+  .wizard-step-card.completed { border-color: rgba(34,166,120,.24); }
+  .wizard-step-number { width: 2.7rem; height: 2.7rem; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; background: #edf4fb; color: #0e7193; font-weight: 800; flex-shrink: 0; }
+  .wizard-step-card.completed .wizard-step-number { background: rgba(34,166,120,.14); color: #15815c; }
+  .wizard-step-card.active .wizard-step-number { background: #0e7193; color: #fff; }
+  .wizard-step-title { display: block; font-size: .98rem; font-weight: 700; margin-bottom: .16rem; }
+  .wizard-step-meta { font-size: .86rem; color: #6b7b90; }
+  .wizard-tip { display: flex; gap: .8rem; align-items: flex-start; padding: 1rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .wizard-tip-icon { width: 2.15rem; height: 2.15rem; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; background: rgba(14,111,147,.1); color: #0e7193; flex-shrink: 0; }
+  .wizard-note { margin-top: 1rem; padding: .95rem 1rem; border-radius: 18px; background: #fff7eb; border: 1px solid rgba(230,157,38,.18); color: #7d5a18; }
+  .wizard-progress-box { padding: 1rem 1.1rem; border-radius: 22px; background: linear-gradient(180deg, #f7fbfd, #fff); border: 1px solid rgba(18,32,51,.06); margin-bottom: 1.25rem; }
+  .wizard-progress-head { display: flex; justify-content: space-between; gap: .9rem; align-items: center; margin-bottom: .75rem; }
+  .wizard-progress-track { width: 100%; height: 12px; overflow: hidden; border-radius: 999px; background: #e6edf4; }
+  .wizard-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #0e7193, #24a171); transition: width .22s ease; }
+  .wizard-progress-copy { display: flex; justify-content: space-between; gap: .75rem; margin-top: .65rem; color: #66768c; font-size: .92rem; }
+  .wizard-status-pill { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .8rem; border-radius: 999px; font-size: .82rem; font-weight: 700; border: 1px solid transparent; }
+  .wizard-status-pill.is-saved { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .wizard-status-pill.is-saving { background: rgba(14,111,147,.1); color: #0e7193; border-color: rgba(14,111,147,.16); }
+  .wizard-status-pill.is-error { background: rgba(220,53,69,.1); color: #b42333; border-color: rgba(220,53,69,.18); }
+  .wizard-section { margin-bottom: 1.45rem; }
+  .wizard-section:last-child { margin-bottom: 0; }
+  .wizard-section-label { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0e7193; margin-bottom: .4rem; }
+  .wizard-section-title { font-size: 1.2rem; font-weight: 700; margin-bottom: .25rem; }
+  .wizard-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+  .wizard-field { display: grid; gap: .42rem; }
+  .wizard-field.full { grid-column: 1 / -1; }
+  .wizard-field label, .wizard-toggle-title { font-size: .92rem; font-weight: 700; color: #233246; }
+  .wizard-field .form-control, .wizard-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; }
+  .wizard-field textarea.form-control { min-height: 140px; }
+  .wizard-error { color: #b42333; font-size: .84rem; }
+  .wizard-error-summary { margin-bottom: 1rem; padding: 1rem 1.1rem; border-radius: 18px; background: rgba(220,53,69,.08); border: 1px solid rgba(220,53,69,.14); }
+  .wizard-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .8rem; }
+  .wizard-choice-card { display: flex; gap: .7rem; align-items: flex-start; min-height: 100%; padding: .95rem 1rem; border-radius: 18px; background: #fbfdff; border: 1px solid rgba(18,32,51,.08); }
+  .wizard-choice-card input, .wizard-toggle-card .form-check-input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; flex-shrink: 0; }
+  .wizard-choice-card span { color: #233246; font-weight: 600; line-height: 1.4; }
+  .wizard-toggle-card { display: flex; gap: .85rem; align-items: flex-start; padding: 1rem; border-radius: 20px; background: #f7fafc; border: 1px solid rgba(18,32,51,.08); }
+  .wizard-toggle-card.full { grid-column: 1 / -1; }
+  .wizard-file-grid, .wizard-consent-grid { display: grid; gap: 1rem; }
+  .wizard-file-card { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #fbfdff); border: 1px solid rgba(18,32,51,.08); }
+  .wizard-file-card .form-control { min-width: 0; }
+  .wizard-file-state { font-size: .86rem; color: #66768c; }
+  .wizard-inline-meta { margin-top: .55rem; color: #66768c; font-size: .88rem; }
+  .wizard-nav { justify-content: space-between; align-items: center; margin-top: 1.6rem; padding-top: 1.15rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .wizard-nav-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .wizard-nav .btn { border-radius: 14px; padding-inline: 1rem; }
+  .wizard-empty { padding: 1rem; border-radius: 18px; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14); color: #66768c; text-align: center; }
+  @media (max-width: 991.98px) { .wizard-shell { grid-template-columns: 1fr; } .wizard-sidebar { position: static; } .wizard-hero-head { flex-direction: column; } .wizard-actions .btn { width: 100%; } }
+  @media (max-width: 767.98px) { .wizard-grid, .wizard-choice-grid { grid-template-columns: 1fr; } .wizard-file-card { flex-direction: column; align-items: stretch; } .wizard-progress-head, .wizard-nav { flex-direction: column; align-items: stretch; } .wizard-nav-actions { width: 100%; } .wizard-nav-actions .btn { flex: 1 1 auto; } }
+</style>
 {% endblock %}
 
+{% block content %}
+<div class="wizard-page container py-4 py-lg-5">
+  <section class="wizard-hero mb-4">
+    <div class="wizard-hero-head">
+      <div>
+        <div class="wizard-kicker">Perfil do jovem</div>
+        <h1 class="wizard-title">{{ step_title }}</h1>
+        <p class="wizard-subtitle">
+          {% if is_editing_profile %}
+            Atualiza o teu perfil passo a passo, com contexto claro do que ja esta completo e do que ainda falta reforcar.
+          {% else %}
+            Completa o teu perfil em quatro passos para aparecer melhor nas pesquisas das empresas e acelerar candidaturas.
+          {% endif %}
+        </p>
+        <div class="wizard-chips">
+          <span class="wizard-chip"><i class="bi bi-diagram-3"></i>Passo {{ step }} de {{ total_steps }}</span>
+          <span class="wizard-chip"><i class="bi bi-activity"></i>{{ progress }}% concluido</span>
+          <span class="wizard-chip"><i class="bi bi-person-badge"></i>{{ user.nome }}</span>
+          <span class="wizard-chip"><i class="bi bi-{% if is_editing_profile %}arrow-repeat{% else %}rocket-takeoff{% endif %}"></i>{% if is_editing_profile %}Modo de atualizacao{% else %}Primeira configuracao{% endif %}</span>
+        </div>
+      </div>
+      <div class="wizard-actions">
+        <a href="{% url 'accounts:profile' %}" class="btn btn-light"><i class="bi bi-person-circle me-2"></i>Minha conta</a>
+        {% if is_editing_profile %}
+          <a href="{% url 'profiles:detail' %}" class="btn btn-outline-light"><i class="bi bi-eye me-2"></i>Ver perfil</a>
+        {% else %}
+          <a href="{% url 'accounts:notifications' %}" class="btn btn-outline-light"><i class="bi bi-bell me-2"></i>Notificacoes</a>
+        {% endif %}
+        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wizard-shell">
+    <aside class="wizard-sidebar">
+      <section class="wizard-panel">
+        <div class="wizard-user mb-4">
+          <div class="wizard-avatar" aria-hidden="true">{{ user.nome|slice:":2"|upper }}</div>
+          <div>
+            <div class="wizard-user-name">{{ user.nome }}</div>
+            <p class="wizard-user-copy">Telemovel {{ user.telefone }}{% if user.distrito %} em {{ user.distrito.nome }}{% endif %}.</p>
+          </div>
+        </div>
+
+        <div class="wizard-section-label"><i class="bi bi-signpost-split"></i>Roteiro do perfil</div>
+        <div class="wizard-step-list">
+          {% for item in wizard_steps %}
+            <a href="{% url 'profiles:wizard_step' item.number %}" class="wizard-step-card {% if item.active %}active{% endif %} {% if item.completed %}completed{% endif %}">
+              <span class="wizard-step-number">{% if item.completed %}<i class="bi bi-check-lg"></i>{% else %}{{ item.number }}{% endif %}</span>
+              <div>
+                <span class="wizard-step-title">{{ item.title }}</span>
+                <div class="wizard-step-meta">{{ item.filled }}/{{ item.total }} pontos preenchidos</div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="wizard-panel">
+        <div class="wizard-section-label"><i class="bi bi-lightbulb"></i>Dicas para este passo</div>
+        <div class="wizard-tip-list">
+          {% if step == 1 %}
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-person-vcard"></i></span><div><strong>Dados corretos ajudam na selecao.</strong><p class="wizard-panel-copy">Confirma nome, contacto e localizacao para as empresas conseguirem ler o teu perfil com confianca.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-calendar-event"></i></span><div><strong>A idade e calculada automaticamente.</strong><p class="wizard-panel-copy">Basta preencher a data de nascimento e o sistema atualiza o resumo sem trabalho extra.</p></div></div>
+          {% elif step == 2 %}
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-mortarboard"></i></span><div><strong>Mostra o teu percurso.</strong><p class="wizard-panel-copy">Mesmo cursos curtos e formacoes informais ajudam a posicionar melhor o perfil nas pesquisas.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-tools"></i></span><div><strong>Marca as skills mais fortes.</strong><p class="wizard-panel-copy">Seleciona o que sabes fazer e usa o campo extra quando falta alguma competencia importante.</p></div></div>
+          {% elif step == 3 %}
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-briefcase"></i></span><div><strong>Interesses claros geram melhores oportunidades.</strong><p class="wizard-panel-copy">Escolhe setores e tipo de oportunidade para receber correspondencias mais proximas do teu objetivo.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-stars"></i></span><div><strong>Experiencia pode ser opcional.</strong><p class="wizard-panel-copy">Se ainda nao trabalhaste formalmente, mantem essa parte escondida e avanca sem friccao.</p></div></div>
+          {% else %}
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-file-earmark-check"></i></span><div><strong>Documentos fortalecem a credibilidade.</strong><p class="wizard-panel-copy">CV e certificado ajudam muito, mas os consentimentos sao o que controlam como o teu perfil pode ser visto.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-shield-check"></i></span><div><strong>Tu controlas a visibilidade.</strong><p class="wizard-panel-copy">Ativa apenas os canais de contacto com que te sentes confortavel para ser abordado.</p></div></div>
+          {% endif %}
+        </div>
+        <div class="wizard-note">
+          O progresso e guardado automaticamente enquanto preenches. Os ficheiros ficam prontos para envio quando usares os botoes do formulario.
+        </div>
+      </section>
+    </aside>
+
+    <section class="wizard-panel">
+      <div class="wizard-progress-box">
+        <div class="wizard-progress-head">
+          <div>
+            <div class="wizard-section-label"><i class="bi {{ step_icon }}"></i>Painel do passo</div>
+            <div class="wizard-section-title mb-0">{{ step_title }}</div>
+          </div>
+          <span id="wizard-autosave-status" class="wizard-status-pill is-saved"><i class="bi bi-cloud-check"></i>Pronto para guardar</span>
+        </div>
+        <div class="wizard-progress-track" aria-hidden="true">
+          <div id="wizard-progress" class="wizard-progress-fill" style="width: {{ progress }}%;"></div>
+        </div>
+        <div class="wizard-progress-copy">
+          <span id="wizard-progress-text">{{ progress }}% concluido no perfil total</span>
+          <span><strong id="wizard-step-stats-current">{{ step_stats.filled }}</strong> de <strong id="wizard-step-stats-total">{{ step_stats.total }}</strong> pontos completos neste passo</span>
+        </div>
+      </div>
+
+      {% if form.non_field_errors or form.errors %}
+        <div class="wizard-error-summary">
+          <strong>Revemos este passo antes de continuar.</strong>
+          <p>Alguns campos precisam de atencao. Corrige os pontos marcados abaixo para guardarmos tudo corretamente.</p>
+        </div>
+      {% endif %}
+
+      <form id="profile-wizard-form" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+        {% if step == 1 %}
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-person-lines-fill"></i>Identidade</div>
+            <h2 class="wizard-section-title">Dados pessoais basicos</h2>
+            <p class="wizard-panel-copy">Preenche os dados que vao sustentar o resto do perfil e facilitar contacto futuro.</p>
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}<div class="wizard-error">{{ form.nome.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.data_nascimento.id_for_label }}">{{ form.data_nascimento.label }}</label>
+                {{ form.data_nascimento }}
+                {% if form.data_nascimento.errors %}<div class="wizard-error">{{ form.data_nascimento.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="wizard_age">Idade estimada</label>
+                <input id="wizard_age" class="form-control" type="text" value="" readonly>
+                <div class="wizard-field-help">Calculada automaticamente a partir da data de nascimento.</div>
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }}</label>
+                {{ form.sexo }}
+                {% if form.sexo.errors %}<div class="wizard-error">{{ form.sexo.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-telephone"></i>Contacto</div>
+            <h2 class="wizard-section-title">Canais principais</h2>
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+                {{ form.telefone }}
+                {% if form.telefone.errors %}<div class="wizard-error">{{ form.telefone.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="wizard-error">{{ form.email.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
+                <label for="{{ form.contacto_alternativo.id_for_label }}">{{ form.contacto_alternativo.label }}</label>
+                {{ form.contacto_alternativo }}
+                {% if form.contacto_alternativo.errors %}<div class="wizard-error">{{ form.contacto_alternativo.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-geo-alt"></i>Localizacao</div>
+            <h2 class="wizard-section-title">Onde te encontras</h2>
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+                {{ form.distrito }}
+                {% if form.distrito.errors %}<div class="wizard-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
+                {{ form.localidade }}
+                {% if form.localidade.errors %}<div class="wizard-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        {% elif step == 2 %}
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-book"></i>Educacao</div>
+            <h2 class="wizard-section-title">Formacao e percurso academico</h2>
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
+                {{ form.nivel }}
+                {% if form.nivel.errors %}<div class="wizard-error">{{ form.nivel.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.area_formacao.id_for_label }}">{{ form.area_formacao.label }}</label>
+                {{ form.area_formacao }}
+                {% if form.area_formacao.errors %}<div class="wizard-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.instituicao.id_for_label }}">{{ form.instituicao.label }}</label>
+                {{ form.instituicao }}
+                {% if form.instituicao.errors %}<div class="wizard-error">{{ form.instituicao.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.ano.id_for_label }}">{{ form.ano.label }}</label>
+                {{ form.ano }}
+                {% if form.ano.errors %}<div class="wizard-error">{{ form.ano.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
+                <label for="{{ form.curso.id_for_label }}">{{ form.curso.label }}</label>
+                {{ form.curso }}
+                {% if form.curso.errors %}<div class="wizard-error">{{ form.curso.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-tools"></i>Competencias</div>
+            <h2 class="wizard-section-title">Skills que queres destacar</h2>
+            <p class="wizard-panel-copy">Seleciona o que ja dominas. Se faltar alguma skill importante, adiciona uma sugestao abaixo.</p>
+            <div class="wizard-choice-grid mt-3">
+              {% for choice in form.skills %}
+                <label class="wizard-choice-card">
+                  {{ choice.tag }}
+                  <span>{{ choice.choice_label }}</span>
+                </label>
+              {% empty %}
+                <div class="wizard-empty">Ainda nao existem skills aprovadas para selecionar.</div>
+              {% endfor %}
+            </div>
+            {% if form.skills.errors %}<div class="wizard-error mt-2">{{ form.skills.errors|striptags }}</div>{% endif %}
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.outra_skill_nome.id_for_label }}">{{ form.outra_skill_nome.label }}</label>
+                {{ form.outra_skill_nome }}
+                {% if form.outra_skill_nome.errors %}<div class="wizard-error">{{ form.outra_skill_nome.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.outra_skill_tipo.id_for_label }}">{{ form.outra_skill_tipo.label }}</label>
+                {{ form.outra_skill_tipo }}
+                {% if form.outra_skill_tipo.errors %}<div class="wizard-error">{{ form.outra_skill_tipo.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        {% elif step == 3 %}
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-briefcase"></i>Objetivo profissional</div>
+            <h2 class="wizard-section-title">Disponibilidade e preferencias</h2>
+            <div class="wizard-grid mt-3">
+              <div class="wizard-field">
+                <label for="{{ form.situacao_atual.id_for_label }}">{{ form.situacao_atual.label }}</label>
+                {{ form.situacao_atual }}
+                {% if form.situacao_atual.errors %}<div class="wizard-error">{{ form.situacao_atual.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.disponibilidade.id_for_label }}">{{ form.disponibilidade.label }}</label>
+                {{ form.disponibilidade }}
+                {% if form.disponibilidade.errors %}<div class="wizard-error">{{ form.disponibilidade.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
+                <label for="{{ form.preferencia_oportunidade.id_for_label }}">{{ form.preferencia_oportunidade.label }}</label>
+                {{ form.preferencia_oportunidade }}
+                {% if form.preferencia_oportunidade.errors %}<div class="wizard-error">{{ form.preferencia_oportunidade.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
+                <label>{{ form.interesse_setorial.label }}</label>
+                <div class="wizard-choice-grid">
+                  {% for choice in form.interesse_setorial %}
+                    <label class="wizard-choice-card">
+                      {{ choice.tag }}
+                      <span>{{ choice.choice_label }}</span>
+                    </label>
+                  {% empty %}
+                    <div class="wizard-empty">Ainda nao existem setores configurados para este passo.</div>
+                  {% endfor %}
+                </div>
+                {% if form.interesse_setorial.errors %}<div class="wizard-error">{{ form.interesse_setorial.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
+                <label for="{{ form.sobre.id_for_label }}">{{ form.sobre.label }}</label>
+                {{ form.sobre }}
+                <div class="wizard-field-help">Resume interesses, objetivos, disponibilidade ou qualquer contexto que ajude uma empresa a perceber o teu potencial.</div>
+                {% if form.sobre.errors %}<div class="wizard-error">{{ form.sobre.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-stars"></i>Experiencia opcional</div>
+            <h2 class="wizard-section-title">Mostra onde ja trabalhaste</h2>
+            <label class="wizard-toggle-card">
+              {{ form.tem_experiencia }}
+              <div>
+                <div class="wizard-toggle-title">{{ form.tem_experiencia.label }}</div>
+                <p class="wizard-panel-copy">Ativa esta opcao apenas se quiseres incluir uma experiencia profissional neste momento.</p>
+              </div>
+            </label>
+            {% if form.tem_experiencia.errors %}<div class="wizard-error mt-2">{{ form.tem_experiencia.errors|striptags }}</div>{% endif %}
+
+            <div id="experiencia_fields" class="wizard-grid mt-3" {% if not form.tem_experiencia.value %}style="display:none;"{% endif %}>
+              <div class="wizard-field">
+                <label for="{{ form.exp_entidade.id_for_label }}">{{ form.exp_entidade.label }}</label>
+                {{ form.exp_entidade }}
+                {% if form.exp_entidade.errors %}<div class="wizard-error">{{ form.exp_entidade.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.exp_cargo.id_for_label }}">{{ form.exp_cargo.label }}</label>
+                {{ form.exp_cargo }}
+                {% if form.exp_cargo.errors %}<div class="wizard-error">{{ form.exp_cargo.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field">
+                <label for="{{ form.exp_inicio.id_for_label }}">{{ form.exp_inicio.label }}</label>
+                {{ form.exp_inicio }}
+                {% if form.exp_inicio.errors %}<div class="wizard-error">{{ form.exp_inicio.errors|striptags }}</div>{% endif %}
+              </div>
+              <div id="exp_fim_wrap" class="wizard-field" {% if form.exp_atual.value %}style="display:none;"{% endif %}>
+                <label for="{{ form.exp_fim.id_for_label }}">{{ form.exp_fim.label }}</label>
+                {{ form.exp_fim }}
+                {% if form.exp_fim.errors %}<div class="wizard-error">{{ form.exp_fim.errors|striptags }}</div>{% endif %}
+              </div>
+              <label class="wizard-toggle-card full">
+                {{ form.exp_atual }}
+                <div>
+                  <div class="wizard-toggle-title">{{ form.exp_atual.label }}</div>
+                  <p class="wizard-panel-copy">Marca esta opcao se ainda estas neste trabalho e nao queres mostrar data de fim.</p>
+                </div>
+              </label>
+              <div class="wizard-field full">
+                <label for="{{ form.exp_descricao.id_for_label }}">{{ form.exp_descricao.label }}</label>
+                {{ form.exp_descricao }}
+                {% if form.exp_descricao.errors %}<div class="wizard-error">{{ form.exp_descricao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-folder2-open"></i>Documentos</div>
+            <h2 class="wizard-section-title">Anexa os ficheiros principais</h2>
+            <div class="wizard-file-grid mt-3">
+              <div class="wizard-file-card">
+                <div>
+                  <label for="{{ form.cv.id_for_label }}" class="wizard-toggle-title">{{ form.cv.label }}</label>
+                  <div class="wizard-file-state">
+                    {% if form.initial.cv %}
+                      Ja existe um CV guardado. Podes substituir se quiseres.
+                    {% else %}
+                      Adiciona um PDF com o teu CV atualizado.
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="wizard-field mb-0">
+                  {{ form.cv }}
+                  {% if form.cv.errors %}<div class="wizard-error">{{ form.cv.errors|striptags }}</div>{% endif %}
+                </div>
+              </div>
+
+              <div class="wizard-file-card">
+                <div>
+                  <label for="{{ form.certificado.id_for_label }}" class="wizard-toggle-title">{{ form.certificado.label }}</label>
+                  <div class="wizard-file-state">
+                    {% if form.initial.certificado %}
+                      Ja existe um certificado associado a este perfil.
+                    {% else %}
+                      Aceita PDF ou imagem do certificado principal.
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="wizard-field mb-0">
+                  {{ form.certificado }}
+                  {% if form.certificado.errors %}<div class="wizard-error">{{ form.certificado.errors|striptags }}</div>{% endif %}
+                </div>
+              </div>
+
+              <div class="wizard-file-card">
+                <div>
+                  <label for="{{ form.bi.id_for_label }}" class="wizard-toggle-title">{{ form.bi.label }}</label>
+                  <div class="wizard-file-state">
+                    {% if form.initial.bi %}
+                      Ja existe um BI guardado no perfil.
+                    {% else %}
+                      Opcional, mas pode ajudar na validacao de dados.
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="wizard-field mb-0">
+                  {{ form.bi }}
+                  {% if form.bi.errors %}<div class="wizard-error">{{ form.bi.errors|striptags }}</div>{% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-shield-lock"></i>Consentimentos</div>
+            <h2 class="wizard-section-title">Controla a visibilidade e os contactos</h2>
+            <div class="wizard-consent-grid mt-3">
+              <label class="wizard-toggle-card">
+                {{ form.visivel }}
+                <div>
+                  <div class="wizard-toggle-title">{{ form.visivel.label }}</div>
+                  <p class="wizard-panel-copy">Permite que empresas autorizadas vejam o teu perfil dentro da plataforma.</p>
+                </div>
+              </label>
+              <label class="wizard-toggle-card">
+                {{ form.consentimento_sms }}
+                <div>
+                  <div class="wizard-toggle-title">{{ form.consentimento_sms.label }}</div>
+                  <p class="wizard-panel-copy">Usa SMS para avisos curtos e contactos diretos.</p>
+                </div>
+              </label>
+              <label class="wizard-toggle-card">
+                {{ form.consentimento_whatsapp }}
+                <div>
+                  <div class="wizard-toggle-title">{{ form.consentimento_whatsapp.label }}</div>
+                  <p class="wizard-panel-copy">Ativa WhatsApp se este for o canal mais pratico para ti.</p>
+                </div>
+              </label>
+              <label class="wizard-toggle-card">
+                {{ form.consentimento_email }}
+                <div>
+                  <div class="wizard-toggle-title">{{ form.consentimento_email.label }}</div>
+                  <p class="wizard-panel-copy">Ideal para receber convites formais, instrucoes e seguimento.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="wizard-nav">
+          <div class="wizard-inline-meta">
+            <span><i class="bi bi-save2 me-1"></i>Podes sair e retomar depois.</span>
+          </div>
+          <div class="wizard-nav-actions">
+            {% if step > 1 %}
+              <button type="submit" name="prev" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Passo anterior</button>
+            {% endif %}
+            <button type="submit" name="save" class="btn btn-outline-primary"><i class="bi bi-floppy me-2"></i>Guardar rascunho</button>
+            {% if step < total_steps %}
+              <button type="submit" name="next" class="btn btn-primary">Continuar<i class="bi bi-arrow-right ms-2"></i></button>
+            {% else %}
+              <button type="submit" name="submit" class="btn btn-success">Concluir perfil<i class="bi bi-check-circle ms-2"></i></button>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('profile-wizard-form');
+    const birthDateInput = document.getElementById('id_data_nascimento');
+    const ageOutput = document.getElementById('wizard_age');
+    const temExperiencia = document.getElementById('id_tem_experiencia');
+    const expAtual = document.getElementById('id_exp_atual');
+    const experienciaFields = document.getElementById('experiencia_fields');
+    const expFimWrap = document.getElementById('exp_fim_wrap');
+    const autosaveStatus = document.getElementById('wizard-autosave-status');
+    const progressBar = document.getElementById('wizard-progress');
+    const progressText = document.getElementById('wizard-progress-text');
+    const stepStatsCurrent = document.getElementById('wizard-step-stats-current');
+    const stepStatsTotal = document.getElementById('wizard-step-stats-total');
+    let autosaveTimer = null;
+    let submitting = false;
+
+    function setAutosaveState(mode, text) {
+      if (!autosaveStatus) return;
+      autosaveStatus.classList.remove('is-saved', 'is-saving', 'is-error');
+      autosaveStatus.classList.add(mode);
+      autosaveStatus.innerHTML = '<i class="bi bi-cloud-check"></i>' + text;
+    }
+
+    function updateAge() {
+      if (!birthDateInput || !ageOutput) return;
+      if (!birthDateInput.value) {
+        ageOutput.value = '';
+        return;
+      }
+      const birthDate = new Date(birthDateInput.value);
+      if (Number.isNaN(birthDate.getTime())) {
+        ageOutput.value = '';
+        return;
+      }
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age -= 1;
+      ageOutput.value = age >= 0 ? age + ' anos' : '';
+    }
+
+    function toggleExperiencia() {
+      if (!temExperiencia || !experienciaFields) return;
+      experienciaFields.style.display = temExperiencia.checked ? 'grid' : 'none';
+    }
+
+    function toggleExpFim() {
+      if (!expAtual || !expFimWrap) return;
+      expFimWrap.style.display = expAtual.checked ? 'none' : 'grid';
+    }
+
+    async function runAutosave() {
+      if (!form || submitting) return;
+      setAutosaveState('is-saving', 'A guardar progresso');
+      const formData = new FormData(form);
+      formData.append('autosave', '1');
+      try {
+        const response = await fetch(window.location.pathname, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (!response.ok || !data.saved) throw new Error('autosave_failed');
+        if (progressBar && typeof data.progress !== 'undefined') progressBar.style.width = data.progress + '%';
+        if (progressText && typeof data.progress !== 'undefined') progressText.textContent = data.progress + '% concluido no perfil total';
+        if (stepStatsCurrent && typeof data.step_filled !== 'undefined') stepStatsCurrent.textContent = data.step_filled;
+        if (stepStatsTotal && typeof data.step_total !== 'undefined') stepStatsTotal.textContent = data.step_total;
+        setAutosaveState('is-saved', 'Progresso guardado');
+      } catch (error) {
+        setAutosaveState('is-error', 'Nao foi possivel guardar agora');
+      }
+    }
+
+    function scheduleAutosave(event) {
+      if (!form || submitting) return;
+      if (event && event.target && event.target.type === 'file') {
+        setAutosaveState('is-saved', 'Ficheiro pronto para envio');
+        return;
+      }
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(runAutosave, 650);
+    }
+
+    updateAge();
+    toggleExperiencia();
+    toggleExpFim();
+    if (birthDateInput) {
+      birthDateInput.addEventListener('change', updateAge);
+      birthDateInput.addEventListener('input', updateAge);
+    }
+    if (temExperiencia) temExperiencia.addEventListener('change', toggleExperiencia);
+    if (expAtual) expAtual.addEventListener('change', toggleExpFim);
+    if (form) {
+      form.addEventListener('input', scheduleAutosave);
+      form.addEventListener('change', scheduleAutosave);
+      form.addEventListener('submit', function () {
+        submitting = true;
+        clearTimeout(autosaveTimer);
+        setAutosaveState('is-saving', 'A processar envio');
+      });
+    }
+  });
+</script>
+{% endblock %}

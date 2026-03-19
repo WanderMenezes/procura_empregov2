@@ -1,0 +1,229 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Utilizador - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 admin-dashboard">
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='users' %}
+        </aside>
+
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4">
+                <div class="card-body">
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Edicao administrativa</div>
+                        <h1 class="admin-page-title">Editar utilizador</h1>
+                        <p class="admin-subtitle mb-0">
+                            Atualize os dados principais da conta sem sair do painel administrativo.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-person-badge"></i>
+                                {{ edit_target.get_perfil_display }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-telephone"></i>
+                                {{ edit_target.telefone }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-toggle-on"></i>
+                                {% if edit_target.is_active %}Conta ativa{% else %}Conta inativa{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="admin-hero-actions">
+                        <a href="{{ next_url }}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar a lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-8">
+                    <div class="card admin-panel">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Dados da conta</div>
+                                    <h5 class="mb-1">{{ edit_target.nome }}</h5>
+                                    <p class="text-muted mb-0">Edite nome, contactos, localizacao e dados condicionais do perfil.</p>
+                                </div>
+                            </div>
+
+                            <form method="post" novalidate class="admin-form-stack">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ next_url }}">
+
+                                {% if edit_user_form.non_field_errors %}
+                                    <div class="alert alert-danger mb-0">
+                                        {{ edit_user_form.non_field_errors|striptags }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="admin-form-section">
+                                    <div class="admin-form-section-label">Identidade e contacto</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="id_nome" class="form-label">
+                                                {% if edit_target.is_empresa %}Nome da empresa *{% else %}Nome completo *{% endif %}
+                                            </label>
+                                            <input type="text" name="nome" id="id_nome"
+                                                   class="form-control{% if edit_user_form.nome.errors %} is-invalid{% endif %}"
+                                                   value="{{ edit_user_form.nome.value|default_if_none:'' }}"
+                                                   required>
+                                            {% if edit_user_form.nome.errors %}
+                                                <div class="invalid-feedback d-block">{{ edit_user_form.nome.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_telefone" class="form-label">Telemovel *</label>
+                                            <input type="tel" name="telefone" id="id_telefone"
+                                                   class="form-control{% if edit_user_form.telefone.errors %} is-invalid{% endif %}"
+                                                   value="{{ edit_user_form.telefone.value|default_if_none:'' }}"
+                                                   required>
+                                            {% if edit_user_form.telefone.errors %}
+                                                <div class="invalid-feedback d-block">{{ edit_user_form.telefone.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_email" class="form-label">Email</label>
+                                            <input type="email" name="email" id="id_email"
+                                                   class="form-control{% if edit_user_form.email.errors %} is-invalid{% endif %}"
+                                                   value="{{ edit_user_form.email.value|default_if_none:'' }}">
+                                            {% if edit_user_form.email.errors %}
+                                                <div class="invalid-feedback d-block">{{ edit_user_form.email.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_distrito" class="form-label">Distrito</label>
+                                            {{ edit_user_form.distrito }}
+                                            {% if edit_user_form.distrito.errors %}
+                                                <div class="text-danger small mt-1">{{ edit_user_form.distrito.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if edit_target.is_empresa %}
+                                    <div class="admin-form-section">
+                                        <div class="admin-form-section-label">Identificacao da empresa</div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="id_nif" class="form-label">NIF *</label>
+                                                <input type="text" name="nif" id="id_nif"
+                                                       class="form-control{% if edit_user_form.nif.errors %} is-invalid{% endif %}"
+                                                       value="{{ edit_user_form.nif.value|default_if_none:'' }}"
+                                                       required>
+                                                {% if edit_user_form.nif.errors %}
+                                                    <div class="invalid-feedback d-block">{{ edit_user_form.nif.errors|striptags }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% elif edit_target.is_jovem %}
+                                    <div class="admin-form-section">
+                                        <div class="admin-form-section-label">Identificacao pessoal</div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="id_bi_numero" class="form-label">Numero do BI *</label>
+                                                <input type="text" name="bi_numero" id="id_bi_numero"
+                                                       class="form-control{% if edit_user_form.bi_numero.errors %} is-invalid{% endif %}"
+                                                       value="{{ edit_user_form.bi_numero.value|default_if_none:'' }}"
+                                                       required>
+                                                {% if edit_user_form.bi_numero.errors %}
+                                                    <div class="invalid-feedback d-block">{{ edit_user_form.bi_numero.errors|striptags }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if edit_target.is_jovem or edit_target.is_empresa %}
+                                    <div class="admin-form-section">
+                                        <div class="admin-form-section-label">Consentimentos</div>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="consentimento_dados" id="id_consentimento_dados"
+                                                           {% if edit_user_form.consentimento_dados.value %}checked{% endif %}>
+                                                    <label class="form-check-label" for="id_consentimento_dados">
+                                                        Autorizo o uso dos meus dados para fins de empregabilidade
+                                                    </label>
+                                                </div>
+                                                {% if edit_user_form.consentimento_dados.errors %}
+                                                    <div class="text-danger small mt-1">{{ edit_user_form.consentimento_dados.errors|striptags }}</div>
+                                                {% endif %}
+                                                <div class="form-check mt-3">
+                                                    <input class="form-check-input" type="checkbox" name="consentimento_contacto" id="id_consentimento_contacto"
+                                                           {% if edit_user_form.consentimento_contacto.value %}checked{% endif %}>
+                                                    <label class="form-check-label" for="id_consentimento_contacto">
+                                                        Autorizo ser contactado por SMS, WhatsApp ou email
+                                                    </label>
+                                                </div>
+                                                {% if edit_user_form.consentimento_contacto.errors %}
+                                                    <div class="text-danger small mt-1">{{ edit_user_form.consentimento_contacto.errors|striptags }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ next_url }}" class="btn btn-outline-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-1"></i>Guardar alteracoes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Resumo</div>
+                                    <h5 class="mb-1">{{ edit_target.nome }}</h5>
+                                    <p class="text-muted mb-0">Leitura rapida do estado atual da conta.</p>
+                                </div>
+                            </div>
+
+                            <div class="admin-inline-stat-list">
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Perfil</span>
+                                    <strong>{{ edit_target.get_perfil_display }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Estado</span>
+                                    <strong>{% if edit_target.is_active %}Ativo{% else %}Inativo{% endif %}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Registado em</span>
+                                    <strong>{{ edit_target.date_joined|date:"d/m/Y" }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Distrito</span>
+                                    <strong>{{ edit_target.distrito.nome|default:"-" }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="admin-note-card">
+                                <h6 class="mb-2">Nota</h6>
+                                <p class="mb-0 text-muted">
+                                    Esta edicao atualiza os dados da conta e, quando o perfil e de empresa, sincroniza tambem o perfil empresarial associado.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

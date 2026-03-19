@@ -1,58 +1,253 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Histórico de Mensagens - Base Nacional de Jovens{% endblock %}
+{% block title %}Historico de Mensagens - Base Nacional de Jovens{% endblock %}
+
+{% block extra_css %}
+<style>
+  .messages-page { color: #122033; }
+  .messages-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 32%), linear-gradient(135deg, rgba(13,37,66,.98), rgba(14,111,147,.94) 54%, rgba(39,161,116,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .messages-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .messages-hero > * { position: relative; z-index: 1; }
+  .messages-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .messages-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .messages-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .messages-subtitle { margin: 0; max-width: 68ch; color: rgba(255,255,255,.86); }
+  .messages-chips, .messages-actions, .messages-stats, .messages-meta, .thread-footer { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .messages-chips { margin-top: 1rem; }
+  .messages-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .88rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .messages-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .messages-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .messages-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .messages-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .messages-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .messages-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .messages-stat-meta { color: rgba(255,255,255,.84); font-size: .84rem; }
+  .messages-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .messages-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .messages-panel, .thread-card, .thread-intro { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .messages-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .messages-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
+  .messages-panel-subtitle, .messages-copy, .thread-copy, .thread-meta, .messages-empty-copy { color: #66768c; }
+  .messages-company { display: flex; gap: .9rem; align-items: center; }
+  .messages-company-logo { width: 72px; height: 72px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.35rem; font-weight: 800; }
+  .messages-company-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .messages-company-name { font-size: 1.02rem; font-weight: 700; margin-bottom: .12rem; }
+  .messages-company-line { color: #66768c; margin: 0; }
+  .messages-tags, .thread-tags { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .messages-tags { margin-top: .9rem; }
+  .messages-tag, .thread-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .42rem .72rem; border-radius: 999px; background: rgba(14,111,147,.1); border: 1px solid rgba(14,111,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600; }
+  .messages-tag.muted, .thread-pill.muted { background: #f7fafc; color: #607086; border-color: rgba(18,32,51,.08); }
+  .messages-tag.highlight, .thread-pill.highlight { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .thread-pill.warning { background: rgba(247,180,51,.16); color: #8a6111; border-color: rgba(247,180,51,.2); }
+  .thread-intro { margin-bottom: 1rem; background: linear-gradient(180deg, #fff, #f7fbfd); }
+  .thread-list { display: grid; gap: 1rem; }
+  .thread-card { position: relative; overflow: hidden; }
+  .thread-card.company { border-left: 4px solid #24a171; }
+  .thread-card.system { border-left: 4px solid #0e7193; }
+  .thread-card-head { display: flex; justify-content: space-between; gap: .8rem; align-items: flex-start; margin-bottom: .8rem; }
+  .thread-title { font-size: 1rem; font-weight: 700; color: #122033; margin-bottom: .15rem; }
+  .thread-copy { margin: 0; line-height: 1.75; }
+  .messages-facts { display: grid; gap: .8rem; }
+  .messages-fact { padding: .95rem 1rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .messages-fact-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #708096; margin-bottom: .2rem; }
+  .messages-fact-value { color: #122033; font-weight: 700; }
+  .messages-empty { border-radius: 24px; padding: 2.3rem 1.5rem; text-align: center; background: linear-gradient(180deg, #fff, #f7fafc); border: 1px dashed rgba(18,32,51,.14); box-shadow: 0 20px 38px rgba(18,32,51,.06); }
+  .messages-empty i { font-size: 2rem; color: #0e7193; display: block; margin-bottom: .8rem; }
+  .pagination .page-link { border-radius: 12px; margin: 0 .18rem; border-color: rgba(18,32,51,.12); color: #0e7193; }
+  @media (max-width: 991.98px) { .messages-shell, .messages-stats { grid-template-columns: 1fr; } .messages-sidebar { position: static; } .messages-hero-head { flex-direction: column; align-items: stretch; } .messages-actions .btn { width: 100%; } }
+  @media (max-width: 575.98px) { .messages-hero { padding: 1.35rem; } .thread-card-head, .thread-footer { flex-direction: column; align-items: stretch; } }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-        <div>
-            <h4 class="mb-1">Histórico de Mensagens</h4>
-            <p class="text-muted mb-0">
-                {{ application.job.titulo }} — {{ application.job.company.nome }}
-            </p>
+<div class="messages-page container py-4 py-lg-5">
+  <section class="messages-hero mb-4">
+    <div class="messages-hero-head">
+      <div>
+        <div class="messages-kicker">Conversa da candidatura</div>
+        <h1 class="messages-title">Historico de mensagens</h1>
+        <p class="messages-subtitle">Acompanha as interacoes ligadas a esta vaga, com contexto da empresa, estado da candidatura e a linha temporal mais recente.</p>
+        <div class="messages-chips">
+          <span class="messages-chip"><i class="bi bi-building"></i>{{ application.job.company.nome }}</span>
+          <span class="messages-chip"><i class="bi bi-briefcase"></i>{{ application.job.titulo }}</span>
+          <span class="messages-chip"><i class="bi bi-check2-circle"></i>{{ application.get_estado_display }}</span>
+          <span class="messages-chip"><i class="bi bi-chat-square-text"></i>{{ message_count }} mensagens</span>
         </div>
-        <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary btn-sm">
-            Voltar ao Perfil
-        </a>
+      </div>
+      <div class="messages-actions">
+        <a href="{% url 'profiles:my_applications' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as candidaturas</a>
+        <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-light"><i class="bi bi-briefcase me-2"></i>Ver vagas</a>
+        <a href="{% url 'profiles:detail' %}" class="btn btn-dark"><i class="bi bi-person me-2"></i>Meu perfil</a>
+      </div>
     </div>
 
-    {% if messages_page %}
-        <div class="list-group">
-            {% for msg in messages_page %}
-                <div class="list-group-item">
-                    <div class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
-                    <div>{{ msg.message|linebreaksbr }}</div>
+    <div class="messages-stats">
+      <div class="messages-stat"><span class="messages-stat-label">Total</span><span class="messages-stat-value">{{ message_count }}</span><span class="messages-stat-meta">na linha de conversa</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Da empresa</span><span class="messages-stat-value">{{ company_message_count }}</span><span class="messages-stat-meta">respostas empresariais</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Do sistema</span><span class="messages-stat-value">{{ system_message_count }}</span><span class="messages-stat-meta">atualizacoes automaticas</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Ultimo toque</span><span class="messages-stat-value">{% if latest_message %}{{ latest_message.created_at|date:"d/m" }}{% else %}--{% endif %}</span><span class="messages-stat-meta">{% if latest_message %}{{ latest_message.created_at|date:"H:i" }}{% else %}sem mensagens ainda{% endif %}</span></div>
+    </div>
+  </section>
+
+  <div class="messages-shell">
+    <aside class="messages-sidebar">
+      <section class="messages-panel">
+        <div class="messages-panel-head">
+          <div>
+            <h2 class="messages-panel-title">Empresa e vaga</h2>
+            <p class="messages-panel-subtitle">Resumo rapido do contexto desta candidatura.</p>
+          </div>
+        </div>
+        <div class="messages-company">
+          <div class="messages-company-logo" aria-hidden="true">
+            {% if application.job.company.logo %}
+              <img src="{{ application.job.company.logo.url }}" alt="{{ application.job.company.nome }}">
+            {% else %}
+              {{ application.company_initials }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="messages-company-name">{{ application.job.company.nome }}</div>
+            <p class="messages-company-line">{{ application.job.titulo }}</p>
+            <p class="messages-company-line">{% if application.job.distrito %}{{ application.job.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+          </div>
+        </div>
+        <div class="messages-tags">
+          <span class="messages-tag highlight"><i class="bi bi-check2-circle"></i>{{ application.get_estado_display }}</span>
+          <span class="messages-tag"><i class="bi bi-briefcase"></i>{{ application.job.get_tipo_display }}</span>
+          {% if application.job.estado == 'ATIVA' %}
+            <span class="messages-tag highlight"><i class="bi bi-broadcast"></i>Vaga ativa</span>
+          {% else %}
+            <span class="messages-tag muted"><i class="bi bi-pause-circle"></i>{{ application.job.get_estado_display }}</span>
+          {% endif %}
+        </div>
+
+        <div class="messages-facts mt-3">
+          <div class="messages-fact">
+            <span class="messages-fact-label">Candidatura enviada</span>
+            <span class="messages-fact-value">{{ application.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+          <div class="messages-fact">
+            <span class="messages-fact-label">Primeira mensagem</span>
+            <span class="messages-fact-value">{% if oldest_message %}{{ oldest_message.created_at|date:"d/m/Y H:i" }}{% else %}Ainda nao existe{% endif %}</span>
+          </div>
+          <div class="messages-fact">
+            <span class="messages-fact-label">Prazo da vaga</span>
+            <span class="messages-fact-value">{% if application.job.data_fecho %}{{ application.job.data_fecho|date:"d/m/Y" }}{% else %}Sem prazo informado{% endif %}</span>
+          </div>
+          <div class="messages-fact">
+            <span class="messages-fact-label">Area</span>
+            <span class="messages-fact-value">{% if application.job.area_formacao %}{{ application.job.get_area_formacao_display }}{% else %}Nao indicada{% endif %}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="messages-panel">
+        <div class="messages-panel-head">
+          <div>
+            <h2 class="messages-panel-title">Leitura da conversa</h2>
+            <p class="messages-panel-subtitle">Como interpretar rapidamente este historico.</p>
+          </div>
+        </div>
+        <div class="messages-facts">
+          <div class="messages-fact">
+            <span class="messages-fact-label">Empresa</span>
+            <span class="messages-fact-value">Mensagens de resposta, seguimento ou convite.</span>
+          </div>
+          <div class="messages-fact">
+            <span class="messages-fact-label">Sistema</span>
+            <span class="messages-fact-value">Atualizacoes automaticas ligadas ao processo.</span>
+          </div>
+          <div class="messages-fact">
+            <span class="messages-fact-label">Sugestao</span>
+            <span class="messages-fact-value">Se houver nova resposta da empresa, vale rever o estado geral em "Minhas candidaturas".</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section>
+      {% if application.mensagem %}
+        <div class="thread-intro">
+          <div class="thread-card-head">
+            <div>
+              <div class="thread-title">Mensagem inicial da candidatura</div>
+              <div class="thread-meta">Enviada por ti no momento da candidatura, em {{ application.created_at|date:"d/m/Y H:i" }}.</div>
+            </div>
+            <div class="thread-tags">
+              <span class="thread-pill muted"><i class="bi bi-chat-dots"></i>Apresentacao</span>
+            </div>
+          </div>
+          <p class="thread-copy">{{ application.mensagem|linebreaksbr }}</p>
+        </div>
+      {% endif %}
+
+      {% if messages_page.object_list %}
+        <div class="thread-list">
+          {% for msg in messages_page %}
+            <article class="thread-card {% if msg.sender == 'EMP' %}company{% else %}system{% endif %}">
+              <div class="thread-card-head">
+                <div>
+                  <div class="thread-title">{{ msg.get_sender_display }}</div>
+                  <div class="thread-meta">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
                 </div>
-            {% endfor %}
+                <div class="thread-tags">
+                  <span class="thread-pill {% if msg.sender == 'EMP' %}highlight{% else %}muted{% endif %}">
+                    <i class="bi {% if msg.sender == 'EMP' %}bi-building{% else %}bi-gear{% endif %}"></i>{{ msg.get_sender_display }}
+                  </span>
+                </div>
+              </div>
+              <p class="thread-copy">{{ msg.message|linebreaksbr }}</p>
+            </article>
+          {% endfor %}
         </div>
 
         {% if messages_page.paginator.num_pages > 1 %}
-            <nav class="mt-3">
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <li class="page-item {% if not messages_page.has_previous %}disabled{% endif %}">
-                        {% if messages_page.has_previous %}
-                            <a class="page-link" href="?page={{ messages_page.previous_page_number }}">Anterior</a>
-                        {% else %}
-                            <span class="page-link">Anterior</span>
-                        {% endif %}
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">
-                            Página {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}
-                        </span>
-                    </li>
-                    <li class="page-item {% if not messages_page.has_next %}disabled{% endif %}">
-                        {% if messages_page.has_next %}
-                            <a class="page-link" href="?page={{ messages_page.next_page_number }}">Próxima</a>
-                        {% else %}
-                            <span class="page-link">Próxima</span>
-                        {% endif %}
-                    </li>
-                </ul>
-            </nav>
+          <nav class="mt-4" aria-label="Paginacao do historico">
+            <ul class="pagination justify-content-center mb-0">
+              <li class="page-item {% if not messages_page.has_previous %}disabled{% endif %}">
+                {% if messages_page.has_previous %}
+                  <a class="page-link" href="?page={{ messages_page.previous_page_number }}">Anterior</a>
+                {% else %}
+                  <span class="page-link">Anterior</span>
+                {% endif %}
+              </li>
+              <li class="page-item disabled"><span class="page-link">Pagina {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}</span></li>
+              <li class="page-item {% if not messages_page.has_next %}disabled{% endif %}">
+                {% if messages_page.has_next %}
+                  <a class="page-link" href="?page={{ messages_page.next_page_number }}">Proxima</a>
+                {% else %}
+                  <span class="page-link">Proxima</span>
+                {% endif %}
+              </li>
+            </ul>
+          </nav>
         {% endif %}
-    {% else %}
-        <div class="alert alert-info mb-0">Sem mensagens.</div>
-    {% endif %}
+      {% elif application.resposta_empresa %}
+        <article class="thread-card company">
+          <div class="thread-card-head">
+            <div>
+              <div class="thread-title">Resposta da empresa</div>
+              <div class="thread-meta">Guardada diretamente na candidatura.</div>
+            </div>
+            <div class="thread-tags">
+              <span class="thread-pill highlight"><i class="bi bi-building"></i>Empresa</span>
+            </div>
+          </div>
+          <p class="thread-copy">{{ application.resposta_empresa|linebreaksbr }}</p>
+        </article>
+      {% else %}
+        <div class="messages-empty">
+          <i class="bi bi-chat-square"></i>
+          <h2 class="messages-panel-title mb-2">Sem mensagens ainda</h2>
+          <p class="messages-empty-copy mb-3">A candidatura ja foi enviada, mas ainda nao existem trocas registadas neste historico. Continua a acompanhar o estado geral em "Minhas candidaturas".</p>
+          <div class="thread-footer">
+            <a href="{% url 'profiles:my_applications' %}" class="btn btn-primary">Voltar ao pipeline</a>
+            <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-secondary">Explorar mais vagas</a>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

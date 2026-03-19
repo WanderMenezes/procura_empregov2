@@ -26,6 +26,33 @@ def _close_job_if_full(job):
         job.save(update_fields=['estado'])
 
 
+def _sync_company_identity(user, company):
+    """Mantém os dados base da conta em sintonia com o perfil da empresa."""
+    update_fields = []
+    company_name = company.nome or user.nome_empresa or user.nome
+    company_nif = company.nif or ''
+    company_setores = company.setores_display
+
+    if user.nome != company_name:
+        user.nome = company_name
+        update_fields.append('nome')
+
+    if user.nome_empresa != company_name:
+        user.nome_empresa = company_name
+        update_fields.append('nome_empresa')
+
+    if user.nif != company_nif:
+        user.nif = company_nif
+        update_fields.append('nif')
+
+    if user.setor_empresa != company_setores:
+        user.setor_empresa = company_setores
+        update_fields.append('setor_empresa')
+
+    if update_fields:
+        user.save(update_fields=update_fields)
+
+
 @login_required
 def complete_company_profile(request):
     """View para completar perfil da empresa"""
@@ -52,6 +79,7 @@ def complete_company_profile(request):
                     # se processamento falhar, prosseguir e salvar sem imagem
                     pass
             company.save()
+            _sync_company_identity(request.user, company)
             
             # Notificação
             Notification.objects.create(
@@ -64,9 +92,17 @@ def complete_company_profile(request):
             messages.success(request, _('Perfil da empresa criado com sucesso!'))
             return redirect('companies:dashboard')
     else:
-        form = CompanyProfileForm()
+        form = CompanyProfileForm(initial={
+            'nome': request.user.nome_empresa or request.user.nome,
+            'nif': request.user.nif,
+            'telefone': request.user.telefone,
+            'email': request.user.email,
+        })
     
-    return render(request, 'companies/complete_profile.html', {'form': form})
+    return render(request, 'companies/complete_profile.html', {
+        'form': form,
+        'draft_company_name': request.user.nome_empresa or request.user.nome,
+    })
 
 
 @login_required
@@ -123,7 +159,8 @@ def company_profile_edit(request):
     if request.method == 'POST':
         form = CompanyProfileForm(request.POST, request.FILES, instance=company)
         if form.is_valid():
-            form.save()
+            company = form.save()
+            _sync_company_identity(request.user, company)
             messages.success(request, _('Perfil atualizado com sucesso!'))
             return redirect('companies:dashboard')
     else:
@@ -156,10 +193,19 @@ def job_list(request):
     
     company = request.user.company_profile
     vagas = company.job_posts.all()
+    total_visualizacoes = vagas.aggregate(total=Sum('visualizacoes'))['total'] or 0
     
     context = {
         'vagas': vagas,
-        'company': company
+        'company': company,
+        'job_stats': {
+            'total': vagas.count(),
+            'ativas': vagas.filter(estado='ATIVA').count(),
+            'pausadas': vagas.filter(estado='PAUSADA').count(),
+            'fechadas': vagas.filter(estado='FECHADA').count(),
+            'candidaturas': company.total_candidaturas,
+            'visualizacoes': total_visualizacoes,
+        }
     }
     
     return render(request, 'companies/job_list_page.html', context)
@@ -171,26 +217,34 @@ def job_create(request):
     if not request.user.is_empresa or not request.user.has_company_profile():
         messages.error(request, _('Acesso negado.'))
         return redirect('home')
-    
+
+    company = request.user.company_profile
+
     if request.method == 'POST':
         form = JobPostForm(request.POST)
         if form.is_valid():
             job = form.save(commit=False)
-            job.company = request.user.company_profile
+            job.company = company
             job.save()
             
             messages.success(request, _('Vaga publicada com sucesso!'))
             return redirect('companies:job_list')
     else:
         form = JobPostForm()
-    
-    return render(request, 'companies/job_form.html', {'form': form, 'action': 'Criar'})
+
+    return render(request, 'companies/job_form.html', {
+        'form': form,
+        'action': 'Criar',
+        'company': company,
+        'job': None,
+    })
 
 
 @login_required
 def job_edit(request, pk):
     """Editar vaga"""
     job = get_object_or_404(JobPost, pk=pk, company__user=request.user)
+    company = job.company
     
     if request.method == 'POST':
         form = JobPostForm(request.POST, instance=job)
@@ -200,8 +254,13 @@ def job_edit(request, pk):
             return redirect('companies:job_list')
     else:
         form = JobPostForm(instance=job)
-    
-    return render(request, 'companies/job_form.html', {'form': form, 'action': 'Editar', 'job': job})
+
+    return render(request, 'companies/job_form.html', {
+        'form': form,
+        'action': 'Editar',
+        'job': job,
+        'company': company,
+    })
 
 
 @login_required
@@ -217,14 +276,32 @@ def job_close(request, pk):
 @login_required
 def job_applications(request, pk):
     """Ver candidaturas de uma vaga"""
-    job = get_object_or_404(JobPost, pk=pk, company__user=request.user)
+    job = get_object_or_404(
+        JobPost.objects.select_related('company', 'distrito'),
+        pk=pk,
+        company__user=request.user
+    )
     
-    candidaturas = job.applications.select_related('youth', 'youth__user').prefetch_related('messages').all()
+    candidaturas = (
+        job.applications
+        .select_related('youth', 'youth__user', 'youth__user__distrito')
+        .prefetch_related('messages', 'youth__documents')
+        .all()
+    )
     
     context = {
+        'company': job.company,
         'job': job,
         'candidaturas': candidaturas,
-        'applications': candidaturas
+        'applications': candidaturas,
+        'application_summary': {
+            'total': candidaturas.count(),
+            'pending': candidaturas.filter(estado='PENDENTE').count(),
+            'analysis': candidaturas.filter(estado='EM_ANALISE').count(),
+            'accepted': candidaturas.filter(estado='ACEITE').count(),
+            'rejected': candidaturas.filter(estado='REJEITADA').count(),
+            'with_documents': candidaturas.filter(youth__documents__isnull=False).distinct().count(),
+        }
     }
     
     return render(request, 'companies/job_applications.html', context)
@@ -267,7 +344,18 @@ def job_apply(request, pk):
 @login_required
 def application_update(request, pk, estado):
     """Atualizar estado de candidatura"""
-    application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
+    application = get_object_or_404(
+        Application.objects.select_related(
+            'job',
+            'job__company',
+            'job__distrito',
+            'youth',
+            'youth__user',
+            'youth__user__distrito',
+        ),
+        pk=pk,
+        job__company__user=request.user
+    )
     
     if estado in ['PENDENTE', 'EM_ANALISE', 'ACEITE', 'REJEITADA']:
         if estado == 'ACEITE' and application.estado != 'ACEITE' and not application.job.tem_vagas_disponiveis:
@@ -351,8 +439,14 @@ def application_messages(request, pk):
     messages_page = paginator.get_page(page_number)
 
     context = {
+        'company': application.job.company,
         'application': application,
         'messages_page': messages_page,
+        'message_summary': {
+            'total': messages_qs.count(),
+            'system': messages_qs.filter(sender='SYS').count(),
+            'company': messages_qs.filter(sender='EMP').count(),
+        }
     }
 
     return render(request, 'companies/application_messages.html', context)
@@ -366,6 +460,7 @@ def search_youth(request):
         messages.error(request, _('Acesso negado.'))
         return redirect('home')
 
+    company = request.user.company_profile
     form = YouthSearchForm(request.GET or None)
 
     # Lista inicial: últimos jovens visíveis e completos
@@ -377,10 +472,19 @@ def search_youth(request):
         .order_by('-created_at')
     )
 
+    total_pool = base_qs.count()
+    available_now = base_qs.filter(disponibilidade='SIM').count()
+    with_experience = base_qs.filter(experiences__isnull=False).distinct().count()
+
     results_qs = base_qs
+    active_filters = 0
 
     if request.GET and form.is_valid():
         data = form.cleaned_data
+        active_filters = sum(
+            1 for value in data.values()
+            if value not in (None, '', [], (), False)
+        )
 
         if data.get('q'):
             q = data['q']
@@ -421,11 +525,18 @@ def search_youth(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
+        'company': company,
         'form': form,
         'results': page_obj.object_list,
         'page_obj': page_obj,
         'paginator': paginator,
         'total': paginator.count,
+        'search_summary': {
+            'base_total': total_pool,
+            'available_now': available_now,
+            'with_experience': with_experience,
+            'active_filters': active_filters,
+        }
     }
 
     # Se pedido AJAX, retornar apenas o fragmento de resultados
@@ -442,22 +553,36 @@ def youth_detail(request, pk):
         messages.error(request, _('Acesso negado.'))
         return redirect('home')
     
-    profile = get_object_or_404(YouthProfile, pk=pk, visivel=True, completo=True)
+    company = request.user.company_profile
+    profile = get_object_or_404(
+        YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
+            'youth_skills__skill',
+            'education',
+            'experiences',
+            'documents',
+        ),
+        pk=pk,
+        visivel=True,
+        completo=True
+    )
     
     # Incrementar visualizações (se implementado)
     
     # Verificar se já existe pedido de contacto
     existing_request = ContactRequest.objects.filter(
-        company=request.user.company_profile,
+        company=company,
         youth=profile
     ).first()
     
     context = {
+        'company': company,
         'profile': profile,
         'education': profile.get_education(),
         'experiences': profile.get_experience(),
         'skills': profile.youth_skills.select_related('skill').all(),
-        'existing_request': existing_request
+        'existing_request': existing_request,
+        'documents': profile.get_documents(),
+        'can_view_contact': bool(existing_request and existing_request.estado == 'APROVADO'),
     }
     
     return render(request, 'companies/youth_detail.html', context)
@@ -471,11 +596,21 @@ def contact_request_create(request, youth_pk):
         messages.error(request, _('Acesso negado.'))
         return redirect('home')
     
-    youth = get_object_or_404(YouthProfile, pk=youth_pk, visivel=True)
+    company = request.user.company_profile
+    youth = get_object_or_404(
+        YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
+            'youth_skills__skill',
+            'documents',
+            'education',
+            'experiences',
+        ),
+        pk=youth_pk,
+        visivel=True
+    )
     
     # Verificar se já existe pedido
     if ContactRequest.objects.filter(
-        company=request.user.company_profile,
+        company=company,
         youth=youth
     ).exists():
         messages.warning(request, _('Já existe um pedido de contacto para este jovem.'))
@@ -485,7 +620,7 @@ def contact_request_create(request, youth_pk):
         form = ContactRequestForm(request.POST)
         if form.is_valid():
             contact = form.save(commit=False)
-            contact.company = request.user.company_profile
+            contact.company = company
             contact.youth = youth
             contact.save()
             
@@ -494,7 +629,7 @@ def contact_request_create(request, youth_pk):
                 user=youth.user,
                 titulo=_('Novo pedido de contacto'),
                 mensagem=_('A empresa "{}" solicitou contacto contigo.').format(
-                    request.user.company_profile.nome
+                    company.nome
                 ),
                 tipo='INFO'
             )
@@ -507,7 +642,7 @@ def contact_request_create(request, youth_pk):
                     user=admin,
                     titulo=_('Novo pedido de contacto'),
                     mensagem=_('A empresa "%(empresa)s" solicitou contacto com %(jovem)s.') % {
-                        'empresa': request.user.company_profile.nome,
+                        'empresa': company.nome,
                         'jovem': youth.user.nome
                     },
                     tipo='INFO'
@@ -520,7 +655,12 @@ def contact_request_create(request, youth_pk):
     
     context = {
         'form': form,
-        'youth': youth
+        'company': company,
+        'youth': youth,
+        'skills': youth.youth_skills.select_related('skill').all(),
+        'documents': youth.get_documents(),
+        'education': youth.get_education(),
+        'experiences': youth.get_experience(),
     }
     
     return render(request, 'companies/contact_request_form.html', context)
@@ -599,13 +739,26 @@ def contact_request_list(request):
     if not (request.user.is_empresa and request.user.has_company_profile()):
         messages.error(request, _('Acesso negado.'))
         return redirect('home')
-    
-    pedidos = request.user.company_profile.contact_requests.select_related('youth', 'youth__user').all()
-    
+
+    company = request.user.company_profile
+    pedidos = company.contact_requests.select_related(
+        'youth',
+        'youth__user',
+        'youth__user__distrito',
+    ).all()
+
     context = {
-        'pedidos': pedidos
+        'company': company,
+        'pedidos': pedidos,
+        'contact_summary': {
+            'total': pedidos.count(),
+            'pending': pedidos.filter(estado='PENDENTE').count(),
+            'approved': pedidos.filter(estado='APROVADO').count(),
+            'rejected': pedidos.filter(estado='REJEITADO').count(),
+            'responded': pedidos.exclude(responded_at__isnull=True).count(),
+        }
     }
-    
+
     return render(request, 'companies/contact_request_page.html', context)
 
 

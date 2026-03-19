@@ -2,88 +2,300 @@
 
 {% block title %}Candidaturas{% endblock %}
 
+{% block extra_css %}
+<style>
+  .job-app-page { color: #122033; }
+  .job-app-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.3), transparent 32%), linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .job-app-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .job-app-hero > * { position: relative; z-index: 1; }
+  .job-app-hero-head, .job-app-panel-head, .job-app-card-top, .job-app-footer { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .job-app-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .job-app-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .job-app-subtitle { max-width: 64ch; margin: 0; color: rgba(255,255,255,.86); }
+  .job-app-chips, .job-app-actions, .job-app-meta, .job-app-tags, .job-app-doc-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .job-app-chips { margin-top: 1rem; }
+  .job-app-chip {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600;
+  }
+  .job-app-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .job-app-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .job-app-stats { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .9rem; margin-top: 1.1rem; }
+  .job-app-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .job-app-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .job-app-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .job-app-stat-meta { color: rgba(255,255,255,.82); font-size: .84rem; }
+  .job-app-panel { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .job-app-panel-head h5 { margin-bottom: .2rem; }
+  .job-app-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .job-app-list { display: grid; gap: 1rem; }
+  .job-app-card { border-radius: 24px; padding: 1.15rem; background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid rgba(18,32,51,.08); }
+  .job-app-identity { display: flex; gap: .95rem; align-items: flex-start; }
+  .job-app-avatar {
+    width: 74px; height: 74px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(14,113,147,.12), rgba(34,166,120,.14)); color: #0e7193; font-size: 1.1rem; font-weight: 700; letter-spacing: .05em;
+  }
+  .job-app-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .job-app-name { font-size: 1.05rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
+  .job-app-subline, .job-app-copy, .job-app-empty, .job-app-history-copy { color: #66768c; }
+  .job-app-subline { margin-bottom: .35rem; }
+  .job-app-tag, .job-app-status {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+  }
+  .job-app-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .job-app-status.pending { background: rgba(108,117,125,.14); color: #5c6670; border: 1px solid rgba(108,117,125,.2); }
+  .job-app-status.analysis { background: rgba(255,193,7,.16); color: #8f6a00; border: 1px solid rgba(255,193,7,.24); }
+  .job-app-status.accepted { background: rgba(25,135,84,.12); color: #146c43; border: 1px solid rgba(25,135,84,.2); }
+  .job-app-status.rejected { background: rgba(220,53,69,.1); color: #a02834; border: 1px solid rgba(220,53,69,.18); }
+  .job-app-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .8rem; margin: 1rem 0; }
+  .job-app-grid-item, .job-app-block {
+    border-radius: 18px; padding: .9rem 1rem; background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .job-app-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #7b8798; margin-bottom: .2rem; }
+  .job-app-block + .job-app-block { margin-top: .85rem; }
+  .job-app-doc-list { display: grid; gap: .7rem; margin-top: .8rem; }
+  .job-app-doc {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; padding: .85rem .95rem; border-radius: 18px; background: #fff; border: 1px solid rgba(18,32,51,.08);
+  }
+  .job-app-doc-preview {
+    width: 62px; height: 62px; border-radius: 16px; overflow: hidden; flex-shrink: 0; background: #f4f7fb;
+    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(18,32,51,.08);
+  }
+  .job-app-doc-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .job-app-doc-preview i { font-size: 1.3rem; color: #0e7193; }
+  .job-app-doc-actions { margin-left: auto; }
+  .job-app-doc-actions .btn, .job-app-footer .btn { border-radius: 12px; }
+  .job-app-form .form-label { font-weight: 700; color: #1f2d3d; }
+  .job-app-form .form-select, .job-app-form .form-control { border-radius: 14px; border-color: rgba(18,32,51,.12); box-shadow: none; }
+  .job-app-history { margin-top: 1rem; }
+  .job-app-history-item { padding: .85rem .95rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .job-app-empty {
+    border-radius: 24px; padding: 1.5rem; text-align: center; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14);
+  }
+  .job-app-empty i { display: block; font-size: 1.8rem; color: var(--primary-color); margin-bottom: .55rem; }
+  @media (max-width: 991.98px) {
+    .job-app-hero-head, .job-app-panel-head, .job-app-card-top, .job-app-footer { flex-direction: column; align-items: stretch; }
+    .job-app-actions .btn { width: 100%; }
+    .job-app-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .job-app-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    .job-app-hero { padding: 1.35rem; }
+    .job-app-stats, .job-app-grid { grid-template-columns: 1fr; }
+    .job-app-identity { flex-direction: column; }
+    .job-app-doc-actions { margin-left: 0; width: 100%; }
+    .job-app-doc-actions .btn { flex: 1 1 auto; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <h4>Candidaturas</h4>
-  {% if applications %}
-    <div class="list-group">
-      {% for app in applications %}
-        <div class="list-group-item">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h6 class="mb-1">{{ app.youth.user.nome }}</h6>
-              <div class="small text-muted mb-1">
-                <i class="bi bi-telephone me-1"></i>{{ app.youth.user.telefone|default:"-" }}
+<div class="job-app-page container py-4 py-lg-5">
+  <section class="job-app-hero mb-4">
+    <div class="job-app-hero-head">
+      <div>
+        <div class="job-app-kicker">Gestao de candidaturas</div>
+        <h1 class="job-app-title">{{ job.titulo }}</h1>
+        <p class="job-app-subtitle">
+          Reveja candidatos, acompanhe documentos, ajuste estados e responda com mais contexto sem sair da vaga.
+        </p>
+        <div class="job-app-chips">
+          <span class="job-app-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="job-app-chip"><i class="bi bi-briefcase"></i>{{ job.get_tipo_display }}</span>
+          <span class="job-app-chip"><i class="bi bi-geo-alt"></i>{{ job.distrito.nome|default:"Distrito por definir" }}</span>
+          <span class="job-app-chip"><i class="bi bi-calendar-event"></i>{{ job.data_publicacao|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+      <div class="job-app-actions">
+        <a href="{% url 'companies:job_list' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as vagas</a>
+        <a href="{% url 'companies:job_edit' job.id %}" class="btn btn-outline-light"><i class="bi bi-pencil-square me-2"></i>Editar vaga</a>
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light"><i class="bi bi-search me-2"></i>Pesquisar jovens</a>
+      </div>
+    </div>
+
+    <div class="job-app-stats">
+      <div class="job-app-stat">
+        <span class="job-app-stat-label">Total</span>
+        <span class="job-app-stat-value">{{ application_summary.total|default:0 }}</span>
+        <span class="job-app-stat-meta">candidatura{{ application_summary.total|default:0|pluralize }} recebida{{ application_summary.total|default:0|pluralize }}</span>
+      </div>
+      <div class="job-app-stat">
+        <span class="job-app-stat-label">Em analise</span>
+        <span class="job-app-stat-value">{{ application_summary.analysis|default:0 }}</span>
+        <span class="job-app-stat-meta">{{ application_summary.pending|default:0 }} pendente{{ application_summary.pending|default:0|pluralize }}</span>
+      </div>
+      <div class="job-app-stat">
+        <span class="job-app-stat-label">Aceites</span>
+        <span class="job-app-stat-value">{{ application_summary.accepted|default:0 }}</span>
+        <span class="job-app-stat-meta">{{ application_summary.rejected|default:0 }} rejeitada{{ application_summary.rejected|default:0|pluralize }}</span>
+      </div>
+      <div class="job-app-stat">
+        <span class="job-app-stat-label">Com documentos</span>
+        <span class="job-app-stat-value">{{ application_summary.with_documents|default:0 }}</span>
+        <span class="job-app-stat-meta">perfis com anexos visiveis</span>
+      </div>
+      <div class="job-app-stat">
+        <span class="job-app-stat-label">Vagas restantes</span>
+        <span class="job-app-stat-value">{{ job.vagas_restantes }}</span>
+        <span class="job-app-stat-meta">{{ job.numero_vagas }} vaga{{ job.numero_vagas|pluralize }} publicada{{ job.numero_vagas|pluralize }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="job-app-panel">
+    <div class="job-app-panel-head">
+      <div>
+        <h5>Lista de candidatos</h5>
+        <p class="job-app-panel-subtitle">Cada cartao junta perfil, documentos, resposta da empresa e historico recente.</p>
+      </div>
+    </div>
+
+    {% if applications %}
+      <div class="job-app-list">
+        {% for app in applications %}
+          <article class="job-app-card">
+            <div class="job-app-card-top">
+              <div class="job-app-identity">
+                <div class="job-app-avatar" aria-hidden="true">
+                  {% if app.youth.photo %}
+                    <img src="{{ app.youth.photo.url }}" alt="{{ app.youth.user.nome }}">
+                  {% else %}
+                    {{ app.youth.user.nome|slice:":2"|upper }}
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="job-app-name">{{ app.youth.user.nome }}</div>
+                  <div class="job-app-subline">
+                    {{ app.youth.distrito.nome|default:"Distrito nao definido" }}{% if app.youth.localidade %} - {{ app.youth.localidade }}{% endif %}
+                  </div>
+                  <div class="job-app-tags">
+                    {% if app.youth.idade %}<span class="job-app-tag"><i class="bi bi-person"></i>{{ app.youth.idade }} anos</span>{% endif %}
+                    <span class="job-app-tag"><i class="bi bi-briefcase"></i>{{ app.youth.get_situacao_atual_display }}</span>
+                    <span class="job-app-tag"><i class="bi bi-lightning-charge"></i>{{ app.youth.get_disponibilidade_display }}</span>
+                    <span class="job-app-tag"><i class="bi bi-file-earmark"></i>{{ app.youth.documents.all|length }} documento{{ app.youth.documents.all|length|pluralize }}</span>
+                  </div>
+                </div>
               </div>
-              <div class="small text-muted mb-1">
-                <i class="bi bi-envelope me-1"></i>{{ app.youth.user.email|default:"-" }}
-              </div>
-              <div class="small text-muted">Candidatou-se em {{ app.created_at|date:"d/m/Y" }}</div>
-            </div>
-            <div class="d-flex flex-column align-items-end gap-2">
-              <span class="badge {% if app.estado == 'ACEITE' %}bg-success{% elif app.estado == 'REJEITADA' %}bg-danger{% elif app.estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+
+              <span class="job-app-status {% if app.estado == 'ACEITE' %}accepted{% elif app.estado == 'REJEITADA' %}rejected{% elif app.estado == 'EM_ANALISE' %}analysis{% else %}pending{% endif %}">
+                <i class="bi {% if app.estado == 'ACEITE' %}bi-check-circle{% elif app.estado == 'REJEITADA' %}bi-x-circle{% elif app.estado == 'EM_ANALISE' %}bi-hourglass-split{% else %}bi-dot{% endif %}"></i>
                 {{ app.get_estado_display }}
               </span>
-              <a href="{% url 'companies:youth_detail' app.youth.id %}"
-                 class="btn btn-outline-secondary btn-sm"
-                 title="Ver perfil"
-                 aria-label="Ver perfil">
-                <i class="bi bi-eye"></i>
-              </a>
             </div>
-          </div>
 
-          <form method="post" action="{% url 'companies:application_manage' app.id %}" class="mt-3">
-            {% csrf_token %}
-            <div class="row g-2">
-              <div class="col-md-4">
-                <label class="form-label small mb-1">Estado</label>
-                <select name="estado" class="form-select form-select-sm">
-                  {% for value,label in app.ESTADO_CHOICES %}
-                    <option value="{{ value }}" {% if app.estado == value %}selected{% endif %}>{{ label }}</option>
+            <div class="job-app-grid">
+              <div class="job-app-grid-item">
+                <span class="job-app-label">Telefone</span>
+                {{ app.youth.user.telefone|default:"-" }}
+              </div>
+              <div class="job-app-grid-item">
+                <span class="job-app-label">Email</span>
+                {{ app.youth.user.email|default:"-" }}
+              </div>
+              <div class="job-app-grid-item">
+                <span class="job-app-label">Candidatura</span>
+                {{ app.created_at|date:"d/m/Y" }}
+              </div>
+              <div class="job-app-grid-item">
+                <span class="job-app-label">Mensagens</span>
+                {{ app.messages.all|length }}
+              </div>
+            </div>
+
+            {% if app.mensagem %}
+              <div class="job-app-block">
+                <span class="job-app-label">Motivacao enviada</span>
+                <div class="job-app-copy">{{ app.mensagem|linebreaksbr }}</div>
+              </div>
+            {% endif %}
+
+            {% if app.youth.documents.all %}
+              <div class="job-app-block">
+                <span class="job-app-label">Documentos do candidato</span>
+                <div class="job-app-doc-list">
+                  {% for doc in app.youth.documents.all %}
+                    {% with file_url=doc.arquivo.name|lower %}
+                      <article class="job-app-doc">
+                        <div class="job-app-doc-preview">
+                          {% if ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}
+                            <img src="{% url 'profiles:document_view' doc.pk %}" alt="{{ doc.nome }}" loading="lazy">
+                          {% elif ".pdf" in file_url %}
+                            <i class="bi bi-file-earmark-pdf"></i>
+                          {% else %}
+                            <i class="bi bi-file-earmark-text"></i>
+                          {% endif %}
+                        </div>
+                        <div>
+                          <div class="job-app-doc-title">{{ doc.nome }}</div>
+                          <div class="job-app-doc-meta">
+                            <span class="badge bg-secondary">{{ doc.get_tipo_display }}</span>
+                            {% if doc.verificado %}<span class="badge bg-success"><i class="bi bi-check me-1"></i>Verificado</span>{% endif %}
+                          </div>
+                        </div>
+                        <div class="job-app-doc-actions">
+                          <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#docPreviewModal" data-doc-url="{% url 'profiles:document_view' doc.pk %}" data-doc-name="{{ doc.nome }}" data-doc-type="{% if ".pdf" in file_url %}pdf{% elif ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}image{% else %}other{% endif %}"><i class="bi bi-eye me-1"></i>Abrir</button>
+                          <a href="{% url 'profiles:document_download' doc.pk %}" class="btn btn-outline-secondary btn-sm" download><i class="bi bi-download me-1"></i>Baixar</a>
+                        </div>
+                      </article>
+                    {% endwith %}
                   {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-8">
-                <label class="form-label small mb-1">Mensagem para o candidato</label>
-                <textarea name="resposta_empresa" rows="2" class="form-control form-control-sm" placeholder="Escreva uma mensagem...">{{ app.resposta_empresa }}</textarea>
-              </div>
-            </div>
-            <div class="mt-2">
-              <button type="submit" class="btn btn-primary btn-sm" title="Guardar" aria-label="Guardar">
-                <i class="bi bi-save"></i>
-              </button>
-            </div>
-          </form>
-
-          {% if app.messages.all %}
-            {% with last_msg=app.messages.all.0 %}
-              <div class="alert alert-info py-2 mb-2 mt-3">
-                <strong>Última mensagem enviada:</strong>
-                <div class="small text-muted">{{ last_msg.created_at|date:"d/m/Y H:i" }}</div>
-                <div>{{ last_msg.message|linebreaksbr }}</div>
-              </div>
-            {% endwith %}
-            <div class="small text-muted fw-semibold mb-1">Histórico (últimas)</div>
-            <div class="list-group list-group-flush">
-              {% for msg in app.messages.all|slice:":3" %}
-                <div class="list-group-item px-0">
-                  <div class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
-                  <div>{{ msg.message|linebreaksbr }}</div>
                 </div>
-              {% endfor %}
-            </div>
-            <div class="mt-2">
-              <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-sm btn-outline-secondary">
-                Ver histórico completo
-              </a>
-            </div>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="alert alert-info">Sem candidaturas.</div>
-  {% endif %}
+              </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'companies:application_manage' app.id %}" class="job-app-form mt-3">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Estado da candidatura</label>
+                  <select name="estado" class="form-select">
+                    {% for value, label in app.ESTADO_CHOICES %}
+                      <option value="{{ value }}" {% if app.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Mensagem para o candidato</label>
+                  <textarea name="resposta_empresa" rows="3" class="form-control" placeholder="Explique o proximo passo, feedback ou estado da analise...">{{ app.resposta_empresa }}</textarea>
+                </div>
+              </div>
+              <div class="job-app-footer mt-3">
+                <div class="job-app-meta">
+                  <span class="job-app-tag"><i class="bi bi-send-check"></i>Responder diretamente da lista</span>
+                  <span class="job-app-tag"><i class="bi bi-clock-history"></i>{{ app.messages.all|length }} mensagem{{ app.messages.all|length|pluralize }} no historico</span>
+                </div>
+                <div class="job-app-actions">
+                  <a href="{% url 'companies:youth_detail' app.youth.id %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-vcard me-1"></i>Ver perfil</a>
+                  <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chat-left-text me-1"></i>Historico completo</a>
+                  <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i>Guardar</button>
+                </div>
+              </div>
+            </form>
+
+            {% if app.messages.all %}
+              {% with last_msg=app.messages.all.0 %}
+                <div class="job-app-history">
+                  <div class="job-app-block">
+                    <span class="job-app-label">Ultima mensagem enviada</span>
+                    <div class="small text-muted mb-2">{{ last_msg.created_at|date:"d/m/Y H:i" }}</div>
+                    <div class="job-app-history-copy">{{ last_msg.message|linebreaksbr }}</div>
+                  </div>
+                </div>
+              {% endwith %}
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="job-app-empty">
+        <i class="bi bi-people"></i>
+        Ainda nao existem candidaturas para esta vaga.
+      </div>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}

@@ -1,224 +1,918 @@
 {% extends 'base/base.html' %}
 {% load humanize %}
 
-{% block title %}Base Nacional de Jovens - São Tomé e Príncipe{% endblock %}
+{% block title %}Base Nacional de Jovens - Sao Tome e Principe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-page {
+        background:
+            radial-gradient(circle at top left, rgba(15, 90, 159, 0.12) 0%, transparent 30%),
+            radial-gradient(circle at bottom right, rgba(30, 140, 108, 0.12) 0%, transparent 26%),
+            linear-gradient(180deg, #f5f9fc 0%, #eef3f8 100%);
+    }
+
+    .home-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 4.5rem 0 3rem;
+    }
+
+    .home-hero::before,
+    .home-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(8px);
+        pointer-events: none;
+    }
+
+    .home-hero::before {
+        width: 240px;
+        height: 240px;
+        top: 1rem;
+        right: 3%;
+        background: rgba(15, 90, 159, 0.12);
+    }
+
+    .home-hero::after {
+        width: 180px;
+        height: 180px;
+        bottom: 0;
+        left: -40px;
+        background: rgba(30, 140, 108, 0.12);
+    }
+
+    .home-surface {
+        position: relative;
+        z-index: 1;
+    }
+
+    .home-kicker,
+    .home-section-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .home-kicker {
+        margin-bottom: 1rem;
+        color: #0f5a9f;
+    }
+
+    .home-title {
+        font-size: clamp(2.5rem, 5vw, 4.6rem);
+        line-height: 0.96;
+        letter-spacing: -0.04em;
+        color: #10253a;
+        margin-bottom: 1.2rem;
+        max-width: 10ch;
+    }
+
+    .home-title-accent {
+        display: block;
+        color: #0f5a9f;
+    }
+
+    .home-subtitle {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #5f7185;
+        max-width: 58ch;
+        margin-bottom: 1.4rem;
+    }
+
+    .home-cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .home-cta-row .btn {
+        padding: 0.95rem 1.25rem;
+        border-radius: 18px;
+        font-weight: 700;
+    }
+
+    .home-chip-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-bottom: 0;
+    }
+
+    .home-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.65rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        color: #304256;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .home-chip i {
+        color: #0f5a9f;
+    }
+
+    .home-hero-panel {
+        position: relative;
+        padding: 1.25rem;
+        border-radius: 30px;
+        background: linear-gradient(145deg, #0b3b6f 0%, #0f5a9f 56%, #1e8c6c 100%);
+        color: #ffffff;
+        box-shadow: 0 30px 80px rgba(11, 59, 111, 0.24);
+        overflow: hidden;
+    }
+
+    .home-hero-panel::before {
+        content: "";
+        position: absolute;
+        inset: auto -8% -22% auto;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .home-highlight-card,
+    .home-metric-card,
+    .home-lane-card {
+        position: relative;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.11);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+    }
+
+    .home-highlight-card {
+        padding: 1.3rem;
+        border-radius: 24px;
+        margin-bottom: 1rem;
+    }
+
+    .home-highlight-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.45rem;
+    }
+
+    .home-highlight-card p,
+    .home-highlight-card small,
+    .home-lane-card p,
+    .home-lane-card small {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .home-badge-soft {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+    }
+
+    .home-panel-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 0.85rem;
+    }
+
+    .home-panel-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.92rem;
+    }
+
+    .home-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .home-metric-card {
+        border-radius: 22px;
+        padding: 1rem;
+    }
+
+    .home-metric-card strong {
+        display: block;
+        font-size: clamp(1.5rem, 3vw, 2.15rem);
+        line-height: 1;
+        margin-bottom: 0.35rem;
+    }
+
+    .home-metric-card span {
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 0.92rem;
+    }
+
+    .home-lane-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .home-lane-card {
+        padding: 1rem;
+        border-radius: 22px;
+    }
+
+    .home-lane-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.16);
+        margin-bottom: 0.8rem;
+        font-size: 1.15rem;
+    }
+
+    .home-section {
+        padding: 3.5rem 0;
+    }
+
+    .home-section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.8rem;
+    }
+
+    .home-section-kicker {
+        color: #0f5a9f;
+        margin-bottom: 0.6rem;
+    }
+
+    .home-section-head h2 {
+        color: #10253a;
+        margin-bottom: 0.45rem;
+    }
+
+    .home-section-head p {
+        color: #64748b;
+        margin-bottom: 0;
+        max-width: 52ch;
+    }
+
+    .home-step-card,
+    .home-benefit-card,
+    .home-job-card,
+    .home-path-card {
+        height: 100%;
+        border: 0;
+        border-radius: 26px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .home-step-card,
+    .home-benefit-card,
+    .home-job-card {
+        background: rgba(255, 255, 255, 0.96);
+    }
+
+    .home-step-card .card-body,
+    .home-benefit-card .card-body,
+    .home-job-card .card-body,
+    .home-job-card .card-footer {
+        padding: 1.4rem;
+    }
+
+    .home-step-index {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0f5a9f 0%, #1e8c6c 100%);
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .home-step-card h3,
+    .home-benefit-card h3,
+    .home-path-card h3 {
+        font-size: 1.1rem;
+        color: #10253a;
+    }
+
+    .home-step-card p,
+    .home-benefit-card p,
+    .home-job-card p,
+    .home-path-card p {
+        color: #64748b;
+    }
+
+    .home-job-card .badge {
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 0.45rem 0.75rem;
+    }
+
+    .home-job-brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .home-job-brand small {
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    .home-job-company {
+        color: #0f5a9f;
+        font-weight: 700;
+    }
+
+    .home-job-meta {
+        display: grid;
+        gap: 0.6rem;
+        margin: 1rem 0 0;
+    }
+
+    .home-job-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: #405569;
+        font-size: 0.95rem;
+    }
+
+    .home-job-meta i,
+    .home-benefit-icon,
+    .home-path-icon {
+        color: #0f5a9f;
+    }
+
+    .home-job-card .card-footer {
+        background: transparent;
+        border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .home-job-card .btn {
+        border-radius: 16px;
+        font-weight: 700;
+    }
+
+    .home-path-card {
+        position: relative;
+        padding: 1.5rem;
+        color: #ffffff;
+        background: linear-gradient(145deg, #10253a 0%, #17344f 50%, #0f5a9f 100%);
+    }
+
+    .home-path-card.secondary {
+        background: linear-gradient(145deg, #133b34 0%, #1e8c6c 54%, #0f5a9f 100%);
+    }
+
+    .home-path-card .btn {
+        border-radius: 16px;
+        font-weight: 700;
+    }
+
+    .home-path-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.14);
+        margin-bottom: 1rem;
+    }
+
+    .home-benefit-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        background: #edf6ff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 0.95rem;
+    }
+
+    .home-bottom-cta {
+        border-radius: 32px;
+        padding: 2rem;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.14) 0%, transparent 28%),
+            linear-gradient(135deg, #0b3b6f 0%, #0f5a9f 52%, #1e8c6c 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 60px rgba(15, 90, 159, 0.22);
+    }
+
+    .home-bottom-cta p {
+        color: rgba(255, 255, 255, 0.86);
+        margin-bottom: 0;
+    }
+
+    .home-bottom-cta .btn {
+        border-radius: 18px;
+        font-weight: 700;
+        padding: 0.95rem 1.2rem;
+    }
+
+    .home-rise {
+        animation: homeRise 0.72s ease both;
+    }
+
+    .home-hero-panel .home-rise:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .home-hero-panel .home-rise:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    @keyframes homeRise {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .home-hero {
+            padding: 3.4rem 0 2.2rem;
+        }
+
+        .home-section-head,
+        .home-bottom-cta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .home-title {
+            max-width: 12ch;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .home-hero-panel,
+        .home-bottom-cta {
+            padding: 1.25rem;
+            border-radius: 24px;
+        }
+
+        .home-metrics-grid,
+        .home-lane-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .home-title {
+            font-size: clamp(2.2rem, 10vw, 3.2rem);
+        }
+
+        .home-cta-row .btn,
+        .home-job-card .btn,
+        .home-path-card .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <h1 class="display-4 fw-bold mb-4">
-                    Conecta-te com Oportunidades no Teu Distrito
-                </h1>
-                <p class="lead mb-4">
-                    A Base Nacional de Jovens é a plataforma oficial de São Tomé e Príncipe 
-                    para conectar jovens com empresas, estágios, formações e empregos.
-                </p>
-                <div class="d-flex flex-wrap gap-3">
-                    {% if not user.is_authenticated %}
-                        <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light btn-lg">
-                            <i class="bi bi-person-plus me-2"></i>Sou Jovem
-                        </a>
-                        <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-outline-light btn-lg">
-                            <i class="bi bi-building me-2"></i>Sou Empresa
-                        </a>
-                    {% elif user.is_jovem %}
-                        {% if not user_has_profile %}
-                            <a href="{% url 'profiles:wizard' %}" class="btn btn-light btn-lg">
-                                <i class="bi bi-person-plus me-2"></i>Completar Perfil
+<main class="home-page">
+    <section class="home-hero">
+        <div class="container home-surface">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-6">
+                    <div class="home-kicker">
+                        <i class="bi bi-stars"></i>
+                        Plataforma nacional de empregabilidade jovem
+                    </div>
+                    <h1 class="home-title">
+                        Liga talento jovem a
+                        <span class="home-title-accent">oportunidades reais.</span>
+                    </h1>
+                    <p class="home-subtitle">
+                        A Base Nacional de Jovens aproxima jovens, empresas e iniciativas de formacao em Sao Tome e Principe, com uma experiencia mais simples para registar, descobrir vagas e construir ligacoes com impacto.
+                    </p>
+
+                    <div class="home-cta-row">
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Sou Jovem
+                            </a>
+                            <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-building me-2"></i>Sou Empresa
+                            </a>
+                            <a href="{% url 'accounts:login' %}?next={% url 'profiles:available_jobs' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-search-heart me-2"></i>Explorar vagas
+                            </a>
+                        {% elif user.is_jovem %}
+                            {% if user_has_profile %}
+                                <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-briefcase me-2"></i>Ver oportunidades
+                                </a>
+                                <a href="{% url 'profiles:detail' %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="bi bi-person-vcard me-2"></i>Meu perfil
+                                </a>
+                            {% else %}
+                                <a href="{% url 'profiles:wizard' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-person-plus me-2"></i>Completar perfil
+                                </a>
+                                <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="bi bi-briefcase me-2"></i>Ver vagas
+                                </a>
+                            {% endif %}
+                        {% elif user.is_empresa %}
+                            {% if user.has_company_profile %}
+                                <a href="{% url 'companies:dashboard' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-speedometer2 me-2"></i>Ir ao painel
+                                </a>
+                                <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="bi bi-search me-2"></i>Pesquisar jovens
+                                </a>
+                            {% else %}
+                                <a href="{% url 'companies:complete_profile' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-building-add me-2"></i>Completar empresa
+                                </a>
+                            {% endif %}
+                        {% elif user.is_operador %}
+                            <a href="{% url 'profiles:assisted_register' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-badge me-2"></i>Registo assistido
+                            </a>
+                        {% elif user.is_admin %}
+                            <a href="{% url 'dashboard:admin' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-speedometer2 me-2"></i>Painel admin
+                            </a>
+                        {% elif user.is_tecnico %}
+                            <a href="{% url 'dashboard:tecnico' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-graph-up me-2"></i>Dashboard tecnico
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="home-chip-list">
+                        <span class="home-chip">
+                            <i class="bi bi-check2-circle"></i>Registo gratuito
+                        </span>
+                        <span class="home-chip">
+                            <i class="bi bi-shield-check"></i>Dados com consentimento
+                        </span>
+                        <span class="home-chip">
+                            <i class="bi bi-geo-alt"></i>{{ stats.total_distritos|intcomma }} distritos cobertos
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="home-hero-panel">
+                        <div class="home-highlight-card home-rise">
+                            <div class="home-badge-soft">
+                                <i class="bi bi-lightning-charge"></i>Destaque
+                            </div>
+                            {% if vagas_recentes %}
+                                <h3>{{ vagas_recentes.0.titulo }}</h3>
+                                <p class="mb-2">{{ vagas_recentes.0.company.nome }}</p>
+                                <small>Publicada recentemente e pronta para novas candidaturas.</small>
+                                <div class="home-panel-meta">
+                                    <span><i class="bi bi-geo-alt"></i>{{ vagas_recentes.0.distrito.nome|default:"Local a definir" }}</span>
+                                    <span><i class="bi bi-people"></i>{{ vagas_recentes.0.vagas_restantes }} em aberto</span>
+                                </div>
+                            {% else %}
+                                <h3>Novas oportunidades chegam aqui primeiro</h3>
+                                <p class="mb-2">Assim que uma vaga for publicada, esta area ajuda a destacar o que merece atencao imediata.</p>
+                                <small>Continua a explorar a plataforma e prepara o teu perfil.</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="home-metrics-grid home-rise">
+                            <div class="home-metric-card">
+                                <strong>{{ stats.total_jovens|intcomma }}</strong>
+                                <span>jovens com perfil ativo</span>
+                            </div>
+                            <div class="home-metric-card">
+                                <strong>{{ stats.total_vagas|intcomma }}</strong>
+                                <span>vagas em aberto</span>
+                            </div>
+                            <div class="home-metric-card">
+                                <strong>{{ stats.total_empresas|intcomma }}</strong>
+                                <span>empresas parceiras</span>
+                            </div>
+                            <div class="home-metric-card">
+                                <strong>{{ stats.total_distritos|intcomma }}</strong>
+                                <span>distritos com cobertura</span>
+                            </div>
+                        </div>
+
+                        <div class="home-lane-grid home-rise">
+                            <div class="home-lane-card">
+                                <div class="home-lane-icon">
+                                    <i class="bi bi-person-workspace"></i>
+                                </div>
+                                <h3>Para jovens</h3>
+                                <p class="mb-2">Monta o perfil, anexa documentos e aumenta a tua visibilidade.</p>
+                                <small>Mais contexto, menos barreiras para comecar.</small>
+                            </div>
+                            <div class="home-lane-card">
+                                <div class="home-lane-icon">
+                                    <i class="bi bi-buildings"></i>
+                                </div>
+                                <h3>Para empresas</h3>
+                                <p class="mb-2">Publica vagas, pesquisa perfis e acompanha candidaturas num unico fluxo.</p>
+                                <small>Uma base central para descobrir talento jovem.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section pt-0">
+        <div class="container">
+            <div class="home-section-head">
+                <div>
+                    <div class="home-section-kicker">
+                        <i class="bi bi-diagram-3"></i>Como funciona
+                    </div>
+                    <h2>Um percurso simples, do registo ao contacto.</h2>
+                    <p>A home agora orienta melhor o utilizador logo de entrada e mostra o que precisa acontecer em seguida.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card home-step-card">
+                        <div class="card-body">
+                            <div class="home-step-index">1</div>
+                            <h3>Cria a conta certa</h3>
+                            <p>Escolhe se entras como jovem ou empresa e preenche apenas a informacao essencial para iniciar.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card home-step-card">
+                        <div class="card-body">
+                            <div class="home-step-index">2</div>
+                            <h3>Completa o teu contexto</h3>
+                            <p>Perfis mais completos ajudam a destacar competencias, documentos e objetivos com mais clareza.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card home-step-card">
+                        <div class="card-body">
+                            <div class="home-step-index">3</div>
+                            <h3>Transforma visibilidade em oportunidade</h3>
+                            <p>Empresas encontram talento com mais rapidez e jovens conseguem acompanhar vagas com menos friccao.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if vagas_recentes %}
+    <section class="home-section">
+        <div class="container">
+            <div class="home-section-head">
+                <div>
+                    <div class="home-section-kicker">
+                        <i class="bi bi-briefcase"></i>Vagas recentes
+                    </div>
+                    <h2>Oportunidades publicadas ha pouco.</h2>
+                    <p>Uma vitrina mais clara para perceber rapido o tipo de vaga, a empresa e o local de trabalho.</p>
+                </div>
+                <div>
+                    {% if user.is_jovem %}
+                        {% if user_has_profile %}
+                            <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-right-circle me-2"></i>Ver todas as vagas
                             </a>
                         {% else %}
-                            <a href="{% url 'profiles:detail' %}" class="btn btn-light btn-lg">
-                                <i class="bi bi-person me-2"></i>Ver Meu Perfil
+                            <a href="{% url 'profiles:wizard' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-person-plus me-2"></i>Completar perfil
                             </a>
                         {% endif %}
                     {% elif user.is_empresa %}
-                        <a href="{% url 'companies:search_youth' %}" class="btn btn-light btn-lg">
-                            <i class="bi bi-search me-2"></i>Pesquisar Jovens
+                        <a href="{% url 'companies:job_list' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Gerir vagas
+                        </a>
+                    {% elif user.is_operador %}
+                        <a href="{% url 'profiles:assisted_register' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-person-badge me-2"></i>Registo assistido
+                        </a>
+                    {% elif user.is_admin %}
+                        <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>Painel admin
+                        </a>
+                    {% elif user.is_tecnico %}
+                        <a href="{% url 'dashboard:tecnico' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-graph-up me-2"></i>Dashboard tecnico
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={% url 'profiles:available_jobs' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Entrar para explorar
                         </a>
                     {% endif %}
                 </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <i class="bi bi-people-fill" style="font-size: 15rem; opacity: 0.3;"></i>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Stats Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-number">{{ stats.total_jovens|intcomma }}</div>
-                    <p class="text-muted mb-0">Jovens Registados</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-number">{{ stats.total_vagas|intcomma }}</div>
-                    <p class="text-muted mb-0">Vagas Ativas</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-number">{{ stats.total_empresas|intcomma }}</div>
-                    <p class="text-muted mb-0">Empresas Parceiras</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+            <div class="row g-4">
+                {% for vaga in vagas_recentes %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card home-job-card">
+                            <div class="card-body">
+                                <div class="home-job-brand">
+                                    <span class="badge bg-primary">{{ vaga.get_tipo_display }}</span>
+                                    <small>{{ vaga.data_publicacao|timesince }}</small>
+                                </div>
+                                <h3 class="h5 mb-2">{{ vaga.titulo }}</h3>
+                                <div class="home-job-company mb-2">
+                                    <i class="bi bi-building me-1"></i>{{ vaga.company.nome }}
+                                </div>
+                                <p class="mb-0">{{ vaga.descricao|truncatechars:110 }}</p>
 
-<!-- Como Funciona -->
-<section class="py-5 bg-white">
-    <div class="container">
-        <h2 class="text-center mb-5">Como Funciona</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
-                    </div>
-                    <h4>1. Regista-te</h4>
-                    <p class="text-muted">Cria a tua conta em poucos minutos. É simples, rápido e gratuito.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-file-person-fill text-success" style="font-size: 3rem;"></i>
-                    </div>
-                    <h4>2. Completa o Perfil</h4>
-                    <p class="text-muted">Adiciona a tua formação, experiências e skills para destacares-te.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-briefcase-fill text-warning" style="font-size: 3rem;"></i>
-                    </div>
-                    <h4>3. Encontra Oportunidades</h4>
-                    <p class="text-muted">Empresas podem encontrar-te e contactar-te diretamente.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Vagas Recentes -->
-{% if vagas_recentes %}
-<section class="py-5">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Vagas Recentes</h2>
-            {% if user.is_empresa %}
-                <a href="{% url 'companies:job_list' %}" class="btn btn-primary">
-                    <i class="bi bi-briefcase me-2"></i>Ver Todas
-                </a>
-            {% endif %}
-        </div>
-        <div class="row g-4">
-            {% for vaga in vagas_recentes %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge bg-primary">{{ vaga.get_tipo_display }}</span>
-                                <small class="text-muted">{{ vaga.data_publicacao|timesince }}</small>
+                                <div class="home-job-meta">
+                                    <span><i class="bi bi-geo-alt"></i>{{ vaga.distrito.nome|default:"Local a definir" }}</span>
+                                    <span><i class="bi bi-people"></i>{{ vaga.vagas_restantes }} em aberto</span>
+                                    {% if vaga.salario %}
+                                        <span><i class="bi bi-cash-stack"></i>{{ vaga.salario }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <h5 class="card-title">{{ vaga.titulo }}</h5>
-                            <p class="card-text text-muted">
-                                <i class="bi bi-building me-1"></i>{{ vaga.company.nome }}
-                            </p>
-                            <p class="card-text">
-                                <i class="bi bi-geo-alt me-1"></i>{{ vaga.distrito.nome|default:"N/A" }}
-                            </p>
-                            {% if vaga.salario %}
-                                <p class="card-text">
-                                    <i class="bi bi-cash me-1"></i>{{ vaga.salario }}
-                                </p>
-                            {% endif %}
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            {% if user.is_jovem and user_has_profile %}
-                                <a href="#" class="btn btn-primary btn-sm w-100">
-                                    <i class="bi bi-send me-1"></i>Candidatar-me
-                                </a>
-                            {% else %}
-                                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-sm w-100">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>Entrar para Candidatar
-                                </a>
-                            {% endif %}
+                            <div class="card-footer">
+                                {% if user.is_authenticated and user.is_jovem and user_has_profile %}
+                                    <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary w-100">
+                                        <i class="bi bi-send me-2"></i>Ver oportunidade
+                                    </a>
+                                {% elif user.is_authenticated and user.is_jovem %}
+                                    <a href="{% url 'profiles:wizard' %}" class="btn btn-primary w-100">
+                                        <i class="bi bi-person-plus me-2"></i>Completar perfil para candidatar
+                                    </a>
+                                {% elif user.is_authenticated and user.is_empresa %}
+                                    <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-speedometer2 me-2"></i>Ir ao painel
+                                    </a>
+                                {% elif user.is_authenticated and user.is_operador %}
+                                    <a href="{% url 'profiles:assisted_register' %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-person-badge me-2"></i>Registo assistido
+                                    </a>
+                                {% elif user.is_authenticated and user.is_admin %}
+                                    <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-speedometer2 me-2"></i>Ir ao admin
+                                    </a>
+                                {% elif user.is_authenticated and user.is_tecnico %}
+                                    <a href="{% url 'dashboard:tecnico' %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-graph-up me-2"></i>Abrir dashboard
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'accounts:login' %}?next={% url 'profiles:available_jobs' %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Entrar para candidatar
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container text-center">
-        <h2 class="mb-4">És Empresa?</h2>
-        <p class="lead mb-4">
-            Encontra os melhores talentos jovens de São Tomé e Príncipe. 
-            Publica vagas, pesquisa perfis e conecta com futuros colaboradores.
-        </p>
-        <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-light btn-lg">
-            <i class="bi bi-building me-2"></i>Registar Empresa
-        </a>
-    </div>
-</section>
-
-<!-- Benefícios -->
-<section class="py-5 bg-white">
-    <div class="container">
-        <h2 class="text-center mb-5">Porquê Usar a Base Nacional de Jovens?</h2>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-check-circle-fill text-success me-3" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <h5>Gratuito</h5>
-                        <p class="text-muted mb-0">Registo e uso completamente gratuitos para jovens e empresas.</p>
+    <section class="home-section">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="home-path-card">
+                        <div class="home-path-icon">
+                            <i class="bi bi-person-hearts"></i>
+                        </div>
+                        <h3>Se procuras oportunidades</h3>
+                        <p class="mb-4">Regista-te como jovem, completa o perfil e aumenta a tua capacidade de ser encontrado por empresas e programas.</p>
+                        <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light">
+                            <i class="bi bi-person-plus me-2"></i>Criar conta jovem
+                        </a>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-shield-check text-success me-3" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <h5>Seguro</h5>
-                        <p class="text-muted mb-0">Os teus dados estão protegidos e só são partilhados com o teu consentimento.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-phone text-success me-3" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <h5>Mobile-Friendly</h5>
-                        <p class="text-muted mb-0">Acede e gere o teu perfil a partir de qualquer dispositivo.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-people text-success me-3" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <h5>Nacional</h5>
-                        <p class="text-muted mb-0">Cobertura em todos os distritos de São Tomé e Príncipe.</p>
+                <div class="col-lg-6">
+                    <div class="home-path-card secondary">
+                        <div class="home-path-icon">
+                            <i class="bi bi-buildings-fill"></i>
+                        </div>
+                        <h3>Se queres contratar talento</h3>
+                        <p class="mb-4">Regista a empresa, publica vagas e encontra perfis mais alinhados ao que a tua organizacao precisa.</p>
+                        <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-light">
+                            <i class="bi bi-building-add me-2"></i>Registar empresa
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section class="home-section">
+        <div class="container">
+            <div class="home-section-head">
+                <div>
+                    <div class="home-section-kicker">
+                        <i class="bi bi-shield-check"></i>Porque esta plataforma ajuda
+                    </div>
+                    <h2>Mais clareza, mais alcance, menos friccao.</h2>
+                    <p>A nova home passa melhor a proposta de valor e organiza a informacao em blocos mais faceis de ler.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card home-benefit-card">
+                        <div class="card-body">
+                            <div class="home-benefit-icon">
+                                <i class="bi bi-check2-circle"></i>
+                            </div>
+                            <h3>Entrada simples</h3>
+                            <p class="mb-0">O caminho inicial ficou mais claro para jovens, empresas e perfis institucionais.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card home-benefit-card">
+                        <div class="card-body">
+                            <div class="home-benefit-icon">
+                                <i class="bi bi-phone"></i>
+                            </div>
+                            <h3>Boa leitura no telemovel</h3>
+                            <p class="mb-0">Blocos, chamadas e cartoes foram reorganizados para funcionar melhor em ecras pequenos.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card home-benefit-card">
+                        <div class="card-body">
+                            <div class="home-benefit-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3>Dados com contexto</h3>
+                            <p class="mb-0">As estatisticas principais ficaram mais visiveis e a contagem de empresas foi corrigida.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card home-benefit-card">
+                        <div class="card-body">
+                            <div class="home-benefit-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h3>Foco no encontro</h3>
+                            <p class="mb-0">A experiencia valoriza o encontro entre talento, empresas e oportunidades concretas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-bottom-cta mt-5 d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <h2 class="h3 mb-2">Pronto para dar o proximo passo?</h2>
+                    <p>Quer sejas jovem a procura do primeiro impulso ou empresa a procura de talento, a entrada certa comeca aqui.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light">
+                        <i class="bi bi-person-plus me-2"></i>Registar jovem
+                    </a>
+                    <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-outline-light">
+                        <i class="bi bi-building me-2"></i>Registar empresa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 {% endblock %}

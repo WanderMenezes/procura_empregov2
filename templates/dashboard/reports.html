@@ -1,51 +1,41 @@
 {% extends 'base/base.html' %}
+{% load humanize %}
 
 {% block title %}Relatorios - Painel de Administracao{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
-    <div class="row">
-        <div class="col-lg-2 mb-4">
-            <div class="admin-sidebar card">
-                <div class="card-body">
-                    <div class="admin-sidebar-title">
-                        <i class="bi bi-shield-check me-2"></i>Admin
-                    </div>
-                    <div class="admin-sidebar-nav">
-                        <a href="{% url 'dashboard:admin' %}" class="admin-nav-link">
-                            <i class="bi bi-speedometer2"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="{% url 'dashboard:user_list' %}" class="admin-nav-link">
-                            <i class="bi bi-people"></i>
-                            <span>Utilizadores</span>
-                        </a>
-                        <a href="{% url 'dashboard:validate_profiles' %}" class="admin-nav-link">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Validar Perfis</span>
-                        </a>
-                        <a href="{% url 'dashboard:manage_contact_requests' %}" class="admin-nav-link">
-                            <i class="bi bi-envelope"></i>
-                            <span>Pedidos Contacto</span>
-                        </a>
-                        <a href="{% url 'dashboard:reports' %}" class="admin-nav-link active">
-                            <i class="bi bi-graph-up"></i>
-                            <span>Relatorios</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='reports' %}
+        </aside>
 
-        <div class="col-lg-10">
-            <div class="card admin-hero mb-4">
-                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <div>
-                        <div class="admin-kicker">Admin</div>
-                        <h2 class="mb-1"><i class="bi bi-graph-up me-2"></i>Relatorios</h2>
-                        <div class="admin-subtitle">Indicadores e estatisticas por periodo.</div>
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4">
+                <div class="card-body">
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Leitura executiva</div>
+                        <h1 class="admin-page-title">Relatorios</h1>
+                        <p class="admin-subtitle mb-0">
+                            Consulte o volume do periodo selecionado e exporte um resumo pronto para partilha.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-calendar-range"></i>
+                                {{ data_inicio|date:"d/m/Y" }} ate {{ data_fim|date:"d/m/Y" }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-activity"></i>
+                                {{ total_movimentos|intcomma }} movimentos no periodo
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-speedometer2"></i>
+                                {{ media_diaria|floatformat:1 }} por dia
+                            </span>
+                        </div>
                     </div>
-                    <div class="d-flex flex-wrap gap-2">
+
+                    <div class="admin-hero-actions">
                         <a href="{% url 'dashboard:export_report_csv' %}?data_inicio={{ data_inicio_value }}&data_fim={{ data_fim_value }}" class="btn btn-light btn-sm">
                             <i class="bi bi-download me-1"></i>Exportar CSV
                         </a>
@@ -56,59 +46,133 @@
                 </div>
             </div>
 
-            <form method="get" class="card card-body mb-4 admin-filter">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label">Data inicial</label>
-                        <input type="date" name="data_inicio" id="data_inicio" class="form-control" value="{{ data_inicio_value }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Data final</label>
-                        <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim_value }}">
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-primary w-100">Atualizar</button>
+            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Data inicial</label>
+                            <input type="date" name="data_inicio" id="data_inicio" class="form-control" value="{{ data_inicio_value }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data final</label>
+                            <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim_value }}">
+                        </div>
+                        <div class="col-md-4 d-grid gap-2">
+                            <button class="btn btn-primary">Atualizar indicadores</button>
+                            <a href="{% url 'dashboard:reports' %}" class="btn btn-outline-secondary">Voltar ao padrao</a>
+                        </div>
                     </div>
                 </div>
             </form>
 
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="card">
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Novos Jovens</h6>
-                            <h3 class="mb-0">{{ jovens_novos }}</h3>
+                            <div class="admin-summary-label">Novos jovens</div>
+                            <div class="admin-summary-value">{{ jovens_novos|intcomma }}</div>
+                            <small class="text-muted">Entradas no periodo</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Novas Empresas</h6>
-                            <h3 class="mb-0">{{ empresas_novas }}</h3>
+                            <div class="admin-summary-label">Novas empresas</div>
+                            <div class="admin-summary-value">{{ empresas_novas|intcomma }}</div>
+                            <small class="text-muted">Perfis empresariais criados</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Novas Vagas</h6>
-                            <h3 class="mb-0">{{ vagas_novas }}</h3>
+                            <div class="admin-summary-label">Novas vagas</div>
+                            <div class="admin-summary-value">{{ vagas_novas|intcomma }}</div>
+                            <small class="text-muted">Publicacoes abertas no periodo</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Novas Candidaturas</h6>
-                            <h3 class="mb-0">{{ candidaturas_novas }}</h3>
+                            <div class="admin-summary-label">Candidaturas</div>
+                            <div class="admin-summary-value">{{ candidaturas_novas|intcomma }}</div>
+                            <small class="text-muted">Movimento total de candidaturas</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="alert alert-info mt-4">
-                Relatorio de {{ data_inicio|date:"d/m/Y" }} ate {{ data_fim|date:"d/m/Y" }}.
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Distribuicao</div>
+                                    <h5 class="mb-1">Peso de cada indicador</h5>
+                                    <p class="text-muted mb-0">Veja onde o volume do periodo se concentrou.</p>
+                                </div>
+                            </div>
+
+                            {% if total_movimentos %}
+                                <div class="admin-bar-list">
+                                    {% for item in report_mix %}
+                                        <div class="admin-bar-row">
+                                            <span class="admin-bar-label"><i class="bi {{ item.icon }} me-2"></i>{{ item.nome }}</span>
+                                            <div class="admin-bar-track">
+                                                <div class="admin-bar-fill" style="width: {{ item.percent }}%;"></div>
+                                            </div>
+                                            <span class="admin-bar-value">{{ item.total }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="admin-empty-state">
+                                    <i class="bi bi-bar-chart"></i>
+                                    <p class="mb-0">Nao houve movimentos no periodo selecionado.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Leituras rapidas</div>
+                                    <h5 class="mb-1">Resumo do periodo</h5>
+                                    <p class="text-muted mb-0">Contexto suficiente para partilha rapida com a equipa.</p>
+                                </div>
+                            </div>
+
+                            <div class="admin-inline-stat-list">
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Duracao analisada</span>
+                                    <strong>{{ period_days }} dia{{ period_days|pluralize }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Total de movimentos</span>
+                                    <strong>{{ total_movimentos|intcomma }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Media diaria</span>
+                                    <strong>{{ media_diaria|floatformat:1 }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="admin-note-card">
+                                <h6 class="mb-2">Exportacao pronta</h6>
+                                <p class="mb-0 text-muted">
+                                    O CSV ajuda em analise detalhada e o PDF gera um resumo executivo do mesmo intervalo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -120,23 +184,27 @@
 document.addEventListener('DOMContentLoaded', function () {
     const startInput = document.getElementById('data_inicio');
     const endInput = document.getElementById('data_fim');
-    const form = startInput?.closest('form');
-    const syncMin = () => {
+    const form = startInput ? startInput.closest('form') : null;
+
+    function syncMinDate() {
         if (startInput && endInput && startInput.value) {
             endInput.min = startInput.value;
         }
-    };
-    syncMin();
-    startInput?.addEventListener('change', syncMin);
+    }
 
-    form?.addEventListener('submit', function (e) {
-        if (startInput && endInput && startInput.value && endInput.value) {
-            if (endInput.value < startInput.value) {
-                e.preventDefault();
-                alert('A data final não pode ser menor que a data inicial.');
+    syncMinDate();
+    if (startInput) {
+        startInput.addEventListener('change', syncMinDate);
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            if (startInput && endInput && startInput.value && endInput.value && endInput.value < startInput.value) {
+                event.preventDefault();
+                alert('A data final nao pode ser menor que a data inicial.');
             }
-        }
-    });
+        });
+    }
 });
 </script>
 {% endblock %}

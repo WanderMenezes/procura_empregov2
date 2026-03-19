@@ -52,10 +52,11 @@ class CompanyProfileForm(forms.ModelForm):
         })
     )
     
-    setor = forms.ChoiceField(
-        label=_('Setor de atividade'),
-        choices=SETOR_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-select'})
+    setor = forms.MultipleChoiceField(
+        label=_('Setores de atividade'),
+        choices=Company.SETOR_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        help_text=_('Pode selecionar mais do que um setor.')
     )
     
     descricao = forms.CharField(
@@ -126,6 +127,23 @@ class CompanyProfileForm(forms.ModelForm):
             'telefone', 'email', 'website',
             'distrito', 'endereco', 'logo'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        setor_value = self.initial.get('setor')
+        if setor_value is None and getattr(self.instance, 'pk', None):
+            setor_value = self.instance.setor
+
+        if isinstance(setor_value, str):
+            self.initial['setor'] = [setor_value] if setor_value else []
+        elif setor_value is None:
+            self.initial['setor'] = []
+
+    def clean_setor(self):
+        setores = self.cleaned_data.get('setor') or []
+        if not setores:
+            raise ValidationError(_('Selecione pelo menos um setor de atividade.'))
+        return list(dict.fromkeys(setores))
 
     def clean_logo(self):
         logo = self.cleaned_data.get('logo')

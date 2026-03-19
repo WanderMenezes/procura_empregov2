@@ -2,23 +2,312 @@
 
 {% block title %}Completar Perfil da Empresa{% endblock %}
 
+{% block extra_css %}
+<style>
+  .company-onboard-page { color: #122033; }
+  .company-onboard-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.3), transparent 32%), linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .company-onboard-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .company-onboard-hero > * { position: relative; z-index: 1; }
+  .company-onboard-hero-head, .company-onboard-form-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .company-onboard-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .company-onboard-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .company-onboard-subtitle { max-width: 62ch; margin: 0; color: rgba(255,255,255,.86); }
+  .company-onboard-chips, .company-onboard-actions, .company-onboard-status { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .company-onboard-chips { margin-top: 1rem; }
+  .company-onboard-chip {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600;
+  }
+  .company-onboard-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .company-onboard-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .company-onboard-shell { display: grid; grid-template-columns: minmax(280px, 320px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .company-onboard-panel {
+    border-radius: 24px; padding: 1.3rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .company-onboard-sidebar { position: sticky; top: 1rem; }
+  .company-onboard-logo-card { text-align: center; padding-bottom: 1.2rem; border-bottom: 1px solid rgba(18,32,51,.08); margin-bottom: 1.2rem; }
+  .company-onboard-logo-frame {
+    width: 110px; height: 110px; margin: 0 auto 1rem; border-radius: 28px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(11,59,111,.12), rgba(30,140,108,.14)); border: 1px solid rgba(18,32,51,.08); color: #0f5a9f; font-size: 2rem; font-weight: 700; letter-spacing: .06em;
+  }
+  .company-onboard-logo-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .company-onboard-name { font-size: 1.15rem; font-weight: 700; color: #122033; margin-bottom: .2rem; }
+  .company-onboard-meta { color: #6b7a90; margin-bottom: 0; }
+  .company-onboard-note {
+    margin-top: 1rem; padding: .95rem 1rem; border-radius: 18px; background: linear-gradient(135deg, rgba(11,94,215,.06), rgba(30,140,108,.08)); color: #516175; font-size: .92rem;
+  }
+  .company-onboard-checklist, .company-onboard-account { display: grid; gap: .8rem; }
+  .company-onboard-check, .company-onboard-account-item {
+    display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .company-onboard-check-icon, .company-onboard-icon {
+    width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .company-onboard-check-icon { background: rgba(0,168,107,.12); color: var(--secondary-color); }
+  .company-onboard-icon { background: rgba(14,113,147,.1); color: #0e7193; }
+  .company-onboard-check strong, .company-onboard-account-item strong { display: block; margin-bottom: .2rem; }
+  .company-onboard-check p, .company-onboard-account-item p { margin: 0; color: #516175; font-size: .92rem; }
+  .company-onboard-form-head h4 { margin-bottom: .2rem; }
+  .company-onboard-form-subtitle { color: #66768c; margin: 0; }
+  .company-onboard-form-section + .company-onboard-form-section { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .company-onboard-section-label { font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #0b5ed7; margin-bottom: .35rem; }
+  .company-onboard-section-title { font-size: 1.05rem; font-weight: 700; color: #122033; margin-bottom: .25rem; }
+  .company-onboard-section-copy { color: #66768c; margin-bottom: 1rem; }
+  .company-onboard-field { margin-bottom: 1rem; }
+  .company-onboard-field label { display: block; font-weight: 700; color: #1f2d3d; margin-bottom: .45rem; }
+  .company-onboard-field .form-control, .company-onboard-field .form-select { border-radius: 14px; min-height: 48px; border-color: rgba(18,32,51,.12); box-shadow: none; }
+  .company-onboard-field textarea.form-control { min-height: 120px; }
+  .company-onboard-field .form-control:focus, .company-onboard-field .form-select:focus { border-color: rgba(11,94,215,.45); box-shadow: 0 0 0 .2rem rgba(11,94,215,.12); }
+  .company-onboard-sector-grid #id_setor {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .55rem; max-height: 220px; overflow-y: auto; padding-right: .25rem;
+  }
+  .company-onboard-sector-grid #id_setor > div { min-width: 0; margin: 0; }
+  .company-onboard-sector-grid #id_setor label {
+    display: flex; align-items: flex-start; gap: .45rem; margin: 0; padding: .55rem .7rem; border-radius: 14px; border: 1px solid rgba(18,32,51,.12); background: #f8fbff; cursor: pointer; font-size: .9rem; line-height: 1.2; font-weight: 600; color: #1f2d3d;
+  }
+  .company-onboard-sector-grid #id_setor input[type="checkbox"] { margin-top: .1rem; flex-shrink: 0; }
+  .company-onboard-sector-grid #id_setor label:hover { border-color: rgba(11,94,215,.35); background: #f3f8ff; }
+  .company-onboard-error { margin-top: .45rem; color: #b42318; font-size: .88rem; }
+  .company-onboard-help { margin-top: .45rem; color: #6b7a90; font-size: .84rem; }
+  .company-onboard-actions-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .85rem; margin-top: 1.35rem; padding-top: 1.2rem; border-top: 1px solid rgba(18,32,51,.08);
+  }
+  .company-onboard-actions-row .btn { border-radius: 14px; padding-inline: 1rem; }
+  @media (max-width: 991.98px) {
+    .company-onboard-shell { grid-template-columns: 1fr; }
+    .company-onboard-sidebar { position: static; }
+    .company-onboard-hero-head, .company-onboard-form-head, .company-onboard-actions-row { flex-direction: column; align-items: stretch; }
+    .company-onboard-actions .btn { width: 100%; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <h4>Completar Perfil da Empresa</h4>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">Guardar</button>
-            </div>
-          </form>
+<div class="company-onboard-page container py-4 py-lg-5">
+  <section class="company-onboard-hero mb-4">
+    <div class="company-onboard-hero-head">
+      <div>
+        <div class="company-onboard-kicker">Ativacao empresarial</div>
+        <h1 class="company-onboard-title">Completar perfil da empresa</h1>
+        <p class="company-onboard-subtitle">
+          Organize a identidade da empresa, confirme os contactos e deixe a base pronta para publicar vagas e pesquisar jovens.
+        </p>
+        <div class="company-onboard-chips">
+          <span class="company-onboard-chip"><i class="bi bi-building"></i>{{ draft_company_name|default:"Empresa" }}</span>
+          {% if request.user.email %}<span class="company-onboard-chip"><i class="bi bi-envelope"></i>{{ request.user.email }}</span>{% endif %}
+          <span class="company-onboard-chip"><i class="bi bi-check2-circle"></i>Pode escolher varios setores</span>
         </div>
       </div>
+      <div class="company-onboard-actions">
+        <a href="{% url 'accounts:profile' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Minha conta</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house me-2"></i>Inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="company-onboard-shell">
+    <aside class="company-onboard-panel company-onboard-sidebar">
+      <div class="company-onboard-logo-card">
+        <div class="company-onboard-logo-frame">
+          <span id="companyLogoFallback">{{ draft_company_name|default:"EM"|slice:":2"|upper }}</span>
+          <img id="companyLogoPreview" src="" alt="{{ draft_company_name|default:'Empresa' }}" class="d-none">
+        </div>
+        <div class="company-onboard-name">{{ draft_company_name|default:"Empresa sem nome" }}</div>
+        <p class="company-onboard-meta">
+          {% if request.user.distrito %}{{ request.user.distrito.nome }}{% else %}Distrito por definir{% endif %}
+        </p>
+        <div class="company-onboard-status mt-3">
+          <span class="badge bg-warning text-dark">Perfil ainda por criar</span>
+          <span class="badge bg-secondary">Conta {{ request.user.get_perfil_display }}</span>
+        </div>
+      </div>
+
+      <div class="company-onboard-account">
+        <div class="company-onboard-account-item">
+          <span class="company-onboard-icon"><i class="bi bi-envelope"></i></span>
+          <div><strong>Email base</strong><p>{{ request.user.email|default:"Nao definido" }}</p></div>
+        </div>
+        <div class="company-onboard-account-item">
+          <span class="company-onboard-icon"><i class="bi bi-telephone"></i></span>
+          <div><strong>Telefone base</strong><p>{{ request.user.telefone|default:"Nao definido" }}</p></div>
+        </div>
+        <div class="company-onboard-account-item">
+          <span class="company-onboard-icon"><i class="bi bi-geo-alt"></i></span>
+          <div><strong>Distrito da conta</strong><p>{% if request.user.distrito %}{{ request.user.distrito.nome }}{% else %}Nao definido{% endif %}</p></div>
+        </div>
+      </div>
+
+      <div class="company-onboard-checklist mt-4">
+        <div class="company-onboard-check">
+          <span class="company-onboard-check-icon"><i class="bi bi-1-circle"></i></span>
+          <div><strong>Identidade da empresa</strong><p>Defina nome, NIF, setores e uma descricao clara da atividade.</p></div>
+        </div>
+        <div class="company-onboard-check">
+          <span class="company-onboard-check-icon"><i class="bi bi-2-circle"></i></span>
+          <div><strong>Contactos principais</strong><p>Confirme telefone, email e website para facilitar resposta rapida.</p></div>
+        </div>
+        <div class="company-onboard-check">
+          <span class="company-onboard-check-icon"><i class="bi bi-3-circle"></i></span>
+          <div><strong>Localizacao e imagem</strong><p>Distrito, endereco e logo ajudam a reforcar a confianca no perfil.</p></div>
+        </div>
+      </div>
+
+      <div class="company-onboard-note">
+        Os dados que ja existem na conta servem como ponto de partida, mas vale rever tudo antes de guardar o perfil empresarial.
+      </div>
+    </aside>
+
+    <div class="company-onboard-panel">
+      <div class="company-onboard-form-head">
+        <div>
+          <h4>Criar perfil empresarial</h4>
+          <p class="company-onboard-form-subtitle">Preencha os campos abaixo e ative a area da empresa numa unica passada.</p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger rounded-4 mb-4">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+
+      <form method="post" novalidate enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <section class="company-onboard-form-section">
+          <div class="company-onboard-section-label">Identidade</div>
+          <div class="company-onboard-section-title">Quem e a empresa</div>
+          <div class="company-onboard-section-copy">Estes dados ajudam tecnicos e candidatos a perceber o contexto da organizacao.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-onboard-field">
+                <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}<div class="company-onboard-error">{{ form.nome.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="company-onboard-field">
+                <label for="{{ form.nif.id_for_label }}">{{ form.nif.label }}</label>
+                {{ form.nif }}
+                {% if form.nif.errors %}<div class="company-onboard-error">{{ form.nif.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-onboard-field">
+                <label for="{{ form.setor.id_for_label }}">{{ form.setor.label }}</label>
+                <div class="company-onboard-sector-grid">{{ form.setor }}</div>
+                {% if form.setor.errors %}<div class="company-onboard-error">{{ form.setor.errors|striptags }}</div>{% endif %}
+                <div class="company-onboard-help">Escolha todos os setores que representem bem a atividade da empresa.</div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-onboard-field">
+                <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}<div class="company-onboard-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-onboard-form-section">
+          <div class="company-onboard-section-label">Contacto</div>
+          <div class="company-onboard-section-title">Como falar com a empresa</div>
+          <div class="company-onboard-section-copy">Use canais reais e ativos para facilitar resposta a pedidos e candidaturas.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-onboard-field">
+                <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+                {{ form.telefone }}
+                {% if form.telefone.errors %}<div class="company-onboard-error">{{ form.telefone.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="company-onboard-field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="company-onboard-error">{{ form.email.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-onboard-field">
+                <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+                {{ form.website }}
+                {% if form.website.errors %}<div class="company-onboard-error">{{ form.website.errors|striptags }}</div>{% endif %}
+                <div class="company-onboard-help">Se existir site institucional, vale coloca-lo aqui desde o inicio.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-onboard-form-section">
+          <div class="company-onboard-section-label">Localizacao</div>
+          <div class="company-onboard-section-title">Onde a empresa opera</div>
+          <div class="company-onboard-section-copy">A localizacao ajuda candidatos a entender melhor a vaga e o contexto da empresa.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="company-onboard-field">
+                <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+                {{ form.distrito }}
+                {% if form.distrito.errors %}<div class="company-onboard-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="company-onboard-field">
+                <label for="{{ form.endereco.id_for_label }}">{{ form.endereco.label }}</label>
+                {{ form.endereco }}
+                {% if form.endereco.errors %}<div class="company-onboard-error">{{ form.endereco.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="company-onboard-form-section">
+          <div class="company-onboard-section-label">Imagem</div>
+          <div class="company-onboard-section-title">Logo e identidade visual</div>
+          <div class="company-onboard-section-copy">Pode criar o perfil agora e atualizar o logo mais tarde, se preferir.</div>
+          <div class="company-onboard-field mb-0">
+            <label for="{{ form.logo.id_for_label }}">{{ form.logo.label }}</label>
+            {{ form.logo }}
+            {% if form.logo.errors %}<div class="company-onboard-error">{{ form.logo.errors|striptags }}</div>{% endif %}
+            <div class="company-onboard-help">Se carregar um ficheiro novo, o preview muda no painel lateral.</div>
+          </div>
+        </section>
+
+        <div class="company-onboard-actions-row">
+          <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle me-2"></i>Criar perfil empresarial</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('{{ form.logo.id_for_label }}');
+  const preview = document.getElementById('companyLogoPreview');
+  const fallback = document.getElementById('companyLogoFallback');
+
+  if (!input || !preview) return;
+
+  input.addEventListener('change', function (event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+      if (fallback) fallback.classList.add('d-none');
+    };
+    reader.readAsDataURL(file);
+  });
+});
+</script>
 {% endblock %}

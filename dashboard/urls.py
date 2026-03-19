@@ -14,6 +14,7 @@ urlpatterns = [
     
     # Gestão de utilizadores
     path('utilizadores/', views.user_list, name='user_list'),
+    path('utilizadores/<int:pk>/editar/', views.user_edit, name='user_edit'),
     path('utilizadores/<int:pk>/toggle/', views.user_toggle_active, name='user_toggle'),
     
     # Validação de perfis

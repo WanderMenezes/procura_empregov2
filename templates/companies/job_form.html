@@ -1,24 +1,710 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Vaga - {{ action }}{% endblock %}
+{% block title %}{% if job %}Editar vaga{% else %}Publicar vaga{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .job-editor-page {
+    color: #122033;
+  }
+
+  .job-editor-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    padding: 1.8rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.3), transparent 32%),
+      linear-gradient(135deg, rgba(7, 59, 76, 0.98), rgba(13, 110, 139, 0.96) 52%, rgba(236, 151, 31, 0.88));
+    box-shadow: 0 24px 50px rgba(7, 59, 76, 0.2);
+  }
+
+  .job-editor-hero::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -70px;
+    bottom: -120px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    filter: blur(4px);
+  }
+
+  .job-editor-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .job-editor-hero-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .job-editor-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.82;
+    margin-bottom: 0.4rem;
+  }
+
+  .job-editor-title {
+    font-size: clamp(1.9rem, 2.5vw, 2.6rem);
+    line-height: 1.04;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  .job-editor-subtitle {
+    max-width: 64ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .job-editor-chips,
+  .job-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .job-editor-chips {
+    margin-top: 1rem;
+  }
+
+  .job-editor-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .job-editor-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .job-editor-actions .btn-outline-light {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .job-editor-shell {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .job-editor-panel {
+    border-radius: 24px;
+    padding: 1.35rem;
+    background: #fff;
+    border: 1px solid rgba(18, 32, 51, 0.07);
+    box-shadow: 0 20px 38px rgba(18, 32, 51, 0.08);
+  }
+
+  .job-editor-sidebar {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .job-preview-card {
+    border-radius: 24px;
+    padding: 1.2rem;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.26), transparent 36%),
+      linear-gradient(145deg, #0c4a60, #0f6b8d);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .job-preview-kicker {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 0.45rem;
+  }
+
+  .job-preview-title {
+    font-size: 1.35rem;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .job-preview-type {
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 1rem;
+  }
+
+  .job-preview-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .job-preview-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .job-sidebar-section + .job-sidebar-section {
+    margin-top: 1rem;
+  }
+
+  .job-company-card {
+    padding: 1rem 0 1.05rem;
+    border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .job-company-card:first-child {
+    padding-top: 0;
+  }
+
+  .job-company-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #0b5ed7;
+    margin-bottom: 0.35rem;
+  }
+
+  .job-company-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #122033;
+    margin-bottom: 0.2rem;
+  }
+
+  .job-company-copy {
+    margin: 0;
+    color: #66768c;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .job-checklist {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .job-check {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .job-check-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .job-check.is-done .job-check-icon {
+    background: rgba(0, 168, 107, 0.12);
+    color: var(--secondary-color);
+  }
+
+  .job-check.is-pending .job-check-icon {
+    background: rgba(255, 193, 7, 0.16);
+    color: #ab7a00;
+  }
+
+  .job-check strong {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #122033;
+  }
+
+  .job-check p,
+  .job-note {
+    margin: 0;
+    color: #516175;
+    font-size: 0.92rem;
+  }
+
+  .job-note {
+    padding: 1rem 1.05rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(13, 110, 139, 0.08), rgba(236, 151, 31, 0.1));
+  }
+
+  .job-form-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .job-form-head h4 {
+    margin-bottom: 0.25rem;
+  }
+
+  .job-form-subtitle {
+    margin: 0;
+    color: #66768c;
+  }
+
+  .job-form-section + .job-form-section {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .job-section-label {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0b5ed7;
+    margin-bottom: 0.35rem;
+  }
+
+  .job-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #122033;
+    margin-bottom: 0.25rem;
+  }
+
+  .job-section-copy {
+    color: #66768c;
+    margin-bottom: 1rem;
+  }
+
+  .job-field {
+    margin-bottom: 1rem;
+  }
+
+  .job-field label {
+    display: block;
+    font-weight: 700;
+    color: #1f2d3d;
+    margin-bottom: 0.45rem;
+  }
+
+  .job-field .form-control,
+  .job-field .form-select {
+    border-radius: 14px;
+    min-height: 48px;
+    border-color: rgba(18, 32, 51, 0.12);
+    box-shadow: none;
+  }
+
+  .job-field textarea.form-control {
+    min-height: 140px;
+  }
+
+  .job-field .form-control:focus,
+  .job-field .form-select:focus {
+    border-color: rgba(13, 110, 139, 0.45);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 139, 0.12);
+  }
+
+  .job-field-help {
+    margin-top: 0.45rem;
+    color: #6b7a90;
+    font-size: 0.84rem;
+  }
+
+  .job-field-error {
+    margin-top: 0.45rem;
+    color: #b42318;
+    font-size: 0.88rem;
+  }
+
+  .job-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .job-form-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .job-editor-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .job-editor-sidebar {
+      position: static;
+    }
+
+    .job-editor-hero-head,
+    .job-form-head,
+    .job-form-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .job-editor-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <h4>{{ action }} Vaga</h4>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">{{ action }}</button>
-            </div>
-          </form>
+<div class="job-editor-page container py-4 py-lg-5">
+  <section class="job-editor-hero mb-4">
+    <div class="job-editor-hero-head">
+      <div>
+        <div class="job-editor-kicker">{% if job %}Atualizacao de vaga{% else %}Nova oportunidade{% endif %}</div>
+        <h1 class="job-editor-title">{% if job %}Editar vaga publicada{% else %}Publicar nova vaga{% endif %}</h1>
+        <p class="job-editor-subtitle">
+          Estruture a oportunidade com clareza para atrair candidaturas mais alinhadas, facilitar triagem e dar contexto real sobre a funcao.
+        </p>
+        <div class="job-editor-chips">
+          <span class="job-editor-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="job-editor-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
+          <span class="job-editor-chip">
+            <i class="bi {% if job and job.estado == 'ATIVA' %}bi-broadcast-pin{% elif job %}bi-pencil-square{% else %}bi-stars{% endif %}"></i>
+            {% if job %}{{ job.get_estado_display }}{% else %}Pronta para publicacao{% endif %}
+          </span>
         </div>
       </div>
+      <div class="job-editor-actions">
+        <a href="{% url 'companies:job_list' %}" class="btn btn-light">
+          <i class="bi bi-arrow-left me-2"></i>Voltar as vagas
+        </a>
+        <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-light">
+          <i class="bi bi-grid me-2"></i>Painel da empresa
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="job-editor-shell">
+    <aside class="job-editor-panel job-editor-sidebar">
+      <div class="job-preview-card">
+        <div class="job-preview-kicker">Preview rapido</div>
+        <div class="job-preview-title" id="jobPreviewTitle">{{ form.titulo.value|default:"Nova oportunidade pronta a publicar" }}</div>
+        <p class="job-preview-type" id="jobPreviewType">{% if job %}{{ job.get_tipo_display }}{% else %}Tipo por definir{% endif %}</p>
+        <div class="job-preview-pills">
+          <span class="job-preview-pill"><i class="bi bi-people"></i><span id="jobPreviewSlots">{{ form.numero_vagas.value|default:"1 vaga" }}</span></span>
+          <span class="job-preview-pill"><i class="bi bi-geo-alt"></i><span id="jobPreviewLocation">{% if job and job.local_trabalho %}{{ job.local_trabalho }}{% elif job and job.distrito %}{{ job.distrito.nome }}{% else %}Local a definir{% endif %}</span></span>
+          <span class="job-preview-pill"><i class="bi bi-calendar-event"></i><span id="jobPreviewDeadline">{% if job and job.data_fecho %}{{ job.data_fecho|date:"d/m/Y" }}{% else %}Sem data de fecho{% endif %}</span></span>
+        </div>
+      </div>
+
+      <div class="job-sidebar-section">
+        <div class="job-company-card">
+          <span class="job-company-label">Empresa</span>
+          <div class="job-company-name">{{ company.nome }}</div>
+          <p class="job-company-copy">
+            {{ company.get_setor_display|default:"Setores por definir" }}
+            {% if company.distrito %}
+              <span class="mx-1">&middot;</span>{{ company.distrito.nome }}
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="job-company-card">
+          <span class="job-company-label">Checklist</span>
+          <div class="job-checklist">
+            <div class="job-check {% if form.titulo.value %}is-done{% else %}is-pending{% endif %}">
+              <span class="job-check-icon"><i class="bi {% if form.titulo.value %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+              <div>
+                <strong>Titulo claro</strong>
+                <p>Um nome objetivo ajuda a vaga a ser compreendida em segundos.</p>
+              </div>
+            </div>
+            <div class="job-check {% if form.descricao.value and form.requisitos.value %}is-done{% else %}is-pending{% endif %}">
+              <span class="job-check-icon"><i class="bi {% if form.descricao.value and form.requisitos.value %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+              <div>
+                <strong>Escopo bem descrito</strong>
+                <p>Responsabilidades e requisitos reduzem candidaturas fora do perfil.</p>
+              </div>
+            </div>
+            <div class="job-check {% if form.tipo.value and form.numero_vagas.value %}is-done{% else %}is-pending{% endif %}">
+              <span class="job-check-icon"><i class="bi {% if form.tipo.value and form.numero_vagas.value %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+              <div>
+                <strong>Formato da oportunidade</strong>
+                <p>Tipo e quantidade de vagas deixam a proposta mais concreta.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="job-note">
+          Vagas com texto direto, requisitos realistas e local bem explicado costumam atrair respostas mais alinhadas.
+        </div>
+      </div>
+    </aside>
+
+    <div class="job-editor-panel">
+      <div class="job-form-head">
+        <div>
+          <h4 class="mb-1">{% if job %}Ajustar informacao da vaga{% else %}Desenhar a oportunidade{% endif %}</h4>
+          <p class="job-form-subtitle">Preencha o essencial primeiro e refine os detalhes antes de guardar.</p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger rounded-4 mb-4">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <section class="job-form-section">
+          <div class="job-section-label">Essencial</div>
+          <div class="job-section-title">O que esta a ser procurado</div>
+          <div class="job-section-copy">Defina a funcao, o formato e quantas vagas existem.</div>
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="job-field">
+                <label for="{{ form.titulo.id_for_label }}">{{ form.titulo.label }}</label>
+                {{ form.titulo }}
+                {% if form.titulo.errors %}<div class="job-field-error">{{ form.titulo.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="job-field">
+                <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                {{ form.tipo }}
+                {% if form.tipo.errors %}<div class="job-field-error">{{ form.tipo.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="job-field">
+                <label for="{{ form.numero_vagas.id_for_label }}">{{ form.numero_vagas.label }}</label>
+                {{ form.numero_vagas }}
+                {% if form.numero_vagas.errors %}<div class="job-field-error">{{ form.numero_vagas.errors|striptags }}</div>{% endif %}
+                <div class="job-field-help">Indique o numero real de posicoes disponiveis.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="job-form-section">
+          <div class="job-section-label">Contexto</div>
+          <div class="job-section-title">Onde e quando a oportunidade acontece</div>
+          <div class="job-section-copy">Ajude candidatos a perceber local, mobilidade e prazo de candidatura.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+                {{ form.distrito }}
+                {% if form.distrito.errors %}<div class="job-field-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.local_trabalho.id_for_label }}">{{ form.local_trabalho.label }}</label>
+                {{ form.local_trabalho }}
+                {% if form.local_trabalho.errors %}<div class="job-field-error">{{ form.local_trabalho.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.data_fecho.id_for_label }}">{{ form.data_fecho.label }}</label>
+                {{ form.data_fecho }}
+                {% if form.data_fecho.errors %}<div class="job-field-error">{{ form.data_fecho.errors|striptags }}</div>{% endif %}
+                <div class="job-field-help">Pode deixar vazio se a vaga nao tiver prazo fixo.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="job-form-section">
+          <div class="job-section-label">Conteudo</div>
+          <div class="job-section-title">Explique bem a vaga</div>
+          <div class="job-section-copy">Descreva tarefas, ambiente e o minimo necessario para a candidatura fazer sentido.</div>
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="job-field">
+                <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}<div class="job-field-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="job-field">
+                <label for="{{ form.requisitos.id_for_label }}">{{ form.requisitos.label }}</label>
+                {{ form.requisitos }}
+                {% if form.requisitos.errors %}<div class="job-field-error">{{ form.requisitos.errors|striptags }}</div>{% endif %}
+                <div class="job-field-help">Prefira requisitos essenciais e observaveis em vez de listas muito amplas.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="job-form-section">
+          <div class="job-section-label">Perfil</div>
+          <div class="job-section-title">Quem se enquadra melhor</div>
+          <div class="job-section-copy">Use estes filtros para dar direcao sem fechar a porta a bons candidatos.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.nivel_educacao.id_for_label }}">{{ form.nivel_educacao.label }}</label>
+                {{ form.nivel_educacao }}
+                {% if form.nivel_educacao.errors %}<div class="job-field-error">{{ form.nivel_educacao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.area_formacao.id_for_label }}">{{ form.area_formacao.label }}</label>
+                {{ form.area_formacao }}
+                {% if form.area_formacao.errors %}<div class="job-field-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.experiencia_minima.id_for_label }}">{{ form.experiencia_minima.label }}</label>
+                {{ form.experiencia_minima }}
+                {% if form.experiencia_minima.errors %}<div class="job-field-error">{{ form.experiencia_minima.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="job-form-section">
+          <div class="job-section-label">Oferta</div>
+          <div class="job-section-title">O que esta a ser oferecido</div>
+          <div class="job-section-copy">Mesmo quando o valor e negociavel, dar algum contexto melhora a qualidade das respostas.</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="job-field">
+                <label for="{{ form.salario.id_for_label }}">{{ form.salario.label }}</label>
+                {{ form.salario }}
+                {% if form.salario.errors %}<div class="job-field-error">{{ form.salario.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="job-field">
+                <label for="{{ form.beneficios.id_for_label }}">{{ form.beneficios.label }}</label>
+                {{ form.beneficios }}
+                {% if form.beneficios.errors %}<div class="job-field-error">{{ form.beneficios.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="job-form-actions">
+          <a href="{% url 'companies:job_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Cancelar
+          </a>
+          <button class="btn btn-primary" type="submit">
+            <i class="bi {% if job %}bi-check2-circle{% else %}bi-send-check{% endif %} me-2"></i>
+            {% if job %}Guardar alteracoes{% else %}Publicar vaga{% endif %}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const titleInput = document.getElementById('{{ form.titulo.id_for_label }}');
+  const typeSelect = document.getElementById('{{ form.tipo.id_for_label }}');
+  const slotsInput = document.getElementById('{{ form.numero_vagas.id_for_label }}');
+  const districtSelect = document.getElementById('{{ form.distrito.id_for_label }}');
+  const locationInput = document.getElementById('{{ form.local_trabalho.id_for_label }}');
+  const deadlineInput = document.getElementById('{{ form.data_fecho.id_for_label }}');
+
+  const titleTarget = document.getElementById('jobPreviewTitle');
+  const typeTarget = document.getElementById('jobPreviewType');
+  const slotsTarget = document.getElementById('jobPreviewSlots');
+  const locationTarget = document.getElementById('jobPreviewLocation');
+  const deadlineTarget = document.getElementById('jobPreviewDeadline');
+
+  function getSelectText(select, fallback) {
+    if (!select) return fallback;
+    const option = select.options[select.selectedIndex];
+    if (!option || !option.value) return fallback;
+    return option.textContent.trim();
+  }
+
+  function formatSlots(value) {
+    const total = parseInt(value || '1', 10);
+    const safeTotal = Number.isNaN(total) || total < 1 ? 1 : total;
+    return safeTotal + ' vaga' + (safeTotal > 1 ? 's' : '');
+  }
+
+  function formatDate(value) {
+    if (!value) return 'Sem data de fecho';
+    const parts = value.split('-');
+    if (parts.length !== 3) return value;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function renderPreview() {
+    if (titleTarget) {
+      titleTarget.textContent = titleInput && titleInput.value.trim()
+        ? titleInput.value.trim()
+        : 'Nova oportunidade pronta a publicar';
+    }
+
+    if (typeTarget) {
+      typeTarget.textContent = getSelectText(typeSelect, 'Tipo por definir');
+    }
+
+    if (slotsTarget) {
+      slotsTarget.textContent = formatSlots(slotsInput ? slotsInput.value : '1');
+    }
+
+    if (locationTarget) {
+      const locationText = locationInput && locationInput.value.trim()
+        ? locationInput.value.trim()
+        : getSelectText(districtSelect, 'Local a definir');
+      locationTarget.textContent = locationText;
+    }
+
+    if (deadlineTarget) {
+      deadlineTarget.textContent = formatDate(deadlineInput ? deadlineInput.value : '');
+    }
+  }
+
+  [titleInput, typeSelect, slotsInput, districtSelect, locationInput, deadlineInput].forEach(function (field) {
+    if (!field) return;
+    field.addEventListener('input', renderPreview);
+    field.addEventListener('change', renderPreview);
+  });
+
+  renderPreview();
+});
+</script>
 {% endblock %}

@@ -3,385 +3,544 @@
 
 {% block title %}Meu Perfil - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .candidate-page { color: #122033; }
+  .candidate-hero {
+    border-radius: 28px;
+    padding: 1.7rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255,255,255,.34), transparent 30%),
+      linear-gradient(135deg, rgba(26,26,46,.98), rgba(0,102,204,.94) 55%, rgba(0,168,107,.82));
+    box-shadow: 0 22px 45px rgba(16, 38, 62, 0.18);
+  }
+  .candidate-identity { display: flex; align-items: flex-start; gap: 1rem; }
+  .candidate-avatar {
+    width: 96px; height: 96px; border-radius: 28px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+  }
+  .candidate-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .candidate-avatar i { font-size: 3.6rem; color: rgba(255,255,255,.88); }
+  .candidate-kicker {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .12em; opacity: .78; margin-bottom: .35rem;
+  }
+  .candidate-title { font-size: clamp(1.8rem, 2vw, 2.4rem); font-weight: 700; line-height: 1.08; margin-bottom: .35rem; }
+  .candidate-subtitle { margin: 0; color: rgba(255,255,255,.82); }
+  .candidate-chip-list, .candidate-actions, .candidate-tag-list { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .candidate-chip {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .42rem .78rem; border-radius: 999px;
+    font-size: .82rem; font-weight: 600; background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2); color: #fff;
+  }
+  .candidate-progress-box {
+    margin-top: 1rem; padding: 1rem 1.1rem; border-radius: 20px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18);
+  }
+  .candidate-progress-box .progress { height: 12px; background: rgba(255,255,255,.18); border-radius: 999px; }
+  .candidate-progress-box .progress-bar { border-radius: 999px; background: linear-gradient(90deg, #8de4ff, #ffffff); }
+  .candidate-progress-note { margin: .65rem 0 0; color: rgba(255,255,255,.82); font-size: .92rem; }
+  .candidate-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .candidate-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .candidate-actions .btn-outline-light:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.38); }
+  .candidate-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .85rem; }
+  .candidate-stat {
+    border-radius: 20px; padding: .95rem 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18);
+  }
+  .candidate-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .2rem; }
+  .candidate-stat-value { display: block; font-size: 1.55rem; font-weight: 700; line-height: 1; margin-bottom: .24rem; }
+  .candidate-stat-meta { color: rgba(255,255,255,.8); font-size: .84rem; }
+  .candidate-panel {
+    border-radius: 24px; padding: 1.3rem; background: #fff; border: 1px solid rgba(18,32,51,.07);
+    box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .candidate-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+  .candidate-panel-head h5, .candidate-panel-head h6 { margin-bottom: .2rem; }
+  .candidate-panel-subtitle { margin: 0; color: #65748b; font-size: .92rem; }
+  .candidate-checklist, .candidate-list, .candidate-doc-list, .candidate-icon-list { display: grid; gap: .85rem; }
+  .candidate-check {
+    display: flex; gap: .8rem; padding: .9rem 1rem; border-radius: 18px; background: #f7fafc;
+    border: 1px solid rgba(18,32,51,.06); text-decoration: none; color: inherit;
+  }
+  .candidate-check-icon {
+    width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: .95rem;
+  }
+  .candidate-check.done .candidate-check-icon { background: rgba(0,168,107,.12); color: var(--secondary-color); }
+  .candidate-check.pending .candidate-check-icon { background: rgba(255,193,7,.16); color: #ab7a00; }
+  .candidate-check p, .candidate-entry-copy, .candidate-about { color: #4d5d71; }
+  .candidate-summary-row {
+    display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .7rem; margin-bottom: .7rem;
+    border-bottom: 1px solid rgba(18,32,51,.07);
+  }
+  .candidate-summary-row:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+  .candidate-summary-row span:first-child { color: #68788f; }
+  .candidate-summary-row span:last-child { font-weight: 600; text-align: right; }
+  .candidate-tag {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .78rem; border-radius: 999px;
+    background: rgba(0,102,204,.08); border: 1px solid rgba(0,102,204,.1); color: #15406c; font-size: .84rem; font-weight: 600;
+  }
+  .candidate-entry, .candidate-doc, .candidate-card {
+    border-radius: 22px; padding: 1rem; background: linear-gradient(180deg, #fff, #fbfdff); border: 1px solid rgba(18,32,51,.07);
+  }
+  .candidate-entry { border-left: 4px solid var(--primary-color); padding-left: 1.05rem; }
+  .candidate-entry-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: .7rem; }
+  .candidate-entry-title { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; color: #122033; }
+  .candidate-entry-subtitle { color: #69798f; margin-bottom: .35rem; }
+  .candidate-entry-meta, .candidate-card-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; color: #6d7c90; font-size: .88rem; }
+  .candidate-entry-meta .badge { border-radius: 999px; padding: .42rem .68rem; font-weight: 600; }
+  .candidate-icon-item { display: flex; gap: .8rem; align-items: flex-start; }
+  .candidate-icon {
+    width: 2.2rem; height: 2.2rem; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(0,102,204,.08); color: var(--primary-color); flex-shrink: 0;
+  }
+  .candidate-icon-label {
+    display: block; font-size: .76rem; font-weight: 700; color: #7b8798; text-transform: uppercase;
+    letter-spacing: .08em; margin-bottom: .15rem;
+  }
+  .candidate-doc { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+  .candidate-doc-preview {
+    width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; background: #f4f7fb;
+    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(18,32,51,.08);
+  }
+  .candidate-doc-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .candidate-doc-preview i { font-size: 1.5rem; color: var(--primary-color); }
+  .candidate-doc-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-left: auto; }
+  .candidate-doc-actions .btn, .candidate-panel-head .btn, .candidate-entry-head .btn { border-radius: 12px; }
+  .candidate-card-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .9rem; }
+  .candidate-empty {
+    border-radius: 22px; padding: 1.25rem; text-align: center; color: #66768c; background: #f7fafc;
+    border: 1px dashed rgba(18,32,51,.14);
+  }
+  .candidate-empty i { font-size: 1.6rem; color: var(--primary-color); display: block; margin-bottom: .55rem; }
+  @media (max-width: 991.98px) { .candidate-actions .btn { width: 100%; } }
+  @media (max-width: 575.98px) {
+    .candidate-hero { padding: 1.35rem; }
+    .candidate-identity, .candidate-entry-head { flex-direction: column; }
+    .candidate-stat-grid { grid-template-columns: 1fr; }
+    .candidate-doc-actions { margin-left: 0; width: 100%; }
+    .candidate-doc-actions .btn { flex: 1 1 auto; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-lg-4 mb-4">
-            <div class="card profile-section" id="dados-pessoais">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        {% if profile.photo %}
-                            <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;">
-                        {% else %}
-                            <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
-                        {% endif %}
-                    </div>
-                    <h4>{{ profile.nome_completo }}</h4>
-                    {% if progress is not None %}
-                        <div class="mt-2">
-                            <div class="progress" style="height:20px;">
-                                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
-                                    <small class="fw-bold">{{ progress }}%</small>
-                                </div>
-                            </div>
-                            {% if step_stats %}
-                                <div class="list-group list-group-flush mt-2 text-start">
-                                    <a href="#dados-pessoais" class="list-group-item list-group-item-action px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                {% if step_stats.1.filled == step_stats.1.total %}
-                                                    <i class="bi bi-check-circle-fill text-success me-1" aria-hidden="true"></i>
-                                                {% else %}
-                                                    <i class="bi bi-x-circle-fill text-danger me-1" aria-hidden="true"></i>
-                                                {% endif %}
-                                                Dados Pessoais
-                                            </span>
-                                            <span class="badge {% if step_stats.1.filled == step_stats.1.total %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                                                {{ step_stats.1.filled }}/{{ step_stats.1.total }}
-                                            </span>
-                                        </div>
-                                        <small class="text-muted">
-                                            {% if step_stats.1.filled == step_stats.1.total %}
-                                                Completo
-                                            {% else %}
-                                                Faltam {{ step_stats.1.missing }}
-                                            {% endif %}
-                                        </small>
-                                    </a>
-                                    <a href="#educacao-skills" class="list-group-item list-group-item-action px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                {% if step_stats.2.filled == step_stats.2.total %}
-                                                    <i class="bi bi-check-circle-fill text-success me-1" aria-hidden="true"></i>
-                                                {% else %}
-                                                    <i class="bi bi-x-circle-fill text-danger me-1" aria-hidden="true"></i>
-                                                {% endif %}
-                                                Educação e Skills
-                                            </span>
-                                            <span class="badge {% if step_stats.2.filled == step_stats.2.total %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                                                {{ step_stats.2.filled }}/{{ step_stats.2.total }}
-                                            </span>
-                                        </div>
-                                        <small class="text-muted">
-                                            {% if step_stats.2.filled == step_stats.2.total %}
-                                                Completo
-                                            {% else %}
-                                                Faltam {{ step_stats.2.missing }}
-                                            {% endif %}
-                                        </small>
-                                    </a>
-                                    <a href="#experiencia" class="list-group-item list-group-item-action px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                {% if step_stats.3.filled == step_stats.3.total %}
-                                                    <i class="bi bi-check-circle-fill text-success me-1" aria-hidden="true"></i>
-                                                {% else %}
-                                                    <i class="bi bi-x-circle-fill text-danger me-1" aria-hidden="true"></i>
-                                                {% endif %}
-                                                Experiência
-                                            </span>
-                                            <span class="badge {% if step_stats.3.filled == step_stats.3.total %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                                                {{ step_stats.3.filled }}/{{ step_stats.3.total }}
-                                            </span>
-                                        </div>
-                                        <small class="text-muted">
-                                            {% if step_stats.3.filled == step_stats.3.total %}
-                                                Completo
-                                            {% else %}
-                                                Faltam {{ step_stats.3.missing }}
-                                            {% endif %}
-                                        </small>
-                                    </a>
-                                    <a href="#documentos" class="list-group-item list-group-item-action px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                {% if doc_stats.filled == doc_stats.total %}
-                                                    <i class="bi bi-check-circle-fill text-success me-1" aria-hidden="true"></i>
-                                                {% else %}
-                                                    <i class="bi bi-x-circle-fill text-danger me-1" aria-hidden="true"></i>
-                                                {% endif %}
-                                                Documentos
-                                            </span>
-                                            <span class="badge {% if doc_stats.filled == doc_stats.total %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                                                {{ doc_stats.filled }}/{{ doc_stats.total }}
-                                            </span>
-                                        </div>
-                                        <small class="text-muted">
-                                            {% if doc_stats.filled == doc_stats.total %}
-                                                Completo
-                                            {% else %}
-                                                Faltam {{ doc_stats.missing }}
-                                            {% endif %}
-                                            <span class="ms-2">Total: {{ doc_stats.total_all }}</span>
-                                        </small>
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                    <p class="text-muted mb-2">
-                        <i class="bi bi-geo-alt me-1"></i>{{ profile.distrito.nome|default:"Distrito não definido" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}
-                    </p>
-                    <p class="text-muted mb-2">
-                        <i class="bi bi-telephone me-1"></i>{{ profile.telefone }}
-                    </p>
-                    <p class="text-muted mb-2">
-                        <i class="bi bi-envelope me-1"></i>{{ profile.email|default:"Email não definido" }}
-                    </p>
-                    {% if profile.contacto_alternativo %}
-                        <p class="text-muted">
-                            <i class="bi bi-person-lines-fill me-1"></i>{{ profile.contacto_alternativo }}
-                        </p>
-                    {% endif %}
-                    
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-primary">
-                            <i class="bi bi-magic me-2"></i>Editar perfil com Wizard
-                        </a>
-                        <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-briefcase me-2"></i>Minhas Candidaturas
-                        </a>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between">
-                        <span>Perfil:</span>
-                        <span>
-                            {% if profile.completo %}
-                                <span class="badge bg-success">Completo</span>
-                            {% else %}
-                                <span class="badge bg-warning">Incompleto</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2">
-                        <span>Validação:</span>
-                        <span>
-                            {% if profile.validado %}
-                                <span class="badge bg-success">Validado</span>
-                            {% else %}
-                                <span class="badge bg-warning">Pendente</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2">
-                        <span>Visibilidade:</span>
-                        <span>
-                            {% if profile.visivel %}
-                                <span class="badge bg-success">Visível</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Oculto</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
+<div class="candidate-page container py-4 py-lg-5">
+  <section class="candidate-hero mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="candidate-identity">
+          <div class="candidate-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ profile.nome_completo }}">
+            {% else %}
+              <i class="bi bi-person-circle"></i>
+            {% endif %}
+          </div>
+          <div>
+            <div class="candidate-kicker">Area pessoal</div>
+            <h1 class="candidate-title">{{ profile.nome_completo }}</h1>
+            <p class="candidate-subtitle">
+              {{ profile.distrito.nome|default:"Distrito nao definido" }}
+              {% if profile.localidade %}<span class="mx-1">&middot;</span>{{ profile.localidade }}{% endif %}
+            </p>
+            <div class="candidate-chip-list mt-3">
+              <span class="candidate-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
+              <span class="candidate-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
+              <span class="candidate-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
+              <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.visivel %}Visivel{% else %}Oculto{% endif %}</span>
             </div>
-            
-            <!-- Resumo -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Resumo</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Idade:</strong> {{ profile.idade|default:"N/A" }} anos</p>
-                    <p><strong>Sexo:</strong> {{ profile.get_sexo_display|default:"N/A" }}</p>
-                    <p><strong>Situação:</strong> {{ profile.get_situacao_atual_display }}</p>
-                    <p><strong>Disponibilidade:</strong> {{ profile.get_disponibilidade_display }}</p>
-                    <p><strong>Preferência:</strong> {{ profile.get_preferencia_oportunidade_display }}</p>
-                    {% if profile.interesse_setorial %}
-                        <p><strong>Setores de Interesse:</strong> {{ profile.interesses_setoriais_display }}</p>
-                    {% endif %}
-                </div>
+            <div class="candidate-progress-box">
+              <div class="d-flex justify-content-between align-items-center gap-3">
+                <span class="fw-semibold">Forca do perfil</span>
+                <strong>{{ progress }}%</strong>
+              </div>
+              <div class="progress mt-2">
+                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <p class="candidate-progress-note">
+                {% if profile.completo %}
+                  O teu perfil ja esta pronto para responder a oportunidades com mais rapidez.
+                {% else %}
+                  Quanto mais completo estiver o perfil, mais facil fica para as empresas perceberem o teu potencial.
+                {% endif %}
+              </p>
             </div>
+          </div>
         </div>
-        
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Sobre -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Sobre Mim</h5>
-                </div>
-                <div class="card-body">
-                    {% if profile.sobre %}
-                        <p>{{ profile.sobre|linebreaks }}</p>
-                    {% else %}
-                        <p class="text-muted">Ainda não adicionaste informações sobre ti.</p>
-                        <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-magic me-1"></i>Completar com Wizard
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Educação -->
-            <div class="card mb-4 profile-section" id="educacao-skills">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-book me-2"></i>Educação</h5>
-                    <a href="{% url 'profiles:education_add' %}" class="btn btn-sm btn-primary" title="Adicionar formação" aria-label="Adicionar formação">
-                        <i class="bi bi-plus-lg"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if education %}
-                        {% for edu in education %}
-                            <div class="d-flex justify-content-between align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                                <div>
-                                    <h6 class="mb-1">{{ edu.get_nivel_display }}</h6>
-                                    <p class="mb-1 text-muted">{{ edu.instituicao }}</p>
-                                    <p class="mb-0">
-                                        <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
-                                        {% if edu.ano %}
-                                            <span class="badge bg-light text-dark">{{ edu.ano }}</span>
-                                        {% endif %}
-                                    </p>
-                                    {% if edu.curso %}
-                                        <p class="mb-0 mt-1"><small>{{ edu.curso }}</small></p>
-                                    {% endif %}
-                                </div>
-                                <a href="{% url 'profiles:education_delete' edu.pk %}" 
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Tens a certeza que queres remover esta formação?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">Ainda não adicionaste nenhuma formação.</p>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Experiência -->
-            <div class="card mb-4 profile-section" id="experiencia">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Experiência Profissional</h5>
-                    <a href="{% url 'profiles:experience_add' %}" class="btn btn-sm btn-primary" title="Adicionar experiência" aria-label="Adicionar experiência">
-                        <i class="bi bi-plus-lg"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if experiences %}
-                        {% for exp in experiences %}
-                            <div class="d-flex justify-content-between align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                                <div>
-                                    <h6 class="mb-1">{{ exp.cargo }}</h6>
-                                    <p class="mb-1 text-muted">{{ exp.entidade }}</p>
-                                    <p class="mb-0">
-                                        <small class="text-muted">
-                                            {{ exp.inicio|date:"m/Y" }} - 
-                                            {% if exp.atual %}Atual{% else %}{{ exp.fim|date:"m/Y" }}{% endif %}
-                                            ({{ exp.duracao }})
-                                        </small>
-                                    </p>
-                                    {% if exp.descricao %}
-                                        <p class="mb-0 mt-2">{{ exp.descricao|truncatewords:30 }}</p>
-                                    {% endif %}
-                                </div>
-                                <a href="{% url 'profiles:experience_delete' exp.pk %}" 
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Tens a certeza que queres remover esta experiência?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">Ainda não adicionaste nenhuma experiência profissional.</p>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Skills -->
-            <div class="card mb-4 profile-section" id="skills">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-stars me-2"></i>Skills</h5>
-                    <a href="{% url 'profiles:skills_edit' %}" class="btn btn-sm btn-primary" title="Editar skills" aria-label="Editar skills">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if skills %}
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for youth_skill in skills %}
-                                <span class="badge bg-primary">
-                                    {{ youth_skill.skill.nome }}
-                                    <small class="ms-1">({{ youth_skill.get_nivel_display }})</small>
-                                </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted">Ainda não adicionaste nenhuma skill.</p>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Documentos -->
-            <div class="card profile-section" id="documentos">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <h5 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documentos</h5>
-                        <span class="badge bg-light text-dark">Total: {{ doc_stats.total_all }}</span>
-                    </div>
-                    <a href="{% url 'profiles:document_add' %}" class="btn btn-sm btn-primary" title="Adicionar documento" aria-label="Adicionar documento">
-                        <i class="bi bi-plus-lg"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if documents %}
-                        <div class="list-group">
-                            {% for doc in documents %}
-                                <div class="list-group-item d-flex flex-wrap align-items-center gap-3">
-                                    <div class="doc-preview">
-                                        {% with file_url=doc.arquivo.url|lower %}
-                                            {% if ".pdf" in file_url %}
-                                                <embed src="{% url 'profiles:document_view' doc.pk %}" type="application/pdf" class="doc-preview-embed">
-                                            {% elif ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}
-                                                <img src="{% url 'profiles:document_view' doc.pk %}" alt="{{ doc.nome }}" class="doc-preview-img" loading="lazy">
-                                            {% else %}
-                                                <div class="doc-preview-fallback">
-                                                    <i class="bi bi-file-earmark-text"></i>
-                                                </div>
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center flex-wrap gap-2">
-                                            <strong>{{ doc.nome }}</strong>
-                                            <span class="badge bg-secondary">{{ doc.get_tipo_display }}</span>
-                                            {% if doc.verificado %}
-                                                <span class="badge bg-success">
-                                                    <i class="bi bi-check"></i>Verificado
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="small text-muted">Enviado em {{ doc.created_at|date:"d/m/Y" }}</div>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <a href="{% url 'profiles:document_view' doc.pk %}" class="btn btn-sm btn-outline-primary me-1" target="_blank" title="Abrir" aria-label="Abrir documento">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{{ doc.arquivo.url }}" class="btn btn-sm btn-outline-primary me-1" download title="Baixar" aria-label="Baixar documento">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                        <a href="{% url 'profiles:document_delete' doc.pk %}" 
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('Tens a certeza que queres remover este documento?')"
-                                           title="Remover" aria-label="Remover documento">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted">Ainda não adicionaste nenhum documento.</p>
-                    {% endif %}
-                </div>
-            </div>
-
+      </div>
+      <div class="col-lg-5">
+        <div class="candidate-actions mb-3">
+          <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-light"><i class="bi bi-magic me-2"></i>Editar com wizard</a>
+          <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-light"><i class="bi bi-send-check me-2"></i>Minhas candidaturas</a>
+          <a href="{% url 'profiles:available_jobs' %}" class="btn btn-dark"><i class="bi bi-briefcase me-2"></i>Ver vagas</a>
         </div>
+        <div class="candidate-stat-grid">
+          <div class="candidate-stat">
+            <span class="candidate-stat-label">Formacao</span>
+            <span class="candidate-stat-value">{{ education|length }}</span>
+            <span class="candidate-stat-meta">registo{{ education|length|pluralize }}</span>
+          </div>
+          <div class="candidate-stat">
+            <span class="candidate-stat-label">Experiencia</span>
+            <span class="candidate-stat-value">{{ experiences|length }}</span>
+            <span class="candidate-stat-meta">registo{{ experiences|length|pluralize }}</span>
+          </div>
+          <div class="candidate-stat">
+            <span class="candidate-stat-label">Skills</span>
+            <span class="candidate-stat-value">{{ skills|length }}</span>
+            <span class="candidate-stat-meta">competencia{{ skills|length|pluralize }}</span>
+          </div>
+          <div class="candidate-stat">
+            <span class="candidate-stat-label">Documentos</span>
+            <span class="candidate-stat-value">{{ documents|length }}</span>
+            <span class="candidate-stat-meta">anexo{{ documents|length|pluralize }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-4">
+      <div class="candidate-panel profile-section" id="dados-pessoais">
+        <div class="candidate-panel-head">
+          <div>
+            <h5>Estado do perfil</h5>
+            <p class="candidate-panel-subtitle">Checklist rapido do que ja esta preenchido.</p>
+          </div>
+        </div>
+        <div class="candidate-checklist">
+          <a href="#dados-pessoais" class="candidate-check {% if step_stats.1.filled == step_stats.1.total %}done{% else %}pending{% endif %}">
+            <span class="candidate-check-icon"><i class="bi {% if step_stats.1.filled == step_stats.1.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+            <div><strong>Dados pessoais</strong><p>{{ step_stats.1.filled }}/{{ step_stats.1.total }} preenchidos{% if step_stats.1.missing %} &middot; faltam {{ step_stats.1.missing }}{% endif %}</p></div>
+          </a>
+          <a href="#educacao-skills" class="candidate-check {% if step_stats.2.filled == step_stats.2.total %}done{% else %}pending{% endif %}">
+            <span class="candidate-check-icon"><i class="bi {% if step_stats.2.filled == step_stats.2.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+            <div><strong>Educacao e skills</strong><p>{{ step_stats.2.filled }}/{{ step_stats.2.total }} preenchidos{% if step_stats.2.missing %} &middot; faltam {{ step_stats.2.missing }}{% endif %}</p></div>
+          </a>
+          <a href="#experiencia" class="candidate-check {% if step_stats.3.filled == step_stats.3.total %}done{% else %}pending{% endif %}">
+            <span class="candidate-check-icon"><i class="bi {% if step_stats.3.filled == step_stats.3.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+            <div><strong>Experiencia</strong><p>{{ step_stats.3.filled }}/{{ step_stats.3.total }} preenchidos{% if step_stats.3.missing %} &middot; faltam {{ step_stats.3.missing }}{% endif %}</p></div>
+          </a>
+          <a href="#documentos" class="candidate-check {% if doc_stats.filled == doc_stats.total %}done{% else %}pending{% endif %}">
+            <span class="candidate-check-icon"><i class="bi {% if doc_stats.filled == doc_stats.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+            <div><strong>Documentos</strong><p>{{ doc_stats.filled }}/{{ doc_stats.total }} essenciais{% if doc_stats.missing %} &middot; faltam {{ doc_stats.missing }}{% endif %} &middot; total {{ doc_stats.total_all }}</p></div>
+          </a>
+        </div>
+      </div>
+
+      <div class="candidate-panel mt-4">
+        <div class="candidate-panel-head">
+          <div>
+            <h6>Contacto e disponibilidade</h6>
+            <p class="candidate-panel-subtitle">Como as empresas te podem encontrar.</p>
+          </div>
+        </div>
+        <div class="candidate-icon-list">
+          <div class="candidate-icon-item">
+            <span class="candidate-icon"><i class="bi bi-telephone"></i></span>
+            <div><span class="candidate-icon-label">Telefone</span>{{ profile.telefone|default:"Nao informado" }}</div>
+          </div>
+          <div class="candidate-icon-item">
+            <span class="candidate-icon"><i class="bi bi-envelope"></i></span>
+            <div><span class="candidate-icon-label">Email</span>{{ profile.email|default:"Nao informado" }}</div>
+          </div>
+          <div class="candidate-icon-item">
+            <span class="candidate-icon"><i class="bi bi-geo-alt"></i></span>
+            <div><span class="candidate-icon-label">Localizacao</span>{{ profile.distrito.nome|default:"Distrito nao definido" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</div>
+          </div>
+          {% if profile.contacto_alternativo %}
+            <div class="candidate-icon-item">
+              <span class="candidate-icon"><i class="bi bi-person-lines-fill"></i></span>
+              <div><span class="candidate-icon-label">Contacto alternativo</span>{{ profile.contacto_alternativo }}</div>
+            </div>
+          {% endif %}
+        </div>
+        <div class="candidate-tag-list mt-3">
+          {% if profile.consentimento_sms %}<span class="candidate-tag"><i class="bi bi-chat-dots"></i>SMS</span>{% endif %}
+          {% if profile.consentimento_whatsapp %}<span class="candidate-tag"><i class="bi bi-whatsapp"></i>WhatsApp</span>{% endif %}
+          {% if profile.consentimento_email %}<span class="candidate-tag"><i class="bi bi-envelope-check"></i>Email</span>{% endif %}
+          {% if not profile.consentimento_sms and not profile.consentimento_whatsapp and not profile.consentimento_email %}
+            <span class="candidate-tag"><i class="bi bi-shield-exclamation"></i>Sem canais extras ativos</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="candidate-panel mt-4">
+        <div class="candidate-panel-head">
+          <div>
+            <h6>Resumo rapido</h6>
+            <p class="candidate-panel-subtitle">Leitura compacta do teu perfil.</p>
+          </div>
+        </div>
+        <div class="candidate-summary-row"><span>Idade</span><span>{{ profile.idade|default:"N/A" }} anos</span></div>
+        <div class="candidate-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"N/A" }}</span></div>
+        <div class="candidate-summary-row"><span>Situacao</span><span>{{ profile.get_situacao_atual_display }}</span></div>
+        <div class="candidate-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
+        <div class="candidate-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="candidate-summary-row"><span>Validacao</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
+        {% if profile.interesse_setorial %}
+          <div class="candidate-tag-list mt-3">
+            {% for interest in profile.interesse_setorial %}
+              <span class="candidate-tag">{{ interest }}</span>
+            {% endfor %}
+          </div>
+          <p class="small text-muted mt-2 mb-0">{{ profile.interesses_setoriais_display }}</p>
+        {% endif %}
+      </div>
     </div>
 
+    <div class="col-12 col-lg-8">
+      <div class="candidate-panel mb-4">
+        <div class="candidate-panel-head">
+          <div>
+            <h5>Sobre mim</h5>
+            <p class="candidate-panel-subtitle">Resumo que acompanha as tuas candidaturas.</p>
+          </div>
+          <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-outline-primary btn-sm">Atualizar</a>
+        </div>
+        <div class="candidate-about">
+          {% if profile.sobre %}
+            {{ profile.sobre|linebreaks }}
+          {% else %}
+            <div class="candidate-empty"><i class="bi bi-person-lines-fill"></i>Ainda nao existe um resumo pessoal. Um texto curto sobre objetivos, energia e experiencia ajuda muito nas candidaturas.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-xl-7">
+          <div class="candidate-panel profile-section h-100" id="educacao-skills">
+            <div class="candidate-panel-head">
+              <div>
+                <h5>Educacao</h5>
+                <p class="candidate-panel-subtitle">Formacao academica e tecnica registada.</p>
+              </div>
+              <a href="{% url 'profiles:education_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
+            </div>
+            {% if education %}
+              <div class="candidate-list">
+                {% for edu in education %}
+                  <article class="candidate-entry">
+                    <div class="candidate-entry-head">
+                      <div>
+                        <div class="candidate-entry-title">{{ edu.get_nivel_display }}</div>
+                        <div class="candidate-entry-subtitle">{{ edu.instituicao }}</div>
+                        <div class="candidate-entry-meta">
+                          <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
+                          {% if edu.ano %}<span class="badge bg-light text-dark border">{{ edu.ano }}</span>{% endif %}
+                        </div>
+                        {% if edu.curso %}<p class="candidate-entry-copy">{{ edu.curso }}</p>{% endif %}
+                      </div>
+                      <a href="{% url 'profiles:education_delete' edu.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta formacao?')"><i class="bi bi-trash"></i></a>
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="candidate-empty"><i class="bi bi-book"></i>Ainda nao existe nenhuma formacao registada.</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-12 col-xl-5">
+          <div class="candidate-panel h-100" id="skills">
+            <div class="candidate-panel-head">
+              <div>
+                <h5>Skills</h5>
+                <p class="candidate-panel-subtitle">Competencias que reforcam o teu perfil.</p>
+              </div>
+              <a href="{% url 'profiles:skills_edit' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square me-1"></i>Editar</a>
+            </div>
+            {% if skills %}
+              <div class="candidate-tag-list">
+                {% for youth_skill in skills %}
+                  <span class="candidate-tag">{{ youth_skill.skill.nome }} <small>({{ youth_skill.get_nivel_display }})</small></span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="candidate-empty"><i class="bi bi-stars"></i>Ainda nao adicionaste nenhuma skill.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="candidate-panel profile-section mt-4" id="experiencia">
+        <div class="candidate-panel-head">
+          <div>
+            <h5>Experiencia profissional</h5>
+            <p class="candidate-panel-subtitle">Percurso de trabalho, estagio ou projetos.</p>
+          </div>
+          <a href="{% url 'profiles:experience_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
+        </div>
+        {% if experiences %}
+          <div class="candidate-list">
+            {% for exp in experiences %}
+              <article class="candidate-entry">
+                <div class="candidate-entry-head">
+                  <div>
+                    <div class="candidate-entry-title">{{ exp.cargo }}</div>
+                    <div class="candidate-entry-subtitle">{{ exp.entidade }}</div>
+                    <div class="candidate-entry-meta">
+                      <span class="badge bg-light text-dark border">{{ exp.inicio|date:"m/Y" }} - {% if exp.atual %}Atual{% else %}{{ exp.fim|date:"m/Y" }}{% endif %}</span>
+                      <span class="badge bg-secondary">{{ exp.duracao }}</span>
+                    </div>
+                    {% if exp.descricao %}<p class="candidate-entry-copy">{{ exp.descricao|truncatewords:35 }}</p>{% endif %}
+                  </div>
+                  <a href="{% url 'profiles:experience_delete' exp.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta experiencia?')"><i class="bi bi-trash"></i></a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="candidate-empty"><i class="bi bi-briefcase"></i>Ainda nao adicionaste nenhuma experiencia profissional.</div>
+        {% endif %}
+      </div>
+
+      <div class="candidate-panel profile-section mt-4" id="documentos">
+        <div class="candidate-panel-head">
+          <div>
+            <h5>Documentos</h5>
+            <p class="candidate-panel-subtitle">Arquivos prontos para validacao e candidatura.</p>
+          </div>
+          <a href="{% url 'profiles:document_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
+        </div>
+        {% if documents %}
+          <div class="candidate-doc-list">
+            {% for doc in documents %}
+              <article class="candidate-doc">
+                <div class="candidate-doc-preview">
+                  {% with file_url=doc.arquivo.name|lower %}
+                    {% if ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}
+                      <img src="{% url 'profiles:document_view' doc.pk %}" alt="{{ doc.nome }}" loading="lazy">
+                    {% elif ".pdf" in file_url %}
+                      <i class="bi bi-file-earmark-pdf"></i>
+                    {% else %}
+                      <i class="bi bi-file-earmark-text"></i>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                <div>
+                  <div class="candidate-entry-title mb-1">{{ doc.nome }}</div>
+                  <div class="candidate-entry-meta">
+                    <span class="badge bg-secondary">{{ doc.get_tipo_display }}</span>
+                    {% if doc.verificado %}<span class="badge bg-success"><i class="bi bi-check me-1"></i>Verificado</span>{% endif %}
+                    <span class="badge bg-light text-dark border">{{ doc.created_at|date:"d/m/Y" }}</span>
+                  </div>
+                </div>
+                <div class="candidate-doc-actions">
+                  {% with file_url=doc.arquivo.name|lower %}
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#docPreviewModal"
+                            data-doc-url="{% url 'profiles:document_view' doc.pk %}"
+                            data-doc-name="{{ doc.nome }}"
+                            data-doc-type="{% if ".pdf" in file_url %}pdf{% elif ".jpg" in file_url or ".jpeg" in file_url or ".png" in file_url or ".gif" in file_url %}image{% else %}other{% endif %}">
+                      <i class="bi bi-eye me-1"></i>Abrir
+                    </button>
+                  {% endwith %}
+                  <a href="{% url 'profiles:document_download' doc.pk %}" class="btn btn-outline-secondary btn-sm" download><i class="bi bi-download me-1"></i>Baixar</a>
+                  <a href="{% url 'profiles:document_delete' doc.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover este documento?')"><i class="bi bi-trash me-1"></i>Remover</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="candidate-empty"><i class="bi bi-file-earmark"></i>Ainda nao existem documentos carregados.</div>
+        {% endif %}
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-12 col-xl-6">
+          <div class="candidate-panel h-100">
+            <div class="candidate-panel-head">
+              <div>
+                <h5>Candidaturas recentes</h5>
+                <p class="candidate-panel-subtitle">As ultimas respostas que merecem atencao.</p>
+              </div>
+              <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-primary btn-sm">Ver todas</a>
+            </div>
+            {% if applications %}
+              <div class="candidate-list">
+                {% for app in applications|slice:":3" %}
+                  <article class="candidate-card">
+                    <div class="candidate-entry-head">
+                      <div>
+                        <div class="candidate-entry-title">{{ app.job.titulo }}</div>
+                        <div class="candidate-entry-subtitle">{{ app.job.company.nome }}</div>
+                      </div>
+                      <span class="badge {% if app.estado == 'ACEITE' %}bg-success{% elif app.estado == 'REJEITADA' %}bg-danger{% elif app.estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                        {{ app.get_estado_display }}
+                      </span>
+                    </div>
+                    {% if app.messages.all %}
+                      {% with last_msg=app.messages.all.0 %}
+                        <p class="candidate-entry-copy mb-0">{{ last_msg.message|truncatewords:18 }}</p>
+                      {% endwith %}
+                    {% else %}
+                      <p class="candidate-entry-copy mb-0">Ainda sem mensagem da empresa.</p>
+                    {% endif %}
+                    <div class="candidate-card-meta">
+                      <span><i class="bi bi-calendar-event me-1"></i>{{ app.created_at|date:"d/m/Y" }}</span>
+                      <span><i class="bi bi-chat-left-text me-1"></i>{{ app.messages.all|length }} mensagem{{ app.messages.all|length|pluralize }}</span>
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="candidate-empty"><i class="bi bi-send"></i>Ainda nao fizeste nenhuma candidatura.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="candidate-panel h-100">
+            <div class="candidate-panel-head">
+              <div>
+                <h5>Oportunidades em destaque</h5>
+                <p class="candidate-panel-subtitle">Vagas abertas para acompanhar sem sair do perfil.</p>
+              </div>
+              <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-primary btn-sm">Explorar</a>
+            </div>
+            {% if vagas_page.object_list %}
+              <div class="candidate-list">
+                {% for vaga in vagas_page.object_list|slice:":3" %}
+                  <article class="candidate-card">
+                    <div class="candidate-entry-head">
+                      <div>
+                        <div class="candidate-entry-title">{{ vaga.titulo }}</div>
+                        <div class="candidate-entry-subtitle">{{ vaga.company.nome }}</div>
+                      </div>
+                      <span class="badge bg-primary">{{ vaga.get_tipo_display }}</span>
+                    </div>
+                    <p class="candidate-entry-copy mb-0">{{ vaga.descricao|truncatewords:20 }}</p>
+                    <div class="candidate-card-meta">
+                      <span><i class="bi bi-geo-alt me-1"></i>{{ vaga.distrito.nome|default:"N/A" }}</span>
+                      <span><i class="bi bi-people me-1"></i>{{ vaga.vagas_restantes }} restante{{ vaga.vagas_restantes|pluralize }}</span>
+                    </div>
+                    <div class="candidate-card-actions">
+                      {% if vaga.id in candidaturas_ids %}
+                        {% with estado=candidaturas_state|get_item:vaga.id %}
+                          <span class="badge {% if estado == 'ACEITE' %}bg-success{% elif estado == 'REJEITADA' %}bg-danger{% elif estado == 'EM_ANALISE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                            {{ candidaturas_map|get_item:vaga.id }}
+                          </span>
+                        {% endwith %}
+                        <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-secondary btn-sm">Acompanhar</a>
+                      {% else %}
+                        <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary btn-sm"><i class="bi bi-arrow-right me-1"></i>Ver vaga</a>
+                      {% endif %}
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="candidate-empty"><i class="bi bi-briefcase"></i>Sem vagas disponiveis neste momento.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

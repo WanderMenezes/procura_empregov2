@@ -2,18 +2,384 @@
 
 {% block title %}Vagas{% endblock %}
 
+{% block extra_css %}
+<style>
+  .job-list-page {
+    color: #122033;
+  }
+
+  .job-list-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    padding: 1.8rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 34%),
+      linear-gradient(135deg, rgba(8, 56, 84, 0.98), rgba(8, 111, 145, 0.95) 54%, rgba(32, 169, 137, 0.88));
+    box-shadow: 0 24px 52px rgba(8, 56, 84, 0.2);
+  }
+
+  .job-list-hero::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    bottom: -130px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    filter: blur(4px);
+  }
+
+  .job-list-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .job-list-hero-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .job-list-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.82;
+    margin-bottom: 0.38rem;
+  }
+
+  .job-list-title {
+    font-size: clamp(1.9rem, 2.4vw, 2.6rem);
+    line-height: 1.05;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  .job-list-subtitle {
+    max-width: 62ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .job-list-chips,
+  .job-list-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .job-list-chips {
+    margin-top: 1rem;
+  }
+
+  .job-list-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .job-list-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .job-list-actions .btn-outline-light {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .job-list-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+  }
+
+  .job-list-stat-card {
+    border-radius: 20px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+  }
+
+  .job-list-stat-label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.76);
+    margin-bottom: 0.28rem;
+  }
+
+  .job-list-stat-value {
+    display: block;
+    font-size: 1.7rem;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .job-list-stat-meta {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.84rem;
+  }
+
+  .job-list-panel {
+    border-radius: 24px;
+    padding: 1.35rem;
+    background: #fff;
+    border: 1px solid rgba(18, 32, 51, 0.07);
+    box-shadow: 0 20px 38px rgba(18, 32, 51, 0.08);
+  }
+
+  .job-list-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .job-list-panel-head h5 {
+    margin-bottom: 0.2rem;
+  }
+
+  .job-list-panel-subtitle {
+    margin: 0;
+    color: #66768c;
+    font-size: 0.92rem;
+  }
+
+  .job-list-stack {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .job-card {
+    border-radius: 24px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    border: 1px solid rgba(18, 32, 51, 0.08);
+  }
+
+  .job-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .job-card-title {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #132133;
+    margin-bottom: 0.4rem;
+  }
+
+  .job-card-badges,
+  .job-card-meta,
+  .job-card-actions,
+  .job-card-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .job-card-badges .badge,
+  .job-card-actions .btn {
+    border-radius: 999px;
+  }
+
+  .job-card-copy {
+    color: #516175;
+    line-height: 1.65;
+    margin-bottom: 0.9rem;
+  }
+
+  .job-card-meta {
+    color: #66768c;
+    font-size: 0.88rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .job-card-inline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .job-card-inline-item {
+    padding: 0.8rem 0.85rem;
+    border-radius: 18px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .job-card-inline-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7a8798;
+    margin-bottom: 0.22rem;
+  }
+
+  .job-card-inline-value {
+    display: block;
+    color: #132133;
+    font-weight: 600;
+  }
+
+  .job-progress {
+    margin-bottom: 0.95rem;
+  }
+
+  .job-progress-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.87rem;
+    color: #5a6a80;
+    margin-bottom: 0.45rem;
+  }
+
+  .job-progress-track {
+    height: 10px;
+    border-radius: 999px;
+    background: #e8eef5;
+    overflow: hidden;
+  }
+
+  .job-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0d6efd, #20a989);
+  }
+
+  .job-card-actions .btn {
+    padding-inline: 0.95rem;
+  }
+
+  .job-empty {
+    border-radius: 24px;
+    padding: 1.4rem;
+    text-align: center;
+    background: #f7fafc;
+    border: 1px dashed rgba(18, 32, 51, 0.14);
+    color: #66768c;
+  }
+
+  .job-empty i {
+    display: block;
+    font-size: 1.7rem;
+    color: var(--primary-color);
+    margin-bottom: 0.55rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .job-list-hero-head,
+    .job-list-panel-head,
+    .job-card-top {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .job-list-actions .btn {
+      width: 100%;
+    }
+
+    .job-list-stat-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .job-list-stat-grid,
+    .job-card-inline {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-      <h4 class="mb-1">Vagas</h4>
-      <p class="text-muted mb-0">Gestão de vagas publicadas pela empresa.</p>
+<div class="job-list-page container py-4 py-lg-5">
+  <section class="job-list-hero mb-4">
+    <div class="job-list-hero-head">
+      <div>
+        <div class="job-list-kicker">Gestao de oportunidades</div>
+        <h1 class="job-list-title">Vagas da empresa</h1>
+        <p class="job-list-subtitle">
+          Acompanhe o que esta ativo, o que ja fechou e onde existe mais tracao de candidaturas para ajustar melhor as proximas publicacoes.
+        </p>
+        <div class="job-list-chips">
+          <span class="job-list-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="job-list-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
+          <span class="job-list-chip"><i class="bi bi-broadcast-pin"></i>{{ job_stats.ativas }} ativa{{ job_stats.ativas|pluralize }}</span>
+        </div>
+      </div>
+      <div class="job-list-actions">
+        <a href="{% url 'companies:job_create' %}" class="btn btn-light">
+          <i class="bi bi-plus-circle me-2"></i>Publicar vaga
+        </a>
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
+          <i class="bi bi-search me-2"></i>Pesquisar jovens
+        </a>
+        <a href="{% url 'companies:dashboard' %}" class="btn btn-outline-light">
+          <i class="bi bi-grid me-2"></i>Painel
+        </a>
+      </div>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
-      <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
+
+    <div class="job-list-stat-grid">
+      <div class="job-list-stat-card">
+        <span class="job-list-stat-label">Total de vagas</span>
+        <span class="job-list-stat-value">{{ job_stats.total|default:0 }}</span>
+        <span class="job-list-stat-meta">Historico publicado</span>
+      </div>
+      <div class="job-list-stat-card">
+        <span class="job-list-stat-label">Ativas</span>
+        <span class="job-list-stat-value">{{ job_stats.ativas|default:0 }}</span>
+        <span class="job-list-stat-meta">{{ job_stats.pausadas|default:0 }} pausada{{ job_stats.pausadas|pluralize }}</span>
+      </div>
+      <div class="job-list-stat-card">
+        <span class="job-list-stat-label">Candidaturas</span>
+        <span class="job-list-stat-value">{{ job_stats.candidaturas|default:0 }}</span>
+        <span class="job-list-stat-meta">Respostas recebidas</span>
+      </div>
+      <div class="job-list-stat-card">
+        <span class="job-list-stat-label">Visualizacoes</span>
+        <span class="job-list-stat-value">{{ job_stats.visualizacoes|default:0 }}</span>
+        <span class="job-list-stat-meta">{{ job_stats.fechadas|default:0 }} fechada{{ job_stats.fechadas|pluralize }}</span>
+      </div>
     </div>
-  </div>
-  {% include 'companies/job_list.html' %}
+  </section>
+
+  <section class="job-list-panel">
+    <div class="job-list-panel-head">
+      <div>
+        <h5>Lista de vagas</h5>
+        <p class="job-list-panel-subtitle">Revise rapidamente estado, procura e ocupacao de cada oportunidade publicada.</p>
+      </div>
+      <a href="{% url 'companies:job_create' %}" class="btn btn-outline-primary btn-sm">Nova vaga</a>
+    </div>
+    {% include 'companies/job_list.html' %}
+  </section>
 </div>
 {% endblock %}

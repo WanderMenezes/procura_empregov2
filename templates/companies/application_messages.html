@@ -1,58 +1,264 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Histórico de Mensagens - Base Nacional de Jovens{% endblock %}
+{% block title %}Historico de Mensagens{% endblock %}
+
+{% block extra_css %}
+<style>
+  .app-messages-page { color: #122033; }
+  .app-messages-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.3), transparent 32%), linear-gradient(135deg, rgba(10,52,86,.98), rgba(14,113,147,.95) 55%, rgba(34,166,120,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .app-messages-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .app-messages-hero > * { position: relative; z-index: 1; }
+  .app-messages-hero-head, .app-messages-panel-head, .app-messages-message-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .app-messages-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
+  .app-messages-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
+  .app-messages-subtitle { max-width: 64ch; margin: 0; color: rgba(255,255,255,.86); }
+  .app-messages-chips, .app-messages-actions, .app-messages-stats, .app-messages-tags { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .app-messages-chips { margin-top: 1rem; }
+  .app-messages-chip, .app-messages-tag {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .84rem; font-weight: 600;
+  }
+  .app-messages-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; }
+  .app-messages-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .app-messages-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .app-messages-stats { margin-top: 1.1rem; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; }
+  .app-messages-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .app-messages-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .app-messages-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .app-messages-stat-meta { color: rgba(255,255,255,.82); font-size: .84rem; }
+  .app-messages-shell { display: grid; grid-template-columns: minmax(290px, 340px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .app-messages-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .app-messages-panel {
+    border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08);
+  }
+  .app-messages-panel-head h5, .app-messages-panel-head h6 { margin-bottom: .2rem; }
+  .app-messages-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
+  .app-messages-candidate { display: flex; gap: .95rem; align-items: flex-start; }
+  .app-messages-avatar {
+    width: 78px; height: 78px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(14,113,147,.12), rgba(34,166,120,.14)); color: #0e7193; font-size: 1.1rem; font-weight: 700; letter-spacing: .05em;
+  }
+  .app-messages-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .app-messages-name { font-size: 1.08rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
+  .app-messages-copy, .app-messages-empty, .app-messages-pagination-copy { color: #66768c; }
+  .app-messages-summary, .app-messages-checklist, .app-messages-list { display: grid; gap: .8rem; }
+  .app-messages-summary-item, .app-messages-check, .app-messages-message {
+    border-radius: 18px; padding: .95rem 1rem; background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .app-messages-summary-item { display: flex; gap: .8rem; align-items: flex-start; }
+  .app-messages-icon, .app-messages-check-icon {
+    width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .app-messages-icon { background: rgba(14,113,147,.1); color: #0e7193; }
+  .app-messages-check-icon { background: rgba(0,168,107,.12); color: var(--secondary-color); }
+  .app-messages-summary-item strong, .app-messages-check strong { display: block; margin-bottom: .2rem; }
+  .app-messages-summary-item p, .app-messages-check p { margin: 0; color: #516175; font-size: .92rem; }
+  .app-messages-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .app-messages-sender {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+  }
+  .app-messages-sender.emp { background: rgba(14,113,147,.12); color: #0e7193; border: 1px solid rgba(14,113,147,.16); }
+  .app-messages-sender.sys { background: rgba(34,166,120,.12); color: #15815c; border: 1px solid rgba(34,166,120,.18); }
+  .app-messages-message-copy { margin-top: .8rem; color: #4f6178; line-height: 1.7; }
+  .app-messages-pagination {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem; padding: 1rem 1.05rem; border-radius: 20px; background: #f7fafc; border: 1px solid rgba(18,32,51,.08);
+  }
+  .app-messages-pagination .btn { border-radius: 12px; }
+  .app-messages-empty {
+    border-radius: 24px; padding: 1.5rem; text-align: center; background: #f7fafc; border: 1px dashed rgba(18,32,51,.14);
+  }
+  .app-messages-empty i { display: block; font-size: 1.8rem; color: var(--primary-color); margin-bottom: .55rem; }
+  @media (max-width: 991.98px) {
+    .app-messages-shell { grid-template-columns: 1fr; }
+    .app-messages-sidebar { position: static; }
+    .app-messages-hero-head, .app-messages-pagination { flex-direction: column; align-items: stretch; }
+    .app-messages-actions .btn { width: 100%; }
+    .app-messages-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    .app-messages-hero { padding: 1.35rem; }
+    .app-messages-candidate { flex-direction: column; }
+    .app-messages-stats { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-        <div>
-            <h4 class="mb-1">Histórico de Mensagens</h4>
-            <p class="text-muted mb-0">
-                {{ application.youth.user.nome }} — {{ application.job.titulo }}
-            </p>
+<div class="app-messages-page container py-4 py-lg-5">
+  <section class="app-messages-hero mb-4">
+    <div class="app-messages-hero-head">
+      <div>
+        <div class="app-messages-kicker">Historico da candidatura</div>
+        <h1 class="app-messages-title">Mensagens da candidatura</h1>
+        <p class="app-messages-subtitle">
+          Acompanhe a conversa associada a esta candidatura, com contexto do candidato e da vaga numa unica vista.
+        </p>
+        <div class="app-messages-chips">
+          <span class="app-messages-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
+          <span class="app-messages-chip"><i class="bi bi-person-badge"></i>{{ application.youth.user.nome }}</span>
+          <span class="app-messages-chip"><i class="bi bi-briefcase"></i>{{ application.job.titulo }}</span>
+          <span class="app-messages-chip"><i class="bi bi-clock-history"></i>{{ application.created_at|date:"d/m/Y" }}</span>
         </div>
-        <a href="{% url 'companies:job_applications' application.job.id %}" class="btn btn-outline-secondary btn-sm">
-            Voltar
-        </a>
+      </div>
+      <div class="app-messages-actions">
+        <a href="{% url 'companies:job_applications' application.job.id %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as candidaturas</a>
+        <a href="{% url 'companies:youth_detail' application.youth.id %}" class="btn btn-outline-light"><i class="bi bi-person-vcard me-2"></i>Ver perfil</a>
+      </div>
     </div>
 
-    {% if messages_page %}
-        <div class="list-group">
-            {% for msg in messages_page %}
-                <div class="list-group-item">
-                    <div class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
-                    <div>{{ msg.message|linebreaksbr }}</div>
-                </div>
-            {% endfor %}
+    <div class="app-messages-stats">
+      <div class="app-messages-stat">
+        <span class="app-messages-stat-label">Mensagens</span>
+        <span class="app-messages-stat-value">{{ message_summary.total|default:0 }}</span>
+        <span class="app-messages-stat-meta">registo{{ message_summary.total|default:0|pluralize }} no historico</span>
+      </div>
+      <div class="app-messages-stat">
+        <span class="app-messages-stat-label">Da empresa</span>
+        <span class="app-messages-stat-value">{{ message_summary.company|default:0 }}</span>
+        <span class="app-messages-stat-meta">mensagens enviadas pela empresa</span>
+      </div>
+      <div class="app-messages-stat">
+        <span class="app-messages-stat-label">Do sistema</span>
+        <span class="app-messages-stat-value">{{ message_summary.system|default:0 }}</span>
+        <span class="app-messages-stat-meta">eventos registados automaticamente</span>
+      </div>
+      <div class="app-messages-stat">
+        <span class="app-messages-stat-label">Estado</span>
+        <span class="app-messages-stat-value">{{ application.get_estado_display }}</span>
+        <span class="app-messages-stat-meta">{{ application.job.get_tipo_display }} em {{ application.job.distrito.nome|default:"distrito por definir" }}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-messages-shell">
+    <aside class="app-messages-sidebar">
+      <section class="app-messages-panel">
+        <div class="app-messages-candidate">
+          <div class="app-messages-avatar" aria-hidden="true">
+            {% if application.youth.photo %}
+              <img src="{{ application.youth.photo.url }}" alt="{{ application.youth.user.nome }}">
+            {% else %}
+              {{ application.youth.user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="app-messages-name">{{ application.youth.user.nome }}</div>
+            <div class="app-messages-copy">
+              {{ application.youth.distrito.nome|default:"Distrito nao definido" }}{% if application.youth.localidade %} - {{ application.youth.localidade }}{% endif %}
+            </div>
+            <div class="app-messages-tags mt-3">
+              <span class="app-messages-tag"><i class="bi bi-briefcase"></i>{{ application.youth.get_situacao_atual_display }}</span>
+              <span class="app-messages-tag"><i class="bi bi-lightning-charge"></i>{{ application.youth.get_disponibilidade_display }}</span>
+              {% if application.youth.idade %}<span class="app-messages-tag"><i class="bi bi-person"></i>{{ application.youth.idade }} anos</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="app-messages-panel">
+        <div class="app-messages-panel-head">
+          <div>
+            <h6>Resumo da candidatura</h6>
+            <p class="app-messages-panel-subtitle">Contexto rapido para ler as mensagens com mais clareza.</p>
+          </div>
+        </div>
+        <div class="app-messages-summary">
+          <div class="app-messages-summary-item">
+            <span class="app-messages-icon"><i class="bi bi-telephone"></i></span>
+            <div><strong>Telefone</strong><p>{{ application.youth.user.telefone|default:"Nao informado" }}</p></div>
+          </div>
+          <div class="app-messages-summary-item">
+            <span class="app-messages-icon"><i class="bi bi-envelope"></i></span>
+            <div><strong>Email</strong><p>{{ application.youth.user.email|default:"Nao informado" }}</p></div>
+          </div>
+          <div class="app-messages-summary-item">
+            <span class="app-messages-icon"><i class="bi bi-calendar-event"></i></span>
+            <div><strong>Candidatura enviada</strong><p>{{ application.created_at|date:"d/m/Y H:i" }}</p></div>
+          </div>
+          <div class="app-messages-summary-item">
+            <span class="app-messages-icon"><i class="bi bi-briefcase"></i></span>
+            <div><strong>Vaga</strong><p>{{ application.job.titulo }}</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="app-messages-panel">
+        <div class="app-messages-panel-head">
+          <div>
+            <h6>Leitura rapida</h6>
+            <p class="app-messages-panel-subtitle">Guia curto para acompanhar a conversa.</p>
+          </div>
+        </div>
+        <div class="app-messages-checklist">
+          <div class="app-messages-check">
+            <span class="app-messages-check-icon"><i class="bi bi-1-circle"></i></span>
+            <div><strong>Veja o ultimo contexto</strong><p>As mensagens mais recentes aparecem primeiro nesta pagina.</p></div>
+          </div>
+          <div class="app-messages-check">
+            <span class="app-messages-check-icon"><i class="bi bi-2-circle"></i></span>
+            <div><strong>Relacione com o estado</strong><p>Vale cruzar a conversa com o estado atual da candidatura.</p></div>
+          </div>
+          <div class="app-messages-check">
+            <span class="app-messages-check-icon"><i class="bi bi-3-circle"></i></span>
+            <div><strong>Volte a lista para agir</strong><p>A atualizacao do estado continua centralizada na lista de candidaturas.</p></div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="app-messages-panel">
+      <div class="app-messages-panel-head">
+        <div>
+          <h5>Timeline de mensagens</h5>
+          <p class="app-messages-panel-subtitle">Historico paginado desta candidatura, com leitura organizada por remetente e data.</p>
+        </div>
+      </div>
+
+      {% if messages_page %}
+        <div class="app-messages-list">
+          {% for msg in messages_page %}
+            <article class="app-messages-message">
+              <div class="app-messages-message-top">
+                <span class="app-messages-sender {% if msg.sender == 'EMP' %}emp{% else %}sys{% endif %}">
+                  <i class="bi {% if msg.sender == 'EMP' %}bi-building{% else %}bi-cpu{% endif %}"></i>
+                  {% if msg.sender == 'EMP' %}Empresa{% else %}Sistema{% endif %}
+                </span>
+                <span class="small text-muted">{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+              </div>
+              <div class="app-messages-message-copy">{{ msg.message|linebreaksbr }}</div>
+            </article>
+          {% endfor %}
         </div>
 
         {% if messages_page.paginator.num_pages > 1 %}
-            <nav class="mt-3">
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <li class="page-item {% if not messages_page.has_previous %}disabled{% endif %}">
-                        {% if messages_page.has_previous %}
-                            <a class="page-link" href="?page={{ messages_page.previous_page_number }}">Anterior</a>
-                        {% else %}
-                            <span class="page-link">Anterior</span>
-                        {% endif %}
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">
-                            Página {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}
-                        </span>
-                    </li>
-                    <li class="page-item {% if not messages_page.has_next %}disabled{% endif %}">
-                        {% if messages_page.has_next %}
-                            <a class="page-link" href="?page={{ messages_page.next_page_number }}">Próxima</a>
-                        {% else %}
-                            <span class="page-link">Próxima</span>
-                        {% endif %}
-                    </li>
-                </ul>
-            </nav>
+          <div class="app-messages-pagination">
+            <div class="app-messages-pagination-copy">
+              Pagina {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}
+            </div>
+            <div class="app-messages-actions">
+              {% if messages_page.has_previous %}
+                <a class="btn btn-outline-secondary btn-sm" href="?page={{ messages_page.previous_page_number }}">Anterior</a>
+              {% else %}
+                <span class="btn btn-outline-secondary btn-sm disabled">Anterior</span>
+              {% endif %}
+              {% if messages_page.has_next %}
+                <a class="btn btn-primary btn-sm" href="?page={{ messages_page.next_page_number }}">Proxima</a>
+              {% else %}
+                <span class="btn btn-primary btn-sm disabled">Proxima</span>
+              {% endif %}
+            </div>
+          </div>
         {% endif %}
-    {% else %}
-        <div class="alert alert-info mb-0">Sem mensagens.</div>
-    {% endif %}
+      {% else %}
+        <div class="app-messages-empty">
+          <i class="bi bi-chat-left-text"></i>
+          Ainda nao existem mensagens associadas a esta candidatura.
+        </div>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

@@ -3,6 +3,7 @@ Views para dashboards (Admin e Técnico)
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
@@ -24,7 +25,7 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics import renderPDF
 
 from accounts.models import User
-from accounts.forms import UserRegistrationForm
+from accounts.forms import UserRegistrationForm, AdminUserUpdateForm
 from profiles.models import YouthProfile, Education
 from companies.models import Company, JobPost, Application, ContactRequest
 from core.models import District, Notification
@@ -65,6 +66,40 @@ def _get_date_range(request):
     return start_date, end_date, start_dt, end_dt, invalid_range
 
 
+def _add_percent(items):
+    """Normalize totals into percentages for lightweight dashboard bars."""
+    max_total = max((item['total'] for item in items), default=0)
+    normalized = []
+    for item in items:
+        current = dict(item)
+        current['percent'] = int((current['total'] / max_total) * 100) if max_total else 0
+        normalized.append(current)
+    return normalized
+
+
+def _with_admin_context(request, context=None):
+    """Attach shared navigation stats to admin dashboard pages."""
+    nav_context = {
+        'admin_nav': {
+            'pending_profiles': YouthProfile.objects.filter(completo=True, validado=False).count(),
+            'pending_contacts': 0,
+            'total_users': 0,
+            'active_jobs': 0,
+        }
+    }
+
+    if getattr(request.user, 'is_admin', False):
+        nav_context['admin_nav'].update({
+            'pending_contacts': ContactRequest.objects.filter(estado='PENDENTE').count(),
+            'total_users': User.objects.count(),
+            'active_jobs': JobPost.objects.filter(estado='ATIVA').count(),
+        })
+
+    if context:
+        nav_context.update(context)
+    return nav_context
+
+
 def admin_required(view_func):
     """Decorator para verificar se é admin"""
     def wrapper(request, *args, **kwargs):
@@ -98,6 +133,8 @@ def tecnico_required(view_func):
 @admin_required
 def admin_dashboard(request):
     """Dashboard do administrador"""
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -112,12 +149,12 @@ def admin_dashboard(request):
         'total_utilizadores': User.objects.count(),
     }
     stats['validacoes_pendentes'] = max(0, stats['jovens_completos'] - stats['jovens_validados'])
-    
-    def _add_percent(items):
-        max_total = max([item['total'] for item in items], default=0)
-        for item in items:
-            item['percent'] = int((item['total'] / max_total) * 100) if max_total else 0
-        return items
+    stats['jovens_nao_completos'] = max(0, stats['total_jovens'] - stats['jovens_completos'])
+    stats['taxa_validacao'] = int((stats['jovens_validados'] / stats['jovens_completos']) * 100) if stats['jovens_completos'] else 0
+    stats['taxa_empresas_ativas'] = int((stats['empresas_ativas'] / stats['total_empresas']) * 100) if stats['total_empresas'] else 0
+    stats['taxa_vagas_ativas'] = int((stats['vagas_ativas'] / stats['total_vagas']) * 100) if stats['total_vagas'] else 0
+    stats['novos_utilizadores_7d'] = User.objects.filter(date_joined__gte=seven_days_ago).count()
+    stats['novas_vagas_30d'] = JobPost.objects.filter(data_publicacao__gte=thirty_days_ago).count()
 
     # Dados por distrito
     jovens_por_distrito = []
@@ -173,7 +210,7 @@ def admin_dashboard(request):
         completo=True, validado=False
     ).order_by('-created_at')[:10]
     
-    context = {
+    context = _with_admin_context(request, {
         'stats': stats,
         'jovens_por_distrito': jovens_por_distrito,
         'educacao_stats': educacao_stats,
@@ -183,7 +220,7 @@ def admin_dashboard(request):
         'vagas_recentes': vagas_recentes,
         'pedidos_pendentes': pedidos_pendentes,
         'perfis_pendentes': perfis_pendentes,
-    }
+    })
     
     return render(request, 'dashboard/admin.html', context)
 
@@ -257,7 +294,7 @@ def user_list(request):
                         Company.objects.create(
                             user=user,
                             nome=user.nome,
-                            setor='OUT',
+                            setor=[],
                             telefone=user.telefone or '',
                             email=user.email or ''
                         )
@@ -269,8 +306,19 @@ def user_list(request):
     else:
         create_user_form = UserRegistrationForm(user=request.user)
 
-    users = User.objects.all().order_by('-date_joined')
-    
+    users = User.objects.select_related('distrito').all().order_by('-date_joined')
+
+    query = (request.GET.get('q') or '').strip()
+    if query:
+        users = users.filter(
+            Q(nome__icontains=query) |
+            Q(nome_empresa__icontains=query) |
+            Q(telefone__icontains=query) |
+            Q(email__icontains=query) |
+            Q(nif__icontains=query) |
+            Q(bi_numero__icontains=query)
+        )
+
     # Filtros
     perfil = request.GET.get('perfil')
     if perfil:
@@ -279,15 +327,50 @@ def user_list(request):
     ativo = request.GET.get('ativo')
     if ativo:
         users = users.filter(is_active=(ativo == 'sim'))
-    
-    context = {
+
+    summary = {
+        'total': User.objects.count(),
+        'ativos': User.objects.filter(is_active=True).count(),
+        'empresas': User.objects.filter(perfil='EMP').count(),
+        'equipa': User.objects.filter(perfil__in=['ADM', 'OP', 'TEC']).count(),
+        'novos_7d': User.objects.filter(date_joined__gte=timezone.now() - timedelta(days=7)).count(),
+        'filtrados': users.count(),
+    }
+
+    context = _with_admin_context(request, {
         'users': users,
+        'filtro_q': query,
         'filtro_perfil': perfil,
         'filtro_ativo': ativo,
         'create_user_form': create_user_form,
-    }
+        'user_summary': summary,
+    })
     
     return render(request, 'dashboard/user_list.html', context)
+
+
+@admin_required
+def user_edit(request, pk):
+    """Editar dados principais de um utilizador pelo painel admin."""
+    target_user = get_object_or_404(User.objects.select_related('distrito'), pk=pk)
+    next_url = request.GET.get('next') or request.POST.get('next') or reverse('dashboard:user_list')
+
+    if request.method == 'POST':
+        edit_user_form = AdminUserUpdateForm(request.POST, instance=target_user)
+        if edit_user_form.is_valid():
+            edit_user_form.save()
+            messages.success(request, _('Utilizador atualizado com sucesso.'))
+            return redirect(next_url)
+    else:
+        edit_user_form = AdminUserUpdateForm(instance=target_user)
+
+    context = _with_admin_context(request, {
+        'edit_user_form': edit_user_form,
+        'edit_target': target_user,
+        'next_url': next_url,
+    })
+
+    return render(request, 'dashboard/user_edit.html', context)
 
 
 @admin_required
@@ -305,21 +388,47 @@ def user_toggle_active(request, pk):
     status = _('ativado') if user.is_active else _('desativado')
     messages.success(request, _('Utilizador {} com sucesso!').format(status))
     
-    return redirect('dashboard:user_list')
+    next_url = request.GET.get('next')
+    return redirect(next_url or 'dashboard:user_list')
 
 
 # Validação de Perfis
 @admin_or_operador_required
 def validate_profiles(request):
     """Lista de perfis pendentes de validação"""
-    perfis = YouthProfile.objects.filter(
+    pending_profiles = YouthProfile.objects.filter(
         completo=True, validado=False
-    ).select_related('user').order_by('-created_at')
-    
-    context = {
-        'perfis': perfis
+    ).select_related('user', 'user__distrito').order_by('-created_at')
+
+    query = (request.GET.get('q') or '').strip()
+    distrito_id = (request.GET.get('distrito') or '').strip()
+
+    perfis = pending_profiles
+    if query:
+        perfis = perfis.filter(
+            Q(user__nome__icontains=query) |
+            Q(user__telefone__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(user__bi_numero__icontains=query)
+        )
+    if distrito_id:
+        perfis = perfis.filter(user__distrito_id=distrito_id)
+
+    validation_summary = {
+        'total_pending': pending_profiles.count(),
+        'pending_today': pending_profiles.filter(created_at__date=timezone.localdate()).count(),
+        'districts': pending_profiles.exclude(user__distrito__isnull=True).values('user__distrito').distinct().count(),
+        'filtered_total': perfis.count(),
     }
-    
+
+    context = _with_admin_context(request, {
+        'perfis': perfis,
+        'districts': District.objects.all().order_by('nome'),
+        'filtro_q': query,
+        'filtro_distrito': distrito_id,
+        'validation_summary': validation_summary,
+    })
+
     return render(request, 'dashboard/validate_profiles.html', context)
 
 
@@ -357,25 +466,44 @@ def validate_profile(request, pk, action):
         
         messages.warning(request, _('Perfil rejeitado.'))
     
-    return redirect('dashboard:validate_profiles')
+    next_url = request.GET.get('next')
+    return redirect(next_url or 'dashboard:validate_profiles')
 
 
 # Gestão de Pedidos de Contacto
 @admin_required
 def manage_contact_requests(request):
     """Gerir pedidos de contacto"""
-    pedidos = ContactRequest.objects.select_related(
-        'company', 'youth', 'youth__user'
+    all_requests = ContactRequest.objects.select_related(
+        'company', 'company__user', 'youth', 'youth__user'
     ).order_by('-created_at')
-    
+
+    query = (request.GET.get('q') or '').strip()
     estado = request.GET.get('estado')
+    pedidos = all_requests
+    if query:
+        pedidos = pedidos.filter(
+            Q(company__nome__icontains=query) |
+            Q(company__user__telefone__icontains=query) |
+            Q(youth__user__nome__icontains=query) |
+            Q(youth__user__telefone__icontains=query)
+        )
     if estado:
         pedidos = pedidos.filter(estado=estado)
-    
-    context = {
-        'pedidos': pedidos,
-        'filtro_estado': estado,
+
+    summary = {
+        'pendentes': all_requests.filter(estado='PENDENTE').count(),
+        'aprovados': all_requests.filter(estado='APROVADO').count(),
+        'rejeitados': all_requests.filter(estado='REJEITADO').count(),
+        'filtrados': pedidos.count(),
     }
+
+    context = _with_admin_context(request, {
+        'pedidos': pedidos,
+        'filtro_q': query,
+        'filtro_estado': estado,
+        'contact_summary': summary,
+    })
     
     return render(request, 'dashboard/manage_contact_requests.html', context)
 
@@ -425,7 +553,8 @@ def contact_request_action(request, pk, action):
         
         messages.warning(request, _('Pedido rejeitado.'))
     
-    return redirect('dashboard:manage_contact_requests')
+    next_url = request.GET.get('next')
+    return redirect(next_url or 'dashboard:manage_contact_requests')
 
 
 # Relatórios
@@ -444,8 +573,17 @@ def reports(request):
         empresas_novas = Company.objects.filter(created_at__range=(start_dt, end_dt)).count()
         vagas_novas = JobPost.objects.filter(data_publicacao__range=(start_dt, end_dt)).count()
         candidaturas_novas = Application.objects.filter(created_at__range=(start_dt, end_dt)).count()
-    
-    context = {
+    period_days = ((end_date - start_date).days + 1) if not invalid_range else 0
+    total_movimentos = jovens_novos + empresas_novas + vagas_novas + candidaturas_novas
+    media_diaria = round(total_movimentos / period_days, 1) if period_days else 0
+    report_mix = _add_percent([
+        {'nome': 'Jovens', 'total': jovens_novos, 'icon': 'bi-person'},
+        {'nome': 'Empresas', 'total': empresas_novas, 'icon': 'bi-building'},
+        {'nome': 'Vagas', 'total': vagas_novas, 'icon': 'bi-briefcase'},
+        {'nome': 'Candidaturas', 'total': candidaturas_novas, 'icon': 'bi-send'},
+    ])
+
+    context = _with_admin_context(request, {
         'data_inicio': start_date,
         'data_fim': end_date,
         'data_inicio_value': start_date.strftime('%Y-%m-%d'),
@@ -454,7 +592,11 @@ def reports(request):
         'empresas_novas': empresas_novas,
         'vagas_novas': vagas_novas,
         'candidaturas_novas': candidaturas_novas,
-    }
+        'period_days': period_days,
+        'total_movimentos': total_movimentos,
+        'media_diaria': media_diaria,
+        'report_mix': report_mix,
+    })
     
     return render(request, 'dashboard/reports.html', context)
 

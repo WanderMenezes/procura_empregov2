@@ -1,13 +1,14 @@
 {% comment %} Partial: lista de vagas usada em dashboards e listagens {% endcomment %}
 
 {% if vagas %}
-  <div class="list-group">
+  <div class="job-list-stack">
     {% for vaga in vagas %}
-      <div class="list-group-item">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+      {% widthratio vaga.vagas_preenchidas vaga.numero_vagas 100 as ocupacao %}
+      <article class="job-card">
+        <div class="job-card-top">
           <div>
-            <div class="fw-semibold d-flex flex-wrap align-items-center gap-2">
-              <span>{{ vaga.titulo }}</span>
+            <div class="job-card-title">{{ vaga.titulo }}</div>
+            <div class="job-card-badges">
               <span class="badge bg-light text-dark border">{{ vaga.get_tipo_display }}</span>
               <span class="badge {% if vaga.estado == 'ATIVA' %}bg-success{% elif vaga.estado == 'PAUSADA' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                 {{ vaga.get_estado_display }}
@@ -16,31 +17,66 @@
                 <span class="badge bg-danger">Esgotada</span>
               {% endif %}
             </div>
-            <div class="small text-muted mt-1">
-              {% if vaga.data_publicacao %}Publicada em {{ vaga.data_publicacao|date:"d/m/Y" }}{% endif %}
-              {% if vaga.total_candidaturas %} • Candidaturas: {{ vaga.total_candidaturas }}{% else %} • Candidaturas: 0{% endif %}
-              • Vagas: {{ vaga.numero_vagas }} • Restantes: {{ vaga.vagas_restantes }}
-            </div>
           </div>
-          <div class="d-flex flex-wrap gap-2">
+
+          <div class="job-card-actions">
             <a class="btn btn-outline-primary btn-sm" href="{% url 'companies:job_applications' vaga.id %}">
-              <i class="bi bi-people" title="Ver candidaturas" aria-label="Ver candidaturas"></i>
+              <i class="bi bi-people me-1"></i>Candidaturas
             </a>
             <a class="btn btn-outline-secondary btn-sm" href="{% url 'companies:job_edit' vaga.id %}">
-              <i class="bi bi-pencil-square" title="Editar vaga" aria-label="Editar vaga"></i>
+              <i class="bi bi-pencil-square me-1"></i>Editar
             </a>
             {% if vaga.estado == 'ATIVA' %}
               <a class="btn btn-outline-danger btn-sm"
                  href="{% url 'companies:job_close' vaga.id %}"
                  onclick="return confirm('Fechar esta vaga?');">
-                <i class="bi bi-x-circle" title="Fechar vaga" aria-label="Fechar vaga"></i>
+                <i class="bi bi-x-circle me-1"></i>Fechar
               </a>
             {% endif %}
           </div>
         </div>
-      </div>
+
+        <div class="job-card-meta">
+          <span><i class="bi bi-calendar-event me-1"></i>Publicada em {{ vaga.data_publicacao|date:"d/m/Y" }}</span>
+          <span><i class="bi bi-geo-alt me-1"></i>{{ vaga.local_trabalho|default:vaga.distrito.nome|default:"Local a definir" }}</span>
+          <span><i class="bi bi-eye me-1"></i>{{ vaga.visualizacoes }} visualizacao{{ vaga.visualizacoes|pluralize }}</span>
+        </div>
+
+        <p class="job-card-copy">{{ vaga.descricao|truncatewords:28 }}</p>
+
+        <div class="job-card-inline">
+          <div class="job-card-inline-item">
+            <span class="job-card-inline-label">Candidaturas</span>
+            <span class="job-card-inline-value">{{ vaga.total_candidaturas }}</span>
+          </div>
+          <div class="job-card-inline-item">
+            <span class="job-card-inline-label">Vagas</span>
+            <span class="job-card-inline-value">{{ vaga.numero_vagas }} total / {{ vaga.vagas_restantes }} restante{{ vaga.vagas_restantes|pluralize }}</span>
+          </div>
+          <div class="job-card-inline-item">
+            <span class="job-card-inline-label">Fecho</span>
+            <span class="job-card-inline-value">{% if vaga.data_fecho %}{{ vaga.data_fecho|date:"d/m/Y" }}{% else %}Sem prazo fixo{% endif %}</span>
+          </div>
+        </div>
+
+        <div class="job-progress">
+          <div class="job-progress-top">
+            <span>Ocupacao da vaga</span>
+            <strong>{{ vaga.vagas_preenchidas }}/{{ vaga.numero_vagas }} preenchida{{ vaga.vagas_preenchidas|pluralize }}</strong>
+          </div>
+          <div class="job-progress-track">
+            <div class="job-progress-fill" style="width: {{ ocupacao }}%;"></div>
+          </div>
+        </div>
+      </article>
     {% endfor %}
   </div>
 {% else %}
-  <div class="alert alert-info mb-0">Nenhuma vaga encontrada.</div>
+  <div class="job-empty">
+    <i class="bi bi-briefcase"></i>
+    Ainda nao existem vagas publicadas. Crie a primeira oportunidade para comecar a receber candidaturas e medir interesse real.
+    <div class="mt-3">
+      <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar primeira vaga</a>
+    </div>
+  </div>
 {% endif %}

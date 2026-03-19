@@ -17,13 +17,13 @@ class UserAdmin(BaseUserAdmin):
         'is_active', 'is_verified', 'date_joined'
     ]
     list_filter = ['perfil', 'is_active', 'is_verified', 'distrito', 'date_joined']
-    search_fields = ['telefone', 'nome', 'email', 'nome_empresa', 'nif']
+    search_fields = ['telefone', 'nome', 'email', 'nome_empresa', 'nif', 'bi_numero']
     ordering = ['-date_joined']
     
     fieldsets = (
         (None, {'fields': ('telefone', 'password')}),
         (_('Informações Pessoais'), {
-            'fields': ('nome', 'email', 'distrito')
+            'fields': ('nome', 'email', 'distrito', 'bi_numero')
         }),
         (_('Perfil'), {
             'fields': ('perfil', 'is_verified')

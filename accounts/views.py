@@ -279,19 +279,74 @@ def profile_view(request):
     
     context = {
         'user': user,
+        'recent_notifications': user.notifications.all()[:4],
+        'unread_notifications': user.notifications.filter(lida=False).count(),
     }
     
     if user.is_jovem and user.has_youth_profile():
         profile = user.youth_profile
+        education = profile.get_education()
+        experiences = profile.get_experience()
+        documents = profile.get_documents()
+        skills = profile.youth_skills.select_related('skill').all()
+        checkpoints = [
+            bool(user.nome),
+            bool(user.email),
+            bool(user.telefone),
+            bool(user.distrito_id),
+            bool(profile.data_nascimento),
+            bool(profile.sexo),
+            bool(profile.localidade),
+            bool(profile.situacao_atual),
+            bool(profile.disponibilidade),
+            bool(profile.preferencia_oportunidade),
+            bool(profile.sobre),
+            bool(profile.interesse_setorial),
+            education.exists(),
+            experiences.exists(),
+            documents.exists(),
+            skills.exists(),
+        ]
+        profile_strength = int((sum(1 for item in checkpoints if item) / len(checkpoints)) * 100) if checkpoints else 0
         context.update({
             'youth_profile': profile,
-            'education': profile.get_education(),
-            'experiences': profile.get_experience(),
-            'documents': profile.get_documents(),
-            'skills': profile.youth_skills.select_related('skill').all(),
+            'education': education,
+            'experiences': experiences,
+            'documents': documents,
+            'skills': skills,
+            'profile_strength': profile_strength,
+            'youth_stats': {
+                'education': education.count(),
+                'experiences': experiences.count(),
+                'documents': documents.count(),
+                'skills': skills.count(),
+            },
         })
     elif user.is_empresa and user.has_company_profile():
-        context['company_profile'] = user.company_profile
+        company = user.company_profile
+        jobs = company.job_posts.all()
+        company_checks = [
+            bool(company.nome),
+            bool(company.setor_codes),
+            bool(company.telefone),
+            bool(company.email),
+            bool(company.descricao),
+            bool(company.distrito_id),
+            bool(company.website),
+            bool(company.logo),
+        ]
+        company_strength = int((sum(1 for item in company_checks if item) / len(company_checks)) * 100) if company_checks else 0
+        context.update({
+            'company_profile': company,
+            'company_strength': company_strength,
+            'company_stats': {
+                'jobs_total': jobs.count(),
+                'jobs_active': jobs.filter(estado='ATIVA').count(),
+                'applications': company.total_candidaturas,
+                'contact_requests': company.contact_requests.count(),
+            },
+            'recent_jobs': jobs.order_by('-data_publicacao')[:3],
+        })
     
     return render(request, 'accounts/profile.html', context)
 
@@ -331,16 +386,33 @@ def notifications_view(request):
     """View para listar notificações do usuário"""
     notifications = request.user.notifications.all()
     
-    # Marcar como lidas
-    unread = notifications.filter(lida=False)
-    unread.update(lida=True)
-    
     context = {
         'notifications': notifications[:50],
-        'unread_count': 0
+        'unread_count': notifications.filter(lida=False).count(),
+        'notification_summary': {
+            'total': notifications.count(),
+            'info': notifications.filter(tipo='INFO').count(),
+            'success': notifications.filter(tipo='SUCESSO').count(),
+            'alert': notifications.filter(tipo='ALERTA').count(),
+            'error': notifications.filter(tipo='ERRO').count(),
+        }
     }
     
     return render(request, 'accounts/notifications.html', context)
+
+
+@login_required
+def mark_all_notifications_read(request):
+    """Marcar todas as notificaÃ§Ãµes do utilizador como lidas"""
+    if request.method != 'POST':
+        return redirect('accounts:notifications')
+
+    updated = request.user.notifications.filter(lida=False).update(lida=True)
+    if updated:
+        messages.success(request, _('Todas as notificaÃ§Ãµes foram marcadas como lidas.'))
+    else:
+        messages.info(request, _('NÃ£o havia notificaÃ§Ãµes por ler.'))
+    return redirect('accounts:notifications')
 
 
 @login_required

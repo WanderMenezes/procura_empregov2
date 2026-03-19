@@ -1,24 +1,227 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Adicionar Formação{% endblock %}
+{% block title %}Adicionar Formacao{% endblock %}
+
+{% block extra_css %}
+<style>
+  .education-page { color: #122033; }
+  .education-hero { position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff; background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 32%), linear-gradient(135deg, rgba(13,37,66,.98), rgba(14,111,147,.94) 54%, rgba(39,161,116,.9)); box-shadow: 0 24px 52px rgba(10,52,86,.18); }
+  .education-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -130px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .education-hero > * { position: relative; z-index: 1; }
+  .education-hero-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .education-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .education-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .education-subtitle { margin: 0; max-width: 68ch; color: rgba(255,255,255,.86); }
+  .education-chips, .education-actions, .education-stats, .education-tags, .education-footer { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .education-chips { margin-top: 1rem; }
+  .education-chip { display: inline-flex; align-items: center; gap: .45rem; padding: .48rem .88rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600; }
+  .education-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .education-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .education-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; margin-top: 1.15rem; }
+  .education-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); }
+  .education-stat-label { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.76); margin-bottom: .25rem; }
+  .education-stat-value { display: block; font-size: 1.6rem; line-height: 1; font-weight: 700; margin-bottom: .2rem; }
+  .education-stat-meta { color: rgba(255,255,255,.84); font-size: .84rem; }
+  .education-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .education-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .education-panel { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .education-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .education-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
+  .education-panel-subtitle, .education-copy, .education-note, .education-field-help { color: #66768c; }
+  .education-profile { display: flex; gap: .9rem; align-items: center; }
+  .education-avatar { width: 72px; height: 72px; border-radius: 22px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.35rem; font-weight: 800; }
+  .education-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .education-profile-name { font-size: 1.02rem; font-weight: 700; margin-bottom: .12rem; }
+  .education-profile-line { color: #66768c; margin: 0; }
+  .education-tags { margin-top: .9rem; }
+  .education-tag { display: inline-flex; align-items: center; gap: .4rem; padding: .42rem .72rem; border-radius: 999px; background: rgba(14,111,147,.1); border: 1px solid rgba(14,111,147,.16); color: #0e7193; font-size: .82rem; font-weight: 600; }
+  .education-tag.highlight { background: rgba(34,166,120,.12); color: #15815c; border-color: rgba(34,166,120,.18); }
+  .education-tag.muted { background: #f7fafc; color: #607086; border-color: rgba(18,32,51,.08); }
+  .education-tip { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fbfdff, #f7fafc); border: 1px solid rgba(18,32,51,.07); }
+  .education-tip + .education-tip { margin-top: .8rem; }
+  .education-tip strong { display: block; margin-bottom: .18rem; color: #122033; }
+  .education-error { margin-bottom: 1rem; padding: 1rem 1.1rem; border-radius: 18px; background: rgba(220,53,69,.08); border: 1px solid rgba(220,53,69,.14); color: #9e2230; }
+  .education-section { margin-bottom: 1.45rem; }
+  .education-section:last-child { margin-bottom: 0; }
+  .education-section-label { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0e7193; margin-bottom: .4rem; }
+  .education-section-title { font-size: 1.18rem; font-weight: 700; margin-bottom: .2rem; }
+  .education-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; margin-top: 1rem; }
+  .education-field { display: grid; gap: .42rem; }
+  .education-field.full { grid-column: 1 / -1; }
+  .education-field label { font-size: .9rem; font-weight: 700; color: #233246; }
+  .education-field .form-control, .education-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; }
+  .education-field-error { color: #b42333; font-size: .84rem; }
+  .education-summary { padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #f7fbfd); border: 1px solid rgba(18,32,51,.07); }
+  .education-summary-title { font-size: .98rem; font-weight: 700; color: #122033; margin-bottom: .2rem; }
+  .education-footer { justify-content: space-between; align-items: center; margin-top: 1.6rem; padding-top: 1.15rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .education-footer .btn { border-radius: 14px; }
+  @media (max-width: 991.98px) { .education-shell, .education-stats { grid-template-columns: 1fr; } .education-sidebar { position: static; } .education-hero-head { flex-direction: column; align-items: stretch; } .education-actions .btn { width: 100%; } }
+  @media (max-width: 767.98px) { .education-grid { grid-template-columns: 1fr; } .education-footer { flex-direction: column; align-items: stretch; } .education-footer .btn { width: 100%; } }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <h4>Adicionar Formação</h4>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">Adicionar</button>
-            </div>
-          </form>
+<div class="education-page container py-4 py-lg-5">
+  <section class="education-hero mb-4">
+    <div class="education-hero-head">
+      <div>
+        <div class="education-kicker">Percurso academico</div>
+        <h1 class="education-title">Adicionar formacao</h1>
+        <p class="education-subtitle">Regista uma etapa de formacao para fortalecer o teu perfil e ajudar empresas a perceberem melhor o teu percurso.</p>
+        <div class="education-chips">
+          <span class="education-chip"><i class="bi bi-mortarboard"></i>{{ education_count }} registo{{ education_count|pluralize }} existente{{ education_count|pluralize }}</span>
+          {% if latest_education %}
+            <span class="education-chip"><i class="bi bi-calendar-event"></i>Ultima em {{ latest_education.ano|default:"ano por indicar" }}</span>
+          {% endif %}
+          {% if profile.distrito %}
+            <span class="education-chip"><i class="bi bi-geo-alt"></i>{{ profile.distrito.nome }}</span>
+          {% endif %}
+          <span class="education-chip"><i class="bi bi-person-badge"></i>{{ user.nome }}</span>
         </div>
       </div>
+      <div class="education-actions">
+        <a href="{% url 'profiles:detail' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar ao perfil</a>
+        <a href="{% url 'profiles:skills_edit' %}" class="btn btn-outline-light"><i class="bi bi-stars me-2"></i>Editar skills</a>
+      </div>
     </div>
+
+    <div class="education-stats">
+      <div class="education-stat"><span class="education-stat-label">Registos</span><span class="education-stat-value">{{ education_count }}</span><span class="education-stat-meta">formacoes no teu perfil</span></div>
+      <div class="education-stat"><span class="education-stat-label">Nivel</span><span class="education-stat-value">{% if latest_education %}{{ latest_education.get_nivel_display|default:"--" }}{% else %}--{% endif %}</span><span class="education-stat-meta">ultima referencia academica</span></div>
+      <div class="education-stat"><span class="education-stat-label">Area</span><span class="education-stat-value">{% if latest_education and latest_education.area_formacao %}{{ latest_education.get_area_formacao_display }}{% else %}--{% endif %}</span><span class="education-stat-meta">ultima area registada</span></div>
+      <div class="education-stat"><span class="education-stat-label">Objetivo</span><span class="education-stat-value">+</span><span class="education-stat-meta">adicionar mais contexto ao perfil</span></div>
+    </div>
+  </section>
+
+  <div class="education-shell">
+    <aside class="education-sidebar">
+      <section class="education-panel">
+        <div class="education-panel-head">
+          <div>
+            <h2 class="education-panel-title">Resumo do perfil</h2>
+            <p class="education-panel-subtitle">Contexto rapido antes de registar a formacao.</p>
+          </div>
+        </div>
+        <div class="education-profile">
+          <div class="education-avatar" aria-hidden="true">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" alt="{{ user.nome }}">
+            {% else %}
+              {{ user.nome|slice:":2"|upper }}
+            {% endif %}
+          </div>
+          <div>
+            <div class="education-profile-name">{{ user.nome }}</div>
+            <p class="education-profile-line">{% if profile.distrito %}Distrito {{ profile.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+            <p class="education-profile-line">{% if profile.completo %}Perfil completo{% else %}Perfil em progresso{% endif %}</p>
+          </div>
+        </div>
+        <div class="education-tags">
+          <span class="education-tag highlight"><i class="bi bi-mortarboard"></i>{{ education_count }} registo{{ education_count|pluralize }} de formacao</span>
+          {% if latest_education %}
+            <span class="education-tag"><i class="bi bi-book"></i>{{ latest_education.get_area_formacao_display }}</span>
+          {% else %}
+            <span class="education-tag muted"><i class="bi bi-plus-circle"></i>Primeiro registo</span>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="education-panel">
+        <div class="education-panel-head">
+          <div>
+            <h2 class="education-panel-title">Dicas para preencher</h2>
+            <p class="education-panel-subtitle">Mantem a informacao clara e util.</p>
+          </div>
+        </div>
+        <div class="education-tip">
+          <strong>Regista a etapa mais relevante.</strong>
+          <div class="education-copy">Podes comecar por uma escola, curso tecnico, formacao profissional ou ensino superior.</div>
+        </div>
+        <div class="education-tip">
+          <strong>Usa o ano de conclusao quando souberes.</strong>
+          <div class="education-copy">Isso ajuda a perceber a atualidade do teu percurso, mas o resto da informacao continua importante mesmo sem ano exato.</div>
+        </div>
+        <div class="education-tip">
+          <strong>Curso e especialidade ajudam muito.</strong>
+          <div class="education-copy">Mesmo quando a area e ampla, o nome do curso da mais clareza a quem esta a avaliar o teu perfil.</div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="education-panel">
+      {% if form.errors %}
+        <div class="education-error">
+          Verifica os campos abaixo antes de guardar esta formacao.
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="education-section">
+          <div class="education-section-label"><i class="bi bi-book"></i>Base academica</div>
+          <h2 class="education-section-title">Nivel, area e ano</h2>
+          <p class="education-note mb-0">Estes campos ajudam a posicionar rapidamente o teu perfil para empresas e oportunidades.</p>
+          <div class="education-grid">
+            <div class="education-field">
+              <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
+              {{ form.nivel }}
+              {% if form.nivel.errors %}<div class="education-field-error">{{ form.nivel.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="education-field">
+              <label for="{{ form.area_formacao.id_for_label }}">{{ form.area_formacao.label }}</label>
+              {{ form.area_formacao }}
+              {% if form.area_formacao.errors %}<div class="education-field-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="education-field">
+              <label for="{{ form.ano.id_for_label }}">{{ form.ano.label }}</label>
+              {{ form.ano }}
+              <div class="education-field-help">Podes deixar em branco se ainda estiveres a estudar ou se nao te recordares agora.</div>
+              {% if form.ano.errors %}<div class="education-field-error">{{ form.ano.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="education-section">
+          <div class="education-section-label"><i class="bi bi-building"></i>Instituicao e curso</div>
+          <h2 class="education-section-title">Onde estudaste e o que fizeste</h2>
+          <div class="education-grid">
+            <div class="education-field full">
+              <label for="{{ form.instituicao.id_for_label }}">{{ form.instituicao.label }}</label>
+              {{ form.instituicao }}
+              {% if form.instituicao.errors %}<div class="education-field-error">{{ form.instituicao.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="education-field full">
+              <label for="{{ form.curso.id_for_label }}">{{ form.curso.label }}</label>
+              {{ form.curso }}
+              <div class="education-field-help">Indica a especialidade, curso principal ou o foco da formacao.</div>
+              {% if form.curso.errors %}<div class="education-field-error">{{ form.curso.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if latest_education %}
+          <div class="education-summary">
+            <div class="education-summary-title">Ultima formacao registada</div>
+            <div class="education-copy">
+              {{ latest_education.get_nivel_display }}{% if latest_education.curso %} em {{ latest_education.curso }}{% endif %}
+              {% if latest_education.instituicao %} - {{ latest_education.instituicao }}{% endif %}
+              {% if latest_education.ano %} ({{ latest_education.ano }}){% endif %}.
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="education-footer">
+          <div class="education-copy">
+            Depois de guardar, esta formacao aparece no teu perfil e ajuda a melhorar a leitura do teu percurso.
+          </div>
+          <div class="education-actions">
+            <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-floppy me-2"></i>Guardar formacao</button>
+          </div>
+        </div>
+      </form>
+    </section>
   </div>
 </div>
 {% endblock %}

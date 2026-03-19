@@ -580,9 +580,9 @@ class EducationForm(forms.ModelForm):
         widgets = {
             'nivel': forms.Select(attrs={'class': 'form-select'}),
             'area_formacao': forms.Select(attrs={'class': 'form-select'}),
-            'instituicao': forms.TextInput(attrs={'class': 'form-control'}),
-            'ano': forms.NumberInput(attrs={'class': 'form-control', 'min': 1950, 'max': 2030}),
-            'curso': forms.TextInput(attrs={'class': 'form-control'}),
+            'instituicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da escola, centro ou instituicao')}),
+            'ano': forms.NumberInput(attrs={'class': 'form-control', 'min': 1950, 'max': 2030, 'placeholder': _('Ex: 2024')}),
+            'curso': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Curso, especialidade ou area principal')}),
         }
 
 
@@ -593,12 +593,12 @@ class ExperienceForm(forms.ModelForm):
         model = Experience
         fields = ['entidade', 'cargo', 'inicio', 'fim', 'atual', 'descricao']
         widgets = {
-            'entidade': forms.TextInput(attrs={'class': 'form-control'}),
-            'cargo': forms.TextInput(attrs={'class': 'form-control'}),
+            'entidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da empresa, oficina, projeto ou instituicao')}),
+            'cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Cargo, funcao ou papel desempenhado')}),
             'inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'fim': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'atual': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': _('Resume as principais tarefas, responsabilidades e resultados desta experiencia')}),
         }
 
 

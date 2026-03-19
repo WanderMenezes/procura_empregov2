@@ -4,173 +4,779 @@
 
 {% block extra_css %}
 <style>
+  .company-dashboard {
+    color: #122033;
+  }
+
   .company-hero {
-    background: linear-gradient(135deg, rgba(0,102,204,0.12) 0%, rgba(0,168,107,0.12) 100%);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-  }
-  .badge-soft {
-    background: rgba(0,102,204,0.12);
-    color: #0052a3;
-    border: 1px solid rgba(0,102,204,0.28);
-  }
-  .stat-tile {
-    background: var(--light-bg);
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 12px;
-    padding: 0.75rem;
-    text-align: center;
-  }
-  .flow-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-  }
-  .flow-list li {
     position: relative;
-    padding-left: 1.4rem;
-    margin-bottom: 0.5rem;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 1.75rem;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.34), transparent 34%),
+      linear-gradient(135deg, rgba(0, 102, 204, 0.96), rgba(0, 168, 107, 0.84));
+    color: #fff;
+    box-shadow: 0 22px 45px rgba(0, 102, 204, 0.18);
   }
-  .flow-list li::before {
+
+  .company-hero::after {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0.35rem;
-    width: 0.55rem;
-    height: 0.55rem;
+    inset: auto -12% -34% auto;
+    width: 240px;
+    height: 240px;
     border-radius: 999px;
-    background: var(--secondary-color);
+    background: rgba(255, 255, 255, 0.1);
+    filter: blur(8px);
   }
-  .flow-list li:last-child {
-    margin-bottom: 0;
+
+  .company-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .company-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .company-avatar {
+    width: 92px;
+    height: 92px;
+    border-radius: 24px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .company-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .company-kicker {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.78;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-title {
+    font-size: clamp(1.75rem, 2vw, 2.3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    margin-bottom: 0.35rem;
+  }
+
+  .company-subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .company-badges,
+  .company-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .company-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.78rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #fff;
+  }
+
+  .company-hero-copy {
+    max-width: 640px;
+    margin: 1rem 0 0;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .company-actions {
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .company-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .company-actions .btn-outline-light {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .company-actions .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .company-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .company-stat-card {
+    border-radius: 20px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .company-stat-label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.76);
+    margin-bottom: 0.25rem;
+  }
+
+  .company-stat-value {
+    display: block;
+    font-size: 1.8rem;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .company-stat-meta {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.85rem;
+  }
+
+  .company-panel {
+    border-radius: 24px;
+    padding: 1.3rem;
+    background: #fff;
+    border: 1px solid rgba(18, 32, 51, 0.07);
+    box-shadow: 0 20px 38px rgba(18, 32, 51, 0.08);
+  }
+
+  .company-panel + .company-panel {
+    margin-top: 1rem;
+  }
+
+  .company-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .company-panel-head h5,
+  .company-panel-head h6 {
+    margin-bottom: 0.2rem;
+  }
+
+  .company-panel-subtitle {
+    margin: 0;
+    color: #65748b;
+    font-size: 0.92rem;
+  }
+
+  .company-detail-list {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .company-detail-item {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+  }
+
+  .company-detail-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 102, 204, 0.08);
+    color: var(--primary-color);
+    flex-shrink: 0;
+  }
+
+  .company-detail-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #7a8798;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.18rem;
+  }
+
+  .company-detail-value {
+    margin: 0;
+    color: #132133;
+    word-break: break-word;
+  }
+
+  .company-steps {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .company-step {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: #f7fafc;
+    border: 1px solid rgba(18, 32, 51, 0.06);
+  }
+
+  .company-step-index {
+    width: 1.95rem;
+    height: 1.95rem;
+    border-radius: 999px;
+    background: rgba(0, 168, 107, 0.12);
+    color: var(--secondary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .company-step p {
+    margin: 0;
+    color: #4e5d71;
+    font-size: 0.92rem;
+  }
+
+  .company-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .company-highlight {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    border: 1px solid rgba(0, 102, 204, 0.1);
+  }
+
+  .company-highlight strong {
+    display: block;
+    font-size: 1.45rem;
+    line-height: 1;
+    color: #10263e;
+    margin-bottom: 0.3rem;
+  }
+
+  .company-highlight span {
+    display: block;
+    color: #66768c;
+    font-size: 0.88rem;
+  }
+
+  .company-description {
+    font-size: 0.97rem;
+    color: #495668;
+    line-height: 1.72;
+  }
+
+  .company-stack {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .company-item {
+    border-radius: 22px;
+    padding: 1rem 1.05rem;
+    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    border: 1px solid rgba(18, 32, 51, 0.07);
+  }
+
+  .company-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .company-item-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: #132133;
+  }
+
+  .company-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .company-item-meta .badge,
+  .company-item-top .badge {
+    border-radius: 999px;
+    padding: 0.42rem 0.68rem;
+    font-weight: 600;
+  }
+
+  .company-item-copy {
+    color: #516175;
+    margin-bottom: 0.8rem;
+  }
+
+  .company-inline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    color: #6d7c90;
+    font-size: 0.88rem;
+  }
+
+  .company-item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .company-item-actions .btn {
+    border-radius: 12px;
+  }
+
+  .company-request-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    color: #6d7c90;
+    font-size: 0.88rem;
+  }
+
+  .company-empty {
+    border-radius: 22px;
+    padding: 1.2rem;
+    text-align: center;
+    color: #66768c;
+    background: #f7fafc;
+    border: 1px dashed rgba(18, 32, 51, 0.14);
+  }
+
+  .company-empty i {
+    font-size: 1.6rem;
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 0.55rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .company-hero {
+      padding: 1.4rem;
+    }
+
+    .company-actions {
+      justify-content: stretch;
+    }
+
+    .company-actions .btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .company-identity {
+      flex-direction: column;
+    }
+
+    .company-stat-grid,
+    .company-highlight-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .company-item-top {
+      flex-direction: column;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="company-hero rounded-4 p-3 p-md-4 mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
-      <div>
-        <h3 class="mb-1">Painel da Empresa</h3>
-        <p class="text-muted mb-0">Consulte perfis, publique vagas e solicite contactos de forma simples.</p>
-        <div class="d-flex flex-wrap gap-2 mt-3">
-          <span class="badge badge-soft">Consulta perfis</span>
-          <span class="badge badge-soft">Publica vagas</span>
-          <span class="badge badge-soft">Solicita contactos</span>
-        </div>
-      </div>
-      <div class="d-flex gap-2">
-        {% if not company_profile_complete %}
-          <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Continuar com o wizard</a>
-        {% endif %}
-        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Pesquisar jovens</a>
-        <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar vaga</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <div class="col-12 col-lg-4">
-      <aside>
-        <div class="card mb-3 p-3 text-center">
-          <div class="company-avatar mx-auto mb-3" style="width:96px;height:96px;border-radius:8px;overflow:hidden;">
+<div class="company-dashboard container py-4 py-lg-5">
+  <section class="company-hero mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="company-identity">
+          <div class="company-avatar" aria-hidden="true">
             {% if company.logo %}
-              <img src="{{ company.logo.url }}" alt="Logo" style="width:96px;height:96px;object-fit:cover;">
+              <img src="{{ company.logo.url }}" alt="{{ company.nome }}">
             {% else %}
-              <div style="width:96px;height:96px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#555;">
-                {{ company.nome|default:'Empresa'|slice:":2"|upper }}
-              </div>
+              {{ company.nome|default:'Empresa'|slice:':2'|upper }}
             {% endif %}
           </div>
-          <h5 class="mb-1">{{ company.nome }}</h5>
-          <p class="text-muted small mb-2">{{ company.get_setor_display|default:'' }}</p>
-          {% if company.verificada %}
-            <span class="badge bg-success">Verificada</span>
-          {% endif %}
+          <div>
+            <div class="company-kicker">Setores da empresa</div>
+            <h1 class="company-title">{{ company.nome }}</h1>
+            <p class="company-subtitle">
+              {{ company.get_setor_display|default:'Setores por definir' }}
+              {% if company.distrito %}
+                <span class="mx-1">&middot;</span>{{ company.distrito.nome }}
+              {% endif %}
+            </p>
+            <div class="company-badges mt-3">
+              <span class="company-chip">
+                <i class="bi bi-shield-check"></i>
+                {% if company.verificada %}Empresa verificada{% else %}Validacao pendente{% endif %}
+              </span>
+              <span class="company-chip">
+                <i class="bi bi-person-badge"></i>
+                {% if company_profile_complete %}Perfil pronto{% else %}Perfil incompleto{% endif %}
+              </span>
+              <span class="company-chip">
+                <i class="bi bi-briefcase"></i>{{ stats.vagas_ativas|default:0 }} vagas ativas
+              </span>
+            </div>
+            <p class="company-hero-copy">
+              {% if company_profile_complete %}
+                O painel centraliza vagas, candidaturas e pedidos de contacto para a equipa agir mais rapido.
+              {% else %}
+                Complete os dados principais da empresa para ganhar mais confianca no perfil e publicar oportunidades com melhor contexto.
+              {% endif %}
+            </p>
+          </div>
         </div>
-
-        <div class="card p-3 mb-3">
-          <h6>Contactos</h6>
-          <p class="mb-1 small"><i class="bi bi-telephone me-1"></i>{{ company.telefone|default:'-' }}</p>
-          <p class="mb-1 small"><i class="bi bi-envelope me-1"></i>{{ company.email|default:'-' }}</p>
-          {% if company.website %}
-            <p class="mb-0 small"><i class="bi bi-globe me-1"></i><a href="{{ company.website }}" target="_blank">Site</a></p>
+      </div>
+      <div class="col-lg-5">
+        <div class="company-actions">
+          {% if not company_profile_complete %}
+            <a href="{% url 'companies:profile_edit' %}" class="btn btn-light">
+              <i class="bi bi-magic me-2"></i>Completar perfil
+            </a>
           {% endif %}
+          <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
+            <i class="bi bi-search me-2"></i>Pesquisar jovens
+          </a>
+          <a href="{% url 'companies:job_create' %}" class="btn btn-dark">
+            <i class="bi bi-plus-circle me-2"></i>Publicar vaga
+          </a>
         </div>
+        <div class="company-stat-grid">
+          <div class="company-stat-card">
+            <span class="company-stat-label">Vagas ativas</span>
+            <span class="company-stat-value">{{ stats.vagas_ativas|default:0 }}</span>
+            <span class="company-stat-meta">Em circulacao neste momento</span>
+          </div>
+          <div class="company-stat-card">
+            <span class="company-stat-label">Total de vagas</span>
+            <span class="company-stat-value">{{ stats.total_vagas|default:0 }}</span>
+            <span class="company-stat-meta">Historico publicado</span>
+          </div>
+          <div class="company-stat-card">
+            <span class="company-stat-label">Candidaturas</span>
+            <span class="company-stat-value">{{ stats.candidaturas|default:0 }}</span>
+            <span class="company-stat-meta">Respostas recebidas</span>
+          </div>
+          <div class="company-stat-card">
+            <span class="company-stat-label">Visualizacoes</span>
+            <span class="company-stat-value">{{ stats.visualizacoes|default:0 }}</span>
+            <span class="company-stat-meta">Interesse gerado nas vagas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="card p-3 mb-3">
-          <h6>Resumo rápido</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <div class="stat-tile">
-                <small class="text-muted">Vagas ativas</small>
-                <div class="h5 mb-0">{{ stats.vagas_ativas|default:0 }}</div>
-              </div>
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-4">
+      <div class="company-panel">
+        <div class="company-panel-head">
+          <div>
+            <h5>Perfil da empresa</h5>
+            <p class="company-panel-subtitle">Dados principais e canais de contacto.</p>
+          </div>
+          <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Editar</a>
+        </div>
+        <div class="company-detail-list">
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-building"></i></span>
+            <div>
+              <span class="company-detail-label">Setores</span>
+              <p class="company-detail-value">{{ company.get_setor_display|default:'Nao informado' }}</p>
             </div>
-            <div class="col-6">
-              <div class="stat-tile">
-                <small class="text-muted">Total de vagas</small>
-                <div class="h5 mb-0">{{ stats.total_vagas|default:0 }}</div>
-              </div>
+          </div>
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-telephone"></i></span>
+            <div>
+              <span class="company-detail-label">Telefone</span>
+              <p class="company-detail-value">{{ company.telefone|default:'Nao informado' }}</p>
             </div>
-            <div class="col-6">
-              <div class="stat-tile">
-                <small class="text-muted">Candidaturas</small>
-                <div class="h5 mb-0">{{ stats.candidaturas|default:0 }}</div>
-              </div>
+          </div>
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-envelope"></i></span>
+            <div>
+              <span class="company-detail-label">Email</span>
+              <p class="company-detail-value">{{ company.email|default:'Nao informado' }}</p>
             </div>
-            <div class="col-6">
-              <div class="stat-tile">
-                <small class="text-muted">Pedidos</small>
-                <div class="h5 mb-0">{{ stats.pedidos_total|default:0 }}</div>
-                <small class="text-muted">Pendentes: {{ stats.pedidos_pendentes|default:0 }}</small>
-              </div>
+          </div>
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-geo-alt"></i></span>
+            <div>
+              <span class="company-detail-label">Localizacao</span>
+              <p class="company-detail-value">
+                {{ company.distrito.nome|default:'Distrito nao definido' }}
+                {% if company.endereco %}
+                  <br>{{ company.endereco }}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-card-text"></i></span>
+            <div>
+              <span class="company-detail-label">NIF</span>
+              <p class="company-detail-value">{{ company.nif|default:'Nao informado' }}</p>
+            </div>
+          </div>
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi bi-globe2"></i></span>
+            <div>
+              <span class="company-detail-label">Website</span>
+              <p class="company-detail-value">
+                {% if company.website %}
+                  <a href="{{ company.website }}" target="_blank" rel="noopener">Abrir site</a>
+                {% else %}
+                  Nao informado
+                {% endif %}
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="card p-3">
-          <h6>Fluxo da empresa</h6>
-          <div class="small text-muted">Fase 1</div>
-          <ol class="flow-list small mb-2">
-            <li>Regista a empresa e valida o e-mail.</li>
-            <li>Preenche o perfil.</li>
-            <li>Pesquisa jovens e solicita contacto.</li>
-          </ol>
-          <div class="small text-muted">Fase 2</div>
-          <ol class="flow-list small mb-0">
-            <li>Publica a vaga (estágio, emprego ou formação).</li>
-            <li>Jovens candidatam-se com 1 clique usando o perfil.</li>
-            <li>Recebe candidaturas.</li>
-            <li>Fecha a vaga quando necessário.</li>
-          </ol>
+      <div class="company-panel">
+        <div class="company-panel-head">
+          <div>
+            <h6>Resumo rapido</h6>
+            <p class="company-panel-subtitle">Indicadores de ritmo e procura.</p>
+          </div>
         </div>
-      </aside>
+        <div class="company-highlight-grid">
+          <div class="company-highlight">
+            <strong>{{ stats.pedidos_total|default:0 }}</strong>
+            <span>Pedidos de contacto no total</span>
+          </div>
+          <div class="company-highlight">
+            <strong>{{ stats.pedidos_pendentes|default:0 }}</strong>
+            <span>Pedidos pendentes</span>
+          </div>
+          <div class="company-highlight">
+            <strong>{{ company.created_at|date:"m/Y" }}</strong>
+            <span>Entrada na plataforma</span>
+          </div>
+          <div class="company-highlight">
+            <strong>{% if company.ativa %}Ativa{% else %}Pausada{% endif %}</strong>
+            <span>Estado do perfil</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="company-panel">
+        <div class="company-panel-head">
+          <div>
+            <h6>Proximos passos</h6>
+            <p class="company-panel-subtitle">Acoes simples para manter o painel vivo.</p>
+          </div>
+        </div>
+        <div class="company-steps">
+          <div class="company-step">
+            <span class="company-step-index">1</span>
+            <div>
+              <strong>{% if company_profile_complete %}Perfil ajustado{% else %}Fechar dados do perfil{% endif %}</strong>
+              <p>
+                {% if company_profile_complete %}
+                  O perfil ja esta com a base essencial pronta para ganhar confianca.
+                {% else %}
+                  Completar contacto, endereco e descricao melhora a leitura para tecnicos e candidatos.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="company-step">
+            <span class="company-step-index">2</span>
+            <div>
+              <strong>{% if stats.vagas_ativas %}Manter vagas atualizadas{% else %}Publicar a primeira vaga{% endif %}</strong>
+              <p>
+                {% if stats.vagas_ativas %}
+                  Reveja vagas ativas para garantir requisitos claros e resposta rapida.
+                {% else %}
+                  Uma vaga bem descrita acelera candidaturas alinhadas com o que a empresa precisa.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="company-step">
+            <span class="company-step-index">3</span>
+            <div>
+              <strong>{% if stats.pedidos_pendentes %}Responder pedidos pendentes{% else %}Acompanhar contactos{% endif %}</strong>
+              <p>
+                {% if stats.pedidos_pendentes %}
+                  Existem pedidos a aguardar resposta e vale acompanhar esse fluxo hoje.
+                {% else %}
+                  Continue a pesquisar jovens e a abrir conversas com perfis interessantes.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="col-12 col-lg-8">
-      <main>
-        <div class="mb-3">
-          <h5>Descrição</h5>
-          <p class="text-muted">{% if company.descricao %}{{ company.descricao|linebreaksbr }}{% else %}<em>Sem descrição.</em>{% endif %}</p>
+      <div class="company-panel mb-4">
+        <div class="company-panel-head">
+          <div>
+            <h5>Descricao</h5>
+            <p class="company-panel-subtitle">Como a empresa se apresenta dentro da plataforma.</p>
+          </div>
+          <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Atualizar texto</a>
+        </div>
+        <div class="company-description">
+          {% if company.descricao %}
+            {{ company.descricao|linebreaksbr }}
+          {% else %}
+            <div class="company-empty">
+              <i class="bi bi-card-text"></i>
+              Ainda nao existe uma descricao. Um bom resumo ajuda candidatos e equipa tecnica a perceber melhor a proposta da empresa.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="company-panel mb-4">
+        <div class="company-panel-head">
+          <div>
+            <h5>Vagas recentes</h5>
+            <p class="company-panel-subtitle">Publicacoes mais recentes e o estado de cada uma.</p>
+          </div>
+          <a href="{% url 'companies:job_list' %}" class="btn btn-outline-primary btn-sm">Ver todas</a>
         </div>
 
-        <div class="card p-3 mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0">Vagas recentes</h6>
-            <a href="{% url 'companies:job_list' %}" class="small">Ver todas</a>
+        {% if vagas %}
+          <div class="company-stack">
+            {% for vaga in vagas %}
+              <article class="company-item">
+                <div class="company-item-top">
+                  <div>
+                    <div class="company-item-title">{{ vaga.titulo }}</div>
+                    <div class="company-item-meta">
+                      <span class="badge bg-light text-dark border">{{ vaga.get_tipo_display }}</span>
+                      <span class="badge {% if vaga.estado == 'ATIVA' %}bg-success{% elif vaga.estado == 'PAUSADA' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                        {{ vaga.get_estado_display }}
+                      </span>
+                      {% if not vaga.tem_vagas_disponiveis %}
+                        <span class="badge bg-danger">Esgotada</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="company-item-actions">
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'companies:job_applications' vaga.id %}">
+                      <i class="bi bi-people me-1"></i>Candidaturas
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'companies:job_edit' vaga.id %}">
+                      <i class="bi bi-pencil-square me-1"></i>Editar
+                    </a>
+                    {% if vaga.estado == 'ATIVA' %}
+                      <a class="btn btn-outline-danger btn-sm"
+                         href="{% url 'companies:job_close' vaga.id %}"
+                         onclick="return confirm('Fechar esta vaga?');">
+                        <i class="bi bi-x-circle me-1"></i>Fechar
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+                <p class="company-item-copy mb-0">{{ vaga.descricao|truncatewords:26 }}</p>
+                <div class="company-inline-meta mt-3">
+                  <span><i class="bi bi-calendar-event me-1"></i>{{ vaga.data_publicacao|date:"d/m/Y" }}</span>
+                  <span><i class="bi bi-person-lines-fill me-1"></i>{{ vaga.total_candidaturas }} candidatura{{ vaga.total_candidaturas|pluralize }}</span>
+                  <span><i class="bi bi-briefcase me-1"></i>{{ vaga.numero_vagas }} vaga{{ vaga.numero_vagas|pluralize }} / {{ vaga.vagas_restantes }} restante{{ vaga.vagas_restantes|pluralize }}</span>
+                </div>
+              </article>
+            {% endfor %}
           </div>
-          {% include 'companies/job_list.html' %}
+        {% else %}
+          <div class="company-empty">
+            <i class="bi bi-briefcase"></i>
+            Ainda nao existem vagas publicadas. Crie a primeira oportunidade para comecar a receber candidaturas.
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="company-panel">
+        <div class="company-panel-head">
+          <div>
+            <h5>Pedidos de contacto</h5>
+            <p class="company-panel-subtitle">Ultimos pedidos feitos a jovens da base.</p>
+          </div>
+          <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-primary btn-sm">Ver todos</a>
         </div>
 
-        <div class="card p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0">Pedidos de contacto</h6>
-            <a href="{% url 'companies:contact_request_list' %}" class="small">Ver todos</a>
+        {% if pedidos %}
+          <div class="company-stack">
+            {% for r in pedidos %}
+              <article class="company-item">
+                <div class="company-item-top">
+                  <div>
+                    <div class="company-item-title">{{ r.youth.user.nome }}</div>
+                    <div class="company-inline-meta">
+                      <span><i class="bi bi-geo-alt me-1"></i>{{ r.youth.distrito.nome|default:'Distrito nao definido' }}</span>
+                      <span><i class="bi bi-calendar-event me-1"></i>{{ r.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                  </div>
+                  <span class="badge {% if r.estado == 'PENDENTE' %}bg-warning text-dark{% elif r.estado == 'APROVADO' %}bg-success{% else %}bg-danger{% endif %}">
+                    {{ r.get_estado_display }}
+                  </span>
+                </div>
+                <p class="company-item-copy">{{ r.motivo|truncatechars:180 }}</p>
+                <div class="company-request-meta">
+                  {% if r.responded_at %}
+                    <span><i class="bi bi-clock-history me-1"></i>Respondido em {{ r.responded_at|date:"d/m/Y" }}</span>
+                  {% else %}
+                    <span><i class="bi bi-hourglass-split me-1"></i>A aguardar resposta</span>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
           </div>
-          {% include 'companies/contact_request_list.html' %}
-        </div>
-      </main>
+        {% else %}
+          <div class="company-empty">
+            <i class="bi bi-chat-left-text"></i>
+            Ainda nao existem pedidos de contacto. Pesquise jovens e abra novas aproximacoes a partir daqui.
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
