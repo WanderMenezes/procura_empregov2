@@ -25,6 +25,19 @@ def _load_env_file():
 
 _load_env_file()
 
+DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql').lower()
+
+if DB_ENGINE == 'mysql':
+    try:
+        import pymysql
+    except ImportError as exc:
+        raise ImportError(
+            'PyMySQL is required to use the MySQL database configuration.'
+        ) from exc
+
+    pymysql.version_info = (2, 2, 1, 'final', 0)
+    pymysql.install_as_MySQLdb()
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-9rg3#jyllnh3+_vc3s*mpz#siz8-bnea0n+yldb^8*6kx6$8*^'
 
@@ -83,12 +96,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'base_nacional_jovens.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DB_ENGINE == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'base_nacional_jovens.db_backends.mysql_xampp',
+            'NAME': os.environ.get('DB_NAME', 'base_nacional_jovens'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '60')),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+            'TEST': {
+                'CHARSET': 'utf8mb4',
+                'COLLATION': 'utf8mb4_unicode_ci',
+            },
+        }
     }
-}
+elif DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    raise ValueError(f'Unsupported DB_ENGINE: {DB_ENGINE}')
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
