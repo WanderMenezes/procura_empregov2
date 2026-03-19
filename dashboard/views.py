@@ -741,6 +741,8 @@ def export_report_pdf(request):
     total_vagas = JobPost.objects.filter(data_publicacao__range=(start_dt, end_dt)).count()
     total_candidaturas = Application.objects.filter(created_at__range=(start_dt, end_dt)).count()
     pedidos_contacto = ContactRequest.objects.filter(estado='PENDENTE', created_at__range=(start_dt, end_dt)).count()
+    period_days = (end_date - start_date).days + 1
+    period_label = f"Periodo selecionado ({period_days} dia{'s' if period_days != 1 else ''})"
 
     jovens_novos = total_jovens
     empresas_novas = total_empresas
@@ -904,7 +906,7 @@ def export_report_pdf(request):
 
     # Tabela do período
     period_data = [
-        ["Indicador", f"Últimos {meses} meses"],
+        ["Indicador", period_label],
         ["Novos jovens", f"{jovens_novos}"],
         ["Novas empresas", f"{empresas_novas}"],
         ["Novas vagas", f"{vagas_novas}"],

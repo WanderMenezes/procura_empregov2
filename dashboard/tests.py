@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from companies.models import Application, Company, ContactRequest, JobPost
 from core.models import District, Notification
@@ -173,3 +176,76 @@ class TechnicalDashboardTests(TestCase):
         response = self.client.get(reverse('dashboard:tecnico'))
 
         self.assertRedirects(response, reverse('home'))
+
+
+class ReportsExportTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000020',
+            nome='Admin Relatorios',
+            perfil=User.ProfileType.ADMIN,
+        )
+        self.district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        self.company_user = User.objects.create_user(
+            telefone='+2399000021',
+            nome='Empresa Relatorios',
+            perfil=User.ProfileType.EMPRESA,
+        )
+        self.company = Company.objects.create(
+            user=self.company_user,
+            nome='Empresa Relatorios',
+            ativa=True,
+        )
+        self.youth_user = User.objects.create_user(
+            telefone='+2399000022',
+            nome='Jovem Relatorios',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='jovem.relatorios@example.com',
+        )
+        self.youth = YouthProfile.objects.create(
+            user=self.youth_user,
+            completo=True,
+            validado=True,
+        )
+        Education.objects.create(
+            profile=self.youth,
+            nivel='SUP',
+            area_formacao='TIC',
+            instituicao='Centro de Formacao',
+            ano=2025,
+            curso='Analise de Dados',
+        )
+        self.job = JobPost.objects.create(
+            company=self.company,
+            titulo='Tecnico de Dados',
+            descricao='Preparar indicadores e relatorios.',
+            requisitos='Conhecimento de dados.',
+            tipo='EMP',
+            estado='ATIVA',
+        )
+        Application.objects.create(
+            job=self.job,
+            youth=self.youth,
+            mensagem='Quero participar.',
+        )
+
+    def test_export_report_pdf_works_for_selected_date_range(self):
+        today = timezone.localdate()
+        start_date = today - timedelta(days=30)
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse('dashboard:export_report_pdf'),
+            {
+                'data_inicio': start_date.strftime('%Y-%m-%d'),
+                'data_fim': today.strftime('%Y-%m-%d'),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertTrue(response.content.startswith(b'%PDF'))
