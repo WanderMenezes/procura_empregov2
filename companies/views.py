@@ -754,6 +754,7 @@ def contact_request_list(request):
             'total': pedidos.count(),
             'pending': pedidos.filter(estado='PENDENTE').count(),
             'approved': pedidos.filter(estado='APROVADO').count(),
+            'disabled': pedidos.filter(estado='DESATIVADO').count(),
             'rejected': pedidos.filter(estado='REJEITADO').count(),
             'responded': pedidos.exclude(responded_at__isnull=True).count(),
         }

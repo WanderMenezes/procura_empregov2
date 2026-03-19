@@ -45,11 +45,6 @@
                             <i class="bi bi-info-circle me-1"></i>Sobre
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if current_name == 'help' %}active{% endif %}" href="{% url 'help' %}">
-                            <i class="bi bi-question-circle me-1"></i>Ajuda
-                        </a>
-                    </li>
                     {% if user.is_authenticated %}
                         {% if user.is_jovem %}
                             <li class="nav-item dropdown">
@@ -242,34 +237,116 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer site-footer">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5><i class="bi bi-people-fill me-2"></i>Base Nacional de Jovens</h5>
-                    <p class="text-footer">Conectando jovens de SÃ£o TomÃ© e PrÃ­ncipe com oportunidades de emprego, estÃ¡gios e formaÃ§Ã£o.</p>
+            <section class="footer-hero">
+                <div class="footer-brand">
+                    <div>
+                        <div class="footer-kicker">Empregabilidade jovem em Sao Tome e Principe</div>
+                        <h2 class="footer-title">Base Nacional de Jovens</h2>
+                        <p class="footer-copy text-footer">
+                            Uma plataforma comum para jovens, empresas, operadores distritais e equipa tecnica acompanharem registo, validacao e oportunidades com mais contexto.
+                        </p>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Links Ãšteis</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{% url 'about' %}"><i class="bi bi-chevron-right me-1"></i>Sobre</a></li>
-                        <li><a href="{% url 'help' %}"><i class="bi bi-chevron-right me-1"></i>Ajuda</a></li>
-                        <li><a href="{% url 'privacy' %}"><i class="bi bi-chevron-right me-1"></i>Privacidade</a></li>
-                        <li><a href="{% url 'terms' %}"><i class="bi bi-chevron-right me-1"></i>Termos de Uso</a></li>
-                    </ul>
+                <div class="footer-hero-chips">
+                    <span class="footer-pill"><i class="bi bi-person-check"></i>Tecnico PNUD</span>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Contacto</h5>
-                    <p class="text-footer">
-                        <i class="bi bi-envelope me-2"></i>info@basenacionaljovens.st<br>
-                        <i class="bi bi-telephone me-2"></i>+239 123 4567<br>
-                        <i class="bi bi-geo-alt me-2"></i>SÃ£o TomÃ©, SÃ£o TomÃ© e PrÃ­ncipe
-                    </p>
+            </section>
+
+            <div class="row g-4 footer-grid">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-card">
+                        <div class="footer-section-label">Explorar</div>
+                        <div class="footer-link-stack">
+                            <a class="footer-link-row" href="{% url 'home' %}">
+                                <span class="footer-link-icon"><i class="bi bi-house-door"></i></span>
+                                <span class="footer-link-label">
+                                    <strong>Inicio</strong>
+                                    <small>Voltar ao ponto principal da plataforma.</small>
+                                </span>
+                            </a>
+                            <a class="footer-link-row" href="{% url 'about' %}">
+                                <span class="footer-link-icon"><i class="bi bi-info-circle"></i></span>
+                                <span class="footer-link-label">
+                                    <strong>Sobre</strong>
+                                    <small>Perceber a missao e o contexto da iniciativa.</small>
+                                </span>
+                            </a>
+                            <a class="footer-link-row" href="{% url 'help' %}">
+                                <span class="footer-link-icon"><i class="bi bi-question-circle"></i></span>
+                                <span class="footer-link-label">
+                                    <strong>Ajuda</strong>
+                                    <small>Consultar respostas rapidas para os fluxos principais.</small>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-card">
+                        <div class="footer-section-label">Conta</div>
+                        <div class="footer-link-stack">
+                            <a class="footer-link-row" href="{% url 'dashboard:tecnico' %}">
+                                <span class="footer-link-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                                <span class="footer-link-label">
+                                    <strong>Dashboard tecnico</strong>
+                                    <small>Acompanhar indicadores e sinais da plataforma.</small>
+                                </span>
+                            </a>
+                            <a class="footer-link-row" href="{% url 'accounts:profile' %}">
+                                <span class="footer-link-icon"><i class="bi bi-person-circle"></i></span>
+                                <span class="footer-link-label">
+                                    <strong>Minha conta</strong>
+                                    <small>Gerir dados da conta e acesso atual.</small>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="footer-card">
+                        <div class="footer-section-label">Contacto</div>
+                        <div class="footer-contact-list">
+                            <a class="footer-contact-item" href="mailto:info@basenacionaljovens.st">
+                                <span class="footer-contact-icon"><i class="bi bi-envelope"></i></span>
+                                <span>
+                                    <strong>Email</strong>
+                                    <small>info@basenacionaljovens.st</small>
+                                </span>
+                            </a>
+                            <a class="footer-contact-item" href="tel:+2391234567">
+                                <span class="footer-contact-icon"><i class="bi bi-telephone"></i></span>
+                                <span>
+                                    <strong>Telefone</strong>
+                                    <small>+239 123 4567</small>
+                                </span>
+                            </a>
+                            <div class="footer-contact-item">
+                                <span class="footer-contact-icon"><i class="bi bi-geo-alt"></i></span>
+                                <span>
+                                    <strong>Localizacao</strong>
+                                    <small>Sao Tome, Sao Tome e Principe</small>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="footer-note">
+                            Os contactos diretos dos jovens continuam protegidos ate existir validacao adequada.
+                        </div>
+                    </div>
                 </div>
             </div>
-            <hr class="my-3">
-            <div class="text-center text-footer">
-                <small>&copy; {% now "Y" %} Base Nacional de Jovens - SÃ£o TomÃ© e PrÃ­ncipe. Todos os direitos reservados.</small>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-copy">
+                    &copy; {% now "Y" %} Base Nacional de Jovens - Sao Tome e Principe. Todos os direitos reservados.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="{% url 'privacy' %}">Privacidade</a>
+                    <a href="{% url 'terms' %}">Termos</a>
+                </div>
             </div>
         </div>
     </footer>

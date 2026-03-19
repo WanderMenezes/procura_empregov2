@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import CreateView, FormView, View
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -110,6 +111,14 @@ class LoginView(FormView):
                 self.request.session.set_expiry(0)
             
             messages.success(self.request, _('Bem-vindo, {}!').format(user.nome))
+
+            next_url = self.request.POST.get('next') or self.request.GET.get('next')
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={self.request.get_host()},
+                require_https=self.request.is_secure(),
+            ):
+                return redirect(next_url)
             
             # Redirecionar conforme o perfil
             return self.get_success_url_for_user(user)

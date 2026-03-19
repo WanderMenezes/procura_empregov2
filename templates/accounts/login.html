@@ -2,99 +2,579 @@
 
 {% block title %}Entrar - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-page {
+        background:
+            radial-gradient(circle at top left, rgba(15, 90, 159, 0.14) 0%, transparent 34%),
+            radial-gradient(circle at bottom right, rgba(30, 140, 108, 0.12) 0%, transparent 28%),
+            linear-gradient(180deg, #f5f9fc 0%, #eef3f8 100%);
+    }
+
+    .login-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: 1.4rem;
+        align-items: stretch;
+    }
+
+    .login-hero,
+    .login-card {
+        border: 0;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 26px 60px rgba(15, 23, 42, 0.12);
+    }
+
+    .login-hero {
+        position: relative;
+        color: #ffffff;
+        background: linear-gradient(145deg, #0b3b6f 0%, #0f5a9f 55%, #1e8c6c 100%);
+    }
+
+    .login-hero::before,
+    .login-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+    }
+
+    .login-hero::before {
+        width: 240px;
+        height: 240px;
+        top: -80px;
+        right: -60px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .login-hero::after {
+        width: 180px;
+        height: 180px;
+        bottom: -70px;
+        left: -40px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .login-hero-body,
+    .login-card .card-body {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+    }
+
+    .login-kicker,
+    .login-section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.72rem;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .login-kicker {
+        margin-bottom: 1rem;
+        color: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .login-hero h1 {
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        line-height: 1.02;
+        max-width: 11ch;
+        margin-bottom: 1rem;
+    }
+
+    .login-hero p,
+    .login-hero small {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .login-chip-list,
+    .login-lane-grid,
+    .login-stat-list {
+        display: grid;
+        gap: 0.8rem;
+    }
+
+    .login-chip-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin: 1.4rem 0;
+    }
+
+    .login-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.85rem 0.95rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .login-highlight,
+    .login-lane {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(8px);
+    }
+
+    .login-highlight {
+        padding: 1.2rem;
+        border-radius: 24px;
+        margin-bottom: 1rem;
+    }
+
+    .login-highlight-title {
+        font-size: 0.86rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.74);
+        margin-bottom: 0.85rem;
+    }
+
+    .login-stat-item {
+        display: flex;
+        gap: 0.9rem;
+        align-items: flex-start;
+        padding: 0.9rem 0;
+    }
+
+    .login-stat-item + .login-stat-item {
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .login-stat-icon,
+    .login-lane-icon {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 1.15rem;
+    }
+
+    .login-stat-item strong,
+    .login-lane strong {
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+
+    .login-lane-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .login-lane {
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+        padding: 1rem;
+        border-radius: 22px;
+    }
+
+    .login-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .login-card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .login-card-head h2 {
+        margin: 0.45rem 0 0.35rem;
+        color: #11263c;
+    }
+
+    .login-card-head p,
+    .login-helper-copy,
+    .login-support-panel p,
+    .login-footer-note {
+        color: #64748b;
+    }
+
+    .login-section-badge {
+        color: #0f5a9f;
+        background: #e9f4ff;
+    }
+
+    .login-register-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.78rem 1rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #0f172a;
+        text-decoration: none;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    .login-form-section,
+    .login-support-panel {
+        padding: 1.2rem;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .login-form-section + .login-form-section,
+    .login-support-panel {
+        margin-top: 1rem;
+    }
+
+    .login-form-section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .login-form-section-head h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+        color: #11263c;
+    }
+
+    .login-form-section-head p {
+        margin-bottom: 0;
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .login-form-card .form-label,
+    .login-input-label {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.45rem;
+    }
+
+    .login-card .form-control,
+    .login-card .input-group .btn {
+        min-height: 3.05rem;
+        border-radius: 16px;
+    }
+
+    .login-card .form-control {
+        border-color: rgba(148, 163, 184, 0.34);
+        padding-inline: 0.95rem;
+    }
+
+    .login-card .form-control:focus {
+        border-color: #0f5a9f;
+        box-shadow: 0 0 0 0.25rem rgba(15, 90, 159, 0.14);
+    }
+
+    .login-card .input-group .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .login-card .input-group .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        padding-inline: 1rem;
+    }
+
+    .login-helper-copy {
+        margin-top: 0.45rem;
+        font-size: 0.84rem;
+    }
+
+    .login-options-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .login-recovery-link {
+        color: #0f5a9f;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-submit {
+        min-height: 3.35rem;
+        border-radius: 18px;
+        font-weight: 700;
+    }
+
+    .login-support-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .login-support-panel h3 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        color: #11263c;
+    }
+
+    .login-footer-note {
+        margin-top: 1rem;
+        font-size: 0.88rem;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 991.98px) {
+        .login-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .login-card-head,
+        .login-form-section-head,
+        .login-support-panel {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .login-register-link,
+        .login-support-panel .btn {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .login-hero-body,
+        .login-card .card-body {
+            padding: 1.3rem;
+        }
+
+        .login-chip-list,
+        .login-lane-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .login-options-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <i class="bi bi-box-arrow-in-right text-primary" style="font-size: 3rem;"></i>
-                        <h2 class="mt-3">Entrar</h2>
-                        <p class="text-muted">Acede à tua conta</p>
+<div class="login-page py-4 py-lg-5">
+    <div class="container">
+        <div class="login-shell">
+            <section class="card login-hero">
+                <div class="login-hero-body">
+                    <div class="login-kicker">
+                        <i class="bi bi-shield-lock"></i>Acesso seguro
+                    </div>
+                    <h1>Entrar na plataforma sem perder o fio ao trabalho.</h1>
+                    <p class="mb-0">
+                        Usa o teu telemovel ou email para continuar o registo, rever o perfil, acompanhar vagas e responder mais depressa aos proximos passos.
+                    </p>
+
+                    <div class="login-chip-list">
+                        <div class="login-chip"><i class="bi bi-person"></i>Jovens</div>
+                        <div class="login-chip"><i class="bi bi-building"></i>Empresas</div>
+                        <div class="login-chip"><i class="bi bi-diagram-3"></i>Parceiros</div>
+                    </div>
+
+                    <div class="login-highlight">
+                        <div class="login-highlight-title">O que encontras ao entrar</div>
+                        <div class="login-stat-list">
+                            <div class="login-stat-item">
+                                <span class="login-stat-icon"><i class="bi bi-person-vcard"></i></span>
+                                <div>
+                                    <strong>Perfis e progresso</strong>
+                                    <small>Continua exatamente do ponto onde ficaste, com os teus dados e consentimentos guardados.</small>
+                                </div>
+                            </div>
+                            <div class="login-stat-item">
+                                <span class="login-stat-icon"><i class="bi bi-briefcase"></i></span>
+                                <div>
+                                    <strong>Vagas e candidaturas</strong>
+                                    <small>Consulta oportunidades, respostas e estados sem precisar de procurar em varios sitios.</small>
+                                </div>
+                            </div>
+                            <div class="login-stat-item">
+                                <span class="login-stat-icon"><i class="bi bi-bell"></i></span>
+                                <div>
+                                    <strong>Alertas e seguimento</strong>
+                                    <small>Recebe notificacoes do sistema e acompanha o que precisa da tua atencao.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="login-lane-grid">
+                        <div class="login-lane">
+                            <span class="login-lane-icon"><i class="bi bi-arrow-repeat"></i></span>
+                            <div>
+                                <strong>Redirecionamento inteligente</strong>
+                                <small>Depois de entrares, seguimos para a area certa do teu perfil.</small>
+                            </div>
+                        </div>
+                        <div class="login-lane">
+                            <span class="login-lane-icon"><i class="bi bi-key"></i></span>
+                            <div>
+                                <strong>Recuperacao simples</strong>
+                                <small>Se esqueceste a palavra-passe, podes recuperar o acesso sem complicacao.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card login-card login-form-card">
+                <div class="card-body">
+                    <div class="login-card-head">
+                        <div>
+                            <span class="login-section-badge">Conta</span>
+                            <h2>Entrar</h2>
+                            <p class="mb-0">Acede com o teu telemovel ou email e continua a usar a plataforma com seguranca.</p>
+                        </div>
+                        <a href="{% url 'accounts:register' %}" class="login-register-link">
+                            <i class="bi bi-person-plus"></i>Criar conta
+                        </a>
                     </div>
 
                     <form method="post" novalidate>
                         {% csrf_token %}
+                        {% if request.GET.next %}
+                            <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% elif request.POST.next %}
+                            <input type="hidden" name="next" value="{{ request.POST.next }}">
+                        {% endif %}
 
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger mb-3">
                                 {{ form.non_field_errors|striptags }}
                             </div>
                         {% endif %}
 
-                        <div class="mb-3">
-                            <label for="id_username" class="form-label">Telemóvel ou Email</label>
-                            <input type="text" name="username" id="id_username"
-                                   class="form-control{% if form.username.errors %} is-invalid{% endif %}"
-                                   placeholder="Teu telemóvel ou email"
-                                   value="{{ form.username.value|default_if_none:'' }}"
-                                   required>
-                            {% if form.username.errors %}
-                                <div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_password" class="form-label">Palavra-passe</label>
-                            <div class="input-group">
-                                <input type="password" name="password" id="id_password"
-                                       class="form-control{% if form.password.errors %} is-invalid{% endif %}"
-                                       placeholder="Tua palavra-passe" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                        <div class="login-form-section">
+                            <div class="login-form-section-head">
+                                <div>
+                                    <h3>Identificacao</h3>
+                                    <p>Usa o contacto com que a conta foi criada.</p>
+                                </div>
+                                <span class="login-section-badge">Passo 1</span>
                             </div>
-                            {% if form.password.errors %}
-                                <div class="invalid-feedback d-block">{{ form.password.errors|striptags }}</div>
-                            {% endif %}
+
+                            <div class="mb-0">
+                                <label for="id_username" class="login-input-label">Telemovel ou Email</label>
+                                <input type="text" name="username" id="id_username"
+                                       class="form-control{% if form.username.errors %} is-invalid{% endif %}"
+                                       placeholder="O teu telemovel ou email"
+                                       value="{{ form.username.value|default_if_none:'' }}"
+                                       autocomplete="username"
+                                       required>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>
+                                {% endif %}
+                                <div class="login-helper-copy">Exemplo: +239 9xx xxx ou nome@exemplo.com.</div>
+                            </div>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="remember_me" id="id_remember_me"
-                                   class="form-check-input" {% if form.remember_me.value %}checked{% endif %}>
-                            <label for="id_remember_me" class="form-check-label">Lembrar-me</label>
+                        <div class="login-form-section">
+                            <div class="login-form-section-head">
+                                <div>
+                                    <h3>Seguranca</h3>
+                                    <p>Confirma a palavra-passe para entrares na tua area.</p>
+                                </div>
+                                <span class="login-section-badge">Passo 2</span>
+                            </div>
+
+                            <div class="mb-0">
+                                <label for="id_password" class="login-input-label">Palavra-passe</label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="id_password"
+                                           class="form-control{% if form.password.errors %} is-invalid{% endif %}"
+                                           placeholder="A tua palavra-passe"
+                                           autocomplete="current-password"
+                                           required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Mostrar ou ocultar palavra-passe">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.password.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="login-options-row">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" name="remember_me" id="id_remember_me"
+                                           class="form-check-input" {% if form.remember_me.value %}checked{% endif %}>
+                                    <label for="id_remember_me" class="form-check-label">Lembrar-me neste dispositivo</label>
+                                </div>
+                                <a href="{% url 'accounts:password_reset_request' %}" class="login-recovery-link">
+                                    <i class="bi bi-key me-1"></i>Esqueceste-te da palavra-passe?
+                                </a>
+                            </div>
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary login-submit">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Entrar com seguranca
                             </button>
                         </div>
                     </form>
 
-                    <div class="text-center mt-4">
-                        <p class="mb-2">
-                            <a href="{% url 'accounts:password_reset_request' %}" class="text-decoration-none">
-                                <i class="bi bi-key me-1"></i>Esqueceste-te da palavra-passe?
-                            </a>
-                        </p>
-                        <hr>
-                        <p class="mb-0">
-                            Ainda não tens conta?
-                            <a href="{% url 'accounts:register' %}" class="text-primary fw-semibold">Regista-te</a>
-                        </p>
+                    <div class="login-support-panel">
+                        <div>
+                            <h3>Primeira vez aqui?</h3>
+                            <p class="mb-0">Cria a tua conta como jovem, empresa ou parceiro e entra no fluxo certo logo desde o inicio.</p>
+                        </div>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-person-plus me-2"></i>Abrir registo
+                        </a>
+                    </div>
+
+                    <div class="login-footer-note">
+                        Ao entrar, mantens acesso ao teu perfil, notificacoes, candidaturas e proximos passos dentro da plataforma.
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.getElementById('togglePassword').addEventListener('click', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('id_password');
-    const icon = this.querySelector('i');
 
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
+    if (!toggleButton || !passwordInput) {
+        return;
     }
+
+    toggleButton.addEventListener('click', function () {
+        const icon = this.querySelector('i');
+        const showPassword = passwordInput.type === 'password';
+
+        passwordInput.type = showPassword ? 'text' : 'password';
+        icon.classList.toggle('bi-eye', !showPassword);
+        icon.classList.toggle('bi-eye-slash', showPassword);
+    });
 });
 </script>
 {% endblock %}

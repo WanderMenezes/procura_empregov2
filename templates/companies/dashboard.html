@@ -755,7 +755,7 @@
                       <span><i class="bi bi-calendar-event me-1"></i>{{ r.created_at|date:"d/m/Y" }}</span>
                     </div>
                   </div>
-                  <span class="badge {% if r.estado == 'PENDENTE' %}bg-warning text-dark{% elif r.estado == 'APROVADO' %}bg-success{% else %}bg-danger{% endif %}">
+                  <span class="badge {% if r.estado == 'PENDENTE' %}bg-warning text-dark{% elif r.estado == 'APROVADO' %}bg-success{% elif r.estado == 'DESATIVADO' %}bg-secondary{% else %}bg-danger{% endif %}">
                     {{ r.get_estado_display }}
                   </span>
                 </div>

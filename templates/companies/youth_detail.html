@@ -76,6 +76,7 @@
   }
   .talent-detail-badge.approved { background: rgba(25,135,84,.12); color: #146c43; border: 1px solid rgba(25,135,84,.2); }
   .talent-detail-badge.pending { background: rgba(255,193,7,.16); color: #8f6a00; border: 1px solid rgba(255,193,7,.24); }
+  .talent-detail-badge.disabled { background: rgba(108,117,125,.12); color: #495057; border: 1px solid rgba(108,117,125,.2); }
   .talent-detail-badge.rejected, .talent-detail-badge.locked { background: rgba(220,53,69,.1); color: #a02834; border: 1px solid rgba(220,53,69,.18); }
   .talent-detail-status p, .talent-detail-about, .talent-detail-copy { color: #4f6178; }
   .talent-detail-contact-list, .talent-detail-note-list, .talent-detail-list, .talent-detail-doc-list, .talent-detail-skill-grid {
@@ -238,11 +239,13 @@
           </div>
         {% elif existing_request %}
           <div class="talent-detail-status">
-            <span class="talent-detail-badge {% if existing_request.estado == 'PENDENTE' %}pending{% else %}rejected{% endif %}">
-              <i class="bi {% if existing_request.estado == 'PENDENTE' %}bi-hourglass-split{% else %}bi-x-circle{% endif %}"></i>{{ existing_request.get_estado_display }}
+            <span class="talent-detail-badge {% if existing_request.estado == 'PENDENTE' %}pending{% elif existing_request.estado == 'DESATIVADO' %}disabled{% else %}rejected{% endif %}">
+              <i class="bi {% if existing_request.estado == 'PENDENTE' %}bi-hourglass-split{% elif existing_request.estado == 'DESATIVADO' %}bi-slash-circle{% else %}bi-x-circle{% endif %}"></i>{{ existing_request.get_estado_display }}
             </span>
             {% if existing_request.estado == 'PENDENTE' %}
               <p>O pedido ja foi enviado e aguarda analise administrativa. Assim que for aprovado, o contacto direto sera liberado aqui.</p>
+            {% elif existing_request.estado == 'DESATIVADO' %}
+              <p>O pedido chegou a ser aprovado, mas o acesso direto ao contacto foi desativado pelo administrador.</p>
             {% else %}
               <p>O pedido nao foi aprovado. Vale acompanhar a resposta administrativa antes de insistir numa nova abordagem.</p>
             {% endif %}

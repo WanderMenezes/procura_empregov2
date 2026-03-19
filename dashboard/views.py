@@ -227,9 +227,10 @@ def admin_dashboard(request):
 
 @tecnico_required
 def tecnico_dashboard(request):
-    """Dashboard do técnico PNUD (apenas leitura)"""
-    
-    # Estatísticas (apenas leitura)
+    """Dashboard técnico com indicadores de leitura para monitorização."""
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
     stats = {
         'total_jovens': YouthProfile.objects.count(),
         'jovens_completos': YouthProfile.objects.filter(completo=True).count(),
@@ -240,33 +241,77 @@ def tecnico_dashboard(request):
         'vagas_ativas': JobPost.objects.filter(estado='ATIVA').count(),
         'total_candidaturas': Application.objects.count(),
     }
-    
-    # Dados por distrito
+    stats['validacoes_pendentes'] = YouthProfile.objects.filter(completo=True, validado=False).count()
+    stats['jovens_nao_completos'] = max(stats['total_jovens'] - stats['jovens_completos'], 0)
+    stats['taxa_validacao'] = int((stats['jovens_validados'] / stats['jovens_completos']) * 100) if stats['jovens_completos'] else 0
+    stats['taxa_empresas_ativas'] = int((stats['empresas_ativas'] / stats['total_empresas']) * 100) if stats['total_empresas'] else 0
+    stats['taxa_vagas_ativas'] = int((stats['vagas_ativas'] / stats['total_vagas']) * 100) if stats['total_vagas'] else 0
+    stats['novos_utilizadores_7d'] = User.objects.filter(date_joined__gte=seven_days_ago).count()
+    stats['novas_vagas_30d'] = JobPost.objects.filter(data_publicacao__gte=thirty_days_ago).count()
+    stats['media_candidaturas_por_vaga'] = round(
+        stats['total_candidaturas'] / stats['total_vagas'], 1
+    ) if stats['total_vagas'] else 0
+
     jovens_por_distrito = []
     for district in District.objects.all():
         count = YouthProfile.objects.filter(user__distrito=district).count()
         if count > 0:
             jovens_por_distrito.append({
                 'nome': district.nome,
-                'total': count
+                'total': count,
             })
-    
-    # Dados por nível de educação
+    jovens_por_distrito = _add_percent(
+        sorted(jovens_por_distrito, key=lambda item: item['total'], reverse=True)
+    )
+
     educacao_stats = []
     for nivel_codigo, nivel_nome in Education.NIVEL_CHOICES:
         count = Education.objects.filter(nivel=nivel_codigo).count()
         if count > 0:
             educacao_stats.append({
                 'nome': nivel_nome,
-                'total': count
+                'total': count,
             })
-    
+    educacao_stats = _add_percent(
+        sorted(educacao_stats, key=lambda item: item['total'], reverse=True)
+    )
+
+    area_labels = dict(getattr(settings, 'AREAS_FORMACAO', []))
+    area_counts = (
+        Education.objects
+        .exclude(area_formacao='')
+        .values('area_formacao')
+        .annotate(total=Count('id'))
+        .order_by('-total', 'area_formacao')
+    )
+    area_stats = _add_percent([
+        {
+            'codigo': item['area_formacao'],
+            'nome': area_labels.get(item['area_formacao'], item['area_formacao']),
+            'total': item['total'],
+        }
+        for item in area_counts
+    ])
+
+    jovens_recentes = YouthProfile.objects.select_related('user', 'user__distrito').order_by('-created_at')[:6]
+    empresas_recentes = Company.objects.select_related('user').order_by('-created_at')[:6]
+    vagas_recentes = JobPost.objects.select_related('company').order_by('-data_publicacao')[:6]
+
     context = {
         'stats': stats,
         'jovens_por_distrito': jovens_por_distrito,
         'educacao_stats': educacao_stats,
+        'area_stats': area_stats,
+        'jovens_recentes': jovens_recentes,
+        'empresas_recentes': empresas_recentes,
+        'vagas_recentes': vagas_recentes,
+        'top_district': jovens_por_distrito[0] if jovens_por_distrito else None,
+        'top_level': educacao_stats[0] if educacao_stats else None,
+        'top_area': area_stats[0] if area_stats else None,
+        'distritos_ativos': len(jovens_por_distrito),
+        'areas_ativas': len(area_stats),
     }
-    
+
     return render(request, 'dashboard/tecnico.html', context)
 
 
@@ -494,6 +539,7 @@ def manage_contact_requests(request):
     summary = {
         'pendentes': all_requests.filter(estado='PENDENTE').count(),
         'aprovados': all_requests.filter(estado='APROVADO').count(),
+        'desativados': all_requests.filter(estado='DESATIVADO').count(),
         'rejeitados': all_requests.filter(estado='REJEITADO').count(),
         'filtrados': pedidos.count(),
     }
@@ -510,7 +556,7 @@ def manage_contact_requests(request):
 
 @admin_required
 def contact_request_action(request, pk, action):
-    """Aprovar ou rejeitar pedido de contacto"""
+    """Aprovar, rejeitar ou desativar pedido de contacto"""
     contact = get_object_or_404(ContactRequest, pk=pk)
     
     if action == 'aprovar':
@@ -538,6 +584,36 @@ def contact_request_action(request, pk, action):
         )
         
         messages.success(request, _('Pedido aprovado!'))
+
+    elif action == 'desativar':
+        if contact.estado != 'APROVADO':
+            messages.warning(request, _('Apenas pedidos aprovados podem ser desativados.'))
+        else:
+            contact.estado = 'DESATIVADO'
+            contact.responded_at = timezone.now()
+            if not contact.resposta_admin:
+                contact.resposta_admin = _('O acesso direto ao contacto foi desativado pelo administrador.')
+            contact.save()
+
+            Notification.objects.create(
+                user=contact.company.user,
+                titulo=_('Pedido de contacto desativado'),
+                mensagem=_('O acesso ao contacto de {} foi desativado pelo administrador.').format(
+                    contact.youth.user.nome
+                ),
+                tipo='ALERTA'
+            )
+
+            Notification.objects.create(
+                user=contact.youth.user,
+                titulo=_('Contacto desativado'),
+                mensagem=_('O acesso direto da empresa "{}" ao teu contacto foi desativado pelo administrador.').format(
+                    contact.company.nome
+                ),
+                tipo='INFO'
+            )
+
+            messages.warning(request, _('Pedido desativado.'))
     
     elif action == 'rejeitar':
         contact.estado = 'REJEITADO'
@@ -552,6 +628,9 @@ def contact_request_action(request, pk, action):
         )
         
         messages.warning(request, _('Pedido rejeitado.'))
+
+    else:
+        messages.error(request, _('Acao invalida para o pedido de contacto.'))
     
     next_url = request.GET.get('next')
     return redirect(next_url or 'dashboard:manage_contact_requests')

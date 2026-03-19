@@ -27,8 +27,8 @@
             </div>
           </div>
 
-          <span class="contact-request-status {% if r.estado == 'PENDENTE' %}pending{% elif r.estado == 'APROVADO' %}approved{% else %}rejected{% endif %}">
-            <i class="bi {% if r.estado == 'PENDENTE' %}bi-hourglass-split{% elif r.estado == 'APROVADO' %}bi-check-circle{% else %}bi-x-circle{% endif %}"></i>
+          <span class="contact-request-status {% if r.estado == 'PENDENTE' %}pending{% elif r.estado == 'APROVADO' %}approved{% elif r.estado == 'DESATIVADO' %}disabled{% else %}rejected{% endif %}">
+            <i class="bi {% if r.estado == 'PENDENTE' %}bi-hourglass-split{% elif r.estado == 'APROVADO' %}bi-check-circle{% elif r.estado == 'DESATIVADO' %}bi-slash-circle{% else %}bi-x-circle{% endif %}"></i>
             {{ r.get_estado_display }}
           </span>
         </div>
@@ -64,6 +64,11 @@
             <div class="contact-request-block">
               <span class="contact-request-label">Estado atual</span>
               <div class="contact-request-status-copy">O pedido aguarda analise do administrador antes de libertar os dados de contacto.</div>
+            </div>
+          {% elif r.estado == 'DESATIVADO' %}
+            <div class="contact-request-block">
+              <span class="contact-request-label">Estado atual</span>
+              <div class="contact-request-status-copy">O acesso ao contacto foi desativado pelo administrador e os dados diretos deixaram de estar liberados.</div>
             </div>
           {% else %}
             <div class="contact-request-block">

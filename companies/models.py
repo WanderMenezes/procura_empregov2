@@ -325,6 +325,7 @@ class ContactRequest(models.Model):
     ESTADO_CHOICES = [
         ('PENDENTE', _('Pendente')),
         ('APROVADO', _('Aprovado')),
+        ('DESATIVADO', _('Desativado')),
         ('REJEITADO', _('Rejeitado')),
     ]
     

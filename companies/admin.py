@@ -154,12 +154,17 @@ class ContactRequestAdmin(admin.ModelAdmin):
     search_fields = ['company__nome', 'youth__user__nome', 'motivo']
     readonly_fields = ['created_at', 'responded_at']
     
-    actions = ['aprovar_pedidos', 'rejeitar_pedidos']
+    actions = ['aprovar_pedidos', 'desativar_pedidos', 'rejeitar_pedidos']
     
     def aprovar_pedidos(self, request, queryset):
         from django.utils import timezone
         queryset.update(estado='APROVADO', responded_at=timezone.now())
     aprovar_pedidos.short_description = _('Aprovar pedidos')
+
+    def desativar_pedidos(self, request, queryset):
+        from django.utils import timezone
+        queryset.filter(estado='APROVADO').update(estado='DESATIVADO', responded_at=timezone.now())
+    desativar_pedidos.short_description = _('Desativar pedidos aprovados')
     
     def rejeitar_pedidos(self, request, queryset):
         from django.utils import timezone

@@ -26,7 +26,7 @@ from .forms import (
     AssistedRegistrationForm, YouthProfileEditForm, YouthSkillsForm,
     EducationForm, ExperienceForm, DocumentForm
 )
-from core.models import District, Skill, Notification
+from core.models import District, Skill, Notification, AuditLog
 from accounts.models import User
 import random
 from accounts.models import PhoneChange
@@ -1361,6 +1361,22 @@ def assisted_register(request):
                     ano=None
                 )
             
+            AuditLog.objects.create(
+                user=request.user,
+                acao='registo_assistido_criado',
+                payload={
+                    'jovem_id': user.id,
+                    'jovem_nome': user.nome,
+                    'jovem_telefone': user.telefone,
+                    'distrito_id': data['distrito'].id if data.get('distrito') else None,
+                    'operador_id': request.user.id,
+                    'operador_nome': request.user.nome,
+                    'associacao_parceira': request.user.associacao_parceira,
+                    'observacoes': data.get('observacoes', ''),
+                },
+                ip_address=request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+            )
+
             messages.success(
                 request,
                 _('Jovem registado com sucesso! O perfil aguarda validação do administrador.')

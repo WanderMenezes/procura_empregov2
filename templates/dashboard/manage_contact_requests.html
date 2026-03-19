@@ -16,7 +16,7 @@
                         <div class="admin-kicker">Autorizacoes</div>
                         <h1 class="admin-page-title">Pedidos de contacto</h1>
                         <p class="admin-subtitle mb-0">
-                            Centralize a aprovacao ou rejeicao dos pedidos feitos pelas empresas antes do contacto direto.
+                            Centralize a aprovacao, rejeicao ou desativacao dos pedidos feitos pelas empresas antes do contacto direto.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -26,6 +26,10 @@
                             <span class="admin-hero-chip">
                                 <i class="bi bi-check2-circle"></i>
                                 {{ contact_summary.aprovados }} aprovados
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-slash-circle"></i>
+                                {{ contact_summary.desativados }} desativados
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-funnel"></i>
@@ -43,7 +47,7 @@
             </div>
 
             <div class="row g-4 mb-4">
-                <div class="col-md-3">
+                <div class="col-lg col-md-6">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Pendentes</div>
@@ -52,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg col-md-6">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Aprovados</div>
@@ -61,7 +65,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg col-md-6">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Desativados</div>
+                            <div class="admin-summary-value">{{ contact_summary.desativados }}</div>
+                            <small class="text-muted">Acesso removido</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg col-md-6">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Rejeitados</div>
@@ -70,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg col-md-6">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Filtrados</div>
@@ -94,6 +107,7 @@
                                 <option value="">Todos</option>
                                 <option value="PENDENTE" {% if filtro_estado == 'PENDENTE' %}selected{% endif %}>Pendente</option>
                                 <option value="APROVADO" {% if filtro_estado == 'APROVADO' %}selected{% endif %}>Aprovado</option>
+                                <option value="DESATIVADO" {% if filtro_estado == 'DESATIVADO' %}selected{% endif %}>Desativado</option>
                                 <option value="REJEITADO" {% if filtro_estado == 'REJEITADO' %}selected{% endif %}>Rejeitado</option>
                             </select>
                         </div>
@@ -156,6 +170,12 @@
                                                     </a>
                                                     <a href="{% url 'dashboard:contact_request_action' pedido.pk 'rejeitar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger">
                                                         <i class="bi bi-x-lg"></i>
+                                                    </a>
+                                                </div>
+                                            {% elif pedido.estado == 'APROVADO' %}
+                                                <div class="admin-queue-actions justify-content-end">
+                                                    <a href="{% url 'dashboard:contact_request_action' pedido.pk 'desativar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-secondary" title="Desativar pedido aprovado">
+                                                        <i class="bi bi-slash-circle"></i>
                                                     </a>
                                                 </div>
                                             {% else %}

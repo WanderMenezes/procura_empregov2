@@ -2,23 +2,357 @@
 
 {% block title %}Registo Assistido{% endblock %}
 
+{% block extra_css %}
+<style>
+  .assisted-page { color: #122033; }
+  .assisted-hero {
+    position: relative; overflow: hidden; border-radius: 30px; padding: 1.8rem; color: #fff;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 30%), linear-gradient(135deg, rgba(18,39,68,.98), rgba(14,111,147,.94) 54%, rgba(219,133,42,.88));
+    box-shadow: 0 24px 52px rgba(10,52,86,.18);
+  }
+  .assisted-hero::after {
+    content: ""; position: absolute; right: -90px; bottom: -120px; width: 260px; height: 260px; border-radius: 999px;
+    background: rgba(255,255,255,.08);
+  }
+  .assisted-hero > * { position: relative; z-index: 1; }
+  .assisted-hero-head, .assisted-form-head, .assisted-actions-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .assisted-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .35rem; }
+  .assisted-title { font-size: clamp(2rem, 2.8vw, 3rem); line-height: 1.03; font-weight: 700; margin-bottom: .4rem; }
+  .assisted-subtitle { max-width: 68ch; margin: 0; color: rgba(255,255,255,.86); }
+  .assisted-chips, .assisted-actions, .assisted-preview-meta { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .assisted-chips { margin-top: 1rem; }
+  .assisted-chip {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: .84rem; font-weight: 600;
+  }
+  .assisted-actions .btn { border-radius: 14px; padding-inline: 1rem; }
+  .assisted-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+  .assisted-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  .assisted-panel {
+    border-radius: 26px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 40px rgba(18,32,51,.08);
+  }
+  .assisted-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+  .assisted-preview-card {
+    padding: 1.15rem; border-radius: 24px; background: linear-gradient(180deg, rgba(14,111,147,.08), rgba(255,255,255,.96));
+    border: 1px solid rgba(18,32,51,.08);
+  }
+  .assisted-preview-head { display: flex; gap: .95rem; align-items: center; margin-bottom: 1rem; }
+  .assisted-preview-avatar {
+    width: 74px; height: 74px; border-radius: 22px; display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2d4e, #0f6f93); color: #fff; font-size: 1.3rem; font-weight: 800; flex-shrink: 0;
+  }
+  .assisted-preview-name { font-size: 1.08rem; font-weight: 700; margin-bottom: .15rem; color: #122033; }
+  .assisted-preview-copy { color: #66768c; margin: 0; }
+  .assisted-preview-meta { margin-top: .9rem; }
+  .assisted-preview-pill {
+    display: inline-flex; align-items: center; gap: .42rem; padding: .42rem .72rem; border-radius: 999px;
+    background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; font-size: .82rem; font-weight: 600;
+  }
+  .assisted-mini-list, .assisted-checklist { display: grid; gap: .8rem; }
+  .assisted-mini-item, .assisted-check {
+    display: flex; gap: .8rem; align-items: flex-start; padding: .95rem 1rem; border-radius: 20px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06);
+  }
+  .assisted-mini-icon, .assisted-check-icon {
+    width: 2.15rem; height: 2.15rem; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .assisted-mini-icon { background: rgba(14,111,147,.1); color: #0e7193; }
+  .assisted-check-icon { background: rgba(34,166,120,.12); color: #15815c; }
+  .assisted-mini-item strong, .assisted-check strong { display: block; margin-bottom: .16rem; color: #122033; }
+  .assisted-mini-item p, .assisted-check p { margin: 0; color: #66768c; font-size: .92rem; }
+  .assisted-note {
+    padding: 1rem 1.05rem; border-radius: 20px; background: linear-gradient(135deg, rgba(219,133,42,.08), rgba(255,255,255,.95));
+    border: 1px solid rgba(219,133,42,.16); color: #6f5a2b;
+  }
+  .assisted-form-head h4 { margin-bottom: .2rem; }
+  .assisted-form-subtitle { color: #66768c; margin: 0; max-width: 65ch; }
+  .assisted-error-summary {
+    margin-top: 1rem; margin-bottom: 1.25rem; padding: 1rem 1.1rem; border-radius: 18px;
+    background: rgba(220,53,69,.08); border: 1px solid rgba(220,53,69,.14);
+  }
+  .assisted-error-summary strong { display: block; margin-bottom: .18rem; color: #8f2230; }
+  .assisted-error-summary p { margin: 0; color: #b33b48; }
+  .assisted-section + .assisted-section { margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid rgba(18,32,51,.08); }
+  .assisted-section-label { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0e7193; margin-bottom: .4rem; }
+  .assisted-section-title { font-size: 1.15rem; font-weight: 700; margin-bottom: .2rem; color: #122033; }
+  .assisted-section-copy { margin: 0 0 1rem; color: #66768c; }
+  .assisted-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+  .assisted-field { display: grid; gap: .42rem; }
+  .assisted-field.full { grid-column: 1 / -1; }
+  .assisted-field label { font-size: .92rem; font-weight: 700; color: #233246; }
+  .assisted-field .form-control, .assisted-field .form-select { min-height: 48px; border-radius: 16px; border-color: rgba(18,32,51,.12); background: #fcfdff; box-shadow: none; }
+  .assisted-field textarea.form-control { min-height: 124px; }
+  .assisted-field .form-control:focus, .assisted-field .form-select:focus {
+    border-color: rgba(11,94,215,.45); box-shadow: 0 0 0 .2rem rgba(11,94,215,.12);
+  }
+  .assisted-help { color: #6b7a90; font-size: .84rem; }
+  .assisted-error { color: #b42333; font-size: .84rem; }
+  .assisted-actions-row {
+    margin-top: 1.5rem; padding-top: 1.15rem; border-top: 1px solid rgba(18,32,51,.08); align-items: center;
+  }
+  .assisted-actions-row .btn { border-radius: 14px; padding-inline: 1rem; }
+  @media (max-width: 991.98px) {
+    .assisted-shell { grid-template-columns: 1fr; }
+    .assisted-sidebar { position: static; }
+    .assisted-hero-head, .assisted-form-head, .assisted-actions-row { flex-direction: column; align-items: stretch; }
+    .assisted-actions .btn { width: 100%; }
+  }
+  @media (max-width: 767.98px) {
+    .assisted-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <h4>Registo Assistido</h4>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-end">
-              <button class="btn btn-primary">Registar</button>
-            </div>
-          </form>
+<div class="assisted-page container py-4 py-lg-5">
+  <section class="assisted-hero mb-4">
+    <div class="assisted-hero-head">
+      <div>
+        <div class="assisted-kicker">Operacao no terreno</div>
+        <h1 class="assisted-title">Registo assistido de jovem</h1>
+        <p class="assisted-subtitle">
+          Recolha os dados essenciais, crie a conta do jovem numa unica passada e deixe o perfil pronto para seguir para validacao administrativa.
+        </p>
+        <div class="assisted-chips">
+          <span class="assisted-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_short_name|default:request.user.nome }}</span>
+          <span class="assisted-chip"><i class="bi bi-people"></i>{{ request.user.associacao_parceira|default:"Parceiro local" }}</span>
+          <span class="assisted-chip"><i class="bi bi-geo-alt"></i>{% if request.user.distrito %}{{ request.user.distrito.nome }}{% else %}Distrito por definir{% endif %}</span>
+          <span class="assisted-chip"><i class="bi bi-hourglass-split"></i>Perfil criado como pendente</span>
         </div>
       </div>
+      <div class="assisted-actions">
+        <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light"><i class="bi bi-check-circle me-2"></i>Validar perfis</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house-door me-2"></i>Inicio</a>
+      </div>
     </div>
+  </section>
+
+  <div class="assisted-shell">
+    <aside class="assisted-sidebar">
+      <section class="assisted-panel assisted-preview-card">
+        <div class="assisted-preview-head">
+          <div class="assisted-preview-avatar" id="assistedPreviewAvatar" aria-hidden="true">NJ</div>
+          <div>
+            <div class="assisted-preview-name" id="assistedPreviewName">Novo jovem</div>
+            <p class="assisted-preview-copy" id="assistedPreviewPhone">Telemovel por preencher</p>
+          </div>
+        </div>
+        <div class="assisted-preview-meta">
+          <span class="assisted-preview-pill"><i class="bi bi-person-vcard"></i>Conta jovem</span>
+          <span class="assisted-preview-pill"><i class="bi bi-shield-check"></i>Pendente para validacao</span>
+        </div>
+        <div class="assisted-mini-list mt-4">
+          <div class="assisted-mini-item">
+            <span class="assisted-mini-icon"><i class="bi bi-geo-alt"></i></span>
+            <div><strong>Local de referencia</strong><p id="assistedPreviewDistrict">Distrito por escolher</p></div>
+          </div>
+          <div class="assisted-mini-item">
+            <span class="assisted-mini-icon"><i class="bi bi-stars"></i></span>
+            <div><strong>Preferencia principal</strong><p id="assistedPreviewOpportunity">Oportunidade por definir</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="assisted-panel">
+        <div class="assisted-section-label"><i class="bi bi-signpost-split"></i>Fluxo de apoio</div>
+        <div class="assisted-checklist">
+          <div class="assisted-check">
+            <span class="assisted-check-icon"><i class="bi bi-1-circle"></i></span>
+            <div><strong>Recolher o essencial</strong><p>Confirme nome, telemovel, localizacao e os dados basicos de enquadramento do jovem.</p></div>
+          </div>
+          <div class="assisted-check">
+            <span class="assisted-check-icon"><i class="bi bi-2-circle"></i></span>
+            <div><strong>Registar situacao e formacao</strong><p>Mesmo quando a formacao nao esta completa, vale guardar o nivel e a area para facilitar a leitura futura.</p></div>
+          </div>
+          <div class="assisted-check">
+            <span class="assisted-check-icon"><i class="bi bi-3-circle"></i></span>
+            <div><strong>Submeter e acompanhar</strong><p>Depois do envio, o perfil fica criado como completo mas aguarda a validacao do administrador.</p></div>
+          </div>
+        </div>
+        <div class="assisted-note mt-4">
+          As observacoes do atendimento ficam guardadas no registo interno da operacao para referencia posterior.
+        </div>
+      </section>
+    </aside>
+
+    <section class="assisted-panel">
+      <div class="assisted-form-head">
+        <div>
+          <h4>Novo registo assistido</h4>
+          <p class="assisted-form-subtitle">
+            Preencha os campos abaixo com calma. O objetivo e criar um perfil inicial consistente, sem obrigar o jovem a navegar sozinho por todo o processo.
+          </p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors or form.errors %}
+        <div class="assisted-error-summary">
+          <strong>Alguns campos precisam de revisao.</strong>
+          <p>Corrija os pontos assinalados abaixo antes de concluir o registo assistido.</p>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+        <section class="assisted-section">
+          <div class="assisted-section-label"><i class="bi bi-person-lines-fill"></i>Identidade</div>
+          <h2 class="assisted-section-title">Quem estamos a registar</h2>
+          <p class="assisted-section-copy">Comece pelos dados pessoais e pelos canais principais de contacto.</p>
+          <div class="assisted-grid">
+            <div class="assisted-field">
+              <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+              {{ form.nome }}
+              {% if form.nome.errors %}<div class="assisted-error">{{ form.nome.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+              {{ form.telefone }}
+              {% if form.telefone.errors %}<div class="assisted-error">{{ form.telefone.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="assisted-error">{{ form.email.errors|striptags }}</div>{% endif %}
+              <div class="assisted-help">Pode ficar vazio se o jovem ainda nao usar email regularmente.</div>
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.data_nascimento.id_for_label }}">{{ form.data_nascimento.label }}</label>
+              {{ form.data_nascimento }}
+              {% if form.data_nascimento.errors %}<div class="assisted-error">{{ form.data_nascimento.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }}</label>
+              {{ form.sexo }}
+              {% if form.sexo.errors %}<div class="assisted-error">{{ form.sexo.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+
+        <section class="assisted-section">
+          <div class="assisted-section-label"><i class="bi bi-geo-alt"></i>Localizacao</div>
+          <h2 class="assisted-section-title">Onde o jovem esta baseado</h2>
+          <p class="assisted-section-copy">Estes dados ajudam o perfil a entrar logo nas pesquisas certas.</p>
+          <div class="assisted-grid">
+            <div class="assisted-field">
+              <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+              {{ form.distrito }}
+              {% if form.distrito.errors %}<div class="assisted-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
+              {{ form.localidade }}
+              {% if form.localidade.errors %}<div class="assisted-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
+              <div class="assisted-help">Bairro, comunidade ou ponto de referencia ajudam bastante.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="assisted-section">
+          <div class="assisted-section-label"><i class="bi bi-mortarboard"></i>Enquadramento</div>
+          <h2 class="assisted-section-title">Formacao e momento atual</h2>
+          <p class="assisted-section-copy">Registe o melhor retrato possivel da situacao do jovem no momento do atendimento.</p>
+          <div class="assisted-grid">
+            <div class="assisted-field">
+              <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
+              {{ form.nivel }}
+              {% if form.nivel.errors %}<div class="assisted-error">{{ form.nivel.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.area_formacao.id_for_label }}">{{ form.area_formacao.label }}</label>
+              {{ form.area_formacao }}
+              {% if form.area_formacao.errors %}<div class="assisted-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.situacao_atual.id_for_label }}">{{ form.situacao_atual.label }}</label>
+              {{ form.situacao_atual }}
+              {% if form.situacao_atual.errors %}<div class="assisted-error">{{ form.situacao_atual.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field">
+              <label for="{{ form.disponibilidade.id_for_label }}">{{ form.disponibilidade.label }}</label>
+              {{ form.disponibilidade }}
+              {% if form.disponibilidade.errors %}<div class="assisted-error">{{ form.disponibilidade.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="assisted-field full">
+              <label for="{{ form.preferencia_oportunidade.id_for_label }}">{{ form.preferencia_oportunidade.label }}</label>
+              {{ form.preferencia_oportunidade }}
+              {% if form.preferencia_oportunidade.errors %}<div class="assisted-error">{{ form.preferencia_oportunidade.errors|striptags }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+
+        <section class="assisted-section">
+          <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observacoes</div>
+          <h2 class="assisted-section-title">Notas internas do atendimento</h2>
+          <p class="assisted-section-copy">Use este campo para registar contexto util do atendimento, barreiras encontradas ou proximos passos combinados.</p>
+          <div class="assisted-grid">
+            <div class="assisted-field full">
+              <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+              {{ form.observacoes }}
+              {% if form.observacoes.errors %}<div class="assisted-error">{{ form.observacoes.errors|striptags }}</div>{% endif %}
+              <div class="assisted-help">Estas observacoes ficam no registo interno da operacao e nao aparecem no perfil publico do jovem.</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="assisted-actions-row">
+          <div class="assisted-help">
+            Ao guardar, a conta do jovem sera criada com o perfil completo e marcada para validacao administrativa.
+          </div>
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-person-plus me-2"></i>Registar jovem
+          </button>
+        </div>
+      </form>
+    </section>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const nameInput = document.getElementById('{{ form.nome.id_for_label }}');
+    const phoneInput = document.getElementById('{{ form.telefone.id_for_label }}');
+    const districtInput = document.getElementById('{{ form.distrito.id_for_label }}');
+    const opportunityInput = document.getElementById('{{ form.preferencia_oportunidade.id_for_label }}');
+
+    const avatar = document.getElementById('assistedPreviewAvatar');
+    const nameTarget = document.getElementById('assistedPreviewName');
+    const phoneTarget = document.getElementById('assistedPreviewPhone');
+    const districtTarget = document.getElementById('assistedPreviewDistrict');
+    const opportunityTarget = document.getElementById('assistedPreviewOpportunity');
+
+    function initialsFromName(value) {
+      const parts = (value || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return 'NJ';
+      return parts.slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('');
+    }
+
+    function selectedText(select, fallback) {
+      if (!select || !select.options || select.selectedIndex < 0) return fallback;
+      const option = select.options[select.selectedIndex];
+      return option && option.value ? option.text : fallback;
+    }
+
+    function updatePreview() {
+      const nameValue = (nameInput && nameInput.value || '').trim();
+      const phoneValue = (phoneInput && phoneInput.value || '').trim();
+
+      avatar.textContent = initialsFromName(nameValue);
+      nameTarget.textContent = nameValue || 'Novo jovem';
+      phoneTarget.textContent = phoneValue || 'Telemovel por preencher';
+      districtTarget.textContent = selectedText(districtInput, 'Distrito por escolher');
+      opportunityTarget.textContent = selectedText(opportunityInput, 'Oportunidade por definir');
+    }
+
+    [nameInput, phoneInput, districtInput, opportunityInput].forEach(function (field) {
+      if (!field) return;
+      field.addEventListener('input', updatePreview);
+      field.addEventListener('change', updatePreview);
+    });
+
+    updatePreview();
+  });
+</script>
 {% endblock %}
