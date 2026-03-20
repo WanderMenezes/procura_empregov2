@@ -14,10 +14,10 @@
             <div class="card admin-hero admin-hero-split mb-4">
                 <div class="card-body">
                     <div class="admin-hero-copy">
-                        <div class="admin-kicker">Gestao central</div>
+                        <div class="admin-kicker">Gestão central</div>
                         <h1 class="admin-page-title">Utilizadores</h1>
                         <p class="admin-subtitle mb-0">
-                            Crie novas contas, pesquise rapidamente e mantenha o estado dos acessos sob controlo.
+                            Crie novas contas, pesquise rápidamente e mantenha o estado dos acessos sob controlo.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -30,7 +30,7 @@
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-person-plus"></i>
-                                {{ user_summary.novos_7d|intcomma }} novos nos ultimos 7 dias
+                                {{ user_summary.novos_7d|intcomma }} novos nos últimos 7 dias
                             </span>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Equipa interna</div>
                             <div class="admin-summary-value">{{ user_summary.equipa|intcomma }}</div>
-                            <small class="text-muted">Admins, operadores e tecnicos</small>
+                            <small class="text-muted">Admins, operadores e técnicos</small>
                         </div>
                     </div>
                 </div>
@@ -125,7 +125,7 @@
                                                                 <i class="bi {% if value == 'JO' %}bi-person{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up{% else %}bi-person{% endif %}"></i>
                                                             </span>
                                                             <span class="admin-radio-title">
-                                                                {% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador{% elif value == 'TEC' %}Tecnico{% else %}{{ label }}{% endif %}
+                                                                {% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador{% elif value == 'TEC' %}Técnico{% else %}{{ label }}{% endif %}
                                                             </span>
                                                         </label>
                                                     </div>
@@ -150,7 +150,7 @@
                                             {% endif %}
                                         </div>
                                         <div class="col-md-6">
-                                            <label for="id_telefone" class="form-label">Telemovel *</label>
+                                            <label for="id_telefone" class="form-label">Telemóvel *</label>
                                             <input type="tel" name="telefone" id="id_telefone"
                                                    class="form-control{% if create_user_form.telefone.errors %} is-invalid{% endif %}"
                                                    value="{{ create_user_form.telefone.value|default_if_none:'' }}"
@@ -185,11 +185,11 @@
                                             {% endif %}
                                         </div>
                                         <div class="col-md-6" id="admin_bi_group">
-                                            <label for="id_bi_numero" class="form-label">Numero do BI *</label>
+                                            <label for="id_bi_numero" class="form-label">Número do BI *</label>
                                             <input type="text" name="bi_numero" id="id_bi_numero"
                                                    class="form-control{% if create_user_form.bi_numero.errors %} is-invalid{% endif %}"
                                                    value="{{ create_user_form.bi_numero.value|default_if_none:'' }}"
-                                                   placeholder="Numero do BI">
+                                                   placeholder="Número do BI">
                                             {% if create_user_form.bi_numero.errors %}
                                                 <div class="invalid-feedback d-block">{{ create_user_form.bi_numero.errors|striptags }}</div>
                                             {% endif %}
@@ -260,7 +260,7 @@
                                 <div>
                                     <div class="admin-section-kicker">Resumo do perfil</div>
                                     <h5 class="mb-1" id="admin_profile_title">Conta para jovem</h5>
-                                    <p class="text-muted mb-0" id="admin_profile_text">Ideal para candidaturas, documentos e validacao individual.</p>
+                                    <p class="text-muted mb-0" id="admin_profile_text">Ideal para candidaturas, documentos e validação individual.</p>
                                 </div>
                             </div>
                             <div class="admin-profile-preview">
@@ -268,11 +268,11 @@
                                 <div class="admin-inline-stat-list">
                                     <div class="admin-inline-stat">
                                         <span class="admin-inline-stat-label">Documento pedido</span>
-                                        <strong id="admin_profile_document">BI obrigatorio</strong>
+                                        <strong id="admin_profile_document">BI obrigatório</strong>
                                     </div>
                                     <div class="admin-inline-stat">
                                         <span class="admin-inline-stat-label">Consentimentos</span>
-                                        <strong id="admin_profile_consent">Obrigatorios</strong>
+                                        <strong id="admin_profile_consent">Obrigatórios</strong>
                                     </div>
                                     <div class="admin-inline-stat">
                                         <span class="admin-inline-stat-label">Foto</span>
@@ -282,9 +282,9 @@
                             </div>
 
                             <div class="admin-note-card">
-                                <h6 class="mb-2">Boas praticas</h6>
+                                <h6 class="mb-2">Boas práticas</h6>
                                 <ul class="admin-note-list mb-0">
-                                    <li>Use o telemovel como identificador principal do acesso.</li>
+                                    <li>Use o telemóvel como identificador principal do acesso.</li>
                                     <li>Para empresas, confirme o nome comercial e o NIF antes de criar a conta.</li>
                                     <li>Perfis internos podem ser criados sem consentimentos de contacto.</li>
                                 </ul>
@@ -315,7 +315,7 @@
                                 <option value="EMP" {% if filtro_perfil == 'EMP' %}selected{% endif %}>Empresa</option>
                                 <option value="OP" {% if filtro_perfil == 'OP' %}selected{% endif %}>Operador</option>
                                 <option value="ADM" {% if filtro_perfil == 'ADM' %}selected{% endif %}>Administrador</option>
-                                <option value="TEC" {% if filtro_perfil == 'TEC' %}selected{% endif %}>Tecnico</option>
+                                <option value="TEC" {% if filtro_perfil == 'TEC' %}selected{% endif %}>Técnico</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -339,7 +339,7 @@
                     <div class="admin-table-header">
                         <div>
                             <h5 class="mb-1">Lista de utilizadores</h5>
-                            <p class="text-muted mb-0">{{ user_summary.filtrados|intcomma }} registo{{ user_summary.filtrados|pluralize }} visivel{{ user_summary.filtrados|pluralize }}</p>
+                            <p class="text-muted mb-0">{{ user_summary.filtrados|intcomma }} registo{{ user_summary.filtrados|pluralize }} visível{{ user_summary.filtrados|pluralize }}</p>
                         </div>
                     </div>
 
@@ -353,7 +353,7 @@
                                     <th>Distrito</th>
                                     <th>Estado</th>
                                     <th>Registo</th>
-                                    <th class="text-end">Acao</th>
+                                    <th class="text-end">Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -384,6 +384,11 @@
                                         <td>{{ user.date_joined|date:"d/m/Y" }}</td>
                                         <td class="text-end">
                                             <div class="admin-queue-actions justify-content-end">
+                                                <a href="{% url 'dashboard:user_detail' user.pk %}?next={{ request.get_full_path|urlencode }}"
+                                                   class="btn btn-sm btn-outline-dark"
+                                                   title="Ver detalhe completo">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
                                                 <a href="{% url 'dashboard:user_edit' user.pk %}?next={{ request.get_full_path|urlencode }}"
                                                    class="btn btn-sm btn-outline-secondary"
                                                    title="Editar utilizador">
@@ -447,10 +452,10 @@ document.addEventListener('DOMContentLoaded', function () {
             nameLabel: 'Nome completo *',
             namePlaceholder: 'Nome completo',
             title: 'Conta para jovem',
-            text: 'Ideal para candidaturas, documentos e validacao individual.',
+            text: 'Ideal para candidaturas, documentos e validação individual.',
             badge: 'Jovem',
-            document: 'BI obrigatorio',
-            consent: 'Obrigatorios',
+            document: 'BI obrigatório',
+            consent: 'Obrigatórios',
             photo: 'Opcional',
             showNif: false,
             showBi: true,
@@ -463,9 +468,9 @@ document.addEventListener('DOMContentLoaded', function () {
             title: 'Conta para empresa',
             text: 'Preparada para criar perfil empresarial, publicar vagas e pedir contactos.',
             badge: 'Empresa',
-            document: 'NIF obrigatorio',
-            consent: 'Obrigatorios',
-            photo: 'Nao aplicavel',
+            document: 'NIF obrigatório',
+            consent: 'Obrigatórios',
+            photo: 'Não aplicável',
             showNif: true,
             showBi: false,
             showPhoto: false,
@@ -475,11 +480,11 @@ document.addEventListener('DOMContentLoaded', function () {
             nameLabel: 'Nome completo *',
             namePlaceholder: 'Nome do operador',
             title: 'Conta para operador',
-            text: 'Indicada para apoio a registos assistidos e validacao local.',
+            text: 'Indicada para apoio a registos assistidos e validação local.',
             badge: 'Operador',
-            document: 'Nao obrigatorio',
-            consent: 'Nao exigidos',
-            photo: 'Nao aplicavel',
+            document: 'Não obrigatório',
+            consent: 'Não exigidos',
+            photo: 'Não aplicável',
             showNif: false,
             showBi: false,
             showPhoto: false,
@@ -487,13 +492,13 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         TEC: {
             nameLabel: 'Nome completo *',
-            namePlaceholder: 'Nome do tecnico',
-            title: 'Conta para tecnico',
-            text: 'Focada em leitura de indicadores, monitorizacao e acompanhamento.',
-            badge: 'Tecnico',
-            document: 'Nao obrigatorio',
-            consent: 'Nao exigidos',
-            photo: 'Nao aplicavel',
+            namePlaceholder: 'Nome do técnico',
+            title: 'Conta para técnico',
+            text: 'Focada em leitura de indicadores, monitorização e acompanhamento.',
+            badge: 'Técnico',
+            document: 'Não obrigatório',
+            consent: 'Não exigidos',
+            photo: 'Não aplicável',
             showNif: false,
             showBi: false,
             showPhoto: false,

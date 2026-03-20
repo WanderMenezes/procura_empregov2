@@ -15,18 +15,18 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Leitura executiva</div>
-                        <h1 class="admin-page-title">Relatorios</h1>
+                        <h1 class="admin-page-title">Relatérios</h1>
                         <p class="admin-subtitle mb-0">
-                            Consulte o volume do periodo selecionado e exporte um resumo pronto para partilha.
+                            Consulte o volume do período selecionado e exporte um resumo pronto para partilha.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
                                 <i class="bi bi-calendar-range"></i>
-                                {{ data_inicio|date:"d/m/Y" }} ate {{ data_fim|date:"d/m/Y" }}
+                                {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-activity"></i>
-                                {{ total_movimentos|intcomma }} movimentos no periodo
+                                {{ total_movimentos|intcomma }} movimentos no período
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-speedometer2"></i>
@@ -71,7 +71,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Novos jovens</div>
                             <div class="admin-summary-value">{{ jovens_novos|intcomma }}</div>
-                            <small class="text-muted">Entradas no periodo</small>
+                            <small class="text-muted">Entradas no período</small>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Novas vagas</div>
                             <div class="admin-summary-value">{{ vagas_novas|intcomma }}</div>
-                            <small class="text-muted">Publicacoes abertas no periodo</small>
+                            <small class="text-muted">Publicações abertas no período</small>
                         </div>
                     </div>
                 </div>
@@ -110,9 +110,9 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Distribuicao</div>
+                                    <div class="admin-section-kicker">Distribuição</div>
                                     <h5 class="mb-1">Peso de cada indicador</h5>
-                                    <p class="text-muted mb-0">Veja onde o volume do periodo se concentrou.</p>
+                                    <p class="text-muted mb-0">Vejá onde o volume do período se concentrou.</p>
                                 </div>
                             </div>
 
@@ -131,7 +131,7 @@
                             {% else %}
                                 <div class="admin-empty-state">
                                     <i class="bi bi-bar-chart"></i>
-                                    <p class="mb-0">Nao houve movimentos no periodo selecionado.</p>
+                                    <p class="mb-0">Não houve movimentos no período selecionado.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -143,15 +143,15 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Leituras rapidas</div>
-                                    <h5 class="mb-1">Resumo do periodo</h5>
-                                    <p class="text-muted mb-0">Contexto suficiente para partilha rapida com a equipa.</p>
+                                    <div class="admin-section-kicker">Leituras rápidas</div>
+                                    <h5 class="mb-1">Resumo do período</h5>
+                                    <p class="text-muted mb-0">Contexto suficiente para partilha rápida com a equipa.</p>
                                 </div>
                             </div>
 
                             <div class="admin-inline-stat-list">
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Duracao analisada</span>
+                                    <span class="admin-inline-stat-label">Duração analisada</span>
                                     <strong>{{ period_days }} dia{{ period_days|pluralize }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
@@ -165,9 +165,9 @@
                             </div>
 
                             <div class="admin-note-card">
-                                <h6 class="mb-2">Exportacao pronta</h6>
+                                <h6 class="mb-2">Exportação pronta</h6>
                                 <p class="mb-0 text-muted">
-                                    O CSV ajuda em analise detalhada e o PDF gera um resumo executivo do mesmo intervalo.
+                                    O CSV ajuda em análise detalhada e o PDF gera um resumo executivo do mesmo intervalo.
                                 </p>
                             </div>
                         </div>
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function (event) {
             if (startInput && endInput && startInput.value && endInput.value && endInput.value < startInput.value) {
                 event.preventDefault();
-                alert('A data final nao pode ser menor que a data inicial.');
+                alert('A data final não pode ser menor que a data inicial.');
             }
         });
     }

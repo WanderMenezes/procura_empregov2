@@ -2,101 +2,819 @@
 
 {% block title %}Sobre - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .about-page {
+    background:
+      radial-gradient(circle at top left, rgba(15, 90, 159, 0.12), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(30, 140, 108, 0.12), transparent 24%),
+      linear-gradient(180deg, #f5f9fc 0%, #eef3f8 100%);
+  }
+
+  .about-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .about-hero,
+  .about-card,
+  .about-panel,
+  .about-cta {
+    border-radius: 28px;
+    border: 1px solid rgba(16, 37, 58, 0.08);
+    box-shadow: 0 22px 44px rgba(16, 37, 58, 0.08);
+  }
+
+  .about-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 28%),
+      linear-gradient(135deg, #0c3555 0%, #0f5a9f 54%, #1e8c6c 100%);
+  }
+
+  .about-hero::after {
+    content: "";
+    position: absolute;
+    right: -72px;
+    bottom: -88px;
+    width: 240px;
+    height: 240px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .about-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .about-kicker,
+  .about-section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .about-kicker {
+    margin-bottom: 0.95rem;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .about-title {
+    font-size: clamp(2.2rem, 4vw, 3.9rem);
+    line-height: 0.98;
+    margin-bottom: 0.85rem;
+    max-width: 10.5ch;
+  }
+
+  .about-copy,
+  .about-lead,
+  .about-card-copy,
+  .about-list li,
+  .about-meta,
+  .about-step-copy,
+  .about-districts p {
+    color: #607287;
+  }
+
+  .about-hero .about-copy,
+  .about-hero .about-meta {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .about-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .about-hero-actions,
+  .about-pill-list,
+  .about-panel-tags,
+  .about-step-meta,
+  .about-benefit-list,
+  .about-district-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .about-hero-actions {
+    margin-top: 1.2rem;
+  }
+
+  .about-hero-actions .btn,
+  .about-cta .btn {
+    border-radius: 16px;
+    padding-inline: 1rem;
+    font-weight: 700;
+  }
+
+  .about-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.58rem 0.88rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .about-panel {
+    padding: 1.2rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .about-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .about-panel-head strong {
+    font-size: 1.1rem;
+  }
+
+  .about-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .about-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .about-panel-stat {
+    padding: 0.95rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .about-panel-stat strong {
+    display: block;
+    font-size: 1.55rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .about-panel-stat span,
+  .about-panel-copy {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .about-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+    gap: 1.35rem;
+    align-items: start;
+  }
+
+  .about-main {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .about-card,
+  .about-sidebar-card {
+    background: #fff;
+    padding: 1.35rem;
+  }
+
+  .about-section-kicker {
+    margin-bottom: 0.55rem;
+    background: rgba(15, 90, 159, 0.08);
+    color: #0f5a9f;
+  }
+
+  .about-section-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .about-feature-grid,
+  .about-lane-grid,
+  .about-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .about-feature-card,
+  .about-lane-card,
+  .about-trust-card {
+    border-radius: 22px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(16, 37, 58, 0.08);
+  }
+
+  .about-feature-icon,
+  .about-lane-icon,
+  .about-trust-icon,
+  .about-step-index {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+    font-size: 1.1rem;
+  }
+
+  .about-feature-icon {
+    background: rgba(15, 90, 159, 0.1);
+    color: #0f5a9f;
+  }
+
+  .about-lane-icon {
+    background: rgba(30, 140, 108, 0.1);
+    color: #1e8c6c;
+  }
+
+  .about-trust-icon {
+    background: rgba(242, 169, 59, 0.12);
+    color: #b8780e;
+  }
+
+  .about-feature-card h3,
+  .about-lane-card h3,
+  .about-trust-card h3,
+  .about-sidebar-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    color: #10253a;
+  }
+
+  .about-process {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .about-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: start;
+    padding: 1rem;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(16, 37, 58, 0.08);
+  }
+
+  .about-step-index {
+    margin-bottom: 0;
+    background: rgba(15, 90, 159, 0.1);
+    color: #0f5a9f;
+    font-weight: 800;
+  }
+
+  .about-step h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .about-step-meta {
+    margin-top: 0.55rem;
+  }
+
+  .about-step-meta span,
+  .about-panel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(15, 90, 159, 0.08);
+    color: #214766;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .about-lane-card {
+    height: 100%;
+  }
+
+  .about-benefit-list {
+    margin-top: 0.85rem;
+  }
+
+  .about-benefit-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(16, 37, 58, 0.05);
+    color: #314659;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .about-districts {
+    border-radius: 24px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #f7fbfd, #ffffff);
+    border: 1px solid rgba(16, 37, 58, 0.08);
+    margin-top: 1rem;
+  }
+
+  .about-district-grid span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.58rem 0.82rem;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(16, 37, 58, 0.08);
+    color: #23455f;
+    font-weight: 600;
+  }
+
+  .about-sidebar {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .about-sidebar-card {
+    border-radius: 24px;
+    border: 1px solid rgba(16, 37, 58, 0.08);
+    box-shadow: 0 18px 34px rgba(16, 37, 58, 0.06);
+    background: #fff;
+    padding: 1.25rem;
+  }
+
+  .about-list {
+    display: grid;
+    gap: 0.7rem;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .about-list li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .about-list i {
+    color: #1e8c6c;
+    margin-top: 0.15rem;
+  }
+
+  .about-link-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .about-link {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff, #f8fbfe);
+    border: 1px solid rgba(16, 37, 58, 0.08);
+    text-decoration: none;
+    color: #10253a;
+    font-weight: 600;
+  }
+
+  .about-link small {
+    display: block;
+    color: #697b8f;
+    font-weight: 500;
+  }
+
+  .about-cta {
+    position: relative;
+    overflow: hidden;
+    padding: 1.55rem;
+    color: #fff;
+    background: linear-gradient(135deg, #143354 0%, #1e8c6c 100%);
+  }
+
+  .about-cta::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -100px auto;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .about-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .about-cta-copy {
+    color: rgba(255, 255, 255, 0.84);
+    max-width: 62ch;
+  }
+
+  @media (max-width: 1199.98px) {
+    .about-feature-grid,
+    .about-lane-grid,
+    .about-trust-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .about-hero-grid,
+    .about-main-grid,
+    .about-feature-grid,
+    .about-lane-grid,
+    .about-trust-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .about-panel-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .about-hero,
+    .about-card,
+    .about-sidebar-card,
+    .about-cta {
+      border-radius: 22px;
+    }
+
+    .about-hero,
+    .about-card,
+    .about-sidebar-card,
+    .about-cta {
+      padding: 1.15rem;
+    }
+
+    .about-panel-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .about-step {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h1 class="text-center mb-4">Sobre a Base Nacional de Jovens</h1>
-                    
-                    <p class="lead text-center mb-5">
-                        Uma plataforma nacional para conectar jovens de São Tomé e Príncipe 
-                        com oportunidades de emprego, estágios e formação.
-                    </p>
-                    
-                    <h3 class="mb-3">A Nossa Missão</h3>
-                    <p>
-                        A Base Nacional de Jovens foi criada com o objetivo de facilitar a 
-                        inserção dos jovens santomenses no mercado de trabalho, promovendo 
-                        a conexão entre talentos jovens e empresas/instituições que oferecem 
-                        oportunidades de desenvolvimento profissional.
-                    </p>
-                    
-                    <h3 class="mb-3 mt-4">O Que Oferecemos</h3>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="d-flex">
-                                <i class="bi bi-person-check text-primary fs-3 me-3"></i>
-                                <div>
-                                    <h5>Para Jovens</h5>
-                                    <ul class="list-unstyled text-muted">
-                                        <li><i class="bi bi-check2 me-2"></i>Registo gratuito</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Perfil profissional</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Acesso a vagas</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Visibilidade para empresas</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex">
-                                <i class="bi bi-building-check text-success fs-3 me-3"></i>
-                                <div>
-                                    <h5>Para Empresas</h5>
-                                    <ul class="list-unstyled text-muted">
-                                        <li><i class="bi bi-check2 me-2"></i>Publicação de vagas</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Pesquisa de candidatos</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Filtros avançados</li>
-                                        <li><i class="bi bi-check2 me-2"></i>Gestão de candidaturas</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h3 class="mb-3 mt-4">Cobertura Nacional</h3>
-                    <p>
-                        A plataforma cobre todos os distritos de São Tomé e Príncipe, 
-                        garantindo que jovens de todas as regiões tenham acesso às 
-                        oportunidades:
-                    </p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Água Grande</li>
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Cantagalo</li>
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Caué</li>
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Lembá</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Lobata</li>
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Mé-Zóchi</li>
-                                <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-primary"></i>Príncipe</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <h3 class="mb-3 mt-4">Parceiros</h3>
-                    <p>
-                        Este projeto é desenvolvido em parceria com o Governo de São Tomé e Príncipe 
-                        e o PNUD (Programa das Nações Unidas para o Desenvolvimento), com o objetivo 
-                        de promover o emprego juvenil e o desenvolvimento económico do país.
-                    </p>
-                    
-                    <div class="text-center mt-5">
-                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3">
-                            <i class="bi bi-person-plus me-2"></i>Registar-me
-                        </a>
-                        <a href="{% url 'help' %}" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-question-circle me-2"></i>Ajuda
-                        </a>
-                    </div>
-                </div>
+<div class="about-page py-4 py-lg-5">
+  <div class="container">
+    <div class="about-shell">
+      <section class="about-hero">
+        <div class="about-hero-grid">
+          <div>
+            <div class="about-kicker"><i class="bi bi-stars"></i>Propósito Nacional</div>
+            <h1 class="about-title">Liga talento jovem a oportunidades reais.</h1>
+            <p class="about-copy mb-0">
+              A Base Nacional de Jovens foi criada para aproximar jovens, empresas e equipas de apoio
+              num único sistema mais claro, confiável e útil para a empregabilidade em São Tomé e Príncipe.
+            </p>
+
+            <div class="about-hero-actions">
+              <a href="{% url 'accounts:register' %}" class="btn btn-light">
+                <i class="bi bi-person-plus me-2"></i>Criar conta
+              </a>
+              <a href="{% url 'help' %}" class="btn btn-outline-light">
+                <i class="bi bi-question-circle me-2"></i>Ver ajuda
+              </a>
             </div>
+
+            <div class="about-pill-list mt-3">
+              <span class="about-pill"><i class="bi bi-briefcase"></i>Emprego e estágios</span>
+              <span class="about-pill"><i class="bi bi-mortarboard"></i>Formação e percurso</span>
+              <span class="about-pill"><i class="bi bi-shield-check"></i>Controlo e confiança</span>
+            </div>
+          </div>
+
+          <aside class="about-panel">
+            <div class="about-panel-head">
+              <div>
+                <div class="about-panel-badge"><i class="bi bi-diagram-3"></i>Como a plataforma ajuda</div>
+                <strong>Um ponto de encontro mais simples para quem procura e para quem recruta.</strong>
+              </div>
+            </div>
+
+            <div class="about-panel-grid">
+              <div class="about-panel-stat">
+                <strong>Jovens</strong>
+                <span>Constroem um perfil e ganham visibilidade para oportunidades certas.</span>
+              </div>
+              <div class="about-panel-stat">
+                <strong>Empresas</strong>
+                <span>Publicam vagas, pesquisam perfis e acompanham candidaturas.</span>
+              </div>
+              <div class="about-panel-stat">
+                <strong>Operadores</strong>
+                <span>Apoiam registos assistidos, validação e inclusão territorial.</span>
+              </div>
+              <div class="about-panel-stat">
+                <strong>Técnicos</strong>
+                <span>Leem indicadores, acompanham fluxos e reforçam a coordenação.</span>
+              </div>
+            </div>
+
+            <div class="about-panel-tags mt-3">
+              <span class="about-panel-tag"><i class="bi bi-geo-alt"></i>Cobertura nacional</span>
+              <span class="about-panel-tag"><i class="bi bi-check2-circle"></i>Fluxos validados</span>
+            </div>
+          </aside>
         </div>
+      </section>
+
+      <div class="about-main-grid">
+        <main class="about-main">
+          <section class="about-card">
+            <div class="about-section-kicker"><i class="bi bi-bullseye"></i>Missão</div>
+            <h2 class="about-section-title">Porque esta plataforma existe</h2>
+            <p class="about-lead mb-0">
+              O objetivo não é apenas reunir dados. É transformar informação dispersa em oportunidades
+              concretas, reduzir atrito no processo e dar mais contexto a cada ligação entre jovem e empresa.
+            </p>
+
+            <div class="about-feature-grid">
+              <article class="about-feature-card">
+                <div class="about-feature-icon"><i class="bi bi-door-open"></i></div>
+                <h3>Acesso mais simples</h3>
+                <p class="about-card-copy mb-0">
+                  Jovens encontram um caminho claro para registar, completar o perfil e candidatar-se sem se perder.
+                </p>
+              </article>
+              <article class="about-feature-card">
+                <div class="about-feature-icon"><i class="bi bi-person-vcard"></i></div>
+                <h3>Perfis com mais contexto</h3>
+                <p class="about-card-copy mb-0">
+                  Formação, interesses, disponibilidade e documentos ajudam empresas a ler melhor cada candidatura.
+                </p>
+              </article>
+              <article class="about-feature-card">
+                <div class="about-feature-icon"><i class="bi bi-buildings"></i></div>
+                <h3>Ligações mais úteis</h3>
+                <p class="about-card-copy mb-0">
+                  Empresas e equipas de apoio conseguem agir com mais rapidez, menos ruído e maior confiança.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="about-card">
+            <div class="about-section-kicker"><i class="bi bi-signpost-2"></i>Fluxo</div>
+            <h2 class="about-section-title">Como funciona na prática</h2>
+            <p class="about-lead mb-0">
+              A experiência foi desenhada para orientar cada perfil no passo seguinte certo, com menos fricção e mais clareza.
+            </p>
+
+            <div class="about-process">
+              <article class="about-step">
+                <div class="about-step-index">1</div>
+                <div>
+                  <h3>Criar conta com o perfil adequado</h3>
+                  <p class="about-step-copy mb-0">
+                    O registo adapta campos e expectativas conforme o utilizador seja jovem, empresa ou perfil interno.
+                  </p>
+                  <div class="about-step-meta">
+                    <span><i class="bi bi-person"></i>Jovem</span>
+                    <span><i class="bi bi-building"></i>Empresa</span>
+                    <span><i class="bi bi-person-workspace"></i>Perfis de apoio</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="about-step">
+                <div class="about-step-index">2</div>
+                <div>
+                  <h3>Organizar informação útil</h3>
+                  <p class="about-step-copy mb-0">
+                    O perfil passa a concentrar dados essenciais para visibilidade, triagem, contacto e acompanhamento.
+                  </p>
+                </div>
+              </article>
+
+              <article class="about-step">
+                <div class="about-step-index">3</div>
+                <div>
+                  <h3>Publicar, pesquisar e candidatar</h3>
+                  <p class="about-step-copy mb-0">
+                    Empresas podem abrir vagas e procurar talento; jovens podem acompanhar oportunidades e responder com mais contexto.
+                  </p>
+                </div>
+              </article>
+
+              <article class="about-step">
+                <div class="about-step-index">4</div>
+                <div>
+                  <h3>Manter controlo e acompanhamento</h3>
+                  <p class="about-step-copy mb-0">
+                    Pedidos de contacto, consentimentos e equipas de apoio ajudam a manter o processo mais seguro e organizado.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="about-card">
+            <div class="about-section-kicker"><i class="bi bi-people"></i>Para quem</div>
+            <h2 class="about-section-title">Valor prático para cada lado da plataforma</h2>
+
+            <div class="about-lane-grid">
+              <article class="about-lane-card">
+                <div class="about-lane-icon"><i class="bi bi-person-heart"></i></div>
+                <h3>Para jovens</h3>
+                <p class="about-card-copy mb-0">
+                  Um espaço para montar o perfil, mostrar competências, anexar documentos e responder a vagas com mais confiança.
+                </p>
+                <div class="about-benefit-list">
+                  <span><i class="bi bi-check2"></i>Registo gratuito</span>
+                  <span><i class="bi bi-check2"></i>Perfil progressivo</span>
+                  <span><i class="bi bi-check2"></i>Candidaturas acompanhadas</span>
+                </div>
+              </article>
+
+              <article class="about-lane-card">
+                <div class="about-lane-icon"><i class="bi bi-building-check"></i></div>
+                <h3>Para empresas</h3>
+                <p class="about-card-copy mb-0">
+                  Um fluxo único para publicar vagas, procurar perfis com mais aderência e gerir aproximações com contexto.
+                </p>
+                <div class="about-benefit-list">
+                  <span><i class="bi bi-check2"></i>Publicação de vagas</span>
+                  <span><i class="bi bi-check2"></i>Pesquisa de perfis</span>
+                  <span><i class="bi bi-check2"></i>Gestão de candidaturas</span>
+                </div>
+              </article>
+
+              <article class="about-lane-card">
+                <div class="about-lane-icon"><i class="bi bi-shield-check"></i></div>
+                <h3>Para equipas de apoio</h3>
+                <p class="about-card-copy mb-0">
+                  Operadores, administradores e técnicos acompanham validação, contacto e leitura de indicadores numa só base.
+                </p>
+                <div class="about-benefit-list">
+                  <span><i class="bi bi-check2"></i>Registo assistido</span>
+                  <span><i class="bi bi-check2"></i>Validação e controlo</span>
+                  <span><i class="bi bi-check2"></i>Leitura nacional</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="about-card">
+            <div class="about-section-kicker"><i class="bi bi-geo-alt"></i>Cobertura</div>
+            <h2 class="about-section-title">Uma base pensada para todo o país</h2>
+            <p class="about-lead mb-0">
+              A plataforma procura servir jovens de todas as regiões de São Tomé e Príncipe,
+              reforçando visibilidade territorial e acesso mais equilibrado a oportunidades.
+            </p>
+
+            <div class="about-districts">
+              <p class="mb-3">
+                A cobertura nacional é importante para que o talento não fique preso apenas aos centros mais visíveis.
+              </p>
+              <div class="about-district-grid">
+                <span><i class="bi bi-geo-alt-fill"></i>Água Grande</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Cantagalo</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Caué</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Lembá</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Lobata</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Mé-Zóchi</span>
+                <span><i class="bi bi-geo-alt-fill"></i>Príncipe</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="about-card">
+            <div class="about-section-kicker"><i class="bi bi-shield-lock"></i>Confiança</div>
+            <h2 class="about-section-title">Privacidade, validação e contacto responsável</h2>
+            <div class="about-trust-grid">
+              <article class="about-trust-card">
+                <div class="about-trust-icon"><i class="bi bi-sliders"></i></div>
+                <h3>Consentimentos claros</h3>
+                <p class="about-card-copy mb-0">
+                  O jovem controla como os seus dados podem ser usados e por quais canais pode ser contactado.
+                </p>
+              </article>
+              <article class="about-trust-card">
+                <div class="about-trust-icon"><i class="bi bi-person-lines-fill"></i></div>
+                <h3>Contacto com contexto</h3>
+                <p class="about-card-copy mb-0">
+                  O pedido de contacto não acontece no vazio; a plataforma ajuda a enquadrar a intenção e o próximo passo.
+                </p>
+              </article>
+              <article class="about-trust-card">
+                <div class="about-trust-icon"><i class="bi bi-check2-square"></i></div>
+                <h3>Validação e supervisão</h3>
+                <p class="about-card-copy mb-0">
+                  Perfis internos apoiam verificação, coordenação e qualidade do processo em toda a operação.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="about-cta">
+            <div class="about-section-kicker text-white border border-white border-opacity-25 bg-white bg-opacity-10"><i class="bi bi-rocket-takeoff"></i>Próximo passo</div>
+            <h2 class="about-section-title text-white">Entrar na plataforma é simples. O valor aparece quando o perfil ganha contexto.</h2>
+            <p class="about-cta-copy mb-4">
+              Se és jovem, começa a construir a tua presença profissional. Se és empresa, publica vagas e encontra perfis mais alinhados ao que precisas.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="{% url 'accounts:register' %}" class="btn btn-light">
+                <i class="bi bi-person-plus me-2"></i>Registar-me
+              </a>
+              <a href="{% url 'accounts:login' %}" class="btn btn-outline-light">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+              </a>
+            </div>
+          </section>
+        </main>
+
+        <aside class="about-sidebar">
+          <section class="about-sidebar-card">
+            <div class="about-section-kicker"><i class="bi bi-diagram-2"></i>Parceria</div>
+            <h3>Uma iniciativa alinhada com empregabilidade e desenvolvimento</h3>
+            <p class="about-card-copy mb-0">
+              O projeto é desenvolvido em articulação com o Governo de São Tomé e Príncipe e o PNUD,
+              com foco em inclusão, empregabilidade jovem e leitura mais útil do ecossistema.
+            </p>
+          </section>
+
+          <section class="about-sidebar-card">
+            <div class="about-section-kicker"><i class="bi bi-check2-circle"></i>O que encontras aqui</div>
+            <ul class="about-list mt-2">
+              <li><i class="bi bi-check2"></i><span>Um registo orientado para o tipo certo de conta.</span></li>
+              <li><i class="bi bi-check2"></i><span>Perfis mais completos para melhorar visibilidade e triagem.</span></li>
+              <li><i class="bi bi-check2"></i><span>Fluxos de candidatura, contacto e acompanhamento num único lugar.</span></li>
+              <li><i class="bi bi-check2"></i><span>Mais coordenação entre jovens, empresas e equipas internas.</span></li>
+            </ul>
+          </section>
+
+          <section class="about-sidebar-card">
+            <div class="about-section-kicker"><i class="bi bi-compass"></i>Ler mais</div>
+            <div class="about-link-list">
+              <a href="{% url 'help' %}" class="about-link">
+                <div>
+                  Guia de ajuda
+                  <small>Vê o fluxo principal e aprende a usar a plataforma.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'privacy' %}" class="about-link">
+                <div>
+                  Privacidade
+                  <small>Percebe como os dados são usados e protegidos.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'terms' %}" class="about-link">
+                <div>
+                  Termos de uso
+                  <small>Consulta as regras de utilização da plataforma.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

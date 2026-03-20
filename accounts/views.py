@@ -412,15 +412,15 @@ def notifications_view(request):
 
 @login_required
 def mark_all_notifications_read(request):
-    """Marcar todas as notificaÃ§Ãµes do utilizador como lidas"""
+    'Marcar todas as notificações do utilizador como lidas'
     if request.method != 'POST':
         return redirect('accounts:notifications')
 
     updated = request.user.notifications.filter(lida=False).update(lida=True)
     if updated:
-        messages.success(request, _('Todas as notificaÃ§Ãµes foram marcadas como lidas.'))
+        messages.success(request, _('Todas as notificações foram marcadas como lidas.'))
     else:
-        messages.info(request, _('NÃ£o havia notificaÃ§Ãµes por ler.'))
+        messages.info(request, _('Não havia notificações por ler.'))
     return redirect('accounts:notifications')
 
 
@@ -439,7 +439,7 @@ def mark_notification_read(request, pk):
 
 @login_required
 def delete_notification(request, pk):
-    """Eliminar notificaÃ§Ã£o"""
+    """Eliminar notificação"""
     if request.method != 'POST':
         return redirect('accounts:notifications')
     notification = get_object_or_404(Notification, pk=pk, user=request.user)

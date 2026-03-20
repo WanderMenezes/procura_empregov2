@@ -455,7 +455,7 @@ def application_messages(request, pk):
 # Pesquisa de Jovens
 @login_required
 def search_youth(request):
-    """Pesquisar jovens com paginação e filtros adicionais"""
+    'Pesquisar jovens com páginação e filtros adicionais'
     if not (request.user.is_empresa and request.user.has_company_profile()):
         messages.error(request, _('Acesso negado.'))
         return redirect('home')

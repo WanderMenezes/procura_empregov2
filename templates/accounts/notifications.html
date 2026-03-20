@@ -88,14 +88,14 @@
     <div class="notifications-hero-head">
       <div>
         <div class="notifications-kicker">Centro de alertas</div>
-        <h1 class="notifications-title">Notificacoes</h1>
+        <h1 class="notifications-title">Notificações</h1>
         <p class="notifications-subtitle">
-          Acompanhe mensagens do sistema, respostas importantes e atualizacoes da plataforma num unico painel mais claro.
+          Acompanhe mensagens do sistema, respostas importantes e atualizações da plataforma num único painel mais claro.
         </p>
         <div class="notifications-chips">
           <span class="notifications-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_perfil_display }}</span>
           <span class="notifications-chip"><i class="bi bi-bell"></i>{{ unread_count|default:0 }} por ler</span>
-          <span class="notifications-chip"><i class="bi bi-clock-history"></i>Ultimas {{ notifications|length }} notificacoes</span>
+          <span class="notifications-chip"><i class="bi bi-clock-history"></i>Últimas {{ notifications|length }} notificações</span>
         </div>
       </div>
       <div class="notifications-actions">
@@ -115,22 +115,22 @@
       <div class="notifications-stat">
         <span class="notifications-stat-label">Total</span>
         <span class="notifications-stat-value">{{ notification_summary.total|default:0 }}</span>
-        <span class="notifications-stat-meta">notificacoes disponiveis</span>
+        <span class="notifications-stat-meta">notificações disponíveis</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Por ler</span>
         <span class="notifications-stat-value">{{ unread_count|default:0 }}</span>
-        <span class="notifications-stat-meta">itens que ainda pedem atencao</span>
+        <span class="notifications-stat-meta">itens que ainda pedem atenção</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Sucesso</span>
         <span class="notifications-stat-value">{{ notification_summary.success|default:0 }}</span>
-        <span class="notifications-stat-meta">confirmacoes e progresso</span>
+        <span class="notifications-stat-meta">confirmações e progresso</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Alertas</span>
         <span class="notifications-stat-value">{{ notification_summary.alert|default:0 }}</span>
-        <span class="notifications-stat-meta">pedidos de atencao</span>
+        <span class="notifications-stat-meta">pedidos de atenção</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Erros</span>
@@ -143,12 +143,12 @@
   <section class="notifications-panel">
     <div class="notifications-panel-head">
       <div>
-        <h5>Historico recente</h5>
-        <p class="notifications-panel-subtitle">A lista abaixo mostra as notificacoes mais recentes da tua conta, com tipo, estado e acoes por item.</p>
+        <h5>Histórico recente</h5>
+        <p class="notifications-panel-subtitle">A lista abaixo mostra as notificações mais recentes da tua conta, com tipo, estado e ações por item.</p>
       </div>
     </div>
     <div class="notifications-toolbar">
-      <span class="notifications-tag"><i class="bi bi-info-circle"></i>Informacao</span>
+      <span class="notifications-tag"><i class="bi bi-info-circle"></i>Informação</span>
       <span class="notifications-tag"><i class="bi bi-check2-circle"></i>Sucesso</span>
       <span class="notifications-tag"><i class="bi bi-exclamation-triangle"></i>Alerta</span>
       <span class="notifications-tag"><i class="bi bi-x-circle"></i>Erro</span>
@@ -185,7 +185,7 @@
                   {% if not n.lida %}
                     <span class="notifications-tag"><i class="bi bi-bell-fill"></i>Por ler</span>
                   {% else %}
-                    <span class="notifications-tag"><i class="bi bi-check2-all"></i>Ja revista</span>
+                    <span class="notifications-tag"><i class="bi bi-check2-all"></i>Já revista</span>
                   {% endif %}
                 </div>
                 <div class="notification-card-actions">
@@ -201,7 +201,7 @@
                     {% csrf_token %}
                     <button type="submit"
                             class="btn btn-outline-danger btn-sm"
-                            onclick="return confirm('Eliminar esta notificacao?');">
+                            onclick="return confirm('Eliminar esta notifica??o?');">
                       <i class="bi bi-trash me-1"></i>Eliminar
                     </button>
                   </form>
@@ -213,7 +213,7 @@
       {% else %}
         <div class="notifications-empty">
           <i class="bi bi-bell-slash"></i>
-          Nao ha notificacoes neste momento.
+          Não há notificações neste momento.
         </div>
       {% endif %}
     </div>

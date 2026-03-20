@@ -140,17 +140,17 @@
             {% endif %}
           </div>
           <div>
-            <div class="candidate-kicker">Area pessoal</div>
+            <div class="candidate-kicker">Área pessoal</div>
             <h1 class="candidate-title">{{ profile.nome_completo }}</h1>
             <p class="candidate-subtitle">
-              {{ profile.distrito.nome|default:"Distrito nao definido" }}
+              {{ profile.distrito.nome|default:"Distrito não definido" }}
               {% if profile.localidade %}<span class="mx-1">&middot;</span>{{ profile.localidade }}{% endif %}
             </p>
             <div class="candidate-chip-list mt-3">
               <span class="candidate-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
               <span class="candidate-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
               <span class="candidate-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
-              <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.visivel %}Visivel{% else %}Oculto{% endif %}</span>
+              <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.visivel %}Visível{% else %}Oculto{% endif %}</span>
             </div>
             <div class="candidate-progress-box">
               <div class="d-flex justify-content-between align-items-center gap-3">
@@ -162,9 +162,9 @@
               </div>
               <p class="candidate-progress-note">
                 {% if profile.completo %}
-                  O teu perfil ja esta pronto para responder a oportunidades com mais rapidez.
+                  O teu perfil já está pronto para responder a oportunidades com mais rapidez.
                 {% else %}
-                  Quanto mais completo estiver o perfil, mais facil fica para as empresas perceberem o teu potencial.
+                  Quanto mais completo estiver o perfil, mais fácil fica para as empresas perceberem o teu potencial.
                 {% endif %}
               </p>
             </div>
@@ -179,12 +179,12 @@
         </div>
         <div class="candidate-stat-grid">
           <div class="candidate-stat">
-            <span class="candidate-stat-label">Formacao</span>
+            <span class="candidate-stat-label">Formação</span>
             <span class="candidate-stat-value">{{ education|length }}</span>
             <span class="candidate-stat-meta">registo{{ education|length|pluralize }}</span>
           </div>
           <div class="candidate-stat">
-            <span class="candidate-stat-label">Experiencia</span>
+            <span class="candidate-stat-label">Experiência</span>
             <span class="candidate-stat-value">{{ experiences|length }}</span>
             <span class="candidate-stat-meta">registo{{ experiences|length|pluralize }}</span>
           </div>
@@ -209,7 +209,7 @@
         <div class="candidate-panel-head">
           <div>
             <h5>Estado do perfil</h5>
-            <p class="candidate-panel-subtitle">Checklist rapido do que ja esta preenchido.</p>
+            <p class="candidate-panel-subtitle">Checklist rápido do que já esta preenchido.</p>
           </div>
         </div>
         <div class="candidate-checklist">
@@ -219,11 +219,11 @@
           </a>
           <a href="#educacao-skills" class="candidate-check {% if step_stats.2.filled == step_stats.2.total %}done{% else %}pending{% endif %}">
             <span class="candidate-check-icon"><i class="bi {% if step_stats.2.filled == step_stats.2.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
-            <div><strong>Educacao e skills</strong><p>{{ step_stats.2.filled }}/{{ step_stats.2.total }} preenchidos{% if step_stats.2.missing %} &middot; faltam {{ step_stats.2.missing }}{% endif %}</p></div>
+            <div><strong>Educação e skills</strong><p>{{ step_stats.2.filled }}/{{ step_stats.2.total }} preenchidos{% if step_stats.2.missing %} &middot; faltam {{ step_stats.2.missing }}{% endif %}</p></div>
           </a>
           <a href="#experiencia" class="candidate-check {% if step_stats.3.filled == step_stats.3.total %}done{% else %}pending{% endif %}">
             <span class="candidate-check-icon"><i class="bi {% if step_stats.3.filled == step_stats.3.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
-            <div><strong>Experiencia</strong><p>{{ step_stats.3.filled }}/{{ step_stats.3.total }} preenchidos{% if step_stats.3.missing %} &middot; faltam {{ step_stats.3.missing }}{% endif %}</p></div>
+            <div><strong>Experiência</strong><p>{{ step_stats.3.filled }}/{{ step_stats.3.total }} preenchidos{% if step_stats.3.missing %} &middot; faltam {{ step_stats.3.missing }}{% endif %}</p></div>
           </a>
           <a href="#documentos" class="candidate-check {% if doc_stats.filled == doc_stats.total %}done{% else %}pending{% endif %}">
             <span class="candidate-check-icon"><i class="bi {% if doc_stats.filled == doc_stats.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
@@ -242,15 +242,15 @@
         <div class="candidate-icon-list">
           <div class="candidate-icon-item">
             <span class="candidate-icon"><i class="bi bi-telephone"></i></span>
-            <div><span class="candidate-icon-label">Telefone</span>{{ profile.telefone|default:"Nao informado" }}</div>
+            <div><span class="candidate-icon-label">Telefone</span>{{ profile.telefone|default:"Não informado" }}</div>
           </div>
           <div class="candidate-icon-item">
             <span class="candidate-icon"><i class="bi bi-envelope"></i></span>
-            <div><span class="candidate-icon-label">Email</span>{{ profile.email|default:"Nao informado" }}</div>
+            <div><span class="candidate-icon-label">Email</span>{{ profile.email|default:"Não informado" }}</div>
           </div>
           <div class="candidate-icon-item">
             <span class="candidate-icon"><i class="bi bi-geo-alt"></i></span>
-            <div><span class="candidate-icon-label">Localizacao</span>{{ profile.distrito.nome|default:"Distrito nao definido" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</div>
+            <div><span class="candidate-icon-label">Localização</span>{{ profile.distrito.nome|default:"Distrito não definido" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</div>
           </div>
           {% if profile.contacto_alternativo %}
             <div class="candidate-icon-item">
@@ -272,19 +272,19 @@
       <div class="candidate-panel mt-4">
         <div class="candidate-panel-head">
           <div>
-            <h6>Resumo rapido</h6>
+            <h6>Resumo rápido</h6>
             <p class="candidate-panel-subtitle">Leitura compacta do teu perfil.</p>
           </div>
         </div>
         <div class="candidate-summary-row"><span>Idade</span><span>{{ profile.idade|default:"N/A" }} anos</span></div>
         <div class="candidate-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"N/A" }}</span></div>
-        <div class="candidate-summary-row"><span>Situacao</span><span>{{ profile.get_situacao_atual_display }}</span></div>
+        <div class="candidate-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="candidate-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
         <div class="candidate-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
-        <div class="candidate-summary-row"><span>Validacao</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
+        <div class="candidate-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
         {% if profile.interesse_setorial %}
           <div class="candidate-tag-list mt-3">
-            {% for interest in profile.interesse_setorial %}
+            {% for interest in profile.interesses_setoriais_labels %}
               <span class="candidate-tag">{{ interest }}</span>
             {% endfor %}
           </div>
@@ -306,7 +306,7 @@
           {% if profile.sobre %}
             {{ profile.sobre|linebreaks }}
           {% else %}
-            <div class="candidate-empty"><i class="bi bi-person-lines-fill"></i>Ainda nao existe um resumo pessoal. Um texto curto sobre objetivos, energia e experiencia ajuda muito nas candidaturas.</div>
+            <div class="candidate-empty"><i class="bi bi-person-lines-fill"></i>Ainda não existe um resumo pessoal. Um texto curto sobre objetivos, energia e experiência ajuda muito nas candidaturas.</div>
           {% endif %}
         </div>
       </div>
@@ -316,8 +316,8 @@
           <div class="candidate-panel profile-section h-100" id="educacao-skills">
             <div class="candidate-panel-head">
               <div>
-                <h5>Educacao</h5>
-                <p class="candidate-panel-subtitle">Formacao academica e tecnica registada.</p>
+                <h5>Educação</h5>
+                <p class="candidate-panel-subtitle">Formação académica e técnica registada.</p>
               </div>
               <a href="{% url 'profiles:education_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
             </div>
@@ -335,13 +335,13 @@
                         </div>
                         {% if edu.curso %}<p class="candidate-entry-copy">{{ edu.curso }}</p>{% endif %}
                       </div>
-                      <a href="{% url 'profiles:education_delete' edu.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta formacao?')"><i class="bi bi-trash"></i></a>
+                      <a href="{% url 'profiles:education_delete' edu.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta forma??o?')"><i class="bi bi-trash"></i></a>
                     </div>
                   </article>
                 {% endfor %}
               </div>
             {% else %}
-              <div class="candidate-empty"><i class="bi bi-book"></i>Ainda nao existe nenhuma formacao registada.</div>
+              <div class="candidate-empty"><i class="bi bi-book"></i>Ainda não existe nenhuma formação registada.</div>
             {% endif %}
           </div>
         </div>
@@ -361,7 +361,7 @@
                 {% endfor %}
               </div>
             {% else %}
-              <div class="candidate-empty"><i class="bi bi-stars"></i>Ainda nao adicionaste nenhuma skill.</div>
+              <div class="candidate-empty"><i class="bi bi-stars"></i>Ainda não adicionaste nenhuma skill.</div>
             {% endif %}
           </div>
         </div>
@@ -370,8 +370,8 @@
       <div class="candidate-panel profile-section mt-4" id="experiencia">
         <div class="candidate-panel-head">
           <div>
-            <h5>Experiencia profissional</h5>
-            <p class="candidate-panel-subtitle">Percurso de trabalho, estagio ou projetos.</p>
+            <h5>Experiência profissional</h5>
+            <p class="candidate-panel-subtitle">Percurso de trabalho, estágio ou projetos.</p>
           </div>
           <a href="{% url 'profiles:experience_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
         </div>
@@ -389,13 +389,13 @@
                     </div>
                     {% if exp.descricao %}<p class="candidate-entry-copy">{{ exp.descricao|truncatewords:35 }}</p>{% endif %}
                   </div>
-                  <a href="{% url 'profiles:experience_delete' exp.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta experiencia?')"><i class="bi bi-trash"></i></a>
+                  <a href="{% url 'profiles:experience_delete' exp.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tens a certeza que queres remover esta experi?ncia?')"><i class="bi bi-trash"></i></a>
                 </div>
               </article>
             {% endfor %}
           </div>
         {% else %}
-          <div class="candidate-empty"><i class="bi bi-briefcase"></i>Ainda nao adicionaste nenhuma experiencia profissional.</div>
+          <div class="candidate-empty"><i class="bi bi-briefcase"></i>Ainda não adicionaste nenhuma experiência profissional.</div>
         {% endif %}
       </div>
 
@@ -403,7 +403,7 @@
         <div class="candidate-panel-head">
           <div>
             <h5>Documentos</h5>
-            <p class="candidate-panel-subtitle">Arquivos prontos para validacao e candidatura.</p>
+            <p class="candidate-panel-subtitle">Arquivos prontos para validação e candidatura.</p>
           </div>
           <a href="{% url 'profiles:document_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
         </div>
@@ -447,7 +447,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="candidate-empty"><i class="bi bi-file-earmark"></i>Ainda nao existem documentos carregados.</div>
+          <div class="candidate-empty"><i class="bi bi-file-earmark"></i>Ainda não existem documentos carregados.</div>
         {% endif %}
       </div>
 
@@ -457,7 +457,7 @@
             <div class="candidate-panel-head">
               <div>
                 <h5>Candidaturas recentes</h5>
-                <p class="candidate-panel-subtitle">As ultimas respostas que merecem atencao.</p>
+                <p class="candidate-panel-subtitle">As Últimas respostas que merecem atenção.</p>
               </div>
               <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-primary btn-sm">Ver todas</a>
             </div>
@@ -489,7 +489,7 @@
                 {% endfor %}
               </div>
             {% else %}
-              <div class="candidate-empty"><i class="bi bi-send"></i>Ainda nao fizeste nenhuma candidatura.</div>
+              <div class="candidate-empty"><i class="bi bi-send"></i>Ainda não fizeste nenhuma candidatura.</div>
             {% endif %}
           </div>
         </div>
@@ -535,7 +535,7 @@
                 {% endfor %}
               </div>
             {% else %}
-              <div class="candidate-empty"><i class="bi bi-briefcase"></i>Sem vagas disponiveis neste momento.</div>
+              <div class="candidate-empty"><i class="bi bi-briefcase"></i>Sem vagas disponíveis neste momento.</div>
             {% endif %}
           </div>
         </div>

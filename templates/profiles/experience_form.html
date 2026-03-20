@@ -69,10 +69,10 @@
     <div class="experience-hero-head">
       <div>
         <div class="experience-kicker">Percurso profissional</div>
-        <h1 class="experience-title">Adicionar experiencia</h1>
-        <p class="experience-subtitle">Regista um trabalho, estagio, voluntariado ou colaboracao relevante para mostrar como ja aplicaste as tuas competencias na pratica.</p>
+        <h1 class="experience-title">Adicionar experiência</h1>
+        <p class="experience-subtitle">Regista um trabalho, estágio, voluntariado ou colaboração relevante para mostrar como já aplicaste as tuas competencias na prática.</p>
         <div class="experience-chips">
-          <span class="experience-chip"><i class="bi bi-briefcase"></i>{{ experience_count }} experiencia{{ experience_count|pluralize }} registada{{ experience_count|pluralize }}</span>
+          <span class="experience-chip"><i class="bi bi-briefcase"></i>{{ experience_count }} experiência{{ experience_count|pluralize }} registada{{ experience_count|pluralize }}</span>
           {% if latest_experience %}
             <span class="experience-chip"><i class="bi bi-building"></i>{{ latest_experience.entidade }}</span>
           {% endif %}
@@ -89,10 +89,10 @@
     </div>
 
     <div class="experience-stats">
-      <div class="experience-stat"><span class="experience-stat-label">Registos</span><span class="experience-stat-value">{{ experience_count }}</span><span class="experience-stat-meta">experiencias no teu perfil</span></div>
-      <div class="experience-stat"><span class="experience-stat-label">Ultima entidade</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.entidade|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">referencia profissional mais recente</span></div>
-      <div class="experience-stat"><span class="experience-stat-label">Ultimo cargo</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.cargo|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">funcao registada por ultimo</span></div>
-      <div class="experience-stat"><span class="experience-stat-label">Objetivo</span><span class="experience-stat-value">+</span><span class="experience-stat-meta">dar contexto pratico ao teu perfil</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Registos</span><span class="experience-stat-value">{{ experience_count }}</span><span class="experience-stat-meta">experiências no teu perfil</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Última entidade</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.entidade|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">referencia profissional mais recente</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Ultimo cargo</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.cargo|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">função registada por ultimo</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Objetivo</span><span class="experience-stat-value">+</span><span class="experience-stat-meta">dar contexto prático ao teu perfil</span></div>
     </div>
   </section>
 
@@ -102,7 +102,7 @@
         <div class="experience-panel-head">
           <div>
             <h2 class="experience-panel-title">Resumo do perfil</h2>
-            <p class="experience-panel-subtitle">Contexto rapido antes de registar a experiencia.</p>
+            <p class="experience-panel-subtitle">Contexto rápido antes de registar a experiência.</p>
           </div>
         </div>
         <div class="experience-profile">
@@ -120,7 +120,7 @@
           </div>
         </div>
         <div class="experience-tags">
-          <span class="experience-tag highlight"><i class="bi bi-briefcase"></i>{{ experience_count }} experiencia{{ experience_count|pluralize }}</span>
+          <span class="experience-tag highlight"><i class="bi bi-briefcase"></i>{{ experience_count }} experiência{{ experience_count|pluralize }}</span>
           {% if latest_experience %}
             <span class="experience-tag"><i class="bi bi-clock-history"></i>{{ latest_experience.duracao }}</span>
           {% else %}
@@ -133,20 +133,20 @@
         <div class="experience-panel-head">
           <div>
             <h2 class="experience-panel-title">Dicas para preencher</h2>
-            <p class="experience-panel-subtitle">Mantem a experiencia facil de ler e credivel.</p>
+            <p class="experience-panel-subtitle">Mantem a experiência fácil de ler e credivel.</p>
           </div>
         </div>
         <div class="experience-tip">
-          <strong>Inclui experiencias reais e relevantes.</strong>
-          <div class="experience-copy">Pode ser emprego, estagio, voluntariado, projeto comunitario ou colaboracao profissional com responsabilidade clara.</div>
+          <strong>Inclui experiências reais e relevantes.</strong>
+          <div class="experience-copy">Pode ser emprego, estágio, voluntariado, projeto comunitario ou colaboração profissional com responsabilidade clara.</div>
         </div>
         <div class="experience-tip">
           <strong>Explica o que fazias.</strong>
-          <div class="experience-copy">Nao basta dizer o cargo. Uma boa descricao ajuda a mostrar competencias, autonomia e resultados.</div>
+          <div class="experience-copy">Não basta dizer o cargo. Uma boa descrição ajuda a mostrar competencias, autonomia e resultados.</div>
         </div>
         <div class="experience-tip">
           <strong>Usa “trabalho atual” quando ainda estas la.</strong>
-          <div class="experience-copy">Assim a pagina adapta o periodo e evita pedir data de fim desnecessariamente.</div>
+          <div class="experience-copy">Assim a página adapta o período e evita pedir data de fim desnecessariamente.</div>
         </div>
       </section>
     </aside>
@@ -154,7 +154,7 @@
     <section class="experience-panel">
       {% if form.errors %}
         <div class="experience-error">
-          Verifica os campos abaixo antes de guardar esta experiencia.
+          Verifica os campos abaixo antes de guardar esta experiência.
         </div>
       {% endif %}
 
@@ -162,7 +162,7 @@
         {% csrf_token %}
 
         <div class="experience-section">
-          <div class="experience-section-label"><i class="bi bi-building"></i>Entidade e funcao</div>
+          <div class="experience-section-label"><i class="bi bi-building"></i>Entidade e função</div>
           <h2 class="experience-section-title">Onde trabalhaste e em que papel</h2>
           <p class="experience-note mb-0">Usa o nome da entidade e um cargo ou papel que descreva bem a tua contribuicao.</p>
           <div class="experience-grid">
@@ -180,8 +180,8 @@
         </div>
 
         <div class="experience-section">
-          <div class="experience-section-label"><i class="bi bi-calendar-range"></i>Periodo</div>
-          <h2 class="experience-section-title">Quando aconteceu esta experiencia</h2>
+          <div class="experience-section-label"><i class="bi bi-calendar-range"></i>Período</div>
+          <h2 class="experience-section-title">Quando aconteceu esta experiência</h2>
           <div class="experience-grid">
             <div class="experience-field">
               <label for="{{ form.inicio.id_for_label }}">{{ form.inicio.label }}</label>
@@ -191,7 +191,7 @@
             <div id="experience-end-wrap" class="experience-field">
               <label for="{{ form.fim.id_for_label }}">{{ form.fim.label }}</label>
               {{ form.fim }}
-              <div class="experience-field-help">Se ainda estas nesta experiencia, ativa a opcao abaixo e a data final deixa de ser necessaria.</div>
+              <div class="experience-field-help">Se ainda estas nesta experiência, ativa a opção abaixo e a data final deixa de ser necessaria.</div>
               {% if form.fim.errors %}<div class="experience-field-error">{{ form.fim.errors|striptags }}</div>{% endif %}
             </div>
           </div>
@@ -200,7 +200,7 @@
             {{ form.atual }}
             <div>
               <div class="experience-section-title mb-1">{{ form.atual.label }}</div>
-              <div class="experience-copy">Marca esta opcao se continuas nesta funcao ou colaboracao.</div>
+              <div class="experience-copy">Marca esta opção se continuas nesta função ou colaboração.</div>
               {% if form.atual.errors %}<div class="experience-field-error mt-2">{{ form.atual.errors|striptags }}</div>{% endif %}
             </div>
           </label>
@@ -208,12 +208,12 @@
 
         <div class="experience-section">
           <div class="experience-section-label"><i class="bi bi-card-text"></i>Responsabilidades</div>
-          <h2 class="experience-section-title">O que fizeste nesta experiencia</h2>
+          <h2 class="experience-section-title">O que fizeste nesta experiência</h2>
           <div class="experience-grid">
             <div class="experience-field full">
               <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
               {{ form.descricao }}
-              <div class="experience-field-help">Foca nas tarefas principais, ferramentas usadas, tipo de publico atendido ou resultados que conseguiste.</div>
+              <div class="experience-field-help">Foca nas tarefas principais, ferramentas usadas, tipo de público aténdido ou resultados que conseguiste.</div>
               {% if form.descricao.errors %}<div class="experience-field-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
             </div>
           </div>
@@ -221,14 +221,14 @@
 
         {% if latest_experience %}
           <div class="experience-summary">
-            <div class="experience-summary-title">Ultima experiencia registada</div>
+            <div class="experience-summary-title">Última experiência registada</div>
             <div class="experience-copy">
               {{ latest_experience.cargo }} em {{ latest_experience.entidade }}
               {% if latest_experience.inicio %} desde {{ latest_experience.inicio|date:"d/m/Y" }}{% endif %}
               {% if latest_experience.atual %}
-                ate ao presente.
+                até ao presente.
               {% elif latest_experience.fim %}
-                ate {{ latest_experience.fim|date:"d/m/Y" }}.
+                até {{ latest_experience.fim|date:"d/m/Y" }}.
               {% endif %}
             </div>
           </div>
@@ -236,11 +236,11 @@
 
         <div class="experience-footer">
           <div class="experience-copy">
-            Depois de guardar, esta experiencia aparece no teu perfil e reforca a leitura pratica do teu percurso.
+            Depois de guardar, esta experiência aparece no teu perfil e reforca a leitura prática do teu percurso.
           </div>
           <div class="experience-actions">
             <a href="{% url 'profiles:detail' %}" class="btn btn-outline-secondary">Cancelar</a>
-            <button class="btn btn-primary" type="submit"><i class="bi bi-floppy me-2"></i>Guardar experiencia</button>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-floppy me-2"></i>Guardar experiência</button>
           </div>
         </div>
       </form>

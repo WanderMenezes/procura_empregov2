@@ -320,7 +320,7 @@
         <section class="hero">
             <div class="hero-kicker">Base Nacional de Jovens</div>
             <h1>Formulario offline de registo - {{ profile_label }}</h1>
-            <p>Preencha os campos abaixo sem editar estruturas tecnicas. No fim, clique em "Gerar ficheiro para importacao" para produzir automaticamente o JSON que sera importado no painel do admin.</p>
+            <p>Preencha os campos abaixo sem editar estruturas técnicas. No fim, clique em "Gerar ficheiro para importação" para produzir automaticamente o JSON que será importado no painel do admin.</p>
             <div class="hero-meta">
                 <span class="hero-chip">Tipo: {{ profile_label }}</span>
                 <span class="hero-chip">Gerado por: {{ payload.generated_by.admin_name }}</span>
@@ -331,7 +331,7 @@
         <div class="layout">
             <section class="card">
                 <h2>Campos de registo</h2>
-                <p class="lead">Os campos marcados com <span class="required">*</span> devem ser preenchidos para a importacao ser aceite.</p>
+                <p class="lead">Os campos marcados com <span class="required">*</span> devem ser preenchidos para a importação ser aceite.</p>
 
                 <form id="offline-registration-form">
                     <div class="section">
@@ -342,7 +342,7 @@
                                 <input id="nome" name="nome" type="text" required>
                             </div>
                             <div class="field">
-                                <label for="telefone">Telemovel <span class="required">*</span></label>
+                                <label for="telefone">Telemóvel <span class="required">*</span></label>
                                 <input id="telefone" name="telefone" type="text" required>
                             </div>
                             <div class="field">
@@ -361,7 +361,7 @@
                             <div class="field">
                                 <label for="password">Palavra-passe <span class="required">*</span></label>
                                 <input id="password" name="password" type="text" minlength="8" required>
-                                <div class="hint">Minimo de 8 caracteres.</div>
+                                <div class="hint">Mínimo de 8 caracteres.</div>
                             </div>
                             <div class="field">
                                 <label for="password_confirm">Confirmar palavra-passe <span class="required">*</span></label>
@@ -386,7 +386,7 @@
                             <div class="section-label">Perfil do jovem</div>
                             <div class="grid">
                                 <div class="field">
-                                    <label for="bi_numero">Numero do BI <span class="required">*</span></label>
+                                    <label for="bi_numero">Número do BI <span class="required">*</span></label>
                                     <input id="bi_numero" name="bi_numero" type="text" required>
                                 </div>
                                 <div class="field">
@@ -411,7 +411,7 @@
                                     <input id="contacto_alternativo" name="contacto_alternativo" type="text">
                                 </div>
                                 <div class="field">
-                                    <label for="situacao_atual">Situacao atual <span class="required">*</span></label>
+                                    <label for="situacao_atual">Situação atual <span class="required">*</span></label>
                                     <select id="situacao_atual" name="situacao_atual" required>
                                         {% for item in situacao_choices %}
                                             <option value="{{ item.value }}"{% if item.value == 'DES' %} selected{% endif %}>{{ item.label }} ({{ item.value }})</option>
@@ -438,7 +438,7 @@
                         </div>
 
                         <div class="section">
-                            <div class="section-label">Educacao</div>
+                            <div class="section-label">Educação</div>
                             <div class="grid">
                                 <div class="field">
                                     <label for="nivel">Nivel</label>
@@ -450,7 +450,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label for="area_formacao">Area de formacao</label>
+                                    <label for="area_formacao">Área de formação</label>
                                     <select id="area_formacao" name="area_formacao">
                                         <option value="">Selecione...</option>
                                         {% for item in area_formacao_choices %}
@@ -459,7 +459,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label for="instituicao">Instituicao</label>
+                                    <label for="instituicao">Instituição</label>
                                     <input id="instituicao" name="instituicao" type="text">
                                 </div>
                                 <div class="field">
@@ -485,11 +485,11 @@
                                     <input id="website" name="website" type="url">
                                 </div>
                                 <div class="field-full">
-                                    <label for="descricao">Descricao</label>
+                                    <label for="descricao">Descrição</label>
                                     <textarea id="descricao" name="descricao"></textarea>
                                 </div>
                                 <div class="field-full">
-                                    <label for="endereco">Endereco</label>
+                                    <label for="endereco">Endereço</label>
                                     <textarea id="endereco" name="endereco"></textarea>
                                 </div>
                                 <div class="field-full">
@@ -519,11 +519,11 @@
                                 <input id="collected_by_name" name="collected_by_name" type="text">
                             </div>
                             <div class="field">
-                                <label for="collected_by_role">Papel ou funcao</label>
+                                <label for="collected_by_role">Papel ou função</label>
                                 <input id="collected_by_role" name="collected_by_role" type="text">
                             </div>
                             <div class="field-full">
-                                <label for="observacoes">Observacoes</label>
+                                <label for="observacoes">Observações</label>
                                 <textarea id="observacoes" name="observacoes"></textarea>
                             </div>
                         </div>
@@ -543,21 +543,21 @@
                         Se precisar interromper, use o rascunho para manter os dados no navegador.
                     </div>
                     <div class="step">
-                        <strong>3. Gerar importacao</strong>
-                        Clique no botao principal para descarregar o JSON final de importacao.
+                        <strong>3. Gerar importação</strong>
+                        Clique no botao principal para descarregar o JSON final de importação.
                     </div>
                 </section>
 
                 <section class="card actions">
-                    <h2>Acoes</h2>
-                    <p class="required-note">O ficheiro final de importacao sera gerado localmente no teu computador.</p>
+                    <h2>Ações</h2>
+                    <p class="required-note">O ficheiro final de importação será gerado localmente no teu computador.</p>
                     <div class="btn-row">
-                        <button type="button" class="btn-primary" id="download-json">Gerar ficheiro para importacao</button>
+                        <button type="button" class="btn-primary" id="download-json">Gerar ficheiro para importação</button>
                         <button type="button" class="btn-secondary" id="save-draft">Guardar rascunho neste navegador</button>
                         <button type="button" class="btn-ghost" id="clear-form">Limpar campos</button>
                     </div>
                     <div class="status-box" id="status-box">Preenche os campos e gera o ficheiro final quando estiver pronto.</div>
-                    <noscript>Este ficheiro precisa de JavaScript ativo para gerar o JSON final de importacao.</noscript>
+                    <noscript>Este ficheiro precisa de JávaScript ativo para gerar o JSON final de importação.</noscript>
                 </section>
             </aside>
         </div>
@@ -658,7 +658,7 @@
                     });
                     setStatus('Rascunho recuperado deste navegador.');
                 } catch (error) {
-                    setStatus('Nao foi possivel recuperar o rascunho guardado.');
+                    setStatus('Não foi possível recuperar o rascunho guardado.');
                 }
             }
 
@@ -687,7 +687,7 @@
                 const link = document.createElement('a');
                 const suffix = basePayload.profile_type === 'JO' ? 'jovem' : 'empresa';
                 link.href = URL.createObjectURL(blob);
-                link.download = 'importacao_registo_offline_' + suffix + '.json';
+                link.download = 'importação_registo_offline_' + suffix + '.json';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

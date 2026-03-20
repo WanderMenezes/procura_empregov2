@@ -374,7 +374,7 @@
         <div class="company-edit-kicker">Perfil da empresa</div>
         <h1 class="company-edit-title">Editar perfil empresarial</h1>
         <p class="company-edit-subtitle">
-          Organize os dados publicos da empresa, mantenha os contactos atualizados e deixe o perfil pronto para vagas e pedidos de contacto.
+          Organize os dados públicos da empresa, mantenha os contactos atualizados e deixe o perfil pronto para vagas e pedidos de contacto.
         </p>
         <div class="company-edit-hero-badges">
           <span class="company-edit-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -413,7 +413,7 @@
         </p>
         <div class="company-edit-status mt-3">
           <span class="badge {% if company.verificada %}bg-success{% else %}bg-warning text-dark{% endif %}">
-            {% if company.verificada %}Verificada{% else %}Validacao pendente{% endif %}
+            {% if company.verificada %}Verificada{% else %}Validação pendente{% endif %}
           </span>
           <span class="badge {% if company.ativa %}bg-primary{% else %}bg-secondary{% endif %}">
             {% if company.ativa %}Ativa{% else %}Pausada{% endif %}
@@ -426,27 +426,27 @@
           <span class="company-edit-check-icon"><i class="bi {% if company.nome and company.setor %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
           <div>
             <strong>Identidade da empresa</strong>
-            <p>Nome, NIF e setores ajudam a dar confianca ao perfil.</p>
+            <p>Nome, NIF e setores ajudam a dar confiança ao perfil.</p>
           </div>
         </div>
         <div class="company-edit-check {% if company.telefone and company.email %}is-done{% else %}is-pending{% endif %}">
           <span class="company-edit-check-icon"><i class="bi {% if company.telefone and company.email %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
           <div>
             <strong>Contactos principais</strong>
-            <p>Telefone e email devem estar atualizados para resposta rapida.</p>
+            <p>Telefone e email devem estar atualizados para resposta rápida.</p>
           </div>
         </div>
         <div class="company-edit-check {% if company.distrito and company.endereco %}is-done{% else %}is-pending{% endif %}">
           <span class="company-edit-check-icon"><i class="bi {% if company.distrito and company.endereco %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
           <div>
-            <strong>Localizacao</strong>
-            <p>Distrito e endereco ajudam na leitura das vagas e da operacao.</p>
+            <strong>Localização</strong>
+            <p>Distrito e endereço ajudam na leitura das vagas e da operação.</p>
           </div>
         </div>
         <div class="company-edit-check {% if company.descricao %}is-done{% else %}is-pending{% endif %}">
           <span class="company-edit-check-icon"><i class="bi {% if company.descricao %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
           <div>
-            <strong>Descricao</strong>
+            <strong>Descrição</strong>
             <p>Um resumo claro melhora a qualidade do perfil e das oportunidades.</p>
           </div>
         </div>
@@ -454,7 +454,7 @@
 
       <div class="company-edit-note">
         {% if company_profile_complete %}
-          O perfil ja tem a base essencial pronta. Vale manter descricao, website e logo sempre atuais.
+          O perfil já tem a base essencial pronta. Vale manter descrição, website e logo sempre atuais.
         {% else %}
           Ainda faltam alguns dados importantes. Completar tudo aqui deixa a empresa pronta para publicar e receber melhor.
         {% endif %}
@@ -465,7 +465,7 @@
       <div class="company-edit-form-head">
         <div>
           <h4 class="mb-1">Dados da empresa</h4>
-          <p class="company-edit-form-subtitle">Preencha os campos abaixo e guarde as alteracoes quando terminar.</p>
+          <p class="company-edit-form-subtitle">Preencha os campos abaixo e guarde as alterações quando terminar.</p>
         </div>
       </div>
 
@@ -479,7 +479,7 @@
         <section class="company-edit-form-section">
           <div class="company-edit-section-label">Identidade</div>
           <div class="company-edit-section-title">Quem e a empresa</div>
-          <div class="company-edit-section-copy">Estes dados sao os primeiros a aparecer para candidatos e equipa tecnica.</div>
+          <div class="company-edit-section-copy">Estes dados são os primeiros a aparecer para candidatos e equipa técnica.</div>
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="company-edit-field">
@@ -537,16 +537,16 @@
                 <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
                 {{ form.website }}
                 {% if form.website.errors %}<div class="company-edit-error">{{ form.website.errors|striptags }}</div>{% endif %}
-                <div class="company-edit-help">Se existir site ou pagina institucional, vale colocar aqui.</div>
+                <div class="company-edit-help">Se existir site ou página institucional, vale colocar aqui.</div>
               </div>
             </div>
           </div>
         </section>
 
         <section class="company-edit-form-section">
-          <div class="company-edit-section-label">Localizacao</div>
+          <div class="company-edit-section-label">Localização</div>
           <div class="company-edit-section-title">Onde a empresa opera</div>
-          <div class="company-edit-section-copy">A localizacao ajuda candidatos a avaliar melhor as oportunidades.</div>
+          <div class="company-edit-section-copy">A localização ajuda candidatos a avaliar melhor as oportunidades.</div>
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="company-edit-field">
@@ -582,7 +582,7 @@
             <i class="bi bi-arrow-left me-2"></i>Cancelar
           </a>
           <button class="btn btn-primary" type="submit">
-            <i class="bi bi-check2-circle me-2"></i>Guardar alteracoes
+            <i class="bi bi-check2-circle me-2"></i>Guardar alterações
           </button>
         </div>
       </form>

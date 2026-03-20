@@ -881,7 +881,7 @@ def available_jobs(request):
         if vaga.area_formacao and vaga.area_formacao in interests:
             reasons.append('Dentro dos teus interesses')
         elif vaga.area_formacao and education_area and vaga.area_formacao == education_area:
-            reasons.append('Relacionada com a tua formacao')
+            reasons.append('Relacionada com a tua formação')
 
         vaga.match_reasons = reasons[:3]
         vaga.match_score = len(reasons)
@@ -1357,7 +1357,7 @@ def assisted_register(request):
                     profile=profile,
                     nivel=data['nivel'],
                     area_formacao=data['area_formacao'],
-                    instituicao='Não especificado',
+                    instituicao='Não específicado',
                     ano=None
                 )
             

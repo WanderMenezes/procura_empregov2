@@ -142,13 +142,16 @@ class YouthProfile(models.Model):
         return self.user.distrito
 
     @property
-    def interesses_setoriais_display(self):
+    def interesses_setoriais_labels(self):
         codes = self.interesse_setorial or []
         if isinstance(codes, str):
             codes = [codes]
         mapping = dict(getattr(settings, 'AREAS_FORMACAO', []))
-        labels = [mapping.get(code, code) for code in codes if code]
-        return ', '.join(labels)
+        return [mapping.get(code, code) for code in codes if code]
+
+    @property
+    def interesses_setoriais_display(self):
+        return ', '.join(self.interesses_setoriais_labels)
     
     def get_skills(self):
         """Retorna todas as skills do jovem"""

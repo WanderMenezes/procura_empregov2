@@ -16,7 +16,7 @@
             <div>
               <div class="contact-request-name">{{ r.youth.user.nome }}</div>
               <div class="contact-request-subline">
-                {{ r.youth.distrito.nome|default:"Distrito nao definido" }}{% if r.youth.localidade %} - {{ r.youth.localidade }}{% endif %}
+                {{ r.youth.distrito.nome|default:"Distrito não definido" }}{% if r.youth.localidade %} - {{ r.youth.localidade }}{% endif %}
               </div>
               <div class="contact-request-tags">
                 {% if r.youth.idade %}<span class="contact-request-tag"><i class="bi bi-person"></i>{{ r.youth.idade }} anos</span>{% endif %}
@@ -42,15 +42,15 @@
           {% if r.estado == 'APROVADO' %}
             <div class="contact-request-block">
               <span class="contact-request-label">Contacto liberado</span>
-              <div class="contact-request-status-copy">O pedido foi aprovado. Ja pode seguir com a abordagem direta ao jovem.</div>
+              <div class="contact-request-status-copy">O pedido foi aprovado. Já pode seguir com a abordagem direta ao jovem.</div>
               <div class="contact-request-inline mt-3">
                 <div class="contact-request-inline-item">
                   <span class="contact-request-label">Telefone</span>
-                  {{ r.youth.telefone|default:"Nao informado" }}
+                  {{ r.youth.telefone|default:"Não informado" }}
                 </div>
                 <div class="contact-request-inline-item">
                   <span class="contact-request-label">Email</span>
-                  {{ r.youth.email|default:"Nao informado" }}
+                  {{ r.youth.email|default:"Não informado" }}
                 </div>
                 {% if r.youth.contacto_alternativo %}
                   <div class="contact-request-inline-item">
@@ -63,7 +63,7 @@
           {% elif r.estado == 'PENDENTE' %}
             <div class="contact-request-block">
               <span class="contact-request-label">Estado atual</span>
-              <div class="contact-request-status-copy">O pedido aguarda analise do administrador antes de libertar os dados de contacto.</div>
+              <div class="contact-request-status-copy">O pedido aguarda análise do administrador antes de libertar os dados de contacto.</div>
             </div>
           {% elif r.estado == 'DESATIVADO' %}
             <div class="contact-request-block">
@@ -73,7 +73,7 @@
           {% else %}
             <div class="contact-request-block">
               <span class="contact-request-label">Estado atual</span>
-              <div class="contact-request-status-copy">O pedido nao foi aprovado. Revise a observacao administrativa e o enquadramento do jovem.</div>
+              <div class="contact-request-status-copy">O pedido não foi aprovado. Revise a observação administrativa e o enquadramento do jovem.</div>
             </div>
           {% endif %}
 
@@ -103,7 +103,7 @@
 {% else %}
   <div class="contact-request-empty">
     <i class="bi bi-chat-left-text"></i>
-    Ainda nao existem pedidos de contacto enviados.
+    Ainda não existem pedidos de contacto enviados.
     <div class="mt-3 d-flex flex-wrap justify-content-center gap-2">
       <a href="{% url 'companies:search_youth' %}" class="btn btn-primary btn-sm">Pesquisar jovens</a>
       <a href="{% url 'companies:job_create' %}" class="btn btn-outline-secondary btn-sm">Publicar vaga</a>

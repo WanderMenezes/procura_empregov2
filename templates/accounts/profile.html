@@ -83,9 +83,9 @@
             {% if youth_profile %}
               Aqui tens uma leitura clara da tua conta, do estado do perfil e dos principais dados usados nas candidaturas.
             {% elif company_profile %}
-              Este espaco junta identidade da empresa, estado do perfil e atalhos para recrutamento.
+              Este espaço junta identidade da empresa, estado do perfil e atalhos para recrutamento.
             {% else %}
-              A conta ja esta criada. Falta agora ligar um perfil completo ao teu papel dentro da plataforma.
+              A conta já está criada. Falta agora ligar um perfil completo ao teu papel dentro da plataforma.
             {% endif %}
           </p>
           <div class="account-chips">
@@ -99,7 +99,7 @@
         </div>
       </div>
       <div class="account-actions">
-        <a href="{% url 'accounts:notifications' %}" class="btn btn-light"><i class="bi bi-bell me-2"></i>Notificacoes</a>
+        <a href="{% url 'accounts:notifications' %}" class="btn btn-light"><i class="bi bi-bell me-2"></i>Notificações</a>
         <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-light"><i class="bi bi-pencil-square me-2"></i>Editar conta</a>
         {% if youth_profile %}
           <a href="{% url 'profiles:wizard' %}?reset=1" class="btn btn-dark"><i class="bi bi-magic me-2"></i>Atualizar perfil</a>
@@ -116,8 +116,8 @@
     <div class="account-stats">
       {% if youth_profile %}
         <div class="account-stat"><span class="account-stat-label">Forca do perfil</span><span class="account-stat-value">{{ profile_strength|default:0 }}%</span><span class="account-stat-meta">dados, skills e documentos combinados</span></div>
-        <div class="account-stat"><span class="account-stat-label">Formacao</span><span class="account-stat-value">{{ youth_stats.education|default:0 }}</span><span class="account-stat-meta">registo{{ youth_stats.education|default:0|pluralize }} academico{{ youth_stats.education|default:0|pluralize }}</span></div>
-        <div class="account-stat"><span class="account-stat-label">Experiencia</span><span class="account-stat-value">{{ youth_stats.experiences|default:0 }}</span><span class="account-stat-meta">entrada{{ youth_stats.experiences|default:0|pluralize }} profissional{{ youth_stats.experiences|default:0|pluralize }}</span></div>
+        <div class="account-stat"><span class="account-stat-label">Formação</span><span class="account-stat-value">{{ youth_stats.education|default:0 }}</span><span class="account-stat-meta">registo{{ youth_stats.education|default:0|pluralize }} académico{{ youth_stats.education|default:0|pluralize }}</span></div>
+        <div class="account-stat"><span class="account-stat-label">Experiência</span><span class="account-stat-value">{{ youth_stats.experiences|default:0 }}</span><span class="account-stat-meta">entrada{{ youth_stats.experiences|default:0|pluralize }} profissional{{ youth_stats.experiences|default:0|pluralize }}</span></div>
         <div class="account-stat"><span class="account-stat-label">Documentos</span><span class="account-stat-value">{{ youth_stats.documents|default:0 }}</span><span class="account-stat-meta">{{ youth_stats.skills|default:0 }} skill{{ youth_stats.skills|default:0|pluralize }} registada{{ youth_stats.skills|default:0|pluralize }}</span></div>
       {% elif company_profile %}
         <div class="account-stat"><span class="account-stat-label">Forca do perfil</span><span class="account-stat-value">{{ company_strength|default:0 }}%</span><span class="account-stat-meta">presenca institucional e contactos</span></div>
@@ -125,9 +125,9 @@
         <div class="account-stat"><span class="account-stat-label">Ativas</span><span class="account-stat-value">{{ company_stats.jobs_active|default:0 }}</span><span class="account-stat-meta">oportunidades abertas agora</span></div>
         <div class="account-stat"><span class="account-stat-label">Pedidos</span><span class="account-stat-value">{{ company_stats.contact_requests|default:0 }}</span><span class="account-stat-meta">{{ company_stats.applications|default:0 }} candidatura{{ company_stats.applications|default:0|pluralize }}</span></div>
       {% else %}
-        <div class="account-stat"><span class="account-stat-label">Notificacoes</span><span class="account-stat-value">{{ unread_notifications|default:0 }}</span><span class="account-stat-meta">mensagens ainda por abrir</span></div>
+        <div class="account-stat"><span class="account-stat-label">Notificações</span><span class="account-stat-value">{{ unread_notifications|default:0 }}</span><span class="account-stat-meta">mensagens ainda por abrir</span></div>
         <div class="account-stat"><span class="account-stat-label">Membro desde</span><span class="account-stat-value">{{ user.date_joined|date:"M Y" }}</span><span class="account-stat-meta">conta criada em {{ user.date_joined|date:"d/m/Y" }}</span></div>
-        <div class="account-stat"><span class="account-stat-label">Telefone</span><span class="account-stat-value">{% if user.telefone %}OK{% else %}-{% endif %}</span><span class="account-stat-meta">{{ user.telefone|default:"ainda nao definido" }}</span></div>
+        <div class="account-stat"><span class="account-stat-label">Telefone</span><span class="account-stat-value">{% if user.telefone %}OK{% else %}-{% endif %}</span><span class="account-stat-meta">{{ user.telefone|default:"ainda não definido" }}</span></div>
         <div class="account-stat"><span class="account-stat-label">Consentimentos</span><span class="account-stat-value">{% if user.consentimento_dados or user.consentimento_contacto %}Ativos{% else %}Pendentes{% endif %}</span><span class="account-stat-meta">dados e contacto</span></div>
       {% endif %}
     </div>
@@ -139,13 +139,13 @@
         <div class="account-panel-head">
           <div>
             <h5>Conta e contacto</h5>
-            <p class="account-panel-subtitle">Os dados base que sustentam a experiencia da conta.</p>
+            <p class="account-panel-subtitle">Os dados base que sustentam a experiência da conta.</p>
           </div>
         </div>
         <div class="account-notes">
-          <div class="account-note"><span class="account-icon"><i class="bi bi-envelope"></i></span><div><span class="account-icon-label">Email</span>{{ user.email|default:"Nao definido" }}</div></div>
-          <div class="account-note"><span class="account-icon"><i class="bi bi-telephone"></i></span><div><span class="account-icon-label">Telefone</span>{{ user.telefone|default:"Nao definido" }}</div></div>
-          <div class="account-note"><span class="account-icon"><i class="bi bi-geo-alt"></i></span><div><span class="account-icon-label">Distrito</span>{% if user.distrito %}{{ user.distrito.nome }}{% else %}Nao definido{% endif %}</div></div>
+          <div class="account-note"><span class="account-icon"><i class="bi bi-envelope"></i></span><div><span class="account-icon-label">Email</span>{{ user.email|default:"Não definido" }}</div></div>
+          <div class="account-note"><span class="account-icon"><i class="bi bi-telephone"></i></span><div><span class="account-icon-label">Telefone</span>{{ user.telefone|default:"Não definido" }}</div></div>
+          <div class="account-note"><span class="account-icon"><i class="bi bi-geo-alt"></i></span><div><span class="account-icon-label">Distrito</span>{% if user.distrito %}{{ user.distrito.nome }}{% else %}Não definido{% endif %}</div></div>
           <div class="account-note"><span class="account-icon"><i class="bi bi-calendar-event"></i></span><div><span class="account-icon-label">Conta criada</span>{{ user.date_joined|date:"d/m/Y" }}</div></div>
           {% if youth_profile and youth_profile.contacto_alternativo %}<div class="account-note"><span class="account-icon"><i class="bi bi-person-lines-fill"></i></span><div><span class="account-icon-label">Contacto alternativo</span>{{ youth_profile.contacto_alternativo }}</div></div>{% endif %}
           {% if company_profile and company_profile.website %}<div class="account-note"><span class="account-icon"><i class="bi bi-globe"></i></span><div><span class="account-icon-label">Website</span><a href="{{ company_profile.website }}" target="_blank" rel="noopener">{{ company_profile.website }}</a></div></div>{% endif %}
@@ -153,7 +153,7 @@
         <div class="account-tags mt-3">
           {% if user.consentimento_dados %}<span class="account-tag"><i class="bi bi-shield-check"></i>Uso de dados</span>{% else %}<span class="account-tag muted"><i class="bi bi-shield-exclamation"></i>Dados pendentes</span>{% endif %}
           {% if user.consentimento_contacto %}<span class="account-tag"><i class="bi bi-chat-dots"></i>Contacto permitido</span>{% else %}<span class="account-tag muted"><i class="bi bi-chat-square-text"></i>Contacto pendente</span>{% endif %}
-          {% if youth_profile and youth_profile.visivel %}<span class="account-tag"><i class="bi bi-eye"></i>Perfil visivel</span>{% elif youth_profile %}<span class="account-tag muted"><i class="bi bi-eye-slash"></i>Perfil oculto</span>{% endif %}
+          {% if youth_profile and youth_profile.visivel %}<span class="account-tag"><i class="bi bi-eye"></i>Perfil visível</span>{% elif youth_profile %}<span class="account-tag muted"><i class="bi bi-eye-slash"></i>Perfil oculto</span>{% endif %}
           {% if company_profile and company_profile.verificada %}<span class="account-tag"><i class="bi bi-patch-check"></i>Empresa verificada</span>{% elif company_profile %}<span class="account-tag muted"><i class="bi bi-patch-exclamation"></i>Empresa por verificar</span>{% endif %}
         </div>
       </section>
@@ -161,8 +161,8 @@
       <section class="account-panel">
         <div class="account-panel-head">
           <div>
-            <h6>Notificacoes recentes</h6>
-            <p class="account-panel-subtitle">As ultimas mensagens importantes da conta.</p>
+            <h6>Notificações recentes</h6>
+            <p class="account-panel-subtitle">As Últimas mensagens importantes da conta.</p>
           </div>
           <a href="{% url 'accounts:notifications' %}" class="btn btn-outline-primary btn-sm">Ver tudo</a>
         </div>
@@ -180,7 +180,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="account-empty"><i class="bi bi-bell-slash"></i>Ainda nao existem notificacoes para mostrar.</div>
+          <div class="account-empty"><i class="bi bi-bell-slash"></i>Ainda não existem notificações para mostrar.</div>
         {% endif %}
       </section>
     </aside>
@@ -191,24 +191,24 @@
           <div class="account-panel-head">
             <div>
               <h5>Resumo do candidato</h5>
-              <p class="account-panel-subtitle">Leitura rapida do teu posicionamento e preferencia atual.</p>
+              <p class="account-panel-subtitle">Leitura rápida do teu posicionamento e preferencia atual.</p>
             </div>
           </div>
           <div class="account-copy mb-3">
             {% if youth_profile.sobre %}
               {{ youth_profile.sobre|linebreaks }}
             {% else %}
-              <div class="account-empty"><i class="bi bi-person-lines-fill"></i>Ainda nao existe um resumo pessoal escrito no perfil.</div>
+              <div class="account-empty"><i class="bi bi-person-lines-fill"></i>Ainda não existe um resumo pessoal escrito no perfil.</div>
             {% endif %}
           </div>
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="account-card h-100">
-                <div class="account-summary-row"><span>Idade</span><span>{% if youth_profile.idade %}{{ youth_profile.idade }} anos{% else %}Nao informada{% endif %}</span></div>
-                <div class="account-summary-row"><span>Situacao</span><span>{{ youth_profile.get_situacao_atual_display }}</span></div>
+                <div class="account-summary-row"><span>Idade</span><span>{% if youth_profile.idade %}{{ youth_profile.idade }} anos{% else %}Não informada{% endif %}</span></div>
+                <div class="account-summary-row"><span>Situação</span><span>{{ youth_profile.get_situacao_atual_display }}</span></div>
                 <div class="account-summary-row"><span>Disponibilidade</span><span>{{ youth_profile.get_disponibilidade_display }}</span></div>
                 <div class="account-summary-row"><span>Preferencia</span><span>{{ youth_profile.get_preferencia_oportunidade_display }}</span></div>
-                <div class="account-summary-row"><span>Interesses</span><span>{{ youth_profile.interesses_setoriais_display|default:"Nao definidos" }}</span></div>
+                <div class="account-summary-row"><span>Interesses</span><span>{{ youth_profile.interesses_setoriais_display|default:"Não definidos" }}</span></div>
               </div>
             </div>
             <div class="col-12 col-md-6">
@@ -216,14 +216,14 @@
                 <div class="account-entry-title">Estado do perfil</div>
                 <p class="account-copy mb-3">
                   {% if youth_profile.completo %}
-                    O perfil ja esta pronto para responder a vagas com mais contexto e melhor leitura.
+                    O perfil já está pronto para responder a vagas com mais contexto e melhor leitura.
                   {% else %}
-                    Ainda ha espaco para reforcar o perfil com mais dados, skills e documentos.
+                    Ainda há espaço para reforçar o perfil com mais dados, skills e documentos.
                   {% endif %}
                 </p>
                 <div class="account-tags">
                   <span class="account-tag"><i class="bi bi-stars"></i>{{ youth_stats.skills|default:0 }} skill{{ youth_stats.skills|default:0|pluralize }}</span>
-                  <span class="account-tag"><i class="bi bi-book"></i>{{ youth_stats.education|default:0 }} formacao{{ youth_stats.education|default:0|pluralize }}</span>
+                  <span class="account-tag"><i class="bi bi-book"></i>{{ youth_stats.education|default:0 }} formação{{ youth_stats.education|default:0|pluralize }}</span>
                   <span class="account-tag"><i class="bi bi-file-earmark"></i>{{ youth_stats.documents|default:0 }} documento{{ youth_stats.documents|default:0|pluralize }}</span>
                 </div>
               </div>
@@ -260,8 +260,8 @@
             <section class="account-panel h-100">
               <div class="account-panel-head">
                 <div>
-                  <h5>Educacao</h5>
-                  <p class="account-panel-subtitle">Formacao academica e tecnica registada na conta.</p>
+                  <h5>Educação</h5>
+                  <p class="account-panel-subtitle">Formação académica e técnica registada na conta.</p>
                 </div>
                 <a href="{% url 'profiles:education_add' %}" class="btn btn-outline-primary btn-sm">Adicionar</a>
               </div>
@@ -270,7 +270,7 @@
                   {% for edu in education %}
                     <article class="account-entry">
                       <div class="account-entry-title">{{ edu.get_nivel_display }}</div>
-                      <div class="account-entry-subtitle">{{ edu.instituicao|default:"Instituicao nao informada" }}</div>
+                      <div class="account-entry-subtitle">{{ edu.instituicao|default:"Instituição não informada" }}</div>
                       {% if edu.curso %}<p class="account-entry-copy mb-0">{{ edu.curso }}</p>{% endif %}
                       <div class="account-entry-meta">
                         <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
@@ -280,7 +280,7 @@
                   {% endfor %}
                 </div>
               {% else %}
-                <div class="account-empty"><i class="bi bi-book"></i>Sem informacao de educacao registada.</div>
+                <div class="account-empty"><i class="bi bi-book"></i>Sem informação de educação registada.</div>
               {% endif %}
             </section>
           </div>
@@ -289,8 +289,8 @@
         <section class="account-panel mt-4">
           <div class="account-panel-head">
             <div>
-              <h5>Experiencia</h5>
-              <p class="account-panel-subtitle">Historico de trabalho, estagio ou projetos.</p>
+              <h5>Experiência</h5>
+              <p class="account-panel-subtitle">Histórico de trabalho, estágio ou projetos.</p>
             </div>
             <a href="{% url 'profiles:experience_add' %}" class="btn btn-outline-primary btn-sm">Adicionar</a>
           </div>
@@ -299,7 +299,7 @@
               {% for exp in experiences %}
                 <article class="account-entry">
                   <div class="account-entry-title">{{ exp.cargo }}</div>
-                  <div class="account-entry-subtitle">{{ exp.entidade|default:"Entidade nao informada" }}</div>
+                  <div class="account-entry-subtitle">{{ exp.entidade|default:"Entidade não informada" }}</div>
                   {% if exp.descricao %}<p class="account-entry-copy mb-0">{{ exp.descricao }}</p>{% endif %}
                   <div class="account-entry-meta">
                     <span class="badge bg-light text-dark border">{{ exp.inicio|date:"m/Y" }} - {% if exp.atual %}Atual{% elif exp.fim %}{{ exp.fim|date:"m/Y" }}{% else %}-{% endif %}</span>
@@ -309,7 +309,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="account-empty"><i class="bi bi-briefcase"></i>Sem experiencia registada.</div>
+            <div class="account-empty"><i class="bi bi-briefcase"></i>Sem experiência registada.</div>
           {% endif %}
         </section>
 
@@ -317,7 +317,7 @@
           <div class="account-panel-head">
             <div>
               <h5>Documentos</h5>
-              <p class="account-panel-subtitle">Arquivos que apoiam validacao e candidaturas.</p>
+              <p class="account-panel-subtitle">Arquivos que apoiam validação e candidaturas.</p>
             </div>
             <a href="{% url 'profiles:document_add' %}" class="btn btn-outline-primary btn-sm">Adicionar</a>
           </div>
@@ -371,7 +371,7 @@
             {% if company_profile.descricao %}
               {{ company_profile.descricao|linebreaks }}
             {% else %}
-              <div class="account-empty"><i class="bi bi-building"></i>A empresa ainda nao tem uma descricao escrita no perfil.</div>
+              <div class="account-empty"><i class="bi bi-building"></i>A empresa ainda não tem uma descrição escrita no perfil.</div>
             {% endif %}
           </div>
         </section>
@@ -386,12 +386,12 @@
                 </div>
               </div>
               <div class="account-summary-row"><span>Nome</span><span>{{ company_profile.nome }}</span></div>
-              <div class="account-summary-row"><span>Setores</span><span>{{ company_profile.get_setor_display|default:"Nao definidos" }}</span></div>
-              <div class="account-summary-row"><span>Telefone</span><span>{{ company_profile.telefone|default:"Nao definido" }}</span></div>
-              <div class="account-summary-row"><span>Email</span><span>{{ company_profile.email|default:"Nao definido" }}</span></div>
-              <div class="account-summary-row"><span>Distrito</span><span>{% if company_profile.distrito %}{{ company_profile.distrito.nome }}{% else %}Nao definido{% endif %}</span></div>
+              <div class="account-summary-row"><span>Setores</span><span>{{ company_profile.get_setor_display|default:"Não definidos" }}</span></div>
+              <div class="account-summary-row"><span>Telefone</span><span>{{ company_profile.telefone|default:"Não definido" }}</span></div>
+              <div class="account-summary-row"><span>Email</span><span>{{ company_profile.email|default:"Não definido" }}</span></div>
+              <div class="account-summary-row"><span>Distrito</span><span>{% if company_profile.distrito %}{{ company_profile.distrito.nome }}{% else %}Não definido{% endif %}</span></div>
               <div class="account-summary-row"><span>Estado</span><span>{% if company_profile.ativa %}Ativa{% else %}Inativa{% endif %}</span></div>
-              <div class="account-summary-row"><span>Verificacao</span><span>{% if company_profile.verificada %}Verificada{% else %}Pendente{% endif %}</span></div>
+              <div class="account-summary-row"><span>Verificação</span><span>{% if company_profile.verificada %}Verificada{% else %}Pendente{% endif %}</span></div>
             </section>
           </div>
 
@@ -399,8 +399,8 @@
             <section class="account-panel h-100">
               <div class="account-panel-head">
                 <div>
-                  <h5>Operacao atual</h5>
-                  <p class="account-panel-subtitle">Leitura rapida da atividade da empresa.</p>
+                  <h5>Operação atual</h5>
+                  <p class="account-panel-subtitle">Leitura rápida da atividade da empresa.</p>
                 </div>
               </div>
               <div class="account-card h-100">
@@ -411,7 +411,7 @@
                   <span class="account-tag"><i class="bi bi-send-check"></i>{{ company_stats.applications|default:0 }} candidatura{{ company_stats.applications|default:0|pluralize }}</span>
                   <span class="account-tag"><i class="bi bi-chat-left-text"></i>{{ company_stats.contact_requests|default:0 }} pedido{{ company_stats.contact_requests|default:0|pluralize }}</span>
                 </div>
-                <p class="account-copy mt-3 mb-0">Mantem o perfil institucional e as vagas atualizados para aumentar a confianca e a aderencia dos jovens.</p>
+                <p class="account-copy mt-3 mb-0">Mantem o perfil institucional e as vagas atualizados para aumentar a confiança e a aderência dos jovens.</p>
               </div>
             </section>
           </div>
@@ -421,7 +421,7 @@
           <div class="account-panel-head">
             <div>
               <h5>Vagas recentes</h5>
-              <p class="account-panel-subtitle">Ultimas oportunidades publicadas pela empresa.</p>
+              <p class="account-panel-subtitle">Últimas oportunidades publicadas pela empresa.</p>
             </div>
             <a href="{% url 'companies:job_list' %}" class="btn btn-outline-primary btn-sm">Ver todas</a>
           </div>
@@ -440,7 +440,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="account-empty"><i class="bi bi-briefcase"></i>A empresa ainda nao publicou vagas.</div>
+            <div class="account-empty"><i class="bi bi-briefcase"></i>A empresa ainda não publicou vagas.</div>
           {% endif %}
         </section>
 
@@ -448,12 +448,12 @@
         <section class="account-panel mb-4">
           <div class="account-panel-head">
             <div>
-              <h5>Proximo passo</h5>
+              <h5>Próximo passo</h5>
               <p class="account-panel-subtitle">A conta existe. Agora falta concluir o perfil certo.</p>
             </div>
           </div>
           <div class="account-card">
-            <div class="account-entry-title mb-2">Completa a experiencia da conta</div>
+            <div class="account-entry-title mb-2">Completa a experiência da conta</div>
             <p class="account-copy mb-3">
               {% if user.is_jovem %}
                 Termina o perfil de jovem para aparecer em pesquisas, responder a vagas e apresentar melhor o teu percurso.
@@ -464,7 +464,7 @@
               {% endif %}
             </p>
             {% if user.is_jovem %}
-              <a href="{% url 'profiles:wizard' %}" class="btn btn-primary"><i class="bi bi-arrow-right-circle me-2"></i>Comecar perfil de jovem</a>
+              <a href="{% url 'profiles:wizard' %}" class="btn btn-primary"><i class="bi bi-arrow-right-circle me-2"></i>Começar perfil de jovem</a>
             {% elif user.is_empresa %}
               <a href="{% url 'companies:complete_profile' %}" class="btn btn-primary"><i class="bi bi-arrow-right-circle me-2"></i>Completar perfil da empresa</a>
             {% else %}
@@ -484,15 +484,15 @@
             <div class="col-12 col-md-6">
               <div class="account-card h-100">
                 <div class="account-summary-row"><span>Nome</span><span>{{ user.nome }}</span></div>
-                <div class="account-summary-row"><span>Email</span><span>{{ user.email|default:"Nao definido" }}</span></div>
-                <div class="account-summary-row"><span>Telefone</span><span>{{ user.telefone|default:"Nao definido" }}</span></div>
+                <div class="account-summary-row"><span>Email</span><span>{{ user.email|default:"Não definido" }}</span></div>
+                <div class="account-summary-row"><span>Telefone</span><span>{{ user.telefone|default:"Não definido" }}</span></div>
                 <div class="account-summary-row"><span>Perfil</span><span>{{ user.get_perfil_display }}</span></div>
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="account-card h-100">
                 <div class="account-entry-title">Estado atual</div>
-                <p class="account-copy mb-3">A conta esta ativa, mas ainda sem um perfil associado completo. Isso limita funcionalidades especificas da plataforma.</p>
+                <p class="account-copy mb-3">A conta esta ativa, mas ainda sem um perfil associado completo. Isso limita funcionalidades específicas da plataforma.</p>
                 <div class="account-tags">
                   {% if user.is_verified %}<span class="account-tag"><i class="bi bi-patch-check"></i>Verificada</span>{% else %}<span class="account-tag muted"><i class="bi bi-patch-exclamation"></i>Por verificar</span>{% endif %}
                   {% if user.consentimento_dados %}<span class="account-tag"><i class="bi bi-shield-check"></i>Dados autorizados</span>{% endif %}

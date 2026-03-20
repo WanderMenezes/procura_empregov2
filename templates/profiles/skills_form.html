@@ -71,12 +71,12 @@
       <div>
         <div class="skills-kicker">Competencias do perfil</div>
         <h1 class="skills-title">Editar skills</h1>
-        <p class="skills-subtitle">Seleciona as competencias que melhor representam o teu perfil e adiciona uma skill nova quando ainda nao existir na lista.</p>
+        <p class="skills-subtitle">Seleciona as competencias que melhor representam o teu perfil e adiciona uma skill nova quando ainda não existir na lista.</p>
         <div class="skills-chips">
           <span class="skills-chip"><i class="bi bi-stars"></i>{{ selected_total_count }} skill{{ selected_total_count|pluralize }} selecionada{{ selected_total_count|pluralize }}</span>
-          <span class="skills-chip"><i class="bi bi-tools"></i>{{ selected_technical_count }} tecnica{{ selected_technical_count|pluralize }}</span>
+          <span class="skills-chip"><i class="bi bi-tools"></i>{{ selected_technical_count }} técnica{{ selected_technical_count|pluralize }}</span>
           <span class="skills-chip"><i class="bi bi-people"></i>{{ selected_transversal_count }} transversal{{ selected_transversal_count|pluralize }}</span>
-          <span class="skills-chip"><i class="bi bi-grid"></i>{{ available_skill_count }} opcao{{ available_skill_count|pluralize }} disponive{{ available_skill_count|pluralize:"l,is" }}</span>
+          <span class="skills-chip"><i class="bi bi-grid"></i>{{ available_skill_count }} opção{{ available_skill_count|pluralize }} disponive{{ available_skill_count|pluralize:"l,is" }}</span>
         </div>
       </div>
       <div class="skills-actions">
@@ -86,9 +86,9 @@
     </div>
 
     <div class="skills-stats">
-      <div class="skills-stat"><span class="skills-stat-label">Selecionadas</span><span class="skills-stat-value">{{ selected_total_count }}</span><span class="skills-stat-meta">ja ligadas ao teu perfil</span></div>
-      <div class="skills-stat"><span class="skills-stat-label">Tecnicas</span><span class="skills-stat-value">{{ technical_skills|length }}</span><span class="skills-stat-meta">ferramentas, oficios e software</span></div>
-      <div class="skills-stat"><span class="skills-stat-label">Transversais</span><span class="skills-stat-value">{{ transversal_skills|length }}</span><span class="skills-stat-meta">comunicacao e colaboracao</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Selecionadas</span><span class="skills-stat-value">{{ selected_total_count }}</span><span class="skills-stat-meta">já ligadas ao teu perfil</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Técnicas</span><span class="skills-stat-value">{{ technical_skills|length }}</span><span class="skills-stat-meta">ferramentas, oficios e software</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Transversais</span><span class="skills-stat-value">{{ transversal_skills|length }}</span><span class="skills-stat-meta">comunicação e colaboração</span></div>
       <div class="skills-stat"><span class="skills-stat-label">Nova skill</span><span class="skills-stat-value">+</span><span class="skills-stat-meta">podes sugerir uma que falte</span></div>
     </div>
   </section>
@@ -99,7 +99,7 @@
         <div class="skills-panel-head">
           <div>
             <h2 class="skills-panel-title">Resumo do perfil</h2>
-            <p class="skills-panel-subtitle">Contexto rapido para organizares melhor as competencias.</p>
+            <p class="skills-panel-subtitle">Contexto rápido para organizares melhor as competencias.</p>
           </div>
         </div>
         <div class="skills-profile">
@@ -118,7 +118,7 @@
         </div>
         <div class="skills-profile-tags">
           <span class="skills-tag highlight"><i class="bi bi-stars"></i>{{ selected_total_count }} selecionada{{ selected_total_count|pluralize }}</span>
-          <span class="skills-tag"><i class="bi bi-tools"></i>{{ selected_technical_count }} tecnicas</span>
+          <span class="skills-tag"><i class="bi bi-tools"></i>{{ selected_technical_count }} técnicas</span>
           <span class="skills-tag muted"><i class="bi bi-people"></i>{{ selected_transversal_count }} transversais</span>
         </div>
       </section>
@@ -127,20 +127,20 @@
         <div class="skills-panel-head">
           <div>
             <h2 class="skills-panel-title">Dicas para escolher</h2>
-            <p class="skills-panel-subtitle">Mantem a lista relevante e facil de ler.</p>
+            <p class="skills-panel-subtitle">Mantem a lista relevante e fácil de ler.</p>
           </div>
         </div>
         <div class="skills-tip">
           <strong>Prioriza o que realmente sabes usar.</strong>
-          <div class="skills-copy">Seleciona primeiro as competencias que consegues demonstrar em entrevista, teste ou experiencia pratica.</div>
+          <div class="skills-copy">Seleciona primeiro as competencias que consegues demonstrar em entrevista, teste ou experiência prática.</div>
         </div>
         <div class="skills-tip">
-          <strong>Mistura tecnica com transversal.</strong>
-          <div class="skills-copy">Um perfil equilibrado costuma combinar capacidade pratica com comunicacao, responsabilidade e trabalho em equipa.</div>
+          <strong>Mistura técnica com transversal.</strong>
+          <div class="skills-copy">Um perfil equilibrado costuma combinar capacidade prática com comunicação, responsabilidade e trabalho em equipa.</div>
         </div>
         <div class="skills-tip">
           <strong>Sugere uma skill nova quando faltar algo importante.</strong>
-          <div class="skills-copy">Usa o campo extra apenas para competencias que ainda nao existem na plataforma.</div>
+          <div class="skills-copy">Usa o campo extra apenas para competencias que ainda não existem na plataforma.</div>
         </div>
       </section>
     </aside>
@@ -156,9 +156,9 @@
         {% csrf_token %}
 
         <div class="skills-section">
-          <div class="skills-section-label"><i class="bi bi-tools"></i>Competencias tecnicas</div>
-          <h2 class="skills-section-title">Ferramentas, software e saber fazer tecnico</h2>
-          <p class="skills-note mb-0">Marca as competencias ligadas a funcao, oficio, tecnologia ou processo que ja consegues executar.</p>
+          <div class="skills-section-label"><i class="bi bi-tools"></i>Competencias técnicas</div>
+          <h2 class="skills-section-title">Ferramentas, software e saber fazer técnico</h2>
+          <p class="skills-note mb-0">Marca as competencias ligadas a função, oficio, tecnologia ou processo que já consegues executar.</p>
           {% if technical_skills %}
             <div class="skills-grid">
               {% for skill in technical_skills %}
@@ -166,21 +166,21 @@
                   <input class="form-check-input" type="checkbox" name="skills" value="{{ skill.id }}" id="skill_{{ skill.id }}" {% if skill.id in selected_skill_ids %}checked{% endif %}>
                   <div>
                     <div class="skills-card-title">{{ skill.nome }}</div>
-                    <div class="skills-card-copy">Skill tecnica para tarefas, ferramentas ou especialidade pratica.</div>
+                    <div class="skills-card-copy">Skill técnica para tarefas, ferramentas ou especialidade prática.</div>
                   </div>
                 </label>
               {% endfor %}
             </div>
           {% else %}
             <div class="skills-empty">
-              <div class="skills-empty-copy">Ainda nao existem skills tecnicas aprovadas para selecionar.</div>
+              <div class="skills-empty-copy">Ainda não existem skills técnicas aprovadas para selecionar.</div>
             </div>
           {% endif %}
         </div>
 
         <div class="skills-section">
           <div class="skills-section-label"><i class="bi bi-people"></i>Competencias transversais</div>
-          <h2 class="skills-section-title">Comunicacao, colaboracao e comportamento profissional</h2>
+          <h2 class="skills-section-title">Comunicação, colaboração e comportamento profissional</h2>
           <p class="skills-note mb-0">Seleciona as competencias que mostram como trabalhas, aprendes e te relacionas em contexto profissional.</p>
           {% if transversal_skills %}
             <div class="skills-grid">
@@ -189,14 +189,14 @@
                   <input class="form-check-input" type="checkbox" name="skills" value="{{ skill.id }}" id="skill_{{ skill.id }}" {% if skill.id in selected_skill_ids %}checked{% endif %}>
                   <div>
                     <div class="skills-card-title">{{ skill.nome }}</div>
-                    <div class="skills-card-copy">Skill transversal importante para ambiente de trabalho, equipa e adaptacao.</div>
+                    <div class="skills-card-copy">Skill transversal importante para ambiente de trabalho, equipa e adaptação.</div>
                   </div>
                 </label>
               {% endfor %}
             </div>
           {% else %}
             <div class="skills-empty">
-              <div class="skills-empty-copy">Ainda nao existem skills transversais aprovadas para selecionar.</div>
+              <div class="skills-empty-copy">Ainda não existem skills transversais aprovadas para selecionar.</div>
             </div>
           {% endif %}
         </div>
@@ -204,12 +204,12 @@
         <div class="skills-section">
           <div class="skills-section-label"><i class="bi bi-plus-circle"></i>Skill em falta</div>
           <h2 class="skills-section-title">Sugerir outra skill</h2>
-          <p class="skills-note mb-0">Se a competencia nao existir na lista, escreve aqui e escolhe o tipo certo para ela entrar corretamente no teu perfil.</p>
+          <p class="skills-note mb-0">Se a competencia não existir na lista, escreve aqui e escolhe o tipo certo para ela entrar corretamente no teu perfil.</p>
           <div class="skills-field-grid">
             <div class="skills-field">
-              <label for="id_outra_skill_nome">Indica uma skill que nao esta na lista</label>
+              <label for="id_outra_skill_nome">Indica uma skill que não esta na lista</label>
               {{ form.outra_skill_nome }}
-              <div class="skills-field-help">Exemplo: Canva, Soldadura, Atendimento ao cliente, Controlo de stock.</div>
+              <div class="skills-field-help">Exemplo: Canva, Soldadura, Aténdimento ao cliente, Controlo de stock.</div>
               {% if form.outra_skill_nome.errors %}<div class="skills-field-error">{{ form.outra_skill_nome.errors|striptags }}</div>{% endif %}
             </div>
             <div class="skills-field">

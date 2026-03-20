@@ -2,75 +2,796 @@
 
 {% block title %}Termos de Uso - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .terms-page {
+    background:
+      radial-gradient(circle at top left, rgba(15, 90, 159, 0.1), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(30, 140, 108, 0.1), transparent 24%),
+      linear-gradient(180deg, #f6fafc 0%, #eef4f8 100%);
+  }
+
+  .terms-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .terms-hero,
+  .terms-card,
+  .terms-panel,
+  .terms-cta,
+  .terms-sidebar-card {
+    border-radius: 28px;
+    border: 1px solid rgba(17, 36, 58, 0.08);
+    box-shadow: 0 22px 44px rgba(17, 36, 58, 0.08);
+  }
+
+  .terms-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%),
+      linear-gradient(135deg, #103251 0%, #0f5a9f 56%, #1e8c6c 100%);
+  }
+
+  .terms-hero::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    bottom: -105px;
+    width: 250px;
+    height: 250px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .terms-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .terms-kicker,
+  .terms-section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .terms-kicker {
+    margin-bottom: 0.9rem;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .terms-title {
+    font-size: clamp(2.1rem, 4vw, 3.7rem);
+    line-height: 0.98;
+    margin-bottom: 0.85rem;
+    max-width: 10ch;
+  }
+
+  .terms-copy,
+  .terms-card-copy,
+  .terms-step-copy,
+  .terms-list li,
+  .terms-meta,
+  .terms-detail-copy {
+    color: #607287;
+  }
+
+  .terms-hero .terms-copy,
+  .terms-hero .terms-meta,
+  .terms-panel-copy,
+  .terms-panel-stat span {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .terms-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .terms-hero-actions,
+  .terms-chip-list,
+  .terms-panel-tags,
+  .terms-step-meta,
+  .terms-mini-tags,
+  .terms-link-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .terms-hero-actions {
+    margin-top: 1.15rem;
+  }
+
+  .terms-hero-actions .btn,
+  .terms-cta .btn {
+    border-radius: 16px;
+    padding-inline: 1rem;
+    font-weight: 700;
+  }
+
+  .terms-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.58rem 0.88rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .terms-panel {
+    padding: 1.15rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .terms-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .terms-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .terms-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .terms-panel-stat {
+    padding: 0.95rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .terms-panel-stat strong {
+    display: block;
+    font-size: 1.08rem;
+    margin-bottom: 0.22rem;
+  }
+
+  .terms-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(285px, 320px);
+    gap: 1.35rem;
+    align-items: start;
+  }
+
+  .terms-main {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .terms-card,
+  .terms-sidebar-card {
+    background: #fff;
+    padding: 1.35rem;
+  }
+
+  .terms-section-kicker {
+    margin-bottom: 0.55rem;
+    background: rgba(15, 90, 159, 0.08);
+    color: #0f5a9f;
+  }
+
+  .terms-section-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .terms-summary-grid,
+  .terms-eligibility-grid,
+  .terms-conduct-grid,
+  .terms-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .terms-summary-card,
+  .terms-eligibility-card,
+  .terms-conduct-card,
+  .terms-trust-card {
+    border-radius: 22px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .terms-summary-icon,
+  .terms-eligibility-icon,
+  .terms-conduct-icon,
+  .terms-trust-icon,
+  .terms-step-index {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+    font-size: 1.1rem;
+  }
+
+  .terms-summary-icon,
+  .terms-step-index {
+    background: rgba(15, 90, 159, 0.1);
+    color: #0f5a9f;
+  }
+
+  .terms-eligibility-icon {
+    background: rgba(30, 140, 108, 0.1);
+    color: #1e8c6c;
+  }
+
+  .terms-conduct-icon {
+    background: rgba(242, 169, 59, 0.12);
+    color: #b97a10;
+  }
+
+  .terms-trust-icon {
+    background: rgba(17, 36, 58, 0.08);
+    color: #1b3956;
+  }
+
+  .terms-summary-card h3,
+  .terms-eligibility-card h3,
+  .terms-conduct-card h3,
+  .terms-trust-card h3,
+  .terms-sidebar-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    color: #10253a;
+  }
+
+  .terms-process {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .terms-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: start;
+    padding: 1rem;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .terms-step-index {
+    margin-bottom: 0;
+    font-weight: 800;
+  }
+
+  .terms-step h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .terms-step-meta span,
+  .terms-mini-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(15, 90, 159, 0.08);
+    color: #214766;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .terms-split-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .terms-detail-box {
+    border-radius: 22px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .terms-detail-box h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    color: #10253a;
+  }
+
+  .terms-list {
+    display: grid;
+    gap: 0.7rem;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .terms-list li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .terms-list i {
+    color: #1e8c6c;
+    margin-top: 0.15rem;
+  }
+
+  .terms-sidebar {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .terms-sidebar-card {
+    border-radius: 24px;
+    box-shadow: 0 18px 34px rgba(17, 36, 58, 0.06);
+  }
+
+  .terms-link-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .terms-link {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+    text-decoration: none;
+    color: #10253a;
+    font-weight: 600;
+  }
+
+  .terms-link small {
+    display: block;
+    color: #697b8f;
+    font-weight: 500;
+  }
+
+  .terms-cta {
+    position: relative;
+    overflow: hidden;
+    padding: 1.55rem;
+    color: #fff;
+    background: linear-gradient(135deg, #143354 0%, #1e8c6c 100%);
+  }
+
+  .terms-cta::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -100px auto;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .terms-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .terms-cta-copy {
+    color: rgba(255, 255, 255, 0.84);
+    max-width: 62ch;
+  }
+
+  @media (max-width: 1199.98px) {
+    .terms-summary-grid,
+    .terms-eligibility-grid,
+    .terms-conduct-grid,
+    .terms-trust-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .terms-hero-grid,
+    .terms-main-grid,
+    .terms-summary-grid,
+    .terms-eligibility-grid,
+    .terms-conduct-grid,
+    .terms-trust-grid,
+    .terms-split-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .terms-panel-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .terms-hero,
+    .terms-card,
+    .terms-sidebar-card,
+    .terms-cta {
+      border-radius: 22px;
+    }
+
+    .terms-hero,
+    .terms-card,
+    .terms-sidebar-card,
+    .terms-cta {
+      padding: 1.15rem;
+    }
+
+    .terms-panel-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .terms-step {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h1 class="text-center mb-4">Termos de Uso</h1>
-                    
-                    <p class="text-muted mb-4">Última atualização: 12 de Fevereiro de 2026</p>
-                    
-                    <h3>1. Aceitação dos Termos</h3>
-                    <p>
-                        Ao aceder e usar a Base Nacional de Jovens, concordas em cumprir estes 
-                        termos de uso. Se não concordares com algum destes termos, não deves usar 
-                        a plataforma.
-                    </p>
-                    
-                    <h3>2. Elegibilidade</h3>
-                    <p>Para usar a plataforma, deves:</p>
-                    <ul>
-                        <li>Ser residente em São Tomé e Príncipe</li>
-                        <li>Ter pelo menos 16 anos de idade</li>
-                        <li>Fornecer informações verdadeiras e atualizadas</li>
-                    </ul>
-                    
-                    <h3>3. Conta de Utilizador</h3>
-                    <p>
-                        És responsável por manter a confidencialidade da tua palavra-passe e por 
-                        todas as atividades que ocorram na tua conta. Deves notificar-nos imediatamente 
-                        sobre qualquer uso não autorizado da tua conta.
-                    </p>
-                    
-                    <h3>4. Conduta do Utilizador</h3>
-                    <p>Concordas em não:</p>
-                    <ul>
-                        <li>Fornecer informações falsas ou enganosas</li>
-                        <li>Usar a plataforma para fins ilegais</li>
-                        <li>Assediar ou discriminar outros utilizadores</li>
-                        <li>Tentar aceder a áreas restritas da plataforma</li>
-                        <li>Interferir com o funcionamento normal da plataforma</li>
-                    </ul>
-                    
-                    <h3>5. Conteúdo do Utilizador</h3>
-                    <p>
-                        Ao submeteres conteúdo (informações de perfil, documentos), garantes que 
-                        tens o direito de o fazer e que o conteúdo não viola direitos de terceiros.
-                    </p>
-                    
-                    <h3>6. Disponibilidade da Plataforma</h3>
-                    <p>
-                        Fazemos todos os esforços para manter a plataforma disponível, mas não 
-                        garantimos acesso ininterrupto. Podemos suspender ou terminar o serviço 
-                        a qualquer momento.
-                    </p>
-                    
-                    <h3>7. Modificações</h3>
-                    <p>
-                        Reservamo-nos o direito de modificar estes termos a qualquer momento. 
-                        As alterações entram em vigor após a publicação na plataforma.
-                    </p>
-                    
-                    <h3>8. Contacto</h3>
-                    <p>
-                        Para questões sobre estes termos, contacta-nos através de 
-                        <a href="mailto:info@basenacionaljovens.st">info@basenacionaljovens.st</a>.
-                    </p>
-                </div>
+<div class="terms-page py-4 py-lg-5">
+  <div class="container">
+    <div class="terms-shell">
+      <section class="terms-hero">
+        <div class="terms-hero-grid">
+          <div>
+            <div class="terms-kicker"><i class="bi bi-file-earmark-text"></i>Regras de utilização</div>
+            <h1 class="terms-title">Usar a plataforma implica responsabilidade e confiança.</h1>
+            <p class="terms-copy mb-0">
+              Estes termos explicam as condições de acesso e utilização da Base Nacional de Jovens,
+              o que é esperado dos utilizadores e como a plataforma pode gerir disponibilidade,
+              alterações e contacto.
+            </p>
+
+            <div class="terms-hero-actions">
+              <a href="{% url 'privacy' %}" class="btn btn-light">
+                <i class="bi bi-shield-lock me-2"></i>Ver privacidade
+              </a>
+              <a href="{% url 'help' %}" class="btn btn-outline-light">
+                <i class="bi bi-question-circle me-2"></i>Ajuda
+              </a>
             </div>
+
+            <div class="terms-chip-list mt-3">
+              <span class="terms-chip"><i class="bi bi-check2-circle"></i>Condições de acesso</span>
+              <span class="terms-chip"><i class="bi bi-person-badge"></i>Conta e conduta</span>
+              <span class="terms-chip"><i class="bi bi-arrow-repeat"></i>Alterações e serviço</span>
+            </div>
+          </div>
+
+          <aside class="terms-panel">
+            <div class="terms-panel-head">
+              <div>
+                <div class="terms-panel-badge"><i class="bi bi-info-circle"></i>Resumo rápido</div>
+              </div>
+            </div>
+            <div class="terms-panel-grid">
+              <div class="terms-panel-stat">
+                <strong>Última atualização</strong>
+                <span>12 de Fevereiro de 2026</span>
+              </div>
+              <div class="terms-panel-stat">
+                <strong>Idade mínima</strong>
+                <span>16 anos para utilização da plataforma.</span>
+              </div>
+              <div class="terms-panel-stat">
+                <strong>Conta</strong>
+                <span>O utilizador responde pela segurança da sua palavra-passe.</span>
+              </div>
+              <div class="terms-panel-stat">
+                <strong>Disponibilidade</strong>
+                <span>O serviço pode ser alterado, suspenso ou atualizado quando necessário.</span>
+              </div>
+            </div>
+            <div class="terms-panel-tags mt-3">
+              <span class="terms-mini-tag"><i class="bi bi-person-check"></i>Uso responsável</span>
+              <span class="terms-mini-tag"><i class="bi bi-exclamation-circle"></i>Regras claras</span>
+            </div>
+          </aside>
         </div>
+      </section>
+
+      <div class="terms-main-grid">
+        <main class="terms-main">
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-compass"></i>Introdução</div>
+            <h2 class="terms-section-title">Aceitação dos termos</h2>
+            <p class="terms-copy mb-0">
+              Ao aceder e usar a Base Nacional de Jovens, concordas em cumprir estes termos de uso.
+              Se não concordares com qualquer parte destas regras, não deves usar a plataforma.
+            </p>
+
+            <div class="terms-summary-grid">
+              <article class="terms-summary-card">
+                <div class="terms-summary-icon"><i class="bi bi-door-open"></i></div>
+                <h3>Acesso com regras</h3>
+                <p class="terms-card-copy mb-0">
+                  O uso da plataforma pressupõe aceitação das condições apresentadas nesta página.
+                </p>
+              </article>
+              <article class="terms-summary-card">
+                <div class="terms-summary-icon"><i class="bi bi-person-check"></i></div>
+                <h3>Responsabilidade do utilizador</h3>
+                <p class="terms-card-copy mb-0">
+                  A conta, os dados submetidos e a forma de utilização devem respeitar as regras da plataforma.
+                </p>
+              </article>
+              <article class="terms-summary-card">
+                <div class="terms-summary-icon"><i class="bi bi-shield-check"></i></div>
+                <h3>Uso seguro e legítimo</h3>
+                <p class="terms-card-copy mb-0">
+                  O sistema existe para apoiar empregabilidade e coordenação, não para fins abusivos ou ilegais.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-person-vcard"></i>Elegibilidade</div>
+            <h2 class="terms-section-title">Quem pode usar a plataforma</h2>
+            <p class="terms-copy mb-0">
+              Para usar a Base Nacional de Jovens, o utilizador deve cumprir requisitos mínimos de elegibilidade e de veracidade da informação.
+            </p>
+
+            <div class="terms-eligibility-grid">
+              <article class="terms-eligibility-card">
+                <div class="terms-eligibility-icon"><i class="bi bi-geo-alt"></i></div>
+                <h3>Residência</h3>
+                <p class="terms-card-copy mb-0">Ser residente em São Tomé e Príncipe.</p>
+              </article>
+              <article class="terms-eligibility-card">
+                <div class="terms-eligibility-icon"><i class="bi bi-calendar-check"></i></div>
+                <h3>Idade mínima</h3>
+                <p class="terms-card-copy mb-0">Ter pelo menos 16 anos de idade.</p>
+              </article>
+              <article class="terms-eligibility-card">
+                <div class="terms-eligibility-icon"><i class="bi bi-patch-check"></i></div>
+                <h3>Informação verdadeira</h3>
+                <p class="terms-card-copy mb-0">Fornecer dados verdadeiros, atualizados e coerentes com a realidade.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-person-lock"></i>Conta</div>
+            <h2 class="terms-section-title">Conta de utilizador e responsabilidades básicas</h2>
+
+            <div class="terms-process">
+              <article class="terms-step">
+                <div class="terms-step-index">1</div>
+                <div>
+                  <h3>Proteger a palavra-passe</h3>
+                  <p class="terms-step-copy mb-0">
+                    És responsável por manter a confidencialidade da tua palavra-passe e evitar uso indevido da conta.
+                  </p>
+                </div>
+              </article>
+
+              <article class="terms-step">
+                <div class="terms-step-index">2</div>
+                <div>
+                  <h3>Assumir a atividade da conta</h3>
+                  <p class="terms-step-copy mb-0">
+                    As ações realizadas na tua conta são, em regra, tratadas como da tua responsabilidade.
+                  </p>
+                </div>
+              </article>
+
+              <article class="terms-step">
+                <div class="terms-step-index">3</div>
+                <div>
+                  <h3>Comunicar uso não autorizado</h3>
+                  <p class="terms-step-copy mb-0">
+                    Deves notificar a plataforma o mais rapidamente possível se suspeitares de acesso indevido ou uso não autorizado.
+                  </p>
+                  <div class="terms-step-meta">
+                    <span><i class="bi bi-envelope"></i>Contacto rápido</span>
+                    <span><i class="bi bi-shield-exclamation"></i>Segurança da conta</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-sign-stop"></i>Conduta</div>
+            <h2 class="terms-section-title">O que não é permitido</h2>
+
+            <div class="terms-conduct-grid">
+              <article class="terms-conduct-card">
+                <div class="terms-conduct-icon"><i class="bi bi-ban"></i></div>
+                <h3>Informação falsa</h3>
+                <p class="terms-card-copy mb-0">Não fornecer informações falsas, enganosas ou manipuladas.</p>
+              </article>
+              <article class="terms-conduct-card">
+                <div class="terms-conduct-icon"><i class="bi bi-exclamation-octagon"></i></div>
+                <h3>Uso ilegal</h3>
+                <p class="terms-card-copy mb-0">Não usar a plataforma para fins ilícitos ou contrários ao seu propósito.</p>
+              </article>
+              <article class="terms-conduct-card">
+                <div class="terms-conduct-icon"><i class="bi bi-person-x"></i></div>
+                <h3>Assédio e discriminação</h3>
+                <p class="terms-card-copy mb-0">Não assediar, intimidar ou discriminar outros utilizadores.</p>
+              </article>
+              <article class="terms-conduct-card">
+                <div class="terms-conduct-icon"><i class="bi bi-lock"></i></div>
+                <h3>Acesso indevido</h3>
+                <p class="terms-card-copy mb-0">Não tentar entrar em áreas restritas ou contornar permissões do sistema.</p>
+              </article>
+              <article class="terms-conduct-card">
+                <div class="terms-conduct-icon"><i class="bi bi-slash-circle"></i></div>
+                <h3>Interferência no serviço</h3>
+                <p class="terms-card-copy mb-0">Não perturbar o funcionamento normal da plataforma ou dos seus fluxos.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-file-earmark-check"></i>Conteúdo</div>
+            <h2 class="terms-section-title">Conteúdo submetido pelo utilizador</h2>
+
+            <div class="terms-split-grid">
+              <article class="terms-detail-box">
+                <h3>O que assumes ao submeter conteúdo</h3>
+                <ul class="terms-list mt-3">
+                  <li><i class="bi bi-check2"></i><span>Que tens o direito de carregar ou inserir esse conteúdo.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Que a informação do perfil e os documentos não violam direitos de terceiros.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Que os materiais submetidos servem finalidade legítima dentro da plataforma.</span></li>
+                </ul>
+              </article>
+
+              <article class="terms-detail-box">
+                <h3>Exemplos de conteúdo</h3>
+                <ul class="terms-list mt-3">
+                  <li><i class="bi bi-check2"></i><span>Informações de perfil.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Currículo, certificados e outros documentos.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Dados empresariais e descrição de vagas.</span></li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-card">
+            <div class="terms-section-kicker"><i class="bi bi-arrow-repeat"></i>Serviço e alterações</div>
+            <h2 class="terms-section-title">Disponibilidade da plataforma e modificações</h2>
+
+            <div class="terms-trust-grid">
+              <article class="terms-trust-card">
+                <div class="terms-trust-icon"><i class="bi bi-wifi"></i></div>
+                <h3>Disponibilidade</h3>
+                <p class="terms-card-copy mb-0">
+                  Fazemos esforço para manter a plataforma disponível, mas não garantimos acesso ininterrupto.
+                </p>
+              </article>
+              <article class="terms-trust-card">
+                <div class="terms-trust-icon"><i class="bi bi-pause-circle"></i></div>
+                <h3>Suspensão ou encerramento</h3>
+                <p class="terms-card-copy mb-0">
+                  O serviço pode ser suspenso, ajustado ou terminado quando houver necessidade operacional ou técnica.
+                </p>
+              </article>
+              <article class="terms-trust-card">
+                <div class="terms-trust-icon"><i class="bi bi-pencil-square"></i></div>
+                <h3>Alteração de termos</h3>
+                <p class="terms-card-copy mb-0">
+                  Estes termos podem ser modificados a qualquer momento, produzindo efeitos após publicação na plataforma.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="terms-cta">
+            <div class="terms-section-kicker text-white border border-white border-opacity-25 bg-white bg-opacity-10"><i class="bi bi-envelope-paper"></i>Questões?</div>
+            <h2 class="terms-section-title text-white">Se precisares de esclarecer estes termos, fala connosco.</h2>
+            <p class="terms-cta-copy mb-4">
+              A política de privacidade complementa estas regras e a página de ajuda resume os fluxos principais da plataforma.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="{% url 'privacy' %}" class="btn btn-light">
+                <i class="bi bi-shield-lock me-2"></i>Política de privacidade
+              </a>
+              <a href="mailto:info@basenacionaljovens.st" class="btn btn-outline-light">
+                <i class="bi bi-envelope me-2"></i>Contactar
+              </a>
+            </div>
+          </section>
+        </main>
+
+        <aside class="terms-sidebar">
+          <section class="terms-sidebar-card">
+            <div class="terms-section-kicker"><i class="bi bi-check2-circle"></i>Essencial</div>
+            <h3>O que convém reter</h3>
+            <ul class="terms-list mt-3">
+              <li><i class="bi bi-check2"></i><span>Usar a plataforma implica aceitar as regras publicadas nesta página.</span></li>
+              <li><i class="bi bi-check2"></i><span>O utilizador responde pela segurança da sua conta e pela veracidade dos dados.</span></li>
+              <li><i class="bi bi-check2"></i><span>Condutas abusivas, falsas ou ilegais não são permitidas.</span></li>
+            </ul>
+          </section>
+
+          <section class="terms-sidebar-card">
+            <div class="terms-section-kicker"><i class="bi bi-person-badge"></i>Responsabilidades</div>
+            <h3>Do lado do utilizador</h3>
+            <ul class="terms-list mt-3">
+              <li><i class="bi bi-check2"></i><span>Guardar a palavra-passe de forma segura.</span></li>
+              <li><i class="bi bi-check2"></i><span>Atualizar dados quando necessário.</span></li>
+              <li><i class="bi bi-check2"></i><span>Não carregar conteúdo sem direito de uso.</span></li>
+              <li><i class="bi bi-check2"></i><span>Usar a plataforma de forma respeitosa e legítima.</span></li>
+            </ul>
+          </section>
+
+          <section class="terms-sidebar-card">
+            <div class="terms-section-kicker"><i class="bi bi-compass"></i>Ligações úteis</div>
+            <div class="terms-link-list">
+              <a href="{% url 'privacy' %}" class="terms-link">
+                <div>
+                  Privacidade
+                  <small>Percebe como os dados são tratados e protegidos.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'help' %}" class="terms-link">
+                <div>
+                  Centro de ajuda
+                  <small>Consulta os fluxos principais da plataforma.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'accounts:register' %}" class="terms-link">
+                <div>
+                  Criar conta
+                  <small>Entrar na plataforma com o perfil certo.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

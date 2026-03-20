@@ -50,7 +50,7 @@
                                 <div>
                                     <div class="admin-section-kicker">Dados da conta</div>
                                     <h5 class="mb-1">{{ edit_target.nome }}</h5>
-                                    <p class="text-muted mb-0">Edite nome, contactos, localizacao e dados condicionais do perfil.</p>
+                                    <p class="text-muted mb-0">Edite nome, contactos, localização e dados condicionais do perfil.</p>
                                 </div>
                             </div>
 
@@ -80,7 +80,7 @@
                                             {% endif %}
                                         </div>
                                         <div class="col-md-6">
-                                            <label for="id_telefone" class="form-label">Telemovel *</label>
+                                            <label for="id_telefone" class="form-label">Telemóvel *</label>
                                             <input type="tel" name="telefone" id="id_telefone"
                                                    class="form-control{% if edit_user_form.telefone.errors %} is-invalid{% endif %}"
                                                    value="{{ edit_user_form.telefone.value|default_if_none:'' }}"
@@ -110,7 +110,7 @@
 
                                 {% if edit_target.is_empresa %}
                                     <div class="admin-form-section">
-                                        <div class="admin-form-section-label">Identificacao da empresa</div>
+                                        <div class="admin-form-section-label">Identificação da empresa</div>
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label for="id_nif" class="form-label">NIF *</label>
@@ -126,10 +126,10 @@
                                     </div>
                                 {% elif edit_target.is_jovem %}
                                     <div class="admin-form-section">
-                                        <div class="admin-form-section-label">Identificacao pessoal</div>
+                                        <div class="admin-form-section-label">Identificação pessoal</div>
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label for="id_bi_numero" class="form-label">Numero do BI *</label>
+                                                <label for="id_bi_numero" class="form-label">Número do BI *</label>
                                                 <input type="text" name="bi_numero" id="id_bi_numero"
                                                        class="form-control{% if edit_user_form.bi_numero.errors %} is-invalid{% endif %}"
                                                        value="{{ edit_user_form.bi_numero.value|default_if_none:'' }}"
@@ -175,7 +175,7 @@
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="{{ next_url }}" class="btn btn-outline-secondary">Cancelar</a>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-1"></i>Guardar alteracoes
+                                        <i class="bi bi-save me-1"></i>Guardar alterações
                                     </button>
                                 </div>
                             </form>
@@ -190,7 +190,7 @@
                                 <div>
                                     <div class="admin-section-kicker">Resumo</div>
                                     <h5 class="mb-1">{{ edit_target.nome }}</h5>
-                                    <p class="text-muted mb-0">Leitura rapida do estado atual da conta.</p>
+                                    <p class="text-muted mb-0">Leitura rápida do estado atual da conta.</p>
                                 </div>
                             </div>
 
@@ -216,7 +216,7 @@
                             <div class="admin-note-card">
                                 <h6 class="mb-2">Nota</h6>
                                 <p class="mb-0 text-muted">
-                                    Esta edicao atualiza os dados da conta e, quando o perfil e de empresa, sincroniza tambem o perfil empresarial associado.
+                                    Esta edicao atualiza os dados da conta e, quando o perfil é de empresa, sincroniza tambem o perfil empresarial associado.
                                 </p>
                             </div>
                         </div>

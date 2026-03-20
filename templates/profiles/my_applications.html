@@ -84,7 +84,7 @@
       <div>
         <div class="apps-kicker">Seguimento das candidaturas</div>
         <h1 class="apps-title">Minhas candidaturas</h1>
-        <p class="apps-subtitle">Acompanha o pipeline das vagas a que te candidataste, revê a ultima interacao com as empresas e foca-te primeiro no que precisa de resposta.</p>
+        <p class="apps-subtitle">Acompanha o pipeline das vagas a que te candidataste, revê a Última interação com as empresas e foca-te primeiro no que precisa de resposta.</p>
         <div class="apps-chips">
           <span class="apps-chip"><i class="bi bi-send-check"></i>{{ total_applications }} candidaturas</span>
           <span class="apps-chip"><i class="bi bi-chat-square-text"></i>{{ with_messages_count }} com mensagens</span>
@@ -95,13 +95,13 @@
       <div class="apps-actions">
         <a href="{% url 'profiles:available_jobs' %}" class="btn btn-light"><i class="bi bi-briefcase me-2"></i>Ver vagas</a>
         <a href="{% url 'profiles:detail' %}" class="btn btn-outline-light"><i class="bi bi-person me-2"></i>Meu perfil</a>
-        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Inicio</a>
+        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Início</a>
       </div>
     </div>
 
     <div class="apps-stats">
-      <div class="apps-stat"><span class="apps-stat-label">Pendentes</span><span class="apps-stat-value">{{ pending_count }}</span><span class="apps-stat-meta">aguardam primeira analise</span></div>
-      <div class="apps-stat"><span class="apps-stat-label">Em analise</span><span class="apps-stat-value">{{ analysis_count }}</span><span class="apps-stat-meta">com avaliacao em curso</span></div>
+      <div class="apps-stat"><span class="apps-stat-label">Pendentes</span><span class="apps-stat-value">{{ pending_count }}</span><span class="apps-stat-meta">aguardam primeira análise</span></div>
+      <div class="apps-stat"><span class="apps-stat-label">Em análise</span><span class="apps-stat-value">{{ analysis_count }}</span><span class="apps-stat-meta">com avaliação em curso</span></div>
       <div class="apps-stat"><span class="apps-stat-label">Aceites</span><span class="apps-stat-value">{{ accepted_count }}</span><span class="apps-stat-meta">com resposta positiva</span></div>
       <div class="apps-stat"><span class="apps-stat-label">Rejeitadas</span><span class="apps-stat-value">{{ rejected_count }}</span><span class="apps-stat-meta">fechadas no processo</span></div>
     </div>
@@ -113,7 +113,7 @@
         <div class="apps-panel-head">
           <div>
             <h2 class="apps-panel-title">Resumo do teu perfil</h2>
-            <p class="apps-panel-subtitle">Contexto rapido para acompanhar o pipeline.</p>
+            <p class="apps-panel-subtitle">Contexto rápido para acompanhar o pipeline.</p>
           </div>
         </div>
         <div class="apps-profile">
@@ -137,11 +137,11 @@
         </div>
         <div class="apps-insight">
           <strong>Como priorizar</strong>
-          <div class="apps-copy">Comeca pelas candidaturas em analise e pelas que receberam mensagem recentemente. Sao as que mais pedem acompanhamento agora.</div>
+          <div class="apps-copy">Começa pelas candidaturas em análise e pelas que receberam mensagem recentemente. São as que mais pedem acompanhamento agora.</div>
         </div>
         <div class="apps-insight">
           <strong>Leitura dos estados</strong>
-          <div class="apps-copy">Pendente significa envio concluido. Em analise indica avaliacao ativa. Aceite e rejeitada mostram o desfecho do processo.</div>
+          <div class="apps-copy">Pendente significa envio concluído. Em análise indica avaliação ativa. Aceite e rejeitada mostram o desfecho do processo.</div>
         </div>
       </section>
 
@@ -185,7 +185,7 @@
           <p class="apps-panel-subtitle mb-0">{% if has_active_filters %}Encontramos {{ filtered_count }} candidatura{{ filtered_count|pluralize }} para os filtros atuais.{% else %}Aqui tens a visao completa das tuas candidaturas, ordenadas da mais recente para a mais antiga.{% endif %}</p>
         </div>
         <div class="apps-profile-tags">
-          <span class="apps-tag muted"><i class="bi bi-grid"></i>Pagina {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span>
+          <span class="apps-tag muted"><i class="bi bi-grid"></i>Página {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span>
         </div>
       </div>
 
@@ -230,19 +230,19 @@
 
               <div class="app-grid">
                 <div class="app-fact">
-                  <span class="app-fact-label">Area</span>
-                  <span class="app-fact-value">{% if app.job.area_formacao %}{{ app.job.get_area_formacao_display }}{% else %}Nao indicada{% endif %}</span>
+                  <span class="app-fact-label">Área</span>
+                  <span class="app-fact-value">{% if app.job.area_formacao %}{{ app.job.get_area_formacao_display }}{% else %}Não indicada{% endif %}</span>
                 </div>
                 <div class="app-fact">
                   <span class="app-fact-label">Mensagens</span>
                   <span class="app-fact-value">{{ app.total_messages_count }}</span>
                 </div>
                 <div class="app-fact">
-                  <span class="app-fact-label">Remuneracao</span>
+                  <span class="app-fact-label">Remuneração</span>
                   <span class="app-fact-value">{% if app.job.salario %}{{ app.job.salario }}{% else %}A combinar{% endif %}</span>
                 </div>
                 <div class="app-fact">
-                  <span class="app-fact-label">Ultima atividade</span>
+                  <span class="app-fact-label">Última atividade</span>
                   <span class="app-fact-value">{{ app.latest_touch|date:"d/m/Y H:i" }}</span>
                 </div>
               </div>
@@ -254,7 +254,7 @@
                       <div class="app-message-title">Mensagem enviada por ti</div>
                       <div class="app-message-meta">Incluida no momento da candidatura.</div>
                     </div>
-                    <span class="app-pill muted"><i class="bi bi-chat-dots"></i>Apresentacao</span>
+                    <span class="app-pill muted"><i class="bi bi-chat-dots"></i>Apresentação</span>
                   </div>
                   <p class="app-message-copy">{{ app.mensagem|truncatewords:28 }}</p>
                 </div>
@@ -264,7 +264,7 @@
                 <div class="app-message-box">
                   <div class="app-message-head">
                     <div>
-                      <div class="app-message-title">Ultima interacao</div>
+                      <div class="app-message-title">Última interação</div>
                       <div class="app-message-meta">{{ app.latest_message.get_sender_display }} em {{ app.latest_message.created_at|date:"d/m/Y H:i" }}</div>
                     </div>
                     <span class="app-pill {% if app.latest_message.sender == 'EMP' %}highlight{% else %}muted{% endif %}">
@@ -289,7 +289,7 @@
                   <div class="app-message-head">
                     <div>
                       <div class="app-message-title">Sem resposta ainda</div>
-                      <div class="app-message-meta">A candidatura foi registada e aguarda nova atualizacao.</div>
+                      <div class="app-message-meta">A candidatura foi registada e aguarda nova atualização.</div>
                     </div>
                     <span class="app-pill muted"><i class="bi bi-hourglass-split"></i>A aguardar</span>
                   </div>
@@ -309,7 +309,7 @@
                   {% endif %}
                 </div>
                 <div class="apps-actions">
-                  <a href="{% url 'profiles:application_messages' app.id %}" class="btn btn-outline-secondary"><i class="bi bi-chat-square-text me-2"></i>Ver historico</a>
+                  <a href="{% url 'profiles:application_messages' app.id %}" class="btn btn-outline-secondary"><i class="bi bi-chat-square-text me-2"></i>Ver histórico</a>
                   <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary"><i class="bi bi-briefcase me-2"></i>Mais vagas</a>
                 </div>
               </div>
@@ -318,7 +318,7 @@
         </div>
 
         {% if applications_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Paginacao de candidaturas">
+          <nav class="mt-4" aria-label="Páginação de candidaturas">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not applications_page.has_previous %}disabled{% endif %}">
                 {% if applications_page.has_previous %}
@@ -327,12 +327,12 @@
                   <span class="page-link">Anterior</span>
                 {% endif %}
               </li>
-              <li class="page-item disabled"><span class="page-link">Pagina {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span></li>
+              <li class="page-item disabled"><span class="page-link">Página {{ applications_page.number }} de {{ applications_page.paginator.num_pages }}</span></li>
               <li class="page-item {% if not applications_page.has_next %}disabled{% endif %}">
                 {% if applications_page.has_next %}
-                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ applications_page.next_page_number }}">Proxima</a>
+                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ applications_page.next_page_number }}">Próxima</a>
                 {% else %}
-                  <span class="page-link">Proxima</span>
+                  <span class="page-link">Próxima</span>
                 {% endif %}
               </li>
             </ul>
@@ -341,8 +341,8 @@
       {% else %}
         <div class="apps-empty">
           <i class="bi bi-send-x"></i>
-          <h2 class="apps-results-title mb-2">Ainda nao tens candidaturas nesta vista</h2>
-          <p class="apps-empty-copy mb-3">{% if has_active_filters %}Os filtros atuais nao devolveram resultados. Tenta limpar os filtros para voltares a ver todo o historico.{% else %}Quando te candidatares a uma vaga, o processo vai aparecer aqui com estado, mensagens e proximos passos.{% endif %}</p>
+          <h2 class="apps-results-title mb-2">Ainda não tens candidaturas nesta vista</h2>
+          <p class="apps-empty-copy mb-3">{% if has_active_filters %}Os filtros atuais não devolveram resultados. Tenta limpar os filtros para voltares a ver todo o histórico.{% else %}Quando te candidatares a uma vaga, o processo vai aparecer aqui com estado, mensagens e próximos passos.{% endif %}</p>
           <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary">Explorar vagas</a>
         </div>
       {% endif %}

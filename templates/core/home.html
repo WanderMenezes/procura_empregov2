@@ -514,14 +514,14 @@
                 <div class="col-lg-6">
                     <div class="home-kicker">
                         <i class="bi bi-stars"></i>
-                        Plataforma nacional de empregabilidade jovem
+                        Plataforma nacional para talento jovem
                     </div>
                     <h1 class="home-title">
-                        Liga talento jovem a
-                        <span class="home-title-accent">oportunidades reais.</span>
+                        Talento jovem com mais visibilidade.
+                        <span class="home-title-accent">Oportunidades com mais direção.</span>
                     </h1>
                     <p class="home-subtitle">
-                        A Base Nacional de Jovens aproxima jovens, empresas e iniciativas de formacao em Sao Tome e Principe, com uma experiencia mais simples para registar, descobrir vagas e construir ligacoes com impacto.
+                        A Base Nacional de Jovens aproxima jovens, empresas e iniciativas de formação em São Tomé e Príncipe, com um percurso mais claro para registar, descobrir vagas e criar ligações com potencial real.
                     </p>
 
                     <div class="home-cta-row">
@@ -574,7 +574,7 @@
                             </a>
                         {% elif user.is_tecnico %}
                             <a href="{% url 'dashboard:tecnico' %}" class="btn btn-primary btn-lg">
-                                <i class="bi bi-graph-up me-2"></i>Dashboard tecnico
+                                <i class="bi bi-graph-up me-2"></i>Dashboard técnico
                             </a>
                         {% endif %}
                     </div>
@@ -601,15 +601,15 @@
                             {% if vagas_recentes %}
                                 <h3>{{ vagas_recentes.0.titulo }}</h3>
                                 <p class="mb-2">{{ vagas_recentes.0.company.nome }}</p>
-                                <small>Publicada recentemente e pronta para novas candidaturas.</small>
+                                <small>Acabou de entrar na plataforma e já está pronta para receber candidaturas.</small>
                                 <div class="home-panel-meta">
                                     <span><i class="bi bi-geo-alt"></i>{{ vagas_recentes.0.distrito.nome|default:"Local a definir" }}</span>
                                     <span><i class="bi bi-people"></i>{{ vagas_recentes.0.vagas_restantes }} em aberto</span>
                                 </div>
                             {% else %}
-                                <h3>Novas oportunidades chegam aqui primeiro</h3>
-                                <p class="mb-2">Assim que uma vaga for publicada, esta area ajuda a destacar o que merece atencao imediata.</p>
-                                <small>Continua a explorar a plataforma e prepara o teu perfil.</small>
+                                <h3>As próximas oportunidades aparecem aqui</h3>
+                                <p class="mb-2">Quando uma nova vaga entrar na plataforma, este destaque ajuda-te a perceber logo o que merece resposta rápida.</p>
+                                <small>Enquanto isso, completa o perfil e prepara o próximo passo.</small>
                             {% endif %}
                         </div>
 
@@ -637,17 +637,17 @@
                                 <div class="home-lane-icon">
                                     <i class="bi bi-person-workspace"></i>
                                 </div>
-                                <h3>Para jovens</h3>
-                                <p class="mb-2">Monta o perfil, anexa documentos e aumenta a tua visibilidade.</p>
-                                <small>Mais contexto, menos barreiras para comecar.</small>
+                                <h3>Perfil que abre portas</h3>
+                                <p class="mb-2">Organiza experiência, formação e documentos para ganhar visibilidade junto de empresas e programas.</p>
+                                <small>Mais contexto para seres encontrado com confiança.</small>
                             </div>
                             <div class="home-lane-card">
                                 <div class="home-lane-icon">
                                     <i class="bi bi-buildings"></i>
                                 </div>
-                                <h3>Para empresas</h3>
-                                <p class="mb-2">Publica vagas, pesquisa perfis e acompanha candidaturas num unico fluxo.</p>
-                                <small>Uma base central para descobrir talento jovem.</small>
+                                <h3>Recrutamento com contexto</h3>
+                                <p class="mb-2">Publica vagas, pesquisa perfis e acompanha candidaturas num fluxo mais simples e mais útil.</p>
+                                <small>Uma base central para descobrir talento jovem com rapidez.</small>
                             </div>
                         </div>
                     </div>
@@ -663,8 +663,8 @@
                     <div class="home-section-kicker">
                         <i class="bi bi-diagram-3"></i>Como funciona
                     </div>
-                    <h2>Um percurso simples, do registo ao contacto.</h2>
-                    <p>A home agora orienta melhor o utilizador logo de entrada e mostra o que precisa acontecer em seguida.</p>
+                    <h2>Do registo ao contacto, o caminho é mais claro.</h2>
+                    <p>A homepage explica rapidamente o que acontece a seguir para jovens, empresas e perfis de apoio.</p>
                 </div>
             </div>
 
@@ -673,8 +673,8 @@
                     <div class="card home-step-card">
                         <div class="card-body">
                             <div class="home-step-index">1</div>
-                            <h3>Cria a conta certa</h3>
-                            <p>Escolhe se entras como jovem ou empresa e preenche apenas a informacao essencial para iniciar.</p>
+                            <h3>Escolhe o perfil certo</h3>
+                            <p>Entra como jovem ou empresa e começa com a informação essencial para ativar a conta.</p>
                         </div>
                     </div>
                 </div>
@@ -682,8 +682,8 @@
                     <div class="card home-step-card">
                         <div class="card-body">
                             <div class="home-step-index">2</div>
-                            <h3>Completa o teu contexto</h3>
-                            <p>Perfis mais completos ajudam a destacar competencias, documentos e objetivos com mais clareza.</p>
+                            <h3>Constrói um perfil com contexto</h3>
+                            <p>Quanto melhor estiver o perfil, mais fácil fica mostrar competências, documentos e objetivos.</p>
                         </div>
                     </div>
                 </div>
@@ -691,8 +691,8 @@
                     <div class="card home-step-card">
                         <div class="card-body">
                             <div class="home-step-index">3</div>
-                            <h3>Transforma visibilidade em oportunidade</h3>
-                            <p>Empresas encontram talento com mais rapidez e jovens conseguem acompanhar vagas com menos friccao.</p>
+                            <h3>Transforma contexto em oportunidade</h3>
+                            <p>Empresas ganham leitura para decidir melhor e jovens acompanham vagas com mais confiança.</p>
                         </div>
                     </div>
                 </div>
@@ -708,8 +708,8 @@
                     <div class="home-section-kicker">
                         <i class="bi bi-briefcase"></i>Vagas recentes
                     </div>
-                    <h2>Oportunidades publicadas ha pouco.</h2>
-                    <p>Uma vitrina mais clara para perceber rapido o tipo de vaga, a empresa e o local de trabalho.</p>
+                    <h2>Oportunidades recentes para agir a tempo.</h2>
+                    <p>Uma leitura rápida para perceber função, empresa, localização e nível de prioridade.</p>
                 </div>
                 <div>
                     {% if user.is_jovem %}
@@ -736,7 +736,7 @@
                         </a>
                     {% elif user.is_tecnico %}
                         <a href="{% url 'dashboard:tecnico' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-graph-up me-2"></i>Dashboard tecnico
+                            <i class="bi bi-graph-up me-2"></i>Dashboard técnico
                         </a>
                     {% else %}
                         <a href="{% url 'accounts:login' %}?next={% url 'profiles:available_jobs' %}" class="btn btn-outline-primary">
@@ -816,8 +816,8 @@
                         <div class="home-path-icon">
                             <i class="bi bi-person-hearts"></i>
                         </div>
-                        <h3>Se procuras oportunidades</h3>
-                        <p class="mb-4">Regista-te como jovem, completa o perfil e aumenta a tua capacidade de ser encontrado por empresas e programas.</p>
+                        <h3>Se estás à procura da próxima oportunidade</h3>
+                        <p class="mb-4">Cria a tua conta como jovem, completa o perfil e aumenta a tua capacidade de ser encontrado por empresas e programas.</p>
                         <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light">
                             <i class="bi bi-person-plus me-2"></i>Criar conta jovem
                         </a>
@@ -828,8 +828,8 @@
                         <div class="home-path-icon">
                             <i class="bi bi-buildings-fill"></i>
                         </div>
-                        <h3>Se queres contratar talento</h3>
-                        <p class="mb-4">Regista a empresa, publica vagas e encontra perfis mais alinhados ao que a tua organizacao precisa.</p>
+                        <h3>Se a tua empresa está a contratar</h3>
+                        <p class="mb-4">Regista a empresa, publica vagas e encontra perfis mais alinhados com o talento que procuras.</p>
                         <a href="{% url 'accounts:register' %}?tipo=EMP" class="btn btn-light">
                             <i class="bi bi-building-add me-2"></i>Registar empresa
                         </a>
@@ -846,8 +846,8 @@
                     <div class="home-section-kicker">
                         <i class="bi bi-shield-check"></i>Porque esta plataforma ajuda
                     </div>
-                    <h2>Mais clareza, mais alcance, menos friccao.</h2>
-                    <p>A nova home passa melhor a proposta de valor e organiza a informacao em blocos mais faceis de ler.</p>
+                    <h2>Mais clareza na entrada, mais confiança no processo.</h2>
+                    <p>A homepage foi organizada para explicar valor, orientar decisões e reduzir fricção logo nos primeiros segundos.</p>
                 </div>
             </div>
 
@@ -858,8 +858,8 @@
                             <div class="home-benefit-icon">
                                 <i class="bi bi-check2-circle"></i>
                             </div>
-                            <h3>Entrada simples</h3>
-                            <p class="mb-0">O caminho inicial ficou mais claro para jovens, empresas e perfis institucionais.</p>
+                            <h3>Entrada orientada</h3>
+                            <p class="mb-0">Cada perfil encontra rapidamente o fluxo certo dentro da plataforma.</p>
                         </div>
                     </div>
                 </div>
@@ -869,8 +869,8 @@
                             <div class="home-benefit-icon">
                                 <i class="bi bi-phone"></i>
                             </div>
-                            <h3>Boa leitura no telemovel</h3>
-                            <p class="mb-0">Blocos, chamadas e cartoes foram reorganizados para funcionar melhor em ecras pequenos.</p>
+                            <h3>Leitura fluida no telemóvel</h3>
+                            <p class="mb-0">Blocos e chamadas principais foram pensados para funcionar bem em ecrãs pequenos e grandes.</p>
                         </div>
                     </div>
                 </div>
@@ -880,8 +880,8 @@
                             <div class="home-benefit-icon">
                                 <i class="bi bi-graph-up-arrow"></i>
                             </div>
-                            <h3>Dados com contexto</h3>
-                            <p class="mb-0">As estatisticas principais ficaram mais visiveis e a contagem de empresas foi corrigida.</p>
+                            <h3>Dados que explicam o contexto</h3>
+                            <p class="mb-0">Indicadores e contagens ajudam a perceber dimensão, atividade e cobertura da base.</p>
                         </div>
                     </div>
                 </div>
@@ -891,8 +891,8 @@
                             <div class="home-benefit-icon">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <h3>Foco no encontro</h3>
-                            <p class="mb-0">A experiencia valoriza o encontro entre talento, empresas e oportunidades concretas.</p>
+                            <h3>Encontro com intenção</h3>
+                            <p class="mb-0">Tudo aponta para o essencial: ligar talento, empresas e oportunidades concretas.</p>
                         </div>
                     </div>
                 </div>
@@ -900,8 +900,8 @@
 
             <div class="home-bottom-cta mt-5 d-flex justify-content-between align-items-center gap-3">
                 <div>
-                    <h2 class="h3 mb-2">Pronto para dar o proximo passo?</h2>
-                    <p>Quer sejas jovem a procura do primeiro impulso ou empresa a procura de talento, a entrada certa comeca aqui.</p>
+                    <h2 class="h3 mb-2">O próximo passo pode começar agora.</h2>
+                    <p>Se és jovem, começa por construir o teu perfil. Se és empresa, começa por abrir a oportunidade certa.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="{% url 'accounts:register' %}?tipo=JO" class="btn btn-light">

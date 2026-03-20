@@ -107,10 +107,10 @@
   <section class="assisted-hero mb-4">
     <div class="assisted-hero-head">
       <div>
-        <div class="assisted-kicker">Operacao no terreno</div>
+        <div class="assisted-kicker">Operação no terreno</div>
         <h1 class="assisted-title">Registo assistido de jovem</h1>
         <p class="assisted-subtitle">
-          Recolha os dados essenciais, crie a conta do jovem numa unica passada e deixe o perfil pronto para seguir para validacao administrativa.
+          Recolha os dados essenciais, crie a conta do jovem numa unica passada e deixe o perfil pronto para seguir para validação administrativa.
         </p>
         <div class="assisted-chips">
           <span class="assisted-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_short_name|default:request.user.nome }}</span>
@@ -121,7 +121,7 @@
       </div>
       <div class="assisted-actions">
         <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light"><i class="bi bi-check-circle me-2"></i>Validar perfis</a>
-        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house-door me-2"></i>Inicio</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house-door me-2"></i>Início</a>
       </div>
     </div>
   </section>
@@ -133,12 +133,12 @@
           <div class="assisted-preview-avatar" id="assistedPreviewAvatar" aria-hidden="true">NJ</div>
           <div>
             <div class="assisted-preview-name" id="assistedPreviewName">Novo jovem</div>
-            <p class="assisted-preview-copy" id="assistedPreviewPhone">Telemovel por preencher</p>
+            <p class="assisted-preview-copy" id="assistedPreviewPhone">Telemóvel por preencher</p>
           </div>
         </div>
         <div class="assisted-preview-meta">
           <span class="assisted-preview-pill"><i class="bi bi-person-vcard"></i>Conta jovem</span>
-          <span class="assisted-preview-pill"><i class="bi bi-shield-check"></i>Pendente para validacao</span>
+          <span class="assisted-preview-pill"><i class="bi bi-shield-check"></i>Pendente para validação</span>
         </div>
         <div class="assisted-mini-list mt-4">
           <div class="assisted-mini-item">
@@ -157,19 +157,19 @@
         <div class="assisted-checklist">
           <div class="assisted-check">
             <span class="assisted-check-icon"><i class="bi bi-1-circle"></i></span>
-            <div><strong>Recolher o essencial</strong><p>Confirme nome, telemovel, localizacao e os dados basicos de enquadramento do jovem.</p></div>
+            <div><strong>Recolher o essencial</strong><p>Confirme nome, telemóvel, localização e os dados básicos de enquadramento do jovem.</p></div>
           </div>
           <div class="assisted-check">
             <span class="assisted-check-icon"><i class="bi bi-2-circle"></i></span>
-            <div><strong>Registar situacao e formacao</strong><p>Mesmo quando a formacao nao esta completa, vale guardar o nivel e a area para facilitar a leitura futura.</p></div>
+            <div><strong>Registar situação e formação</strong><p>Mesmo quando a formação não esta completa, vale guardar o nivel e a Área para facilitar a leitura futura.</p></div>
           </div>
           <div class="assisted-check">
             <span class="assisted-check-icon"><i class="bi bi-3-circle"></i></span>
-            <div><strong>Submeter e acompanhar</strong><p>Depois do envio, o perfil fica criado como completo mas aguarda a validacao do administrador.</p></div>
+            <div><strong>Submeter e acompanhar</strong><p>Depois do envio, o perfil fica criado como completo mas aguarda a validação do administrador.</p></div>
           </div>
         </div>
         <div class="assisted-note mt-4">
-          As observacoes do atendimento ficam guardadas no registo interno da operacao para referencia posterior.
+          As observações do aténdimento ficam guardadas no registo interno da operação para referencia posterior.
         </div>
       </section>
     </aside>
@@ -187,7 +187,7 @@
       {% if form.non_field_errors or form.errors %}
         <div class="assisted-error-summary">
           <strong>Alguns campos precisam de revisao.</strong>
-          <p>Corrija os pontos assinalados abaixo antes de concluir o registo assistido.</p>
+          <p>Corrijá os pontos assinalados abaixo antes de concluir o registo assistido.</p>
         </div>
       {% endif %}
 
@@ -214,7 +214,7 @@
               <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
               {{ form.email }}
               {% if form.email.errors %}<div class="assisted-error">{{ form.email.errors|striptags }}</div>{% endif %}
-              <div class="assisted-help">Pode ficar vazio se o jovem ainda nao usar email regularmente.</div>
+              <div class="assisted-help">Pode ficar vazio se o jovem ainda não usar email regularmente.</div>
             </div>
             <div class="assisted-field">
               <label for="{{ form.data_nascimento.id_for_label }}">{{ form.data_nascimento.label }}</label>
@@ -230,7 +230,7 @@
         </section>
 
         <section class="assisted-section">
-          <div class="assisted-section-label"><i class="bi bi-geo-alt"></i>Localizacao</div>
+          <div class="assisted-section-label"><i class="bi bi-geo-alt"></i>Localização</div>
           <h2 class="assisted-section-title">Onde o jovem esta baseado</h2>
           <p class="assisted-section-copy">Estes dados ajudam o perfil a entrar logo nas pesquisas certas.</p>
           <div class="assisted-grid">
@@ -250,8 +250,8 @@
 
         <section class="assisted-section">
           <div class="assisted-section-label"><i class="bi bi-mortarboard"></i>Enquadramento</div>
-          <h2 class="assisted-section-title">Formacao e momento atual</h2>
-          <p class="assisted-section-copy">Registe o melhor retrato possivel da situacao do jovem no momento do atendimento.</p>
+          <h2 class="assisted-section-title">Formação e momento atual</h2>
+          <p class="assisted-section-copy">Registe o melhor retrato possível da situação do jovem no momento do aténdimento.</p>
           <div class="assisted-grid">
             <div class="assisted-field">
               <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
@@ -282,22 +282,22 @@
         </section>
 
         <section class="assisted-section">
-          <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observacoes</div>
-          <h2 class="assisted-section-title">Notas internas do atendimento</h2>
-          <p class="assisted-section-copy">Use este campo para registar contexto util do atendimento, barreiras encontradas ou proximos passos combinados.</p>
+          <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observações</div>
+          <h2 class="assisted-section-title">Notas internas do aténdimento</h2>
+          <p class="assisted-section-copy">Use éste campo para registar contexto Útil do aténdimento, barreiras encontradas ou próximos passos combinados.</p>
           <div class="assisted-grid">
             <div class="assisted-field full">
               <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
               {{ form.observacoes }}
               {% if form.observacoes.errors %}<div class="assisted-error">{{ form.observacoes.errors|striptags }}</div>{% endif %}
-              <div class="assisted-help">Estas observacoes ficam no registo interno da operacao e nao aparecem no perfil publico do jovem.</div>
+              <div class="assisted-help">Estas observações ficam no registo interno da operação e não aparecem no perfil público do jovem.</div>
             </div>
           </div>
         </section>
 
         <div class="assisted-actions-row">
           <div class="assisted-help">
-            Ao guardar, a conta do jovem sera criada com o perfil completo e marcada para validacao administrativa.
+            Ao guardar, a conta do jovem será criada com o perfil completo e marcada para validação administrativa.
           </div>
           <button class="btn btn-primary" type="submit">
             <i class="bi bi-person-plus me-2"></i>Registar jovem
@@ -341,7 +341,7 @@
 
       avatar.textContent = initialsFromName(nameValue);
       nameTarget.textContent = nameValue || 'Novo jovem';
-      phoneTarget.textContent = phoneValue || 'Telemovel por preencher';
+      phoneTarget.textContent = phoneValue || 'Telemóvel por preencher';
       districtTarget.textContent = selectedText(districtInput, 'Distrito por escolher');
       opportunityTarget.textContent = selectedText(opportunityInput, 'Oportunidade por definir');
     }

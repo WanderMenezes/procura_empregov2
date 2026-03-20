@@ -16,7 +16,7 @@ class OfflineRegistrationExportForm(forms.Form):
 
 class OfflineRegistrationImportForm(forms.Form):
     file = forms.FileField(
-        label=_('Ficheiro de importacao gerado pelo formulario offline'),
+        label=_('Ficheiro de importação gerado pelo formulário offline'),
         widget=forms.ClearableFileInput(
             attrs={
                 'class': 'form-control',
@@ -28,7 +28,7 @@ class OfflineRegistrationImportForm(forms.Form):
     def clean_file(self):
         uploaded = self.cleaned_data['file']
         if uploaded.size > 1024 * 1024:
-            raise forms.ValidationError(_('O ficheiro offline nao pode ultrapassar 1 MB.'))
+            raise forms.ValidationError(_('O ficheiro offline não pode ultrapassar 1 MB.'))
         if not uploaded.name.lower().endswith('.json'):
-            raise forms.ValidationError(_('Importe o ficheiro JSON gerado pelo formulario offline.'))
+            raise forms.ValidationError(_('Importe o ficheiro JSON gerado pelo formulário offline.'))
         return uploaded

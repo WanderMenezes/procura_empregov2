@@ -2,11 +2,73 @@
 Forms para perfis de jovens
 """
 
+import re
+import unicodedata
+
 from django import forms
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from .models import YouthProfile, Education, Experience, Document, YouthSkill
 from core.models import Skill, District
+
+
+def _normalize_sector_search_value(value):
+    normalized = unicodedata.normalize('NFKD', str(value or '').strip())
+    return ''.join(char for char in normalized if not unicodedata.combining(char)).lower()
+
+
+def _build_sector_lookup():
+    lookup = {}
+    for code, label in getattr(settings, 'AREAS_FORMACAO', []):
+        lookup[_normalize_sector_search_value(code)] = code
+        lookup[_normalize_sector_search_value(label)] = code
+    return lookup
+
+
+def normalize_custom_sector_values(raw_value):
+    if not raw_value:
+        return []
+
+    lookup = _build_sector_lookup()
+    values = []
+    for item in re.split(r'[\r\n,;]+', str(raw_value)):
+        cleaned = ' '.join(item.split()).strip()
+        if not cleaned:
+            continue
+        values.append(lookup.get(_normalize_sector_search_value(cleaned), cleaned))
+    return list(dict.fromkeys(values))
+
+
+def split_known_and_custom_sectors(values):
+    valid_codes = {code for code, _label in getattr(settings, 'AREAS_FORMACAO', [])}
+    lookup = _build_sector_lookup()
+    selected = []
+    custom = []
+
+    if isinstance(values, str):
+        values = [values]
+    elif not values:
+        values = []
+
+    for value in values:
+        cleaned = ' '.join(str(value or '').split()).strip()
+        if not cleaned:
+            continue
+        mapped_value = lookup.get(_normalize_sector_search_value(cleaned), cleaned)
+        if mapped_value in valid_codes:
+            selected.append(mapped_value)
+        else:
+            custom.append(mapped_value)
+
+    return list(dict.fromkeys(selected)), list(dict.fromkeys(custom))
+
+
+def combine_interest_sector_values(selected_values, raw_custom_values):
+    selected = [value for value in (selected_values or []) if value]
+    custom = normalize_custom_sector_values(raw_custom_values)
+    if custom:
+        selected = [value for value in selected if value != 'OUT']
+    return list(dict.fromkeys(selected + custom))
 
 
 class YouthProfileStep1Form(forms.ModelForm):
@@ -164,7 +226,7 @@ class YouthProfileStep2Form(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Escreve uma skill que não esteja na lista')
+            'placeholder': _('Escreve uma skill que não estejá na lista')
         })
     )
 
@@ -207,7 +269,17 @@ class YouthProfileStep3Form(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-    
+
+    outros_setores_interesse = forms.CharField(
+        label=_('Outro setor de interesse'),
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por virgulas')
+        })
+    )
+
     preferencia_oportunidade = forms.ChoiceField(
         choices=YouthProfile.OPORTUNIDADE_CHOICES,
         label=_('Tipo de oportunidade preferida'),
@@ -290,8 +362,22 @@ class YouthProfileStep3Form(forms.ModelForm):
             'preferencia_oportunidade', 'sobre'
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_values = self.initial.get('interesse_setorial')
+        if current_values is None and getattr(self.instance, 'pk', None):
+            current_values = self.instance.interesse_setorial
+
+        selected, custom = split_known_and_custom_sectors(current_values)
+        self.initial['interesse_setorial'] = selected
+        self.initial['outros_setores_interesse'] = ', '.join(custom)
+
     def clean(self):
         cleaned_data = super().clean()
+        cleaned_data['interesse_setorial'] = combine_interest_sector_values(
+            cleaned_data.get('interesse_setorial'),
+            cleaned_data.get('outros_setores_interesse'),
+        )
         tem_experiencia = cleaned_data.get('tem_experiencia')
         if tem_experiencia:
             exp_entidade = cleaned_data.get('exp_entidade')
@@ -389,7 +475,7 @@ class YouthSkillsForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Escreve uma skill que não esteja na lista')
+            'placeholder': _('Escreve uma skill que não estejá na lista')
         })
     )
     outra_skill_tipo = forms.ChoiceField(
@@ -543,6 +629,16 @@ class YouthProfileEditForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
+
+    outros_setores_interesse = forms.CharField(
+        label=_('Outro setor de interesse'),
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por virgulas')
+        })
+    )
     
     class Meta:
         model = YouthProfile
@@ -570,6 +666,24 @@ class YouthProfileEditForm(forms.ModelForm):
             'photo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'})
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_values = self.initial.get('interesse_setorial')
+        if current_values is None and getattr(self.instance, 'pk', None):
+            current_values = self.instance.interesse_setorial
+
+        selected, custom = split_known_and_custom_sectors(current_values)
+        self.initial['interesse_setorial'] = selected
+        self.initial['outros_setores_interesse'] = ', '.join(custom)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data['interesse_setorial'] = combine_interest_sector_values(
+            cleaned_data.get('interesse_setorial'),
+            cleaned_data.get('outros_setores_interesse'),
+        )
+        return cleaned_data
+
 
 class EducationForm(forms.ModelForm):
     """Formulário para adicionar formação"""
@@ -580,9 +694,9 @@ class EducationForm(forms.ModelForm):
         widgets = {
             'nivel': forms.Select(attrs={'class': 'form-select'}),
             'area_formacao': forms.Select(attrs={'class': 'form-select'}),
-            'instituicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da escola, centro ou instituicao')}),
+            'instituicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da escola, centro ou instituição')}),
             'ano': forms.NumberInput(attrs={'class': 'form-control', 'min': 1950, 'max': 2030, 'placeholder': _('Ex: 2024')}),
-            'curso': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Curso, especialidade ou area principal')}),
+            'curso': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Curso, especialidade ou área principal')}),
         }
 
 
@@ -593,12 +707,12 @@ class ExperienceForm(forms.ModelForm):
         model = Experience
         fields = ['entidade', 'cargo', 'inicio', 'fim', 'atual', 'descricao']
         widgets = {
-            'entidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da empresa, oficina, projeto ou instituicao')}),
-            'cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Cargo, funcao ou papel desempenhado')}),
+            'entidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da empresa, oficina, projeto ou instituição')}),
+            'cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Cargo, função ou papel desempenhado')}),
             'inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'fim': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'atual': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': _('Resume as principais tarefas, responsabilidades e resultados desta experiencia')}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': _('Resume as principais tarefas, responsabilidades e resultados desta experiência')}),
         }
 
 

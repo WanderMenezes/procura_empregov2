@@ -159,9 +159,9 @@
             <div class="talent-detail-kicker">Talento em destaque</div>
             <h1 class="talent-detail-title">{{ profile.nome_completo }}</h1>
             <p class="talent-detail-subtitle">
-              {{ profile.distrito.nome|default:"Distrito nao definido" }}
+              {{ profile.distrito.nome|default:"Distrito não definido" }}
               {% if profile.localidade %}<span class="mx-1">&middot;</span>{{ profile.localidade }}{% endif %}
-              <span class="mx-1">&middot;</span>Perfil pronto para avaliacao, contacto e enquadramento em oportunidades.
+              <span class="mx-1">&middot;</span>Perfil pronto para avaliação, contacto e enquadramento em oportunidades.
             </p>
             <div class="talent-detail-chips">
               <span class="talent-detail-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -174,7 +174,7 @@
         </div>
       </div>
       <div class="talent-detail-actions">
-        <a href="{% url 'companies:search_youth' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar a pesquisa</a>
+        <a href="{% url 'companies:search_youth' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar à pesquisa</a>
         <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-light"><i class="bi bi-chat-left-text me-2"></i>Pedidos de contacto</a>
         {% if not existing_request %}
           <a href="{% url 'companies:contact_request_create' profile.id %}" class="btn btn-dark"><i class="bi bi-send-check me-2"></i>Solicitar contacto</a>
@@ -184,12 +184,12 @@
 
     <div class="talent-detail-stats">
       <div class="talent-detail-stat">
-        <span class="talent-detail-stat-label">Formacao</span>
+        <span class="talent-detail-stat-label">Formação</span>
         <span class="talent-detail-stat-value">{{ education|length }}</span>
-        <span class="talent-detail-stat-meta">registo{{ education|length|pluralize }} academico{{ education|length|pluralize }}</span>
+        <span class="talent-detail-stat-meta">registo{{ education|length|pluralize }} académico{{ education|length|pluralize }}</span>
       </div>
       <div class="talent-detail-stat">
-        <span class="talent-detail-stat-label">Experiencia</span>
+        <span class="talent-detail-stat-label">Experiência</span>
         <span class="talent-detail-stat-value">{{ experiences|length }}</span>
         <span class="talent-detail-stat-meta">trajeto profissional registado</span>
       </div>
@@ -212,22 +212,22 @@
         <div class="talent-detail-panel-head">
           <div>
             <h5>Estado do contacto</h5>
-            <p class="talent-detail-panel-subtitle">Acesso direto e proximos passos para a empresa.</p>
+            <p class="talent-detail-panel-subtitle">Acesso direto e próximos passos para a empresa.</p>
           </div>
         </div>
 
         {% if can_view_contact %}
           <div class="talent-detail-status">
             <span class="talent-detail-badge approved"><i class="bi bi-check-circle"></i>{{ existing_request.get_estado_display }}</span>
-            <p>O pedido foi aprovado e os dados de contacto estao liberados para a equipa seguir com a conversa.</p>
+            <p>O pedido foi aprovado e os dados de contacto estão liberados para a equipa seguir com a conversa.</p>
             <div class="talent-detail-contact-list">
               <div class="talent-detail-contact">
                 <span class="talent-detail-icon"><i class="bi bi-telephone"></i></span>
-                <div><span class="talent-detail-icon-label">Telefone</span>{{ profile.telefone|default:"Nao informado" }}</div>
+                <div><span class="talent-detail-icon-label">Telefone</span>{{ profile.telefone|default:"Não informado" }}</div>
               </div>
               <div class="talent-detail-contact">
                 <span class="talent-detail-icon"><i class="bi bi-envelope"></i></span>
-                <div><span class="talent-detail-icon-label">Email</span>{{ profile.email|default:"Nao informado" }}</div>
+                <div><span class="talent-detail-icon-label">Email</span>{{ profile.email|default:"Não informado" }}</div>
               </div>
               {% if profile.contacto_alternativo %}
                 <div class="talent-detail-contact">
@@ -243,11 +243,11 @@
               <i class="bi {% if existing_request.estado == 'PENDENTE' %}bi-hourglass-split{% elif existing_request.estado == 'DESATIVADO' %}bi-slash-circle{% else %}bi-x-circle{% endif %}"></i>{{ existing_request.get_estado_display }}
             </span>
             {% if existing_request.estado == 'PENDENTE' %}
-              <p>O pedido ja foi enviado e aguarda analise administrativa. Assim que for aprovado, o contacto direto sera liberado aqui.</p>
+              <p>O pedido já foi enviado e aguarda análise administrativa. Assim que for aprovado, o contacto direto será liberado aqui.</p>
             {% elif existing_request.estado == 'DESATIVADO' %}
               <p>O pedido chegou a ser aprovado, mas o acesso direto ao contacto foi desativado pelo administrador.</p>
             {% else %}
-              <p>O pedido nao foi aprovado. Vale acompanhar a resposta administrativa antes de insistir numa nova abordagem.</p>
+              <p>O pedido não foi aprovado. Vale acompanhar a resposta administrativa antes de insistir numa nova abordagem.</p>
             {% endif %}
             <div class="talent-detail-note-list">
               <div class="talent-detail-note">
@@ -257,13 +257,13 @@
               {% if existing_request.responded_at %}
                 <div class="talent-detail-note">
                   <span class="talent-detail-icon"><i class="bi bi-clock-history"></i></span>
-                  <div><span class="talent-detail-icon-label">Ultima resposta</span>{{ existing_request.responded_at|date:"d/m/Y H:i" }}</div>
+                  <div><span class="talent-detail-icon-label">Última resposta</span>{{ existing_request.responded_at|date:"d/m/Y H:i" }}</div>
                 </div>
               {% endif %}
               {% if existing_request.resposta_admin %}
                 <div class="talent-detail-note">
                   <span class="talent-detail-icon"><i class="bi bi-shield-check"></i></span>
-                  <div><span class="talent-detail-icon-label">Observacao do admin</span>{{ existing_request.resposta_admin }}</div>
+                  <div><span class="talent-detail-icon-label">Observação do admin</span>{{ existing_request.resposta_admin }}</div>
                 </div>
               {% endif %}
             </div>
@@ -271,11 +271,11 @@
         {% else %}
           <div class="talent-detail-status">
             <span class="talent-detail-badge locked"><i class="bi bi-lock"></i>Sem pedido ativo</span>
-            <p>Os dados diretos do jovem ficam protegidos ate existir um pedido de contacto submetido e aprovado.</p>
+            <p>Os dados diretos do jovem ficam protegidos até existir um pedido de contacto submetido e aprovado.</p>
             <div class="talent-detail-note-list">
               <div class="talent-detail-note">
                 <span class="talent-detail-icon"><i class="bi bi-search"></i></span>
-                <div><span class="talent-detail-icon-label">Passo 1</span>Avaliar experiencia, formacao, skills e documentos do perfil.</div>
+                <div><span class="talent-detail-icon-label">Passo 1</span>Avaliar experiência, formação, skills e documentos do perfil.</div>
               </div>
               <div class="talent-detail-note">
                 <span class="talent-detail-icon"><i class="bi bi-send-check"></i></span>
@@ -290,17 +290,17 @@
       <section class="talent-detail-panel">
         <div class="talent-detail-panel-head">
           <div>
-            <h6>Resumo rapido</h6>
-            <p class="talent-detail-panel-subtitle">Leitura compacta para decisao rapida.</p>
+            <h6>Resumo rápido</h6>
+            <p class="talent-detail-panel-subtitle">Leitura compacta para decisão rápida.</p>
           </div>
         </div>
-        <div class="talent-detail-summary-row"><span>Idade</span><span>{% if profile.idade %}{{ profile.idade }} anos{% else %}Nao informada{% endif %}</span></div>
-        <div class="talent-detail-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"Nao informado" }}</span></div>
-        <div class="talent-detail-summary-row"><span>Localizacao</span><span>{{ profile.distrito.nome|default:"Nao definida" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</span></div>
-        <div class="talent-detail-summary-row"><span>Situacao</span><span>{{ profile.get_situacao_atual_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Idade</span><span>{% if profile.idade %}{{ profile.idade }} anos{% else %}Não informada{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"Não informado" }}</span></div>
+        <div class="talent-detail-summary-row"><span>Localização</span><span>{{ profile.distrito.nome|default:"Não definida" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
-        <div class="talent-detail-summary-row"><span>Validacao</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
       </section>
 
       <section class="talent-detail-panel">
@@ -316,7 +316,7 @@
             <div><span class="talent-detail-icon-label">Setores de interesse</span>{{ profile.interesses_setoriais_display }}</div>
           </div>
         {% else %}
-          <div class="talent-detail-empty mb-3"><i class="bi bi-compass"></i>O jovem ainda nao definiu setores de interesse.</div>
+          <div class="talent-detail-empty mb-3"><i class="bi bi-compass"></i>O jovem ainda não definiu setores de interesse.</div>
         {% endif %}
         <div class="talent-detail-tags">
           {% if profile.consentimento_sms %}<span class="talent-detail-tag"><i class="bi bi-chat-dots"></i>SMS</span>{% endif %}
@@ -334,14 +334,14 @@
         <div class="talent-detail-panel-head">
           <div>
             <h5>Sobre o jovem</h5>
-            <p class="talent-detail-panel-subtitle">Resumo pessoal para perceber contexto, motivacao e objetivos.</p>
+            <p class="talent-detail-panel-subtitle">Resumo pessoal para perceber contexto, motivação e objetivos.</p>
           </div>
         </div>
         <div class="talent-detail-about">
           {% if profile.sobre %}
             {{ profile.sobre|linebreaks }}
           {% else %}
-            <div class="talent-detail-empty"><i class="bi bi-person-lines-fill"></i>Este perfil ainda nao tem uma apresentacao pessoal escrita.</div>
+            <div class="talent-detail-empty"><i class="bi bi-person-lines-fill"></i>Este perfil ainda não tem uma apresentação pessoal escrita.</div>
           {% endif %}
         </div>
       </section>
@@ -352,7 +352,7 @@
             <div class="talent-detail-panel-head">
               <div>
                 <h5>Skills</h5>
-                <p class="talent-detail-panel-subtitle">Competencias registadas para leitura rapida.</p>
+                <p class="talent-detail-panel-subtitle">Competencias registadas para leitura rápida.</p>
               </div>
             </div>
             {% if skills %}
@@ -374,8 +374,8 @@
           <section class="talent-detail-panel h-100">
             <div class="talent-detail-panel-head">
               <div>
-                <h5>Formacao</h5>
-                <p class="talent-detail-panel-subtitle">Percurso academico e tecnico informado no perfil.</p>
+                <h5>Formação</h5>
+                <p class="talent-detail-panel-subtitle">Percurso académico e técnico informado no perfil.</p>
               </div>
             </div>
             {% if education %}
@@ -383,7 +383,7 @@
                 {% for edu in education %}
                   <article class="talent-detail-entry">
                     <div class="talent-detail-entry-title">{{ edu.get_nivel_display }}</div>
-                    <div class="talent-detail-entry-subtitle">{{ edu.instituicao|default:"Instituicao nao informada" }}</div>
+                    <div class="talent-detail-entry-subtitle">{{ edu.instituicao|default:"Instituição não informada" }}</div>
                     {% if edu.curso %}<p class="talent-detail-entry-copy mb-0">{{ edu.curso }}</p>{% endif %}
                     <div class="talent-detail-entry-meta">
                       <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
@@ -393,7 +393,7 @@
                 {% endfor %}
               </div>
             {% else %}
-              <div class="talent-detail-empty"><i class="bi bi-book"></i>Sem formacao registada.</div>
+              <div class="talent-detail-empty"><i class="bi bi-book"></i>Sem formação registada.</div>
             {% endif %}
           </section>
         </div>
@@ -402,8 +402,8 @@
       <section class="talent-detail-panel mt-4">
         <div class="talent-detail-panel-head">
           <div>
-            <h5>Experiencia profissional</h5>
-            <p class="talent-detail-panel-subtitle">Historico de trabalho, estagio ou outras experiencias relevantes.</p>
+            <h5>Experiência profissional</h5>
+            <p class="talent-detail-panel-subtitle">Histórico de trabalho, estágio ou outras experiências relevantes.</p>
           </div>
         </div>
         {% if experiences %}
@@ -413,7 +413,7 @@
                 <div class="talent-detail-entry-head">
                   <div>
                     <div class="talent-detail-entry-title">{{ exp.cargo }}</div>
-                    <div class="talent-detail-entry-subtitle">{{ exp.entidade|default:"Entidade nao informada" }}</div>
+                    <div class="talent-detail-entry-subtitle">{{ exp.entidade|default:"Entidade não informada" }}</div>
                     {% if exp.descricao %}<p class="talent-detail-entry-copy mb-0">{{ exp.descricao }}</p>{% endif %}
                   </div>
                 </div>
@@ -425,7 +425,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="talent-detail-empty"><i class="bi bi-briefcase"></i>Sem experiencia profissional registada.</div>
+          <div class="talent-detail-empty"><i class="bi bi-briefcase"></i>Sem experiência profissional registada.</div>
         {% endif %}
       </section>
 

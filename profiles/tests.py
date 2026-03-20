@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import AuditLog, District
+from profiles.forms import YouthProfileStep3Form
 from profiles.models import Education, YouthProfile
 
 
@@ -76,3 +77,41 @@ class AssistedRegisterTests(TestCase):
         response = self.client.get(reverse('profiles:assisted_register'))
 
         self.assertRedirects(response, reverse('home'))
+
+
+class YouthProfileInterestSectorTests(TestCase):
+    def test_step3_form_accepts_custom_interest_sector(self):
+        form = YouthProfileStep3Form(data={
+            'situacao_atual': 'DES',
+            'disponibilidade': 'SIM',
+            'interesse_setorial': ['AGR', 'OUT'],
+            'outros_setores_interesse': 'Turismo, Robotica',
+            'preferencia_oportunidade': 'EMP',
+            'sobre': 'Quero trabalhar em areas tecnicas.',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['interesse_setorial'], ['AGR', 'TUR', 'Robotica'])
+
+    def test_step3_form_prefills_custom_interest_sector(self):
+        form = YouthProfileStep3Form(initial={
+            'interesse_setorial': ['AGR', 'Robotica'],
+        })
+
+        self.assertEqual(form.initial['interesse_setorial'], ['AGR'])
+        self.assertEqual(form.initial['outros_setores_interesse'], 'Robotica')
+
+    def test_profile_display_keeps_custom_interest_sector(self):
+        user = User.objects.create_user(
+            telefone='+2399000400',
+            nome='Jovem Setor',
+            perfil=User.ProfileType.JOVEM,
+            password='SenhaSegura123',
+        )
+        profile = YouthProfile.objects.create(
+            user=user,
+            interesse_setorial=['AGR', 'Robotica'],
+        )
+
+        self.assertEqual(profile.interesses_setoriais_labels, ['Agricultura', 'Robotica'])
+        self.assertEqual(profile.interesses_setoriais_display, 'Agricultura, Robotica')

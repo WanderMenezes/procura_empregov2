@@ -91,7 +91,7 @@
   <section class="company-onboard-hero mb-4">
     <div class="company-onboard-hero-head">
       <div>
-        <div class="company-onboard-kicker">Ativacao empresarial</div>
+        <div class="company-onboard-kicker">Ativação empresarial</div>
         <h1 class="company-onboard-title">Completar perfil da empresa</h1>
         <p class="company-onboard-subtitle">
           Organize a identidade da empresa, confirme os contactos e deixe a base pronta para publicar vagas e pesquisar jovens.
@@ -104,7 +104,7 @@
       </div>
       <div class="company-onboard-actions">
         <a href="{% url 'accounts:profile' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Minha conta</a>
-        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house me-2"></i>Inicio</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-light"><i class="bi bi-house me-2"></i>Início</a>
       </div>
     </div>
   </section>
@@ -129,35 +129,35 @@
       <div class="company-onboard-account">
         <div class="company-onboard-account-item">
           <span class="company-onboard-icon"><i class="bi bi-envelope"></i></span>
-          <div><strong>Email base</strong><p>{{ request.user.email|default:"Nao definido" }}</p></div>
+          <div><strong>Email base</strong><p>{{ request.user.email|default:"Não definido" }}</p></div>
         </div>
         <div class="company-onboard-account-item">
           <span class="company-onboard-icon"><i class="bi bi-telephone"></i></span>
-          <div><strong>Telefone base</strong><p>{{ request.user.telefone|default:"Nao definido" }}</p></div>
+          <div><strong>Telefone base</strong><p>{{ request.user.telefone|default:"Não definido" }}</p></div>
         </div>
         <div class="company-onboard-account-item">
           <span class="company-onboard-icon"><i class="bi bi-geo-alt"></i></span>
-          <div><strong>Distrito da conta</strong><p>{% if request.user.distrito %}{{ request.user.distrito.nome }}{% else %}Nao definido{% endif %}</p></div>
+          <div><strong>Distrito da conta</strong><p>{% if request.user.distrito %}{{ request.user.distrito.nome }}{% else %}Não definido{% endif %}</p></div>
         </div>
       </div>
 
       <div class="company-onboard-checklist mt-4">
         <div class="company-onboard-check">
           <span class="company-onboard-check-icon"><i class="bi bi-1-circle"></i></span>
-          <div><strong>Identidade da empresa</strong><p>Defina nome, NIF, setores e uma descricao clara da atividade.</p></div>
+          <div><strong>Identidade da empresa</strong><p>Defina nome, NIF, setores e uma descrição clara da atividade.</p></div>
         </div>
         <div class="company-onboard-check">
           <span class="company-onboard-check-icon"><i class="bi bi-2-circle"></i></span>
-          <div><strong>Contactos principais</strong><p>Confirme telefone, email e website para facilitar resposta rapida.</p></div>
+          <div><strong>Contactos principais</strong><p>Confirme telefone, email e website para facilitar resposta rápida.</p></div>
         </div>
         <div class="company-onboard-check">
           <span class="company-onboard-check-icon"><i class="bi bi-3-circle"></i></span>
-          <div><strong>Localizacao e imagem</strong><p>Distrito, endereco e logo ajudam a reforcar a confianca no perfil.</p></div>
+          <div><strong>Localização e imagem</strong><p>Distrito, endereço e logo ajudam a reforçar a confiança no perfil.</p></div>
         </div>
       </div>
 
       <div class="company-onboard-note">
-        Os dados que ja existem na conta servem como ponto de partida, mas vale rever tudo antes de guardar o perfil empresarial.
+        Os dados que já existem na conta servem como ponto de partida, mas vale rever tudo antes de guardar o perfil empresarial.
       </div>
     </aside>
 
@@ -165,7 +165,7 @@
       <div class="company-onboard-form-head">
         <div>
           <h4>Criar perfil empresarial</h4>
-          <p class="company-onboard-form-subtitle">Preencha os campos abaixo e ative a area da empresa numa unica passada.</p>
+          <p class="company-onboard-form-subtitle">Preencha os campos abaixo e ative a Área da empresa numa unica passada.</p>
         </div>
       </div>
 
@@ -179,7 +179,7 @@
         <section class="company-onboard-form-section">
           <div class="company-onboard-section-label">Identidade</div>
           <div class="company-onboard-section-title">Quem e a empresa</div>
-          <div class="company-onboard-section-copy">Estes dados ajudam tecnicos e candidatos a perceber o contexto da organizacao.</div>
+          <div class="company-onboard-section-copy">Estes dados ajudam técnicos e candidatos a perceber o contexto da organização.</div>
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="company-onboard-field">
@@ -237,16 +237,16 @@
                 <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
                 {{ form.website }}
                 {% if form.website.errors %}<div class="company-onboard-error">{{ form.website.errors|striptags }}</div>{% endif %}
-                <div class="company-onboard-help">Se existir site institucional, vale coloca-lo aqui desde o inicio.</div>
+                <div class="company-onboard-help">Se existir site institucional, vale coloca-lo aqui desde o início.</div>
               </div>
             </div>
           </div>
         </section>
 
         <section class="company-onboard-form-section">
-          <div class="company-onboard-section-label">Localizacao</div>
+          <div class="company-onboard-section-label">Localização</div>
           <div class="company-onboard-section-title">Onde a empresa opera</div>
-          <div class="company-onboard-section-copy">A localizacao ajuda candidatos a entender melhor a vaga e o contexto da empresa.</div>
+          <div class="company-onboard-section-copy">A localização ajuda candidatos a entender melhor a vaga e o contexto da empresa.</div>
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="company-onboard-field">
@@ -273,7 +273,7 @@
             <label for="{{ form.logo.id_for_label }}">{{ form.logo.label }}</label>
             {{ form.logo }}
             {% if form.logo.errors %}<div class="company-onboard-error">{{ form.logo.errors|striptags }}</div>{% endif %}
-            <div class="company-onboard-help">Se carregar um ficheiro novo, o preview muda no painel lateral.</div>
+            <div class="company-onboard-help">Se carregar um ficheiro novo, o preview muda no painel latéral.</div>
           </div>
         </section>
 

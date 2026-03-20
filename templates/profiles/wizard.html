@@ -87,16 +87,16 @@
         <h1 class="wizard-title">{{ step_title }}</h1>
         <p class="wizard-subtitle">
           {% if is_editing_profile %}
-            Atualiza o teu perfil passo a passo, com contexto claro do que ja esta completo e do que ainda falta reforcar.
+            Atualiza o teu perfil passo a passo, com contexto claro do que já está completo e do que ainda falta reforçar.
           {% else %}
             Completa o teu perfil em quatro passos para aparecer melhor nas pesquisas das empresas e acelerar candidaturas.
           {% endif %}
         </p>
         <div class="wizard-chips">
           <span class="wizard-chip"><i class="bi bi-diagram-3"></i>Passo {{ step }} de {{ total_steps }}</span>
-          <span class="wizard-chip"><i class="bi bi-activity"></i>{{ progress }}% concluido</span>
+          <span class="wizard-chip"><i class="bi bi-activity"></i>{{ progress }}% concluído</span>
           <span class="wizard-chip"><i class="bi bi-person-badge"></i>{{ user.nome }}</span>
-          <span class="wizard-chip"><i class="bi bi-{% if is_editing_profile %}arrow-repeat{% else %}rocket-takeoff{% endif %}"></i>{% if is_editing_profile %}Modo de atualizacao{% else %}Primeira configuracao{% endif %}</span>
+          <span class="wizard-chip"><i class="bi bi-{% if is_editing_profile %}arrow-repeat{% else %}rocket-takeoff{% endif %}"></i>{% if is_editing_profile %}Modo de atualização{% else %}Primeira configuração{% endif %}</span>
         </div>
       </div>
       <div class="wizard-actions">
@@ -104,9 +104,9 @@
         {% if is_editing_profile %}
           <a href="{% url 'profiles:detail' %}" class="btn btn-outline-light"><i class="bi bi-eye me-2"></i>Ver perfil</a>
         {% else %}
-          <a href="{% url 'accounts:notifications' %}" class="btn btn-outline-light"><i class="bi bi-bell me-2"></i>Notificacoes</a>
+          <a href="{% url 'accounts:notifications' %}" class="btn btn-outline-light"><i class="bi bi-bell me-2"></i>Notificações</a>
         {% endif %}
-        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Inicio</a>
+        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Início</a>
       </div>
     </div>
   </section>
@@ -118,7 +118,7 @@
           <div class="wizard-avatar" aria-hidden="true">{{ user.nome|slice:":2"|upper }}</div>
           <div>
             <div class="wizard-user-name">{{ user.nome }}</div>
-            <p class="wizard-user-copy">Telemovel {{ user.telefone }}{% if user.distrito %} em {{ user.distrito.nome }}{% endif %}.</p>
+            <p class="wizard-user-copy">Telemóvel {{ user.telefone }}{% if user.distrito %} em {{ user.distrito.nome }}{% endif %}.</p>
           </div>
         </div>
 
@@ -140,21 +140,21 @@
         <div class="wizard-section-label"><i class="bi bi-lightbulb"></i>Dicas para este passo</div>
         <div class="wizard-tip-list">
           {% if step == 1 %}
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-person-vcard"></i></span><div><strong>Dados corretos ajudam na selecao.</strong><p class="wizard-panel-copy">Confirma nome, contacto e localizacao para as empresas conseguirem ler o teu perfil com confianca.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-person-vcard"></i></span><div><strong>Dados corretos ajudam na seleção.</strong><p class="wizard-panel-copy">Confirma nome, contacto e localização para as empresas conseguirem ler o teu perfil com confiança.</p></div></div>
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-calendar-event"></i></span><div><strong>A idade e calculada automaticamente.</strong><p class="wizard-panel-copy">Basta preencher a data de nascimento e o sistema atualiza o resumo sem trabalho extra.</p></div></div>
           {% elif step == 2 %}
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-mortarboard"></i></span><div><strong>Mostra o teu percurso.</strong><p class="wizard-panel-copy">Mesmo cursos curtos e formacoes informais ajudam a posicionar melhor o perfil nas pesquisas.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-mortarboard"></i></span><div><strong>Mostra o teu percurso.</strong><p class="wizard-panel-copy">Mesmo cursos curtos e formações informais ajudam a posicionar melhor o perfil nas pesquisas.</p></div></div>
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-tools"></i></span><div><strong>Marca as skills mais fortes.</strong><p class="wizard-panel-copy">Seleciona o que sabes fazer e usa o campo extra quando falta alguma competencia importante.</p></div></div>
           {% elif step == 3 %}
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-briefcase"></i></span><div><strong>Interesses claros geram melhores oportunidades.</strong><p class="wizard-panel-copy">Escolhe setores e tipo de oportunidade para receber correspondencias mais proximas do teu objetivo.</p></div></div>
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-stars"></i></span><div><strong>Experiencia pode ser opcional.</strong><p class="wizard-panel-copy">Se ainda nao trabalhaste formalmente, mantem essa parte escondida e avanca sem friccao.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-briefcase"></i></span><div><strong>Interesses claros geram melhores oportunidades.</strong><p class="wizard-panel-copy">Escolhe setores e tipo de oportunidade para receber correspondencias mais próximas do teu objetivo.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-stars"></i></span><div><strong>Experiência pode ser opcional.</strong><p class="wizard-panel-copy">Se ainda não trabalhaste formalmente, mantem essa parte escondida e avanca sem fricção.</p></div></div>
           {% else %}
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-file-earmark-check"></i></span><div><strong>Documentos fortalecem a credibilidade.</strong><p class="wizard-panel-copy">CV e certificado ajudam muito, mas os consentimentos sao o que controlam como o teu perfil pode ser visto.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-file-earmark-check"></i></span><div><strong>Documentos fortalecem a credibilidade.</strong><p class="wizard-panel-copy">CV e certificado ajudam muito, mas os consentimentos são o que controlam como o teu perfil pode ser visto.</p></div></div>
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-shield-check"></i></span><div><strong>Tu controlas a visibilidade.</strong><p class="wizard-panel-copy">Ativa apenas os canais de contacto com que te sentes confortavel para ser abordado.</p></div></div>
           {% endif %}
         </div>
         <div class="wizard-note">
-          O progresso e guardado automaticamente enquanto preenches. Os ficheiros ficam prontos para envio quando usares os botoes do formulario.
+          O progresso é guardado automaticamente enquanto preenches. Os ficheiros ficam prontos para envio quando usares os botões do formulário.
         </div>
       </section>
     </aside>
@@ -172,7 +172,7 @@
           <div id="wizard-progress" class="wizard-progress-fill" style="width: {{ progress }}%;"></div>
         </div>
         <div class="wizard-progress-copy">
-          <span id="wizard-progress-text">{{ progress }}% concluido no perfil total</span>
+          <span id="wizard-progress-text">{{ progress }}% concluído no perfil total</span>
           <span><strong id="wizard-step-stats-current">{{ step_stats.filled }}</strong> de <strong id="wizard-step-stats-total">{{ step_stats.total }}</strong> pontos completos neste passo</span>
         </div>
       </div>
@@ -180,7 +180,7 @@
       {% if form.non_field_errors or form.errors %}
         <div class="wizard-error-summary">
           <strong>Revemos este passo antes de continuar.</strong>
-          <p>Alguns campos precisam de atencao. Corrige os pontos marcados abaixo para guardarmos tudo corretamente.</p>
+          <p>Alguns campos precisam de atenção. Corrige os pontos marcados abaixo para guardarmos tudo corretamente.</p>
         </div>
       {% endif %}
 
@@ -191,8 +191,8 @@
         {% if step == 1 %}
           <div class="wizard-section">
             <div class="wizard-section-label"><i class="bi bi-person-lines-fill"></i>Identidade</div>
-            <h2 class="wizard-section-title">Dados pessoais basicos</h2>
-            <p class="wizard-panel-copy">Preenche os dados que vao sustentar o resto do perfil e facilitar contacto futuro.</p>
+            <h2 class="wizard-section-title">Dados pessoais básicos</h2>
+            <p class="wizard-panel-copy">Preenche os dados que vão sustentar o resto do perfil e facilitar contacto futuro.</p>
             <div class="wizard-grid mt-3">
               <div class="wizard-field">
                 <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
@@ -240,7 +240,7 @@
           </div>
 
           <div class="wizard-section">
-            <div class="wizard-section-label"><i class="bi bi-geo-alt"></i>Localizacao</div>
+            <div class="wizard-section-label"><i class="bi bi-geo-alt"></i>Localização</div>
             <h2 class="wizard-section-title">Onde te encontras</h2>
             <div class="wizard-grid mt-3">
               <div class="wizard-field">
@@ -257,8 +257,8 @@
           </div>
         {% elif step == 2 %}
           <div class="wizard-section">
-            <div class="wizard-section-label"><i class="bi bi-book"></i>Educacao</div>
-            <h2 class="wizard-section-title">Formacao e percurso academico</h2>
+            <div class="wizard-section-label"><i class="bi bi-book"></i>Educação</div>
+            <h2 class="wizard-section-title">Formação e percurso académico</h2>
             <div class="wizard-grid mt-3">
               <div class="wizard-field">
                 <label for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
@@ -291,7 +291,7 @@
           <div class="wizard-section">
             <div class="wizard-section-label"><i class="bi bi-tools"></i>Competencias</div>
             <h2 class="wizard-section-title">Skills que queres destacar</h2>
-            <p class="wizard-panel-copy">Seleciona o que ja dominas. Se faltar alguma skill importante, adiciona uma sugestao abaixo.</p>
+            <p class="wizard-panel-copy">Seleciona o que já dominas. Se faltar alguma skill importante, adiciona uma sugestão abaixo.</p>
             <div class="wizard-choice-grid mt-3">
               {% for choice in form.skills %}
                 <label class="wizard-choice-card">
@@ -299,7 +299,7 @@
                   <span>{{ choice.choice_label }}</span>
                 </label>
               {% empty %}
-                <div class="wizard-empty">Ainda nao existem skills aprovadas para selecionar.</div>
+                <div class="wizard-empty">Ainda não existem skills aprovadas para selecionar.</div>
               {% endfor %}
             </div>
             {% if form.skills.errors %}<div class="wizard-error mt-2">{{ form.skills.errors|striptags }}</div>{% endif %}
@@ -345,10 +345,17 @@
                       <span>{{ choice.choice_label }}</span>
                     </label>
                   {% empty %}
-                    <div class="wizard-empty">Ainda nao existem setores configurados para este passo.</div>
+                    <div class="wizard-empty">Ainda não existem setores configurados para este passo.</div>
                   {% endfor %}
                 </div>
                 {% if form.interesse_setorial.errors %}<div class="wizard-error">{{ form.interesse_setorial.errors|striptags }}</div>{% endif %}
+                <div class="wizard-field-help mt-2">Se o setor que procuras não estiver na lista, escreve abaixo para guardarmos tambem esse interesse.</div>
+              </div>
+              <div class="wizard-field full">
+                <label for="{{ form.outros_setores_interesse.id_for_label }}">{{ form.outros_setores_interesse.label }}</label>
+                {{ form.outros_setores_interesse }}
+                <div class="wizard-field-help">Podes indicar um ou mais setores separados por virgulas.</div>
+                {% if form.outros_setores_interesse.errors %}<div class="wizard-error">{{ form.outros_setores_interesse.errors|striptags }}</div>{% endif %}
               </div>
               <div class="wizard-field full">
                 <label for="{{ form.sobre.id_for_label }}">{{ form.sobre.label }}</label>
@@ -360,13 +367,13 @@
           </div>
 
           <div class="wizard-section">
-            <div class="wizard-section-label"><i class="bi bi-stars"></i>Experiencia opcional</div>
-            <h2 class="wizard-section-title">Mostra onde ja trabalhaste</h2>
+            <div class="wizard-section-label"><i class="bi bi-stars"></i>Experiência opcional</div>
+            <h2 class="wizard-section-title">Mostra onde já trabalhaste</h2>
             <label class="wizard-toggle-card">
               {{ form.tem_experiencia }}
               <div>
                 <div class="wizard-toggle-title">{{ form.tem_experiencia.label }}</div>
-                <p class="wizard-panel-copy">Ativa esta opcao apenas se quiseres incluir uma experiencia profissional neste momento.</p>
+                <p class="wizard-panel-copy">Ativa esta opção apenas se quiseres incluir uma experiência profissional neste momento.</p>
               </div>
             </label>
             {% if form.tem_experiencia.errors %}<div class="wizard-error mt-2">{{ form.tem_experiencia.errors|striptags }}</div>{% endif %}
@@ -396,7 +403,7 @@
                 {{ form.exp_atual }}
                 <div>
                   <div class="wizard-toggle-title">{{ form.exp_atual.label }}</div>
-                  <p class="wizard-panel-copy">Marca esta opcao se ainda estas neste trabalho e nao queres mostrar data de fim.</p>
+                  <p class="wizard-panel-copy">Marca esta opção se ainda estas neste trabalho e não queres mostrar data de fim.</p>
                 </div>
               </label>
               <div class="wizard-field full">
@@ -416,7 +423,7 @@
                   <label for="{{ form.cv.id_for_label }}" class="wizard-toggle-title">{{ form.cv.label }}</label>
                   <div class="wizard-file-state">
                     {% if form.initial.cv %}
-                      Ja existe um CV guardado. Podes substituir se quiseres.
+                      Já existe um CV guardado. Podes substituir se quiseres.
                     {% else %}
                       Adiciona um PDF com o teu CV atualizado.
                     {% endif %}
@@ -433,7 +440,7 @@
                   <label for="{{ form.certificado.id_for_label }}" class="wizard-toggle-title">{{ form.certificado.label }}</label>
                   <div class="wizard-file-state">
                     {% if form.initial.certificado %}
-                      Ja existe um certificado associado a este perfil.
+                      Já existe um certificado associado a este perfil.
                     {% else %}
                       Aceita PDF ou imagem do certificado principal.
                     {% endif %}
@@ -450,9 +457,9 @@
                   <label for="{{ form.bi.id_for_label }}" class="wizard-toggle-title">{{ form.bi.label }}</label>
                   <div class="wizard-file-state">
                     {% if form.initial.bi %}
-                      Ja existe um BI guardado no perfil.
+                      Já existe um BI guardado no perfil.
                     {% else %}
-                      Opcional, mas pode ajudar na validacao de dados.
+                      Opcional, mas pode ajudar na validação de dados.
                     {% endif %}
                   </div>
                 </div>
@@ -486,7 +493,7 @@
                 {{ form.consentimento_whatsapp }}
                 <div>
                   <div class="wizard-toggle-title">{{ form.consentimento_whatsapp.label }}</div>
-                  <p class="wizard-panel-copy">Ativa WhatsApp se este for o canal mais pratico para ti.</p>
+                  <p class="wizard-panel-copy">Ativa WhatsApp se éste for o canal mais prático para ti.</p>
                 </div>
               </label>
               <label class="wizard-toggle-card">
@@ -589,12 +596,12 @@
         const data = await response.json();
         if (!response.ok || !data.saved) throw new Error('autosave_failed');
         if (progressBar && typeof data.progress !== 'undefined') progressBar.style.width = data.progress + '%';
-        if (progressText && typeof data.progress !== 'undefined') progressText.textContent = data.progress + '% concluido no perfil total';
+        if (progressText && typeof data.progress !== 'undefined') progressText.textContent = data.progress + '% concluído no perfil total';
         if (stepStatsCurrent && typeof data.step_filled !== 'undefined') stepStatsCurrent.textContent = data.step_filled;
         if (stepStatsTotal && typeof data.step_total !== 'undefined') stepStatsTotal.textContent = data.step_total;
         setAutosaveState('is-saved', 'Progresso guardado');
       } catch (error) {
-        setAutosaveState('is-error', 'Nao foi possivel guardar agora');
+        setAutosaveState('is-error', 'Não foi possível guardar agora');
       }
     }
 

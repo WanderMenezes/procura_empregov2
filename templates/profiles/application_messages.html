@@ -65,8 +65,8 @@
     <div class="messages-hero-head">
       <div>
         <div class="messages-kicker">Conversa da candidatura</div>
-        <h1 class="messages-title">Historico de mensagens</h1>
-        <p class="messages-subtitle">Acompanha as interacoes ligadas a esta vaga, com contexto da empresa, estado da candidatura e a linha temporal mais recente.</p>
+        <h1 class="messages-title">Histórico de mensagens</h1>
+        <p class="messages-subtitle">Acompanha as interações ligadas a esta vaga, com contexto da empresa, estado da candidatura e a linha temporal mais recente.</p>
         <div class="messages-chips">
           <span class="messages-chip"><i class="bi bi-building"></i>{{ application.job.company.nome }}</span>
           <span class="messages-chip"><i class="bi bi-briefcase"></i>{{ application.job.titulo }}</span>
@@ -84,7 +84,7 @@
     <div class="messages-stats">
       <div class="messages-stat"><span class="messages-stat-label">Total</span><span class="messages-stat-value">{{ message_count }}</span><span class="messages-stat-meta">na linha de conversa</span></div>
       <div class="messages-stat"><span class="messages-stat-label">Da empresa</span><span class="messages-stat-value">{{ company_message_count }}</span><span class="messages-stat-meta">respostas empresariais</span></div>
-      <div class="messages-stat"><span class="messages-stat-label">Do sistema</span><span class="messages-stat-value">{{ system_message_count }}</span><span class="messages-stat-meta">atualizacoes automaticas</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Do sistema</span><span class="messages-stat-value">{{ system_message_count }}</span><span class="messages-stat-meta">atualizações automaticas</span></div>
       <div class="messages-stat"><span class="messages-stat-label">Ultimo toque</span><span class="messages-stat-value">{% if latest_message %}{{ latest_message.created_at|date:"d/m" }}{% else %}--{% endif %}</span><span class="messages-stat-meta">{% if latest_message %}{{ latest_message.created_at|date:"H:i" }}{% else %}sem mensagens ainda{% endif %}</span></div>
     </div>
   </section>
@@ -95,7 +95,7 @@
         <div class="messages-panel-head">
           <div>
             <h2 class="messages-panel-title">Empresa e vaga</h2>
-            <p class="messages-panel-subtitle">Resumo rapido do contexto desta candidatura.</p>
+            <p class="messages-panel-subtitle">Resumo rápido do contexto desta candidatura.</p>
           </div>
         </div>
         <div class="messages-company">
@@ -129,15 +129,15 @@
           </div>
           <div class="messages-fact">
             <span class="messages-fact-label">Primeira mensagem</span>
-            <span class="messages-fact-value">{% if oldest_message %}{{ oldest_message.created_at|date:"d/m/Y H:i" }}{% else %}Ainda nao existe{% endif %}</span>
+            <span class="messages-fact-value">{% if oldest_message %}{{ oldest_message.created_at|date:"d/m/Y H:i" }}{% else %}Ainda não existe{% endif %}</span>
           </div>
           <div class="messages-fact">
             <span class="messages-fact-label">Prazo da vaga</span>
             <span class="messages-fact-value">{% if application.job.data_fecho %}{{ application.job.data_fecho|date:"d/m/Y" }}{% else %}Sem prazo informado{% endif %}</span>
           </div>
           <div class="messages-fact">
-            <span class="messages-fact-label">Area</span>
-            <span class="messages-fact-value">{% if application.job.area_formacao %}{{ application.job.get_area_formacao_display }}{% else %}Nao indicada{% endif %}</span>
+            <span class="messages-fact-label">Área</span>
+            <span class="messages-fact-value">{% if application.job.area_formacao %}{{ application.job.get_area_formacao_display }}{% else %}Não indicada{% endif %}</span>
           </div>
         </div>
       </section>
@@ -146,7 +146,7 @@
         <div class="messages-panel-head">
           <div>
             <h2 class="messages-panel-title">Leitura da conversa</h2>
-            <p class="messages-panel-subtitle">Como interpretar rapidamente este historico.</p>
+            <p class="messages-panel-subtitle">Como interpretar rápidamente este histórico.</p>
           </div>
         </div>
         <div class="messages-facts">
@@ -156,10 +156,10 @@
           </div>
           <div class="messages-fact">
             <span class="messages-fact-label">Sistema</span>
-            <span class="messages-fact-value">Atualizacoes automaticas ligadas ao processo.</span>
+            <span class="messages-fact-value">Atualizações automaticas ligadas ao processo.</span>
           </div>
           <div class="messages-fact">
-            <span class="messages-fact-label">Sugestao</span>
+            <span class="messages-fact-label">Sugestão</span>
             <span class="messages-fact-value">Se houver nova resposta da empresa, vale rever o estado geral em "Minhas candidaturas".</span>
           </div>
         </div>
@@ -175,7 +175,7 @@
               <div class="thread-meta">Enviada por ti no momento da candidatura, em {{ application.created_at|date:"d/m/Y H:i" }}.</div>
             </div>
             <div class="thread-tags">
-              <span class="thread-pill muted"><i class="bi bi-chat-dots"></i>Apresentacao</span>
+              <span class="thread-pill muted"><i class="bi bi-chat-dots"></i>Apresentação</span>
             </div>
           </div>
           <p class="thread-copy">{{ application.mensagem|linebreaksbr }}</p>
@@ -203,7 +203,7 @@
         </div>
 
         {% if messages_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Paginacao do historico">
+          <nav class="mt-4" aria-label="Páginação do histórico">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not messages_page.has_previous %}disabled{% endif %}">
                 {% if messages_page.has_previous %}
@@ -212,12 +212,12 @@
                   <span class="page-link">Anterior</span>
                 {% endif %}
               </li>
-              <li class="page-item disabled"><span class="page-link">Pagina {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}</span></li>
+              <li class="page-item disabled"><span class="page-link">Página {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}</span></li>
               <li class="page-item {% if not messages_page.has_next %}disabled{% endif %}">
                 {% if messages_page.has_next %}
-                  <a class="page-link" href="?page={{ messages_page.next_page_number }}">Proxima</a>
+                  <a class="page-link" href="?page={{ messages_page.next_page_number }}">Próxima</a>
                 {% else %}
-                  <span class="page-link">Proxima</span>
+                  <span class="page-link">Próxima</span>
                 {% endif %}
               </li>
             </ul>
@@ -240,7 +240,7 @@
         <div class="messages-empty">
           <i class="bi bi-chat-square"></i>
           <h2 class="messages-panel-title mb-2">Sem mensagens ainda</h2>
-          <p class="messages-empty-copy mb-3">A candidatura ja foi enviada, mas ainda nao existem trocas registadas neste historico. Continua a acompanhar o estado geral em "Minhas candidaturas".</p>
+          <p class="messages-empty-copy mb-3">A candidatura já foi enviada, mas ainda não existem trocas registadas neste histórico. Continua a acompanhar o estado geral em "Minhas candidaturas".</p>
           <div class="thread-footer">
             <a href="{% url 'profiles:my_applications' %}" class="btn btn-primary">Voltar ao pipeline</a>
             <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-secondary">Explorar mais vagas</a>

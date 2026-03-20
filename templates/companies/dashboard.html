@@ -449,7 +449,7 @@
             <div class="company-badges mt-3">
               <span class="company-chip">
                 <i class="bi bi-shield-check"></i>
-                {% if company.verificada %}Empresa verificada{% else %}Validacao pendente{% endif %}
+                {% if company.verificada %}Empresa verificada{% else %}Validação pendente{% endif %}
               </span>
               <span class="company-chip">
                 <i class="bi bi-person-badge"></i>
@@ -461,9 +461,9 @@
             </div>
             <p class="company-hero-copy">
               {% if company_profile_complete %}
-                O painel centraliza vagas, candidaturas e pedidos de contacto para a equipa agir mais rapido.
+                O painel centraliza vagas, candidaturas e pedidos de contacto para a equipa agir mais rápido.
               {% else %}
-                Complete os dados principais da empresa para ganhar mais confianca no perfil e publicar oportunidades com melhor contexto.
+                Complete os dados principais da empresa para ganhar mais confiança no perfil e publicar oportunidades com melhor contexto.
               {% endif %}
             </p>
           </div>
@@ -487,12 +487,12 @@
           <div class="company-stat-card">
             <span class="company-stat-label">Vagas ativas</span>
             <span class="company-stat-value">{{ stats.vagas_ativas|default:0 }}</span>
-            <span class="company-stat-meta">Em circulacao neste momento</span>
+            <span class="company-stat-meta">Em circulação neste momento</span>
           </div>
           <div class="company-stat-card">
             <span class="company-stat-label">Total de vagas</span>
             <span class="company-stat-value">{{ stats.total_vagas|default:0 }}</span>
-            <span class="company-stat-meta">Historico publicado</span>
+            <span class="company-stat-meta">Histórico publicado</span>
           </div>
           <div class="company-stat-card">
             <span class="company-stat-label">Candidaturas</span>
@@ -500,7 +500,7 @@
             <span class="company-stat-meta">Respostas recebidas</span>
           </div>
           <div class="company-stat-card">
-            <span class="company-stat-label">Visualizacoes</span>
+            <span class="company-stat-label">Visualizações</span>
             <span class="company-stat-value">{{ stats.visualizacoes|default:0 }}</span>
             <span class="company-stat-meta">Interesse gerado nas vagas</span>
           </div>
@@ -524,29 +524,29 @@
             <span class="company-detail-icon"><i class="bi bi-building"></i></span>
             <div>
               <span class="company-detail-label">Setores</span>
-              <p class="company-detail-value">{{ company.get_setor_display|default:'Nao informado' }}</p>
+              <p class="company-detail-value">{{ company.get_setor_display|default:'Não informado' }}</p>
             </div>
           </div>
           <div class="company-detail-item">
             <span class="company-detail-icon"><i class="bi bi-telephone"></i></span>
             <div>
               <span class="company-detail-label">Telefone</span>
-              <p class="company-detail-value">{{ company.telefone|default:'Nao informado' }}</p>
+              <p class="company-detail-value">{{ company.telefone|default:'Não informado' }}</p>
             </div>
           </div>
           <div class="company-detail-item">
             <span class="company-detail-icon"><i class="bi bi-envelope"></i></span>
             <div>
               <span class="company-detail-label">Email</span>
-              <p class="company-detail-value">{{ company.email|default:'Nao informado' }}</p>
+              <p class="company-detail-value">{{ company.email|default:'Não informado' }}</p>
             </div>
           </div>
           <div class="company-detail-item">
             <span class="company-detail-icon"><i class="bi bi-geo-alt"></i></span>
             <div>
-              <span class="company-detail-label">Localizacao</span>
+              <span class="company-detail-label">Localização</span>
               <p class="company-detail-value">
-                {{ company.distrito.nome|default:'Distrito nao definido' }}
+                {{ company.distrito.nome|default:'Distrito não definido' }}
                 {% if company.endereco %}
                   <br>{{ company.endereco }}
                 {% endif %}
@@ -557,7 +557,7 @@
             <span class="company-detail-icon"><i class="bi bi-card-text"></i></span>
             <div>
               <span class="company-detail-label">NIF</span>
-              <p class="company-detail-value">{{ company.nif|default:'Nao informado' }}</p>
+              <p class="company-detail-value">{{ company.nif|default:'Não informado' }}</p>
             </div>
           </div>
           <div class="company-detail-item">
@@ -568,7 +568,7 @@
                 {% if company.website %}
                   <a href="{{ company.website }}" target="_blank" rel="noopener">Abrir site</a>
                 {% else %}
-                  Nao informado
+                  Não informado
                 {% endif %}
               </p>
             </div>
@@ -579,7 +579,7 @@
       <div class="company-panel">
         <div class="company-panel-head">
           <div>
-            <h6>Resumo rapido</h6>
+            <h6>Resumo rápido</h6>
             <p class="company-panel-subtitle">Indicadores de ritmo e procura.</p>
           </div>
         </div>
@@ -606,8 +606,8 @@
       <div class="company-panel">
         <div class="company-panel-head">
           <div>
-            <h6>Proximos passos</h6>
-            <p class="company-panel-subtitle">Acoes simples para manter o painel vivo.</p>
+            <h6>Próximos passos</h6>
+            <p class="company-panel-subtitle">Ações simples para manter o painel vivo.</p>
           </div>
         </div>
         <div class="company-steps">
@@ -617,9 +617,9 @@
               <strong>{% if company_profile_complete %}Perfil ajustado{% else %}Fechar dados do perfil{% endif %}</strong>
               <p>
                 {% if company_profile_complete %}
-                  O perfil ja esta com a base essencial pronta para ganhar confianca.
+                  O perfil já está com a base essencial pronta para ganhar confiança.
                 {% else %}
-                  Completar contacto, endereco e descricao melhora a leitura para tecnicos e candidatos.
+                  Completar contacto, endereço e descrição melhora a leitura para técnicos e candidatos.
                 {% endif %}
               </p>
             </div>
@@ -630,7 +630,7 @@
               <strong>{% if stats.vagas_ativas %}Manter vagas atualizadas{% else %}Publicar a primeira vaga{% endif %}</strong>
               <p>
                 {% if stats.vagas_ativas %}
-                  Reveja vagas ativas para garantir requisitos claros e resposta rapida.
+                  Reveja vagas ativas para garantir requisitos claros e resposta rápida.
                 {% else %}
                   Uma vaga bem descrita acelera candidaturas alinhadas com o que a empresa precisa.
                 {% endif %}
@@ -658,7 +658,7 @@
       <div class="company-panel mb-4">
         <div class="company-panel-head">
           <div>
-            <h5>Descricao</h5>
+            <h5>Descrição</h5>
             <p class="company-panel-subtitle">Como a empresa se apresenta dentro da plataforma.</p>
           </div>
           <a href="{% url 'companies:profile_edit' %}" class="btn btn-outline-primary btn-sm">Atualizar texto</a>
@@ -669,7 +669,7 @@
           {% else %}
             <div class="company-empty">
               <i class="bi bi-card-text"></i>
-              Ainda nao existe uma descricao. Um bom resumo ajuda candidatos e equipa tecnica a perceber melhor a proposta da empresa.
+              Ainda não existe uma descrição. Um bom resumo ajuda candidatos e equipa técnica a perceber melhor a proposta da empresa.
             </div>
           {% endif %}
         </div>
@@ -679,7 +679,7 @@
         <div class="company-panel-head">
           <div>
             <h5>Vagas recentes</h5>
-            <p class="company-panel-subtitle">Publicacoes mais recentes e o estado de cada uma.</p>
+            <p class="company-panel-subtitle">Publicações mais recentes e o estado de cada uma.</p>
           </div>
           <a href="{% url 'companies:job_list' %}" class="btn btn-outline-primary btn-sm">Ver todas</a>
         </div>
@@ -729,7 +729,7 @@
         {% else %}
           <div class="company-empty">
             <i class="bi bi-briefcase"></i>
-            Ainda nao existem vagas publicadas. Crie a primeira oportunidade para comecar a receber candidaturas.
+            Ainda não existem vagas publicadas. Crie a primeira oportunidade para começar a receber candidaturas.
           </div>
         {% endif %}
       </div>
@@ -738,7 +738,7 @@
         <div class="company-panel-head">
           <div>
             <h5>Pedidos de contacto</h5>
-            <p class="company-panel-subtitle">Ultimos pedidos feitos a jovens da base.</p>
+            <p class="company-panel-subtitle">Últimos pedidos feitos a jovens da base.</p>
           </div>
           <a href="{% url 'companies:contact_request_list' %}" class="btn btn-outline-primary btn-sm">Ver todos</a>
         </div>
@@ -751,7 +751,7 @@
                   <div>
                     <div class="company-item-title">{{ r.youth.user.nome }}</div>
                     <div class="company-inline-meta">
-                      <span><i class="bi bi-geo-alt me-1"></i>{{ r.youth.distrito.nome|default:'Distrito nao definido' }}</span>
+                      <span><i class="bi bi-geo-alt me-1"></i>{{ r.youth.distrito.nome|default:'Distrito não definido' }}</span>
                       <span><i class="bi bi-calendar-event me-1"></i>{{ r.created_at|date:"d/m/Y" }}</span>
                     </div>
                   </div>
@@ -773,7 +773,7 @@
         {% else %}
           <div class="company-empty">
             <i class="bi bi-chat-left-text"></i>
-            Ainda nao existem pedidos de contacto. Pesquise jovens e abra novas aproximacoes a partir daqui.
+            Ainda não existem pedidos de contacto. Pesquise jovens e abra novas aproximações a partir daqui.
           </div>
         {% endif %}
       </div>

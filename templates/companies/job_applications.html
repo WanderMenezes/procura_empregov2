@@ -98,7 +98,7 @@
   <section class="job-app-hero mb-4">
     <div class="job-app-hero-head">
       <div>
-        <div class="job-app-kicker">Gestao de candidaturas</div>
+        <div class="job-app-kicker">Gestão de candidaturas</div>
         <h1 class="job-app-title">{{ job.titulo }}</h1>
         <p class="job-app-subtitle">
           Reveja candidatos, acompanhe documentos, ajuste estados e responda com mais contexto sem sair da vaga.
@@ -124,7 +124,7 @@
         <span class="job-app-stat-meta">candidatura{{ application_summary.total|default:0|pluralize }} recebida{{ application_summary.total|default:0|pluralize }}</span>
       </div>
       <div class="job-app-stat">
-        <span class="job-app-stat-label">Em analise</span>
+        <span class="job-app-stat-label">Em análise</span>
         <span class="job-app-stat-value">{{ application_summary.analysis|default:0 }}</span>
         <span class="job-app-stat-meta">{{ application_summary.pending|default:0 }} pendente{{ application_summary.pending|default:0|pluralize }}</span>
       </div>
@@ -136,7 +136,7 @@
       <div class="job-app-stat">
         <span class="job-app-stat-label">Com documentos</span>
         <span class="job-app-stat-value">{{ application_summary.with_documents|default:0 }}</span>
-        <span class="job-app-stat-meta">perfis com anexos visiveis</span>
+        <span class="job-app-stat-meta">perfis com anexos visíveis</span>
       </div>
       <div class="job-app-stat">
         <span class="job-app-stat-label">Vagas restantes</span>
@@ -150,7 +150,7 @@
     <div class="job-app-panel-head">
       <div>
         <h5>Lista de candidatos</h5>
-        <p class="job-app-panel-subtitle">Cada cartao junta perfil, documentos, resposta da empresa e historico recente.</p>
+        <p class="job-app-panel-subtitle">Cada cartao junta perfil, documentos, resposta da empresa e histórico recente.</p>
       </div>
     </div>
 
@@ -170,7 +170,7 @@
                 <div>
                   <div class="job-app-name">{{ app.youth.user.nome }}</div>
                   <div class="job-app-subline">
-                    {{ app.youth.distrito.nome|default:"Distrito nao definido" }}{% if app.youth.localidade %} - {{ app.youth.localidade }}{% endif %}
+                    {{ app.youth.distrito.nome|default:"Distrito não definido" }}{% if app.youth.localidade %} - {{ app.youth.localidade }}{% endif %}
                   </div>
                   <div class="job-app-tags">
                     {% if app.youth.idade %}<span class="job-app-tag"><i class="bi bi-person"></i>{{ app.youth.idade }} anos</span>{% endif %}
@@ -208,7 +208,7 @@
 
             {% if app.mensagem %}
               <div class="job-app-block">
-                <span class="job-app-label">Motivacao enviada</span>
+                <span class="job-app-label">Motivação enviada</span>
                 <div class="job-app-copy">{{ app.mensagem|linebreaksbr }}</div>
               </div>
             {% endif %}
@@ -260,17 +260,17 @@
                 </div>
                 <div class="col-md-8">
                   <label class="form-label">Mensagem para o candidato</label>
-                  <textarea name="resposta_empresa" rows="3" class="form-control" placeholder="Explique o proximo passo, feedback ou estado da analise...">{{ app.resposta_empresa }}</textarea>
+                  <textarea name="resposta_empresa" rows="3" class="form-control" placeholder="Explique o próximo passo, feedback ou estado da análise...">{{ app.resposta_empresa }}</textarea>
                 </div>
               </div>
               <div class="job-app-footer mt-3">
                 <div class="job-app-meta">
                   <span class="job-app-tag"><i class="bi bi-send-check"></i>Responder diretamente da lista</span>
-                  <span class="job-app-tag"><i class="bi bi-clock-history"></i>{{ app.messages.all|length }} mensagem{{ app.messages.all|length|pluralize }} no historico</span>
+                  <span class="job-app-tag"><i class="bi bi-clock-history"></i>{{ app.messages.all|length }} mensagem{{ app.messages.all|length|pluralize }} no histórico</span>
                 </div>
                 <div class="job-app-actions">
                   <a href="{% url 'companies:youth_detail' app.youth.id %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-vcard me-1"></i>Ver perfil</a>
-                  <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chat-left-text me-1"></i>Historico completo</a>
+                  <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chat-left-text me-1"></i>Histórico completo</a>
                   <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i>Guardar</button>
                 </div>
               </div>
@@ -280,7 +280,7 @@
               {% with last_msg=app.messages.all.0 %}
                 <div class="job-app-history">
                   <div class="job-app-block">
-                    <span class="job-app-label">Ultima mensagem enviada</span>
+                    <span class="job-app-label">Última mensagem enviada</span>
                     <div class="small text-muted mb-2">{{ last_msg.created_at|date:"d/m/Y H:i" }}</div>
                     <div class="job-app-history-copy">{{ last_msg.message|linebreaksbr }}</div>
                   </div>
@@ -293,7 +293,7 @@
     {% else %}
       <div class="job-app-empty">
         <i class="bi bi-people"></i>
-        Ainda nao existem candidaturas para esta vaga.
+        Ainda não existem candidaturas para esta vaga.
       </div>
     {% endif %}
   </section>

@@ -30,11 +30,11 @@
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-cloud-arrow-up"></i>
-                                {{ offline_summary.imports|intcomma }} importacoes
+                                {{ offline_summary.imports|intcomma }} importações
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-filetype-html"></i>
-                                formulario offline preenchivel
+                                formulário offline preenchível
                             </span>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                 <div class="col-md-6 col-xl-3">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <div class="admin-summary-label">Importacoes</div>
+                            <div class="admin-summary-label">Importações</div>
                             <div class="admin-summary-value">{{ offline_summary.imports|intcomma }}</div>
                             <small class="text-muted">Contas criadas a partir de ficheiros offline</small>
                         </div>
@@ -96,9 +96,9 @@
                             <div class="admin-section-head">
                                 <div>
                                     <div class="admin-section-kicker">Etapa 1</div>
-                                    <h5 class="mb-1">Gerar formulario preenchivel</h5>
+                                    <h5 class="mb-1">Gerar formulário preenchível</h5>
                                     <p class="text-muted mb-0">
-                                        Escolha se o ficheiro sera para jovem ou empresa. O sistema descarrega um ficheiro HTML com campos, listas e botoes para preencher offline sem editar JSON manualmente.
+                                        Escolha se o ficheiro será para jovem ou empresa. O sistema descarrega um ficheiro HTML com campos, listas e botoes para preencher offline sem editar JSON manualmente.
                                     </p>
                                 </div>
                             </div>
@@ -121,21 +121,21 @@
                                 </div>
 
                                 <div class="admin-note-card">
-                                    <h6 class="mb-2">O formulario inclui</h6>
+                                    <h6 class="mb-2">O formulário inclui</h6>
                                     <ul class="admin-note-list">
                                         <li>Campos base do utilizador, consentimentos e palavra-passe.</li>
-                                        <li>Listas prontas para distrito, educacao, oportunidade ou setor.</li>
+                                        <li>Listas prontas para distrito, educação, oportunidade ou setor.</li>
                                         <li>Botao para guardar rascunho no navegador enquanto estiver offline.</li>
-                                        <li>Botao para gerar automaticamente o JSON final de importacao.</li>
+                                        <li>Botao para gerar automaticamente o JSON final de importação.</li>
                                     </ul>
                                 </div>
 
                                 <div class="d-flex flex-wrap gap-2">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-download me-1"></i>Gerar formulario offline
+                                        <i class="bi bi-download me-1"></i>Gerar formulário offline
                                     </button>
                                     <span class="text-muted small align-self-center">
-                                        O ficheiro abre no navegador e depois gera o JSON final para importacao.
+                                        O ficheiro abre no navegador e depois gera o JSON final para importação.
                                     </span>
                                 </div>
                             </form>
@@ -151,7 +151,7 @@
                                     <div class="admin-section-kicker">Etapa 2</div>
                                     <h5 class="mb-1">Importar e criar a conta</h5>
                                     <p class="text-muted mb-0">
-                                        Quando voltar a internet, importe o JSON produzido pelo formulario offline para criar a conta do utilizador e o respetivo perfil de jovem ou empresa no sistema.
+                                        Quando voltar a internet, importe o JSON produzido pelo formulário offline para criar a conta do utilizador e o respetivo perfil de jovem ou empresa no sistema.
                                     </p>
                                 </div>
                             </div>
@@ -165,7 +165,7 @@
                                 {% endif %}
 
                                 <div class="admin-form-section">
-                                    <div class="admin-form-section-label">Importacao</div>
+                                    <div class="admin-form-section-label">Importação</div>
                                     <label for="{{ import_form.file.id_for_label }}" class="form-label">{{ import_form.file.label }}</label>
                                     {{ import_form.file }}
                                     {% for error in import_form.file.errors %}
@@ -179,8 +179,8 @@
                                         <strong>Jovem e Empresa</strong>
                                     </div>
                                     <div class="admin-inline-stat">
-                                        <span class="admin-inline-stat-label">Importacao</span>
-                                        <strong>JSON gerado pelo formulario</strong>
+                                        <span class="admin-inline-stat-label">Importação</span>
+                                        <strong>JSON gerado pelo formulário</strong>
                                     </div>
                                     <div class="admin-inline-stat">
                                         <span class="admin-inline-stat-label">Resultado</span>
@@ -215,7 +215,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Jovem</div>
-                                        <div class="admin-priority-text">Inclui BI, dados pessoais, disponibilidade e educacao para o perfil ficar pronto para validacao.</div>
+                                        <div class="admin-priority-text">Inclui BI, dados pessoais, disponibilidade e educação para o perfil ficar pronto para validação.</div>
                                     </div>
                                 </div>
                                 <div class="admin-priority-item">
@@ -224,7 +224,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Empresa</div>
-                                        <div class="admin-priority-text">Inclui NIF, setor, descricao, contacto e endereco para criar o perfil empresarial base.</div>
+                                        <div class="admin-priority-text">Inclui NIF, setor, descrição, contacto e endereço para criar o perfil empresarial base.</div>
                                     </div>
                                 </div>
                                 <div class="admin-priority-item">
@@ -233,7 +233,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Seguranca</div>
-                                        <div class="admin-priority-text">O ficheiro leva palavra-passe; depois da importacao, o ideal e apagar a copia local.</div>
+                                        <div class="admin-priority-text">O ficheiro leva palavra-passe; depois da importação, o ideal e apagar a copia local.</div>
                                     </div>
                                 </div>
                             </div>
@@ -247,8 +247,8 @@
                                 <div class="admin-section-head compact">
                                     <div>
                                         <div class="admin-section-kicker">Auditoria recente</div>
-                                        <h5 class="mb-1">Ultimos registos offline</h5>
-                                        <p class="text-muted mb-0">Geracoes e importacoes realizadas a partir deste modulo.</p>
+                                        <h5 class="mb-1">Últimos registos offline</h5>
+                                        <p class="text-muted mb-0">Gerações e importações realizadas a partir deste modulo.</p>
                                     </div>
                                 </div>
 
@@ -275,7 +275,7 @@
                             {% else %}
                                 <div class="admin-empty-state">
                                     <i class="bi bi-file-earmark-arrow-down"></i>
-                                    <p class="mb-0">Ainda nao existem registos offline processados.</p>
+                                    <p class="mb-0">Ainda não existem registos offline processados.</p>
                                 </div>
                             {% endif %}
                         </div>

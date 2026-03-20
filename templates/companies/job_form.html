@@ -388,17 +388,17 @@
   <section class="job-editor-hero mb-4">
     <div class="job-editor-hero-head">
       <div>
-        <div class="job-editor-kicker">{% if job %}Atualizacao de vaga{% else %}Nova oportunidade{% endif %}</div>
+        <div class="job-editor-kicker">{% if job %}Atualização de vaga{% else %}Nova oportunidade{% endif %}</div>
         <h1 class="job-editor-title">{% if job %}Editar vaga publicada{% else %}Publicar nova vaga{% endif %}</h1>
         <p class="job-editor-subtitle">
-          Estruture a oportunidade com clareza para atrair candidaturas mais alinhadas, facilitar triagem e dar contexto real sobre a funcao.
+          Estruture a oportunidade com clareza para atrair candidaturas mais alinhadas, facilitar triagem e dar contexto real sobre a função.
         </p>
         <div class="job-editor-chips">
           <span class="job-editor-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
           <span class="job-editor-chip"><i class="bi bi-briefcase"></i>{{ company.get_setor_display|default:"Setores por definir" }}</span>
           <span class="job-editor-chip">
             <i class="bi {% if job and job.estado == 'ATIVA' %}bi-broadcast-pin{% elif job %}bi-pencil-square{% else %}bi-stars{% endif %}"></i>
-            {% if job %}{{ job.get_estado_display }}{% else %}Pronta para publicacao{% endif %}
+            {% if job %}{{ job.get_estado_display }}{% else %}Pronta para publicação{% endif %}
           </span>
         </div>
       </div>
@@ -416,7 +416,7 @@
   <div class="job-editor-shell">
     <aside class="job-editor-panel job-editor-sidebar">
       <div class="job-preview-card">
-        <div class="job-preview-kicker">Preview rapido</div>
+        <div class="job-preview-kicker">Preview rápido</div>
         <div class="job-preview-title" id="jobPreviewTitle">{{ form.titulo.value|default:"Nova oportunidade pronta a publicar" }}</div>
         <p class="job-preview-type" id="jobPreviewType">{% if job %}{{ job.get_tipo_display }}{% else %}Tipo por definir{% endif %}</p>
         <div class="job-preview-pills">
@@ -474,7 +474,7 @@
     <div class="job-editor-panel">
       <div class="job-form-head">
         <div>
-          <h4 class="mb-1">{% if job %}Ajustar informacao da vaga{% else %}Desenhar a oportunidade{% endif %}</h4>
+          <h4 class="mb-1">{% if job %}Ajustar informação da vaga{% else %}Desenhar a oportunidade{% endif %}</h4>
           <p class="job-form-subtitle">Preencha o essencial primeiro e refine os detalhes antes de guardar.</p>
         </div>
       </div>
@@ -489,7 +489,7 @@
         <section class="job-form-section">
           <div class="job-section-label">Essencial</div>
           <div class="job-section-title">O que esta a ser procurado</div>
-          <div class="job-section-copy">Defina a funcao, o formato e quantas vagas existem.</div>
+          <div class="job-section-copy">Defina a função, o formato e quantas vagas existem.</div>
           <div class="row g-3">
             <div class="col-12">
               <div class="job-field">
@@ -510,7 +510,7 @@
                 <label for="{{ form.numero_vagas.id_for_label }}">{{ form.numero_vagas.label }}</label>
                 {{ form.numero_vagas }}
                 {% if form.numero_vagas.errors %}<div class="job-field-error">{{ form.numero_vagas.errors|striptags }}</div>{% endif %}
-                <div class="job-field-help">Indique o numero real de posicoes disponiveis.</div>
+                <div class="job-field-help">Indique o número real de posicoes disponíveis.</div>
               </div>
             </div>
           </div>
@@ -540,16 +540,16 @@
                 <label for="{{ form.data_fecho.id_for_label }}">{{ form.data_fecho.label }}</label>
                 {{ form.data_fecho }}
                 {% if form.data_fecho.errors %}<div class="job-field-error">{{ form.data_fecho.errors|striptags }}</div>{% endif %}
-                <div class="job-field-help">Pode deixar vazio se a vaga nao tiver prazo fixo.</div>
+                <div class="job-field-help">Pode deixar vazio se a vaga não tiver prazo fixo.</div>
               </div>
             </div>
           </div>
         </section>
 
         <section class="job-form-section">
-          <div class="job-section-label">Conteudo</div>
+          <div class="job-section-label">Conteúdo</div>
           <div class="job-section-title">Explique bem a vaga</div>
-          <div class="job-section-copy">Descreva tarefas, ambiente e o minimo necessario para a candidatura fazer sentido.</div>
+          <div class="job-section-copy">Descreva tarefas, ambiente e o mínimo necessario para a candidatura fazer sentido.</div>
           <div class="row g-3">
             <div class="col-12">
               <div class="job-field">
@@ -572,7 +572,7 @@
         <section class="job-form-section">
           <div class="job-section-label">Perfil</div>
           <div class="job-section-title">Quem se enquadra melhor</div>
-          <div class="job-section-copy">Use estes filtros para dar direcao sem fechar a porta a bons candidatos.</div>
+          <div class="job-section-copy">Use éstes filtros para dar direcao sem fechar a porta a bons candidatos.</div>
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <div class="job-field">
@@ -626,7 +626,7 @@
           </a>
           <button class="btn btn-primary" type="submit">
             <i class="bi {% if job %}bi-check2-circle{% else %}bi-send-check{% endif %} me-2"></i>
-            {% if job %}Guardar alteracoes{% else %}Publicar vaga{% endif %}
+            {% if job %}Guardar alterações{% else %}Publicar vaga{% endif %}
           </button>
         </div>
       </form>

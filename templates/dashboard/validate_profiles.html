@@ -13,10 +13,10 @@
             <div class="card admin-hero admin-hero-split mb-4">
                 <div class="card-body">
                     <div class="admin-hero-copy">
-                        <div class="admin-kicker">{% if request.user.is_admin %}Validacao central{% else %}Fila do operador{% endif %}</div>
+                        <div class="admin-kicker">{% if request.user.is_admin %}Validação central{% else %}Fila do operador{% endif %}</div>
                         <h1 class="admin-page-title">Perfis pendentes</h1>
                         <p class="admin-subtitle mb-0">
-                            Reveja rapidamente os perfis completos e decida quem fica pronto para ficar visivel para as empresas.
+                            Reveja rápidamente os perfis completos e decida quem fica pronto para ficar visível para as empresas.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -50,7 +50,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Fila total</div>
                             <div class="admin-summary-value">{{ validation_summary.total_pending }}</div>
-                            <small class="text-muted">Perfis prontos para avaliacao</small>
+                            <small class="text-muted">Perfis prontos para avaliação</small>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                                 </div>
 
                                 <div class="admin-review-footer">
-                                    <small class="text-muted">Submetido em {{ perfil.created_at|date:"d/m/Y" }} - {{ perfil.created_at|timesince }} atras</small>
+                                    <small class="text-muted">Submetido em {{ perfil.created_at|date:"d/m/Y" }} - {{ perfil.created_at|timesince }} atrás</small>
                                     <div class="admin-queue-actions">
                                         <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
                                             <i class="bi bi-check2 me-1"></i>Aprovar
@@ -142,7 +142,7 @@
                     <div class="card-body">
                         <div class="admin-empty-state">
                             <i class="bi bi-check2-all"></i>
-                            <p class="mb-0">Nao existem perfis pendentes com os filtros atuais.</p>
+                            <p class="mb-0">Não existem perfis pendentes com os filtros atuais.</p>
                         </div>
                     </div>
                 </div>

@@ -15,9 +15,9 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Centro de comando</div>
-                        <h1 class="admin-page-title">Painel de Administracao</h1>
+                        <h1 class="admin-page-title">Painel de Administração</h1>
                         <p class="admin-subtitle mb-0">
-                            Acompanhe filas pendentes, atividade recente e os principais indicadores da plataforma num so espaco.
+                            Acompanhe filas pendentes, atividade recente e os principais indicadores da plataforma num só espaço.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -26,7 +26,7 @@
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-check-circle"></i>
-                                {{ stats.validacoes_pendentes|intcomma }} validacoes pendentes
+                                {{ stats.validacoes_pendentes|intcomma }} validações pendentes
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-envelope-paper"></i>
@@ -37,13 +37,13 @@
 
                     <div class="admin-hero-actions">
                         <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light btn-sm">
-                            <i class="bi bi-check-circle me-1"></i>Ver fila de validacao
+                            <i class="bi bi-check-circle me-1"></i>Ver fila de validação
                         </a>
                         <a href="{% url 'dashboard:user_list' %}" class="btn btn-light btn-sm">
                             <i class="bi bi-people me-1"></i>Gerir utilizadores
                         </a>
                         <a href="{% url 'dashboard:reports' %}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-graph-up me-1"></i>Abrir relatorios
+                            <i class="bi bi-graph-up me-1"></i>Abrir relatérios
                         </a>
                         <a href="{% url 'companies:export_youth_csv' %}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-download me-1"></i>Exportar base
@@ -119,7 +119,7 @@
                                 <div>
                                     <div class="admin-section-kicker">Prioridades</div>
                                     <h5 class="mb-1">Fila de trabalho do admin</h5>
-                                    <p class="text-muted mb-0">Atalhos para o que precisa de decisao ou acompanhamento agora.</p>
+                                    <p class="text-muted mb-0">Atalhos para o que precisa de decisão ou acompanhamento agora.</p>
                                 </div>
                             </div>
 
@@ -130,7 +130,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Perfis por validar</div>
-                                        <div class="admin-priority-text">Jovens completos a aguardar aprovacao final.</div>
+                                        <div class="admin-priority-text">Jovens completos a aguardar aprovação final.</div>
                                     </div>
                                     <div class="admin-priority-value">{{ stats.validacoes_pendentes|intcomma }}</div>
                                 </a>
@@ -140,7 +140,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Pedidos de contacto</div>
-                                        <div class="admin-priority-text">Empresas a pedir autorizacao para contactar jovens.</div>
+                                        <div class="admin-priority-text">Empresas a pedir autorização para contactar jovens.</div>
                                     </div>
                                     <div class="admin-priority-value">{{ stats.pedidos_contacto_pendentes|intcomma }}</div>
                                 </a>
@@ -160,7 +160,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Novas vagas em 30 dias</div>
-                                        <div class="admin-priority-text">Publicacoes recentes para monitorar dinamica do mercado.</div>
+                                        <div class="admin-priority-text">Publicações recentes para monitorar dinâmica do mercado.</div>
                                     </div>
                                     <div class="admin-priority-value">{{ stats.novas_vagas_30d|intcomma }}</div>
                                 </a>
@@ -175,15 +175,15 @@
                             <div class="admin-section-head">
                                 <div>
                                     <div class="admin-section-kicker">Saude da plataforma</div>
-                                    <h5 class="mb-1">Leitura rapida</h5>
-                                    <p class="text-muted mb-0">Indicadores para perceber cobertura, adesao e ritmo da operacao.</p>
+                                    <h5 class="mb-1">Leitura rápida</h5>
+                                    <p class="text-muted mb-0">Indicadores para perceber cobertura, adesão e ritmo da operação.</p>
                                 </div>
                             </div>
 
                             <div class="admin-progress-stack">
                                 <div class="admin-progress-card">
                                     <div class="admin-progress-head">
-                                        <span>Validacao de perfis completos</span>
+                                        <span>Validação de perfis completos</span>
                                         <strong>{{ stats.taxa_validacao }}%</strong>
                                     </div>
                                     <div class="admin-progress-track">
@@ -215,7 +215,7 @@
 
                             <div class="admin-inline-stat-list">
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Registos nos ultimos 7 dias</span>
+                                    <span class="admin-inline-stat-label">Registos nos últimos 7 dias</span>
                                     <strong>{{ stats.novos_utilizadores_7d|intcomma }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
@@ -238,7 +238,7 @@
                         <div class="card-body">
                             <div class="admin-section-head compact">
                                 <div>
-                                    <div class="admin-section-kicker">Distribuicao</div>
+                                    <div class="admin-section-kicker">Distribuição</div>
                                     <h5 class="mb-1">Jovens por distrito</h5>
                                 </div>
                             </div>
@@ -265,7 +265,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-bar-chart-line"></i>
-                                    <p class="mb-0">Ainda nao existem dados suficientes para este recorte.</p>
+                                    <p class="mb-0">Ainda não existem dados suficientes para este recorte.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -277,8 +277,8 @@
                         <div class="card-body">
                             <div class="admin-section-head compact">
                                 <div>
-                                    <div class="admin-section-kicker">Formacao</div>
-                                    <h5 class="mb-1">Nivel de educacao</h5>
+                                    <div class="admin-section-kicker">Formação</div>
+                                    <h5 class="mb-1">Nivel de educação</h5>
                                 </div>
                             </div>
                             {% if educacao_stats %}
@@ -304,7 +304,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-book"></i>
-                                    <p class="mb-0">Sem registos de formacao para apresentar.</p>
+                                    <p class="mb-0">Sem registos de formação para apresentar.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -317,7 +317,7 @@
                             <div class="admin-section-head compact">
                                 <div>
                                     <div class="admin-section-kicker">Interesses</div>
-                                    <h5 class="mb-1">Area de formacao</h5>
+                                    <h5 class="mb-1">Área de formação</h5>
                                 </div>
                             </div>
                             {% if area_stats %}
@@ -343,7 +343,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-diagram-3"></i>
-                                    <p class="mb-0">Sem areas de formacao consolidadas neste momento.</p>
+                                    <p class="mb-0">Sem Áreas de formação consolidadas neste momento.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -367,7 +367,7 @@
                                         <div class="admin-activity-item">
                                             <div>
                                                 <div class="admin-activity-title">{{ jovem.nome_completo }}</div>
-                                                <small class="text-muted">{{ jovem.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ jovem.created_at|timesince }} atrás</small>
                                             </div>
                                             <span class="admin-status-pill {% if jovem.validado %}success{% else %}pending{% endif %}">
                                                 {% if jovem.validado %}Validado{% else %}Pendente{% endif %}
@@ -378,7 +378,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-person-plus"></i>
-                                    <p class="mb-0">Ainda nao ha entradas recentes de jovens.</p>
+                                    <p class="mb-0">Ainda não há entradas recentes de jovens.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -400,7 +400,7 @@
                                         <div class="admin-activity-item">
                                             <div>
                                                 <div class="admin-activity-title">{{ empresa.nome }}</div>
-                                                <small class="text-muted">{{ empresa.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ empresa.created_at|timesince }} atrás</small>
                                             </div>
                                             <span class="admin-status-pill {% if empresa.ativa %}success{% else %}neutral{% endif %}">
                                                 {% if empresa.ativa %}Ativa{% else %}Inativa{% endif %}
@@ -411,7 +411,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-building-add"></i>
-                                    <p class="mb-0">Ainda nao ha empresas recentes para mostrar.</p>
+                                    <p class="mb-0">Ainda não há empresas recentes para mostrar.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -433,7 +433,7 @@
                                         <div class="admin-activity-item">
                                             <div>
                                                 <div class="admin-activity-title">{{ vaga.titulo }}</div>
-                                                <small class="text-muted">{{ vaga.company.nome }} - {{ vaga.data_publicacao|timesince }} atras</small>
+                                                <small class="text-muted">{{ vaga.company.nome }} - {{ vaga.data_publicacao|timesince }} atrás</small>
                                             </div>
                                             <span class="admin-status-pill {% if vaga.estado == 'ATIVA' %}info{% else %}neutral{% endif %}">
                                                 {{ vaga.get_estado_display }}
@@ -458,9 +458,9 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Acao imediata</div>
+                                    <div class="admin-section-kicker">Ação imediata</div>
                                     <h5 class="mb-1">Perfis pendentes</h5>
-                                    <p class="text-muted mb-0">Aprove ou rejeite rapidamente os perfis que chegaram por ultimo.</p>
+                                    <p class="text-muted mb-0">Aprove ou rejeite rápidamente os perfis que chegaram por ultimo.</p>
                                 </div>
                                 <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-outline-primary btn-sm">Ver fila completa</a>
                             </div>
@@ -471,7 +471,7 @@
                                         <div class="admin-queue-item">
                                             <div>
                                                 <div class="admin-queue-title">{{ perfil.nome_completo }}</div>
-                                                <small class="text-muted">{{ perfil.distrito.nome|default:"Sem distrito" }} - {{ perfil.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ perfil.distrito.nome|default:"Sem distrito" }} - {{ perfil.created_at|timesince }} atrás</small>
                                             </div>
                                             <div class="admin-queue-actions">
                                                 <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success" title="Aprovar">
@@ -487,7 +487,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-check2-all"></i>
-                                    <p class="mb-0">Nao ha perfis pendentes de validacao neste momento.</p>
+                                    <p class="mb-0">Não há perfis pendentes de validação neste momento.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -499,7 +499,7 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Acao imediata</div>
+                                    <div class="admin-section-kicker">Ação imediata</div>
                                     <h5 class="mb-1">Pedidos de contacto</h5>
                                     <p class="text-muted mb-0">Decisoes pendentes para empresas que querem contactar candidatos.</p>
                                 </div>
@@ -512,7 +512,7 @@
                                         <div class="admin-queue-item">
                                             <div>
                                                 <div class="admin-queue-title">{{ pedido.company.nome }}</div>
-                                                <small class="text-muted">{{ pedido.youth.nome_completo }} - {{ pedido.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ pedido.youth.nome_completo }} - {{ pedido.created_at|timesince }} atrás</small>
                                             </div>
                                             <div class="admin-queue-actions">
                                                 <a href="{% url 'dashboard:contact_request_action' pedido.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success" title="Aprovar">
@@ -528,7 +528,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-envelope-check"></i>
-                                    <p class="mb-0">Nao ha pedidos de contacto pendentes agora.</p>
+                                    <p class="mb-0">Não há pedidos de contacto pendentes agora.</p>
                                 </div>
                             {% endif %}
                         </div>

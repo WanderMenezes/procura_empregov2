@@ -1,0 +1,623 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Detalhe do Utilizador - Painel de Administracao{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .admin-detail-item { padding: 1rem 1.05rem; border: 1px solid rgba(18,32,51,.08); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,247,251,.98)); }
+  .admin-detail-label { display: block; margin-bottom: .35rem; font-size: .76rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7b8c; }
+  .admin-detail-value { margin: 0; color: #122033; font-weight: 600; word-break: break-word; }
+  .admin-detail-media { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 22px; background: #f4f7fb; border: 1px solid rgba(18,32,51,.08); }
+  .admin-detail-avatar { width: 94px; height: 94px; border-radius: 24px; object-fit: cover; flex-shrink: 0; background: linear-gradient(135deg, #10324d, #0d7a9a); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.65rem; font-weight: 800; overflow: hidden; }
+  .admin-detail-text { padding: 1rem 1.1rem; border-radius: 18px; background: #f8fafc; border: 1px solid rgba(18,32,51,.08); color: #23364d; }
+  .admin-detail-text p:last-child { margin-bottom: 0; }
+  .admin-detail-pre { margin: 0; padding: 1rem; border-radius: 18px; background: #0f2135; color: #e9f0f7; font-size: .9rem; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  .admin-detail-empty { padding: 1rem 1.1rem; border-radius: 18px; border: 1px dashed rgba(18,32,51,.18); background: #fbfcfe; color: #607083; }
+  .admin-detail-table td, .admin-detail-table th { vertical-align: top; }
+  .admin-detail-table .text-wrap-cell { min-width: 220px; white-space: normal; }
+  @media (max-width: 767.98px) { .admin-detail-media { flex-direction: column; align-items: flex-start; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 admin-dashboard">
+  <div class="admin-shell">
+    <aside class="admin-shell-sidebar">
+      {% include 'dashboard/_admin_sidebar.html' with active_page='users' %}
+    </aside>
+
+    <div class="admin-shell-main">
+      <div class="card admin-hero admin-hero-split mb-4">
+        <div class="card-body">
+          <div class="admin-hero-copy">
+            <div class="admin-kicker">Consulta administrativa</div>
+            <h1 class="admin-page-title">Detalhe do utilizador</h1>
+            <p class="admin-subtitle mb-0">O administrador pode consultar todos os dados do candidato ou da empresa nesta area, sem expor a palavra-passe.</p>
+            <div class="admin-hero-chips">
+              <span class="admin-hero-chip"><i class="bi bi-person-badge"></i>{{ target_user.get_perfil_display }}</span>
+              <span class="admin-hero-chip"><i class="bi bi-telephone"></i>{{ target_user.telefone }}</span>
+              <span class="admin-hero-chip"><i class="bi bi-geo-alt"></i>{{ target_user.distrito.nome|default:"Sem distrito" }}</span>
+            </div>
+          </div>
+          <div class="admin-hero-actions">
+            <a href="{{ next_url }}" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i>Voltar a lista</a>
+            <a href="{% url 'dashboard:user_edit' target_user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-light btn-sm"><i class="bi bi-pencil-square me-1"></i>Editar utilizador</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-xl-8">
+          <div class="card admin-panel mb-4">
+            <div class="card-body">
+              <div class="admin-section-head">
+                <div>
+                  <div class="admin-section-kicker">Conta</div>
+                  <h5 class="mb-1">{{ target_user.nome }}</h5>
+                  <p class="text-muted mb-0">Leitura integral da conta base, privilegios e consentimentos.</p>
+                </div>
+              </div>
+              <div class="admin-detail-grid">
+                {% for field in account_fields %}
+                  <div class="admin-detail-item">
+                    <span class="admin-detail-label">{{ field.label }}</span>
+                    <p class="admin-detail-value">{{ field.value }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          {% if youth_profile %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Candidato</div>
+                    <h5 class="mb-1">Perfil completo do jovem</h5>
+                    <p class="text-muted mb-0">Dados pessoais, disponibilidade, consentimentos e estado do perfil.</p>
+                  </div>
+                </div>
+
+                <div class="admin-detail-media mb-4">
+                  {% if youth_profile.photo %}
+                    <img src="{{ youth_profile.photo.url }}" alt="{{ target_user.nome }}" class="admin-detail-avatar">
+                  {% else %}
+                    <div class="admin-detail-avatar">{{ target_user.nome|slice:":2"|upper }}</div>
+                  {% endif %}
+                  <div>
+                    <h6 class="mb-1">{{ target_user.nome }}</h6>
+                    <p class="text-muted mb-3">
+                      {% if youth_profile.completo %}Perfil marcado como completo.{% else %}Perfil ainda em progresso.{% endif %}
+                      {% if youth_profile.validado %} Validado para consulta institucional.{% endif %}
+                    </p>
+                    {% if youth_profile.photo %}
+                      <a href="{{ youth_profile.photo.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-image me-1"></i>Abrir foto original
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="admin-detail-grid">
+                  {% for field in youth_fields %}
+                    <div class="admin-detail-item">
+                      <span class="admin-detail-label">{{ field.label }}</span>
+                      <p class="admin-detail-value">{{ field.value }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                {% if youth_profile.sobre %}
+                  <div class="mt-4">
+                    <div class="admin-detail-label">Sobre</div>
+                    <div class="admin-detail-text">{{ youth_profile.sobre|linebreaks }}</div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if youth_skills %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Competencias</div>
+                    <h5 class="mb-1">Skills registadas</h5>
+                    <p class="text-muted mb-0">Lista completa das competencias ligadas ao perfil.</p>
+                  </div>
+                </div>
+
+                {% if youth_skills %}
+                  <div class="admin-detail-grid">
+                    {% for skill in youth_skills %}
+                      <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{ skill.skill.nome }}</span>
+                        <p class="admin-detail-value">{{ skill.get_nivel_display }}</p>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if youth_education %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Formacao</div>
+                    <h5 class="mb-1">Historico de educacao</h5>
+                    <p class="text-muted mb-0">Formacoes e cursos associados ao candidato.</p>
+                  </div>
+                </div>
+
+                {% if youth_education %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Nivel</th>
+                          <th>Area</th>
+                          <th>Instituicao</th>
+                          <th>Curso</th>
+                          <th>Ano</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in youth_education %}
+                          <tr>
+                            <td>{{ item.get_nivel_display }}</td>
+                            <td>{{ item.get_area_formacao_display }}</td>
+                            <td>{{ item.instituicao }}</td>
+                            <td>{{ item.curso|default:"-" }}</td>
+                            <td>{{ item.ano|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if youth_experiences %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Experiencia</div>
+                    <h5 class="mb-1">Historico profissional</h5>
+                    <p class="text-muted mb-0">Experiencias declaradas pelo candidato.</p>
+                  </div>
+                </div>
+
+                {% if youth_experiences %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Entidade</th>
+                          <th>Cargo</th>
+                          <th>Periodo</th>
+                          <th>Duracao</th>
+                          <th class="text-wrap-cell">Descricao</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in youth_experiences %}
+                          <tr>
+                            <td>{{ item.entidade }}</td>
+                            <td>{{ item.cargo }}</td>
+                            <td>
+                              {{ item.inicio|date:"d/m/Y" }}
+                              {% if item.atual %} ate agora
+                              {% elif item.fim %} ate {{ item.fim|date:"d/m/Y" }}
+                              {% else %} -{% endif %}
+                            </td>
+                            <td>{{ item.duracao }}</td>
+                            <td class="text-wrap-cell">{{ item.descricao|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if youth_documents %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Documentos</div>
+                    <h5 class="mb-1">Ficheiros do candidato</h5>
+                    <p class="text-muted mb-0">Curriculos, certificados e documentos enviados.</p>
+                  </div>
+                </div>
+
+                {% if youth_documents %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Nome</th>
+                          <th>Estado</th>
+                          <th>Enviado em</th>
+                          <th class="text-end">Acesso</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in youth_documents %}
+                          <tr>
+                            <td>{{ item.get_tipo_display }}</td>
+                            <td>{{ item.nome }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if item.verificado %}success{% else %}pending{% endif %}">
+                                {% if item.verificado %}Verificado{% else %}Por verificar{% endif %}
+                              </span>
+                            </td>
+                            <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                            <td class="text-end">
+                              <a href="{{ item.arquivo.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                              </a>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if youth_applications %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Candidaturas</div>
+                    <h5 class="mb-1">Historico de oportunidades</h5>
+                    <p class="text-muted mb-0">Todas as vagas a que o candidato ja respondeu.</p>
+                  </div>
+                </div>
+
+                {% if youth_applications %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Vaga</th>
+                          <th>Empresa</th>
+                          <th>Estado</th>
+                          <th>Data</th>
+                          <th class="text-wrap-cell">Mensagem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for app in youth_applications %}
+                          <tr>
+                            <td>{{ app.job.titulo }}</td>
+                            <td>{{ app.job.company.nome }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if app.estado == 'ACEITE' %}success{% elif app.estado == 'REJEITADA' %}neutral{% else %}info{% endif %}">
+                                {{ app.get_estado_display }}
+                              </span>
+                            </td>
+                            <td>{{ app.created_at|date:"d/m/Y H:i" }}</td>
+                            <td class="text-wrap-cell">{{ app.mensagem|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if youth_contact_requests %}
+            <div class="card admin-panel">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Pedidos de contacto</div>
+                    <h5 class="mb-1">Interacoes com empresas</h5>
+                    <p class="text-muted mb-0">Pedidos de contacto enviados por empresas para este candidato.</p>
+                  </div>
+                </div>
+
+                {% if youth_contact_requests %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Empresa</th>
+                          <th>Estado</th>
+                          <th>Solicitado em</th>
+                          <th>Respondido em</th>
+                          <th class="text-wrap-cell">Motivo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in youth_contact_requests %}
+                          <tr>
+                            <td>{{ item.company.nome }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if item.estado == 'APROVADO' %}success{% elif item.estado == 'PENDENTE' %}pending{% else %}neutral{% endif %}">
+                                {{ item.get_estado_display }}
+                              </span>
+                            </td>
+                            <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ item.responded_at|date:"d/m/Y H:i"|default:"-" }}</td>
+                            <td class="text-wrap-cell">{{ item.motivo|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          {% elif company_profile %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Empresa</div>
+                    <h5 class="mb-1">Perfil institucional</h5>
+                    <p class="text-muted mb-0">Dados da organizacao, contactos e estado do perfil empresarial.</p>
+                  </div>
+                </div>
+
+                <div class="admin-detail-media mb-4">
+                  {% if company_profile.logo %}
+                    <img src="{{ company_profile.logo.url }}" alt="{{ company_profile.nome }}" class="admin-detail-avatar">
+                  {% else %}
+                    <div class="admin-detail-avatar">{{ company_profile.nome|slice:":2"|upper }}</div>
+                  {% endif %}
+                  <div>
+                    <h6 class="mb-1">{{ company_profile.nome }}</h6>
+                    <p class="text-muted mb-3">
+                      {% if company_profile.verificada %}Empresa verificada para operacao na plataforma.{% else %}Empresa ainda sem verificacao final.{% endif %}
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                      {% if company_profile.logo %}
+                        <a href="{{ company_profile.logo.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                          <i class="bi bi-image me-1"></i>Abrir logo
+                        </a>
+                      {% endif %}
+                      {% if company_profile.website %}
+                        <a href="{{ company_profile.website }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                          <i class="bi bi-globe me-1"></i>Visitar website
+                        </a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="admin-detail-grid">
+                  {% for field in company_fields %}
+                    <div class="admin-detail-item">
+                      <span class="admin-detail-label">{{ field.label }}</span>
+                      <p class="admin-detail-value">{{ field.value }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                {% if company_profile.descricao %}
+                  <div class="mt-4">
+                    <div class="admin-detail-label">Descricao institucional</div>
+                    <div class="admin-detail-text">{{ company_profile.descricao|linebreaks }}</div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if company_jobs %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Vagas</div>
+                    <h5 class="mb-1">Oportunidades publicadas</h5>
+                    <p class="text-muted mb-0">Lista de vagas ligadas a esta empresa.</p>
+                  </div>
+                </div>
+
+                {% if company_jobs %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Titulo</th>
+                          <th>Tipo</th>
+                          <th>Estado</th>
+                          <th>Distrito</th>
+                          <th>Vagas</th>
+                          <th>Candidaturas</th>
+                          <th>Publicada em</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for job in company_jobs %}
+                          <tr>
+                            <td>{{ job.titulo }}</td>
+                            <td>{{ job.get_tipo_display }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if job.estado == 'ATIVA' %}success{% elif job.estado == 'PAUSADA' %}pending{% else %}neutral{% endif %}">
+                                {{ job.get_estado_display }}
+                              </span>
+                            </td>
+                            <td>{{ job.distrito.nome|default:"-" }}</td>
+                            <td>{{ job.numero_vagas }} total / {{ job.vagas_restantes }} restantes</td>
+                            <td>{{ job.applications_count }}</td>
+                            <td>{{ job.data_publicacao|date:"d/m/Y H:i" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if company_applications %}
+            <div class="card admin-panel mb-4">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Candidaturas</div>
+                    <h5 class="mb-1">Respostas recebidas</h5>
+                    <p class="text-muted mb-0">Candidaturas enviadas para vagas desta empresa.</p>
+                  </div>
+                </div>
+
+                {% if company_applications %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Jovem</th>
+                          <th>Vaga</th>
+                          <th>Estado</th>
+                          <th>Data</th>
+                          <th class="text-wrap-cell">Mensagem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for app in company_applications %}
+                          <tr>
+                            <td>{{ app.youth.user.nome }}</td>
+                            <td>{{ app.job.titulo }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if app.estado == 'ACEITE' %}success{% elif app.estado == 'REJEITADA' %}neutral{% else %}info{% endif %}">
+                                {{ app.get_estado_display }}
+                              </span>
+                            </td>
+                            <td>{{ app.created_at|date:"d/m/Y H:i" }}</td>
+                            <td class="text-wrap-cell">{{ app.mensagem|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if company_contact_requests %}
+            <div class="card admin-panel">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Pedidos de contacto</div>
+                    <h5 class="mb-1">Historico de pedidos</h5>
+                    <p class="text-muted mb-0">Pedidos de contacto enviados por esta empresa aos candidatos.</p>
+                  </div>
+                </div>
+
+                {% if company_contact_requests %}
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-detail-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Jovem</th>
+                          <th>Estado</th>
+                          <th>Solicitado em</th>
+                          <th>Respondido em</th>
+                          <th class="text-wrap-cell">Motivo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in company_contact_requests %}
+                          <tr>
+                            <td>{{ item.youth.user.nome }}</td>
+                            <td>
+                              <span class="admin-status-pill {% if item.estado == 'APROVADO' %}success{% elif item.estado == 'PENDENTE' %}pending{% else %}neutral{% endif %}">
+                                {{ item.get_estado_display }}
+                              </span>
+                            </td>
+                            <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ item.responded_at|date:"d/m/Y H:i"|default:"-" }}</td>
+                            <td class="text-wrap-cell">{{ item.motivo|default:"-" }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          {% else %}
+            <div class="card admin-panel">
+              <div class="card-body">
+                <div class="admin-section-head">
+                  <div>
+                    <div class="admin-section-kicker">Perfil associado</div>
+                    <h5 class="mb-1">Sem dados complementares</h5>
+                    <p class="text-muted mb-0">Este utilizador nao tem um perfil de candidato ou empresa associado para consulta.</p>
+                  </div>
+                </div>
+                <div class="admin-detail-empty">
+                  A conta base continua disponivel acima, mas nao existem dados adicionais para este tipo de utilizador.
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="col-xl-4">
+          <div class="card admin-panel mb-4">
+            <div class="card-body">
+              <div class="admin-section-head">
+                <div>
+                  <div class="admin-section-kicker">Resumo</div>
+                  <h5 class="mb-1">{{ target_user.nome }}</h5>
+                  <p class="text-muted mb-0">Indicadores principais desta ficha.</p>
+                </div>
+              </div>
+              <div class="admin-inline-stat-list">
+                {% for item in summary_stats %}
+                  <div class="admin-inline-stat">
+                    <span class="admin-inline-stat-label">{{ item.label }}</span>
+                    <strong>{{ item.value }}</strong>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="card admin-panel">
+            <div class="card-body">
+              <div class="admin-section-head">
+                <div>
+                  <div class="admin-section-kicker">Acoes</div>
+                  <h5 class="mb-1">Gestao rapida</h5>
+                  <p class="text-muted mb-0">A ficha mostra apenas informacoes operacionais e a palavra-passe continua oculta.</p>
+                </div>
+              </div>
+              <div class="d-grid gap-2 mt-3">
+                <a href="{% url 'dashboard:user_edit' target_user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary"><i class="bi bi-pencil-square me-1"></i>Editar este utilizador</a>
+                <a href="{{ next_url }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Voltar a lista</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

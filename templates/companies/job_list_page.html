@@ -323,10 +323,10 @@
   <section class="job-list-hero mb-4">
     <div class="job-list-hero-head">
       <div>
-        <div class="job-list-kicker">Gestao de oportunidades</div>
+        <div class="job-list-kicker">Gestão de oportunidades</div>
         <h1 class="job-list-title">Vagas da empresa</h1>
         <p class="job-list-subtitle">
-          Acompanhe o que esta ativo, o que ja fechou e onde existe mais tracao de candidaturas para ajustar melhor as proximas publicacoes.
+          Acompanhe o que está ativo, o que já fechou e onde existe mais tração de candidaturas para ajustar melhor as próximas publicações.
         </p>
         <div class="job-list-chips">
           <span class="job-list-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -351,7 +351,7 @@
       <div class="job-list-stat-card">
         <span class="job-list-stat-label">Total de vagas</span>
         <span class="job-list-stat-value">{{ job_stats.total|default:0 }}</span>
-        <span class="job-list-stat-meta">Historico publicado</span>
+        <span class="job-list-stat-meta">Histórico publicado</span>
       </div>
       <div class="job-list-stat-card">
         <span class="job-list-stat-label">Ativas</span>
@@ -364,7 +364,7 @@
         <span class="job-list-stat-meta">Respostas recebidas</span>
       </div>
       <div class="job-list-stat-card">
-        <span class="job-list-stat-label">Visualizacoes</span>
+        <span class="job-list-stat-label">Visualizações</span>
         <span class="job-list-stat-value">{{ job_stats.visualizacoes|default:0 }}</span>
         <span class="job-list-stat-meta">{{ job_stats.fechadas|default:0 }} fechada{{ job_stats.fechadas|pluralize }}</span>
       </div>
@@ -375,7 +375,7 @@
     <div class="job-list-panel-head">
       <div>
         <h5>Lista de vagas</h5>
-        <p class="job-list-panel-subtitle">Revise rapidamente estado, procura e ocupacao de cada oportunidade publicada.</p>
+        <p class="job-list-panel-subtitle">Revise rápidamente estado, procura e ocupação de cada oportunidade publicada.</p>
       </div>
       <a href="{% url 'companies:job_create' %}" class="btn btn-outline-primary btn-sm">Nova vaga</a>
     </div>

@@ -35,7 +35,7 @@ from core.models import AuditLog, District, Notification
 
 
 def _get_date_range(request):
-    """Parse date range (data_inicio/data_fim) with sane defaults."""
+    'Parse daté range (data_inicio/data_fim) with sane defaults.'
     today = timezone.localdate()
     default_start = today - timedelta(days=30 * 6)
 
@@ -118,6 +118,41 @@ def _coerce_bool(value):
     return False
 
 
+def _display_value(value, empty='-'):
+    if value is None:
+        return empty
+    if isinstance(value, bool):
+        return _('Sim') if value else _('Nao')
+    if isinstance(value, (list, tuple, set)):
+        items = [str(item).strip() for item in value if str(item).strip()]
+        return ', '.join(items) if items else empty
+    if isinstance(value, dict):
+        return json.dumps(value, ensure_ascii=False, indent=2) if value else empty
+    if isinstance(value, str):
+        value = value.strip()
+        return value or empty
+    return value
+
+
+def _display_date(value, with_time=False):
+    if not value:
+        return '-'
+    if with_time:
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        return value.strftime('%d/%m/%Y %H:%M')
+    return value.strftime('%d/%m/%Y')
+
+
+def _make_field(label, value, keep_empty=False):
+    display = _display_value(value, empty='')
+    if display == '':
+        if not keep_empty:
+            return None
+        display = '-'
+    return {'label': label, 'value': display}
+
+
 def _decode_offline_json(uploaded_file):
     raw = uploaded_file.read()
     uploaded_file.seek(0)
@@ -131,12 +166,12 @@ def _decode_offline_json(uploaded_file):
             continue
 
     if decoded is None:
-        raise ValueError(_('Nao foi possivel ler o ficheiro offline.'))
+        raise ValueError(_('Não foi possível ler o ficheiro offline.'))
 
     try:
         return json.loads(decoded)
     except json.JSONDecodeError as exc:
-        raise ValueError(_('O ficheiro offline nao contem um JSON valido.')) from exc
+        raise ValueError(_('O ficheiro offline não contem um JSON valido.')) from exc
 
 
 def _build_choice_reference(choices):
@@ -248,7 +283,7 @@ def _build_offline_registration_payload(profile_type, admin_user):
             'Preencha apenas os campos dentro de "registration_data".',
             'Use os codigos apresentados em "references" para distrito, setor ou escolhas do perfil.',
             'A palavra-passe deve ter pelo menos 8 caracteres e ser confirmada no proprio ficheiro.',
-            'Depois da importacao, elimine o ficheiro local se ele contiver dados sensiveis.',
+            'Depois da importação, elimine o ficheiro local se ele contiver dados sensiveis.',
         ],
         'references': references,
         'registration_data': registration_data,
@@ -276,9 +311,9 @@ def _offline_registrations_context(request, export_form=None, import_form=None):
 
 def _import_offline_registration_payload(payload, admin_user, file_name, ip_address):
     if payload.get('schema') != 'bnj_offline_registration':
-        raise ValueError(_('O ficheiro nao pertence ao formato de registo offline da plataforma.'))
+        raise ValueError(_('O ficheiro não pertence ao formato de registo offline da plataforma.'))
     if payload.get('version') != 1:
-        raise ValueError(_('A versao do ficheiro offline nao e suportada.'))
+        raise ValueError(_('A versao do ficheiro offline não e suportada.'))
 
     profile_type = _clean_text(payload.get('profile_type')).upper()
     if profile_type not in {User.ProfileType.JOVEM, User.ProfileType.EMPRESA}:
@@ -300,25 +335,25 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
     observacoes = _clean_text(data.get('observacoes'))
 
     if not nome:
-        raise ValueError(_('O nome e obrigatorio no registo offline.'))
+        raise ValueError(_('O nome é obrigatório no registo offline.'))
     if not telefone:
-        raise ValueError(_('O telemovel e obrigatorio no registo offline.'))
+        raise ValueError(_('O telemóvel é obrigatório no registo offline.'))
     if not district_code:
-        raise ValueError(_('O distrito e obrigatorio no registo offline.'))
+        raise ValueError(_('O distrito é obrigatório no registo offline.'))
     if len(password) < 8:
         raise ValueError(_('A palavra-passe do registo offline deve ter pelo menos 8 caracteres.'))
     if password != password_confirm:
-        raise ValueError(_('A palavra-passe e a confirmacao nao coincidem.'))
+        raise ValueError(_('A palavra-passe e a confirmação não coincidem.'))
 
     if User.objects.filter(telefone=telefone).exists():
-        raise ValueError(_('Ja existe um utilizador com este telemovel.'))
+        raise ValueError(_('Já existe um utilizador com este telemóvel.'))
     if email and User.objects.filter(email__iexact=email).exists():
-        raise ValueError(_('Ja existe um utilizador com este email.'))
+        raise ValueError(_('Já existe um utilizador com este email.'))
 
     try:
         district = District.objects.get(codigo__iexact=district_code)
     except District.DoesNotExist as exc:
-        raise ValueError(_('O distrito indicado no ficheiro offline nao existe.')) from exc
+        raise ValueError(_('O distrito indicado no ficheiro offline não existe.')) from exc
 
     data_consentimento = timezone.now() if consentimento_dados or consentimento_contacto else None
 
@@ -326,9 +361,9 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
         if profile_type == User.ProfileType.JOVEM:
             bi_numero = _clean_text(data.get('bi_numero'))
             if not bi_numero:
-                raise ValueError(_('O numero do BI e obrigatorio para registos offline de jovens.'))
+                raise ValueError(_('O número do BI é obrigatório para registos offline de jovens.'))
             if User.objects.filter(bi_numero__iexact=bi_numero).exists():
-                raise ValueError(_('Ja existe um utilizador com este numero de BI.'))
+                raise ValueError(_('Já existe um utilizador com este número de BI.'))
 
             data_nascimento_raw = _clean_text(data.get('data_nascimento'))
             data_nascimento = None
@@ -353,18 +388,18 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
             if sexo and sexo not in dict(YouthProfile.SEXO_CHOICES):
                 raise ValueError(_('O valor de sexo indicado no ficheiro offline e invalido.'))
             if situacao_atual not in dict(YouthProfile.SITUACAO_CHOICES):
-                raise ValueError(_('A situacao atual indicada no ficheiro offline e invalida.'))
+                raise ValueError(_('A situação atual indicada no ficheiro offline e invalida.'))
             if disponibilidade not in dict(YouthProfile.DISPONIBILIDADE_CHOICES):
                 raise ValueError(_('A disponibilidade indicada no ficheiro offline e invalida.'))
             if preferencia_oportunidade not in dict(YouthProfile.OPORTUNIDADE_CHOICES):
                 raise ValueError(_('A preferencia de oportunidade indicada no ficheiro offline e invalida.'))
 
             if nivel and nivel not in dict(Education.NIVEL_CHOICES):
-                raise ValueError(_('O nivel de educacao indicado no ficheiro offline e invalido.'))
+                raise ValueError(_('O nivel de educação indicado no ficheiro offline e invalido.'))
             if area_formacao and area_formacao not in dict(settings.AREAS_FORMACAO):
-                raise ValueError(_('A area de formacao indicada no ficheiro offline e invalida.'))
+                raise ValueError(_('A área de formação indicada no ficheiro offline e invalida.'))
             if any([nivel, area_formacao, instituicao, ano_raw, curso]) and (not nivel or not area_formacao):
-                raise ValueError(_('Para guardar educacao offline, informe pelo menos nivel e area de formacao.'))
+                raise ValueError(_('Para guardar educação offline, informe pelo menos nivel e área de formação.'))
 
             ano = None
             if ano_raw:
@@ -405,7 +440,7 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
                     profile=user.youth_profile,
                     nivel=nivel,
                     area_formacao=area_formacao,
-                    instituicao=instituicao or 'Nao especificado',
+                    instituicao=instituicao or 'Não específicado',
                     ano=ano,
                     curso=curso,
                 )
@@ -413,9 +448,9 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
         else:
             nif = _clean_text(data.get('nif'))
             if not nif:
-                raise ValueError(_('O NIF e obrigatorio para registos offline de empresas.'))
+                raise ValueError(_('O NIF é obrigatório para registos offline de empresas.'))
             if User.objects.filter(nif__iexact=nif).exists():
-                raise ValueError(_('Ja existe um utilizador com este NIF.'))
+                raise ValueError(_('Já existe um utilizador com este NIF.'))
 
             setor_codes = _normalize_code_list(data.get('setor_codes'))
             invalid_setores = [code for code in setor_codes if code not in dict(Company.SETOR_CHOICES)]
@@ -697,7 +732,7 @@ def tecnico_dashboard(request):
 # Gestão de Utilizadores
 @admin_required
 def user_list(request):
-    """Lista de utilizadores"""
+    'Lista de utilizadores'
     create_user_form = None
     if request.method == 'POST' and request.POST.get('action') == 'create_user':
         create_user_form = UserRegistrationForm(request.POST, request.FILES, user=request.user)
@@ -774,8 +809,173 @@ def user_list(request):
 
 
 @admin_required
+def user_detail(request, pk):
+    'Detalhe completo de um utilizador para consulta administrativa.'
+    target_user = get_object_or_404(User.objects.select_related('distrito'), pk=pk)
+    next_url = request.GET.get('next') or reverse('dashboard:user_list')
+
+    youth_profile = None
+    company_profile = None
+    youth_fields = []
+    company_fields = []
+    youth_education = []
+    youth_experiences = []
+    youth_documents = []
+    youth_skills = []
+    youth_applications = []
+    youth_contact_requests = []
+    company_jobs = []
+    company_applications = []
+    company_contact_requests = []
+    account_fields = [
+        field for field in [
+            _make_field('Perfil', target_user.get_perfil_display(), keep_empty=True),
+            _make_field('Nome', target_user.nome, keep_empty=True),
+            _make_field('Telemovel', target_user.telefone, keep_empty=True),
+            _make_field('Email', target_user.email),
+            _make_field('Distrito', target_user.distrito.nome if target_user.distrito else None),
+            _make_field('Conta ativa', target_user.is_active, keep_empty=True),
+            _make_field('Conta verificada', target_user.is_verified, keep_empty=True),
+            _make_field('Consentimento de dados', target_user.consentimento_dados, keep_empty=True),
+            _make_field('Consentimento de contacto', target_user.consentimento_contacto, keep_empty=True),
+            _make_field('Registo', _display_date(target_user.date_joined, with_time=True)),
+            _make_field('Numero do BI', target_user.bi_numero),
+            _make_field('Nome da empresa', target_user.nome_empresa),
+            _make_field('NIF', target_user.nif),
+            _make_field('Setor', target_user.setor_empresa),
+            _make_field('Associacao/parceiro', target_user.associacao_parceira),
+        ] if field
+    ]
+
+    if target_user.is_jovem:
+        youth_profile = (
+            YouthProfile.objects.select_related('user', 'user__distrito')
+            .prefetch_related(
+                'education',
+                'experiences',
+                'documents',
+                'youth_skills__skill',
+                'applications__job__company',
+                'applications__job__distrito',
+                'contact_requests__company',
+            )
+            .filter(user=target_user)
+            .first()
+        )
+
+        if youth_profile:
+            youth_education = youth_profile.education.all()
+            youth_experiences = youth_profile.experiences.all()
+            youth_documents = youth_profile.documents.all()
+            youth_skills = youth_profile.youth_skills.all()
+            youth_applications = youth_profile.applications.all()
+            youth_contact_requests = youth_profile.contact_requests.all()
+            youth_fields = [
+                field for field in [
+                    _make_field('Data de nascimento', _display_date(youth_profile.data_nascimento)),
+                    _make_field('Idade', youth_profile.idade),
+                    _make_field('Sexo', youth_profile.get_sexo_display()),
+                    _make_field('Localidade', youth_profile.localidade),
+                    _make_field('Contacto alternativo', youth_profile.contacto_alternativo),
+                    _make_field('Situacao atual', youth_profile.get_situacao_atual_display(), keep_empty=True),
+                    _make_field('Disponibilidade', youth_profile.get_disponibilidade_display(), keep_empty=True),
+                    _make_field('Preferencia', youth_profile.get_preferencia_oportunidade_display(), keep_empty=True),
+                    _make_field('Setores de interesse', youth_profile.interesses_setoriais_display),
+                    _make_field('Perfil completo', youth_profile.completo, keep_empty=True),
+                    _make_field('Perfil validado', youth_profile.validado, keep_empty=True),
+                    _make_field('Visivel para empresas', youth_profile.visivel, keep_empty=True),
+                    _make_field('Consentimento SMS', youth_profile.consentimento_sms, keep_empty=True),
+                    _make_field('Consentimento WhatsApp', youth_profile.consentimento_whatsapp, keep_empty=True),
+                    _make_field('Consentimento email', youth_profile.consentimento_email, keep_empty=True),
+                ] if field
+            ]
+        else:
+            youth_fields = []
+
+    elif target_user.is_empresa:
+        company_profile = (
+            Company.objects.select_related('user', 'distrito')
+            .prefetch_related('job_posts__distrito', 'contact_requests__youth__user')
+            .filter(user=target_user)
+            .first()
+        )
+
+        if company_profile:
+            company_jobs = company_profile.job_posts.annotate(applications_count=Count('applications'))
+            company_applications = (
+                Application.objects.select_related('job', 'youth__user')
+                .filter(job__company=company_profile)
+                .order_by('-created_at')
+            )
+            company_contact_requests = company_profile.contact_requests.all()
+
+            company_fields = [
+                field for field in [
+                    _make_field('Nome da empresa', company_profile.nome, keep_empty=True),
+                    _make_field('NIF', company_profile.nif),
+                    _make_field('Setores de atividade', company_profile.setores_display),
+                    _make_field('Telefone', company_profile.telefone),
+                    _make_field('Email', company_profile.email),
+                    _make_field('Website', company_profile.website),
+                    _make_field('Distrito', company_profile.distrito.nome if company_profile.distrito else None),
+                    _make_field('Endereco', company_profile.endereco),
+                    _make_field('Ativa', company_profile.ativa, keep_empty=True),
+                    _make_field('Verificada', company_profile.verificada, keep_empty=True),
+                ] if field
+            ]
+        else:
+            company_fields = []
+    else:
+        youth_fields = []
+        company_fields = []
+
+    summary_stats = [
+        {'label': 'Perfil', 'value': _display_value(target_user.get_perfil_display())},
+        {'label': 'Estado', 'value': _('Ativo') if target_user.is_active else _('Inativo')},
+    ]
+
+    if youth_profile:
+        summary_stats.extend([
+            {'label': 'Formacoes', 'value': len(youth_education)},
+            {'label': 'Experiencias', 'value': len(youth_experiences)},
+            {'label': 'Documentos', 'value': len(youth_documents)},
+            {'label': 'Skills', 'value': len(youth_skills)},
+            {'label': 'Candidaturas', 'value': len(youth_applications)},
+        ])
+    elif company_profile:
+        summary_stats.extend([
+            {'label': 'Vagas publicadas', 'value': company_profile.total_vagas},
+            {'label': 'Vagas ativas', 'value': company_profile.vagas_ativas},
+            {'label': 'Candidaturas recebidas', 'value': company_profile.total_candidaturas},
+            {'label': 'Pedidos de contacto', 'value': company_contact_requests.count()},
+        ])
+
+    context = _with_admin_context(request, {
+        'target_user': target_user,
+        'next_url': next_url,
+        'account_fields': account_fields,
+        'summary_stats': summary_stats,
+        'youth_profile': youth_profile,
+        'youth_fields': youth_fields,
+        'youth_education': youth_education,
+        'youth_experiences': youth_experiences,
+        'youth_documents': youth_documents,
+        'youth_skills': youth_skills,
+        'youth_applications': youth_applications,
+        'youth_contact_requests': youth_contact_requests,
+        'company_profile': company_profile,
+        'company_fields': company_fields,
+        'company_jobs': company_jobs,
+        'company_applications': company_applications,
+        'company_contact_requests': company_contact_requests,
+    })
+
+    return render(request, 'dashboard/user_detail.html', context)
+
+
+@admin_required
 def user_edit(request, pk):
-    """Editar dados principais de um utilizador pelo painel admin."""
+    'Editar dados principais de um utilizador pelo painel admin.'
     target_user = get_object_or_404(User.objects.select_related('distrito'), pk=pk)
     next_url = request.GET.get('next') or request.POST.get('next') or reverse('dashboard:user_list')
 
@@ -799,7 +999,7 @@ def user_edit(request, pk):
 
 @admin_required
 def user_toggle_active(request, pk):
-    """Ativar/desativar utilizador"""
+    'Ativar/desativar utilizador'
     user = get_object_or_404(User, pk=pk)
     
     if user == request.user:
@@ -1009,7 +1209,7 @@ def contact_request_action(request, pk, action):
         messages.warning(request, _('Pedido rejeitado.'))
 
     else:
-        messages.error(request, _('Acao invalida para o pedido de contacto.'))
+        messages.error(request, _('Ação invalida para o pedido de contacto.'))
     
     next_url = request.GET.get('next')
     return redirect(next_url or 'dashboard:manage_contact_requests')
@@ -1017,7 +1217,7 @@ def contact_request_action(request, pk, action):
 
 @admin_required
 def offline_registrations(request):
-    """Area para gerar e importar registos offline de utilizadores."""
+    'Área para gerar e importar registos offline de utilizadores.'
     context = _offline_registrations_context(request)
     return render(request, 'dashboard/offline_registrations.html', context)
 
@@ -1080,7 +1280,7 @@ def offline_registration_export(request):
 
 @admin_required
 def offline_registration_import(request):
-    """Importar ficheiro offline e criar o registo do utilizador."""
+    'Importar ficheiro offline e criar o registo do utilizador.'
     if request.method != 'POST':
         return redirect('dashboard:offline_registrations')
 
@@ -1178,7 +1378,7 @@ def export_report_csv(request):
         )
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.csv"'
+    response['Content-Disposition'] = 'attachment; filename="relatório_base_nacional.csv"'
     
     writer = csv.writer(response)
     writer.writerow([
@@ -1420,7 +1620,7 @@ def export_report_pdf(request):
 
     buffer.seek(0)
     response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="relatório_base_nacional.pdf"'
     return response
 
 

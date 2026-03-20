@@ -91,7 +91,7 @@
   <section class="app-messages-hero mb-4">
     <div class="app-messages-hero-head">
       <div>
-        <div class="app-messages-kicker">Historico da candidatura</div>
+        <div class="app-messages-kicker">Histórico da candidatura</div>
         <h1 class="app-messages-title">Mensagens da candidatura</h1>
         <p class="app-messages-subtitle">
           Acompanhe a conversa associada a esta candidatura, com contexto do candidato e da vaga numa unica vista.
@@ -113,7 +113,7 @@
       <div class="app-messages-stat">
         <span class="app-messages-stat-label">Mensagens</span>
         <span class="app-messages-stat-value">{{ message_summary.total|default:0 }}</span>
-        <span class="app-messages-stat-meta">registo{{ message_summary.total|default:0|pluralize }} no historico</span>
+        <span class="app-messages-stat-meta">registo{{ message_summary.total|default:0|pluralize }} no histórico</span>
       </div>
       <div class="app-messages-stat">
         <span class="app-messages-stat-label">Da empresa</span>
@@ -147,7 +147,7 @@
           <div>
             <div class="app-messages-name">{{ application.youth.user.nome }}</div>
             <div class="app-messages-copy">
-              {{ application.youth.distrito.nome|default:"Distrito nao definido" }}{% if application.youth.localidade %} - {{ application.youth.localidade }}{% endif %}
+              {{ application.youth.distrito.nome|default:"Distrito não definido" }}{% if application.youth.localidade %} - {{ application.youth.localidade }}{% endif %}
             </div>
             <div class="app-messages-tags mt-3">
               <span class="app-messages-tag"><i class="bi bi-briefcase"></i>{{ application.youth.get_situacao_atual_display }}</span>
@@ -162,17 +162,17 @@
         <div class="app-messages-panel-head">
           <div>
             <h6>Resumo da candidatura</h6>
-            <p class="app-messages-panel-subtitle">Contexto rapido para ler as mensagens com mais clareza.</p>
+            <p class="app-messages-panel-subtitle">Contexto rápido para ler as mensagens com mais clareza.</p>
           </div>
         </div>
         <div class="app-messages-summary">
           <div class="app-messages-summary-item">
             <span class="app-messages-icon"><i class="bi bi-telephone"></i></span>
-            <div><strong>Telefone</strong><p>{{ application.youth.user.telefone|default:"Nao informado" }}</p></div>
+            <div><strong>Telefone</strong><p>{{ application.youth.user.telefone|default:"Não informado" }}</p></div>
           </div>
           <div class="app-messages-summary-item">
             <span class="app-messages-icon"><i class="bi bi-envelope"></i></span>
-            <div><strong>Email</strong><p>{{ application.youth.user.email|default:"Nao informado" }}</p></div>
+            <div><strong>Email</strong><p>{{ application.youth.user.email|default:"Não informado" }}</p></div>
           </div>
           <div class="app-messages-summary-item">
             <span class="app-messages-icon"><i class="bi bi-calendar-event"></i></span>
@@ -188,14 +188,14 @@
       <section class="app-messages-panel">
         <div class="app-messages-panel-head">
           <div>
-            <h6>Leitura rapida</h6>
+            <h6>Leitura rápida</h6>
             <p class="app-messages-panel-subtitle">Guia curto para acompanhar a conversa.</p>
           </div>
         </div>
         <div class="app-messages-checklist">
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-1-circle"></i></span>
-            <div><strong>Veja o ultimo contexto</strong><p>As mensagens mais recentes aparecem primeiro nesta pagina.</p></div>
+            <div><strong>Vejá o ultimo contexto</strong><p>As mensagens mais recentes aparecem primeiro nesta página.</p></div>
           </div>
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-2-circle"></i></span>
@@ -203,7 +203,7 @@
           </div>
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-3-circle"></i></span>
-            <div><strong>Volte a lista para agir</strong><p>A atualizacao do estado continua centralizada na lista de candidaturas.</p></div>
+            <div><strong>Volte a lista para agir</strong><p>A atualização do estado continua centralizada na lista de candidaturas.</p></div>
           </div>
         </div>
       </section>
@@ -213,7 +213,7 @@
       <div class="app-messages-panel-head">
         <div>
           <h5>Timeline de mensagens</h5>
-          <p class="app-messages-panel-subtitle">Historico paginado desta candidatura, com leitura organizada por remetente e data.</p>
+          <p class="app-messages-panel-subtitle">Histórico páginado desta candidatura, com leitura organizada por remetente e data.</p>
         </div>
       </div>
 
@@ -236,7 +236,7 @@
         {% if messages_page.paginator.num_pages > 1 %}
           <div class="app-messages-pagination">
             <div class="app-messages-pagination-copy">
-              Pagina {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}
+              Página {{ messages_page.number }} de {{ messages_page.paginator.num_pages }}
             </div>
             <div class="app-messages-actions">
               {% if messages_page.has_previous %}
@@ -245,9 +245,9 @@
                 <span class="btn btn-outline-secondary btn-sm disabled">Anterior</span>
               {% endif %}
               {% if messages_page.has_next %}
-                <a class="btn btn-primary btn-sm" href="?page={{ messages_page.next_page_number }}">Proxima</a>
+                <a class="btn btn-primary btn-sm" href="?page={{ messages_page.next_page_number }}">Próxima</a>
               {% else %}
-                <span class="btn btn-primary btn-sm disabled">Proxima</span>
+                <span class="btn btn-primary btn-sm disabled">Próxima</span>
               {% endif %}
             </div>
           </div>
@@ -255,7 +255,7 @@
       {% else %}
         <div class="app-messages-empty">
           <i class="bi bi-chat-left-text"></i>
-          Ainda nao existem mensagens associadas a esta candidatura.
+          Ainda não existem mensagens associadas a esta candidatura.
         </div>
       {% endif %}
     </section>

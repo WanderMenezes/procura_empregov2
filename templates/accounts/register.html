@@ -435,9 +435,9 @@
 
             const internal = value === 'OP' || value === 'TEC';
             consentInputs.forEach(function (input) { input.required = !internal; });
-            if (consentBadge) consentBadge.textContent = internal ? 'Opcional' : 'Obrigatorio';
+            if (consentBadge) consentBadge.textContent = internal ? 'Opcional' : 'Obrigatório';
             if (consentTitle) consentTitle.textContent = internal ? 'Consentimentos opcionais para perfis internos' : 'Consentimentos ativos para esta conta';
-            if (consentHelpText) consentHelpText.textContent = internal ? 'Perfis internos podem prosseguir sem estes consentimentos.' : 'Para perfis publicos, estes campos sao obrigatorios.';
+            if (consentHelpText) consentHelpText.textContent = internal ? 'Perfis internos podem prosseguir sem estes consentimentos.' : 'Para perfis públicos, estes campos são obrigatórios.';
 
             const company = value === 'EMP';
             const youth = value === 'JO';
@@ -475,7 +475,7 @@
 
             if (photoSection) photoSection.classList.toggle('d-none', !youth);
             if (photoInput) photoInput.disabled = !youth;
-            if (photoHelperText) photoHelperText.textContent = youth ? 'Uma foto nitida ajuda a tornar o perfil mais completo.' : 'A foto so sera usada quando o perfil jovem estiver selecionado.';
+            if (photoHelperText) photoHelperText.textContent = youth ? 'Uma foto nítida ajuda a tornar o perfil mais completo.' : 'A foto só será usada quando o perfil jovem estiver selecionado.';
         }
 
         togglePassword('togglePassword1', 'id_password1');
@@ -508,7 +508,7 @@
                     <div class="register-banner-copy">
                         <div class="register-kicker"><i class="bi bi-stars"></i>Novo registo</div>
                         <h1>Abre a tua conta com mais contexto desde o primeiro passo.</h1>
-                        <p class="mb-0">A pagina de registo agora ajuda-te a escolher o perfil certo, perceber o que muda em cada tipo de conta e preencher tudo com menos atrito.</p>
+                        <p class="mb-0">A página de registo agora ajuda-te a escolher o perfil certo, perceber o que muda em cada tipo de conta e preencher tudo com menos atrito.</p>
                     </div>
                 </div>
                 <div class="col-lg-5">
@@ -520,14 +520,14 @@
                             <div>
                                 <div class="register-summary-badge" id="profileSummaryBadge">Perfil selecionado</div>
                                 <strong id="profileSummaryTitle" class="d-block mb-1">Jovem</strong>
-                                <p id="profileSummaryText" class="mb-1">Ideal para candidaturas, estagios e programas de formacao.</p>
+                                <p id="profileSummaryText" class="mb-1">Ideal para candidaturas, estágios e programas de formação.</p>
                                 <small id="profileSummaryStep">Depois do registo podes completar o perfil e anexar documentos.</small>
                             </div>
                         </div>
                         <div class="register-stat-list">
                             <div class="register-stat-item"><span>Tempo medio</span><strong>2 min</strong></div>
                             <div class="register-stat-item"><span>Registo</span><strong>Gratis</strong></div>
-                            <div class="register-stat-item"><span>Acesso</span><strong>Telemovel</strong></div>
+                            <div class="register-stat-item"><span>Acesso</span><strong>Telemóvel</strong></div>
                         </div>
                     </div>
                 </div>
@@ -543,7 +543,7 @@
                     </div>
                     <a href="{% url 'accounts:login' %}" class="register-login-link">
                         <i class="bi bi-box-arrow-in-right"></i>
-                        Ja tenho conta
+                        Já tenho conta
                     </a>
                 </div>
 
@@ -578,15 +578,15 @@
                                                    value="{{ value }}"
                                                    data-profile-name="{% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador Distrital (Associacao/Parceiro){% elif value == 'TEC' %}Tecnico PNUD{% else %}{{ label }}{% endif %}"
                                                    data-profile-badge="{% if value == 'JO' %}Perfil selecionado{% elif value == 'EMP' %}Conta empresarial{% elif value == 'OP' %}Registo assistido{% elif value == 'TEC' %}Conta tecnica{% else %}Perfil selecionado{% endif %}"
-                                                   data-profile-copy="{% if value == 'JO' %}Ideal para candidaturas, estagios e programas de formacao.{% elif value == 'EMP' %}Pensado para empresas que publicam vagas e acompanham candidaturas.{% elif value == 'OP' %}Apoia registos offline/assistidos e valida dados basicos.{% elif value == 'TEC' %}Focado em leitura de indicadores e acompanhamento.{% else %}{{ label }}{% endif %}"
+                                                   data-profile-copy="{% if value == 'JO' %}Ideal para candidaturas, estágios e programas de formação.{% elif value == 'EMP' %}Pensado para empresas que publicam vagas e acompanham candidaturas.{% elif value == 'OP' %}Apoia registos offline/assistidos e valida dados básicos.{% elif value == 'TEC' %}Focado em leitura de indicadores e acompanhamento.{% else %}{{ label }}{% endif %}"
                                                    data-profile-step="{% if value == 'JO' %}Depois do registo podes completar o perfil e anexar documentos.{% elif value == 'EMP' %}Depois do registo podes configurar a empresa e publicar vagas.{% elif value == 'OP' %}Depois do registo teras acesso ao fluxo de registo assistido.{% elif value == 'TEC' %}Depois do registo podes acompanhar paineis e relatorios.{% else %}Continua apos criar a conta.{% endif %}"
                                                    data-profile-icon="{% if value == 'JO' %}bi-person-heart{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up-arrow{% else %}bi-person{% endif %}"
                                                    {% if selected == value %}checked{% endif %}>
                                             <span class="profile-card">
                                                 <span class="profile-icon"><i class="bi {% if value == 'JO' %}bi-person-heart{% elif value == 'EMP' %}bi-building{% elif value == 'OP' %}bi-person-badge{% elif value == 'TEC' %}bi-graph-up-arrow{% else %}bi-person{% endif %}"></i></span>
                                                 <span>
-                                                    <strong class="d-block mb-1">{% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador Distrital (Associacao/Parceiro){% elif value == 'TEC' %}Tecnico PNUD{% else %}{{ label }}{% endif %}</strong>
-                                                    <small class="register-help">{% if value == 'JO' %}Procuro oportunidades e quero construir o meu perfil.{% elif value == 'EMP' %}Quero publicar vagas e gerir candidaturas.{% elif value == 'OP' %}Apoia registos offline/assistidos e valida dados basicos.{% elif value == 'TEC' %}Preciso acompanhar indicadores e relatarios.{% else %}{{ label }}{% endif %}</small>
+                                                    <strong class="d-block mb-1">{% if value == 'JO' %}Jovem{% elif value == 'EMP' %}Empresa{% elif value == 'OP' %}Operador Distrital (Associação/Parceiro){% elif value == 'TEC' %}Técnico PNUD{% else %}{{ label }}{% endif %}</strong>
+                                                    <small class="register-help">{% if value == 'JO' %}Procuro oportunidades e quero construir o meu perfil.{% elif value == 'EMP' %}Quero publicar vagas e gerir candidaturas.{% elif value == 'OP' %}Apoia registos offline/assistidos e valida dados básicos.{% elif value == 'TEC' %}Preciso acompanhar indicadores e relatórios.{% else %}{{ label }}{% endif %}</small>
                                                 </span>
                                             </span>
                                         </label>
@@ -600,7 +600,7 @@
                         <div class="register-section-head">
                             <div>
                                 <h3>2. Dados da conta</h3>
-                                <p>Estes dados identificam a conta e tornam o contacto mais facil.</p>
+                                <p>Estes dados identificam a conta e tornam o contacto mais fácil.</p>
                             </div>
                             <span class="register-section-badge">Conta</span>
                         </div>
@@ -613,7 +613,7 @@
                                 {% if form.nome.errors %}<div class="invalid-feedback d-block">{{ form.nome.errors|striptags }}</div>{% endif %}
                             </div>
                             <div class="col-md-6">
-                                <label for="id_telefone" class="register-input-label">Telemovel *</label>
+                                <label for="id_telefone" class="register-input-label">Telemóvel *</label>
                                 <input type="tel" name="telefone" id="id_telefone" class="form-control{% if form.telefone.errors %} is-invalid{% endif %}" placeholder="Ex: +239 123 4567" value="{{ form.telefone.value|default_if_none:'' }}" autocomplete="tel" required>
                                 <div class="register-help mt-2">Vai servir como login principal e para contacto direto.</div>
                                 {% if form.telefone.errors %}<div class="invalid-feedback d-block">{{ form.telefone.errors|striptags }}</div>{% endif %}
@@ -621,19 +621,19 @@
                             <div class="col-md-6">
                                 <label for="id_email" class="register-input-label">Email</label>
                                 <input type="email" name="email" id="id_email" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="teu@email.com" value="{{ form.email.value|default_if_none:'' }}" autocomplete="email">
-                                <div class="register-help mt-2">Opcional, mas util para notificacoes e recuperacao.</div>
+                                <div class="register-help mt-2">Opcional, mas Útil para notificações e recuperação.</div>
                                 {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors|striptags }}</div>{% endif %}
                             </div>
                             <div class="col-md-6{% if form.perfil.value != 'EMP' %} d-none{% endif %}" id="nifFieldWrap">
                                 <label for="id_nif" class="register-input-label">NIF *</label>
                                 <input type="text" name="nif" id="id_nif" class="form-control{% if form.nif.errors %} is-invalid{% endif %}" placeholder="NIF da empresa" value="{{ form.nif.value|default_if_none:'' }}" autocomplete="off">
-                                <div class="register-help mt-2">Obrigatorio para contas de empresa.</div>
+                                <div class="register-help mt-2">Obrigatório para contas de empresa.</div>
                                 {% if form.nif.errors %}<div class="invalid-feedback d-block">{{ form.nif.errors|striptags }}</div>{% endif %}
                             </div>
                             <div class="col-md-6{% if form.perfil.value and form.perfil.value != 'JO' %} d-none{% endif %}" id="biFieldWrap">
-                                <label for="id_bi_numero" class="register-input-label">Numero do BI *</label>
-                                <input type="text" name="bi_numero" id="id_bi_numero" class="form-control{% if form.bi_numero.errors %} is-invalid{% endif %}" placeholder="Numero do Bilhete de Identidade" value="{{ form.bi_numero.value|default_if_none:'' }}" autocomplete="off">
-                                <div class="register-help mt-2">Obrigatorio para registo de candidato.</div>
+                                <label for="id_bi_numero" class="register-input-label">Número do BI *</label>
+                                <input type="text" name="bi_numero" id="id_bi_numero" class="form-control{% if form.bi_numero.errors %} is-invalid{% endif %}" placeholder="Número do Bilhete de Identidade" value="{{ form.bi_numero.value|default_if_none:'' }}" autocomplete="off">
+                                <div class="register-help mt-2">Obrigatório para registo de candidato.</div>
                                 {% if form.bi_numero.errors %}<div class="invalid-feedback d-block">{{ form.bi_numero.errors|striptags }}</div>{% endif %}
                             </div>
                         </div>
@@ -643,7 +643,7 @@
                         <div class="register-section-head">
                             <div>
                                 <h3>3. Foto de perfil</h3>
-                                <p>Mais util para o perfil jovem. Podes carregar agora ou deixar para depois.</p>
+                                <p>Mais Útil para o perfil jovem. Podes carregar agora ou deixar para depois.</p>
                             </div>
                             <span class="register-section-badge">Opcional</span>
                         </div>
@@ -656,7 +656,7 @@
                             <div class="flex-grow-1">
                                 <label for="id_photo" class="register-input-label">Carregar foto</label>
                                 <input type="file" name="photo" id="id_photo" accept="image/*" class="form-control{% if form.photo.errors %} is-invalid{% endif %}">
-                                <div class="register-help mt-2" id="photoHelperText">Uma foto nitida ajuda a tornar o perfil mais completo.</div>
+                                <div class="register-help mt-2" id="photoHelperText">Uma foto nítida ajuda a tornar o perfil mais completo.</div>
                                 {% if form.photo.errors %}<div class="invalid-feedback d-block">{{ form.photo.errors|striptags }}</div>{% endif %}
                             </div>
                         </div>
@@ -675,7 +675,7 @@
                             <div class="col-md-6">
                                 <label for="id_password1" class="register-input-label">Palavra-passe *</label>
                                 <div class="input-group">
-                                    <input type="password" name="password1" id="id_password1" class="form-control{% if form.password1.errors %} is-invalid{% endif %}" placeholder="Minimo 8 caracteres" autocomplete="new-password" required>
+                                    <input type="password" name="password1" id="id_password1" class="form-control{% if form.password1.errors %} is-invalid{% endif %}" placeholder="Mínimo 8 caracteres" autocomplete="new-password" required>
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword1"><i class="bi bi-eye"></i></button>
                                 </div>
                                 {% if form.password1.errors %}<div class="invalid-feedback d-block">{{ form.password1.errors|striptags }}</div>{% endif %}
@@ -693,7 +693,7 @@
                         <ul class="register-password-list">
                             <li id="passwordRuleLength"><i class="bi bi-check2-circle"></i>Pelo menos 8 caracteres</li>
                             <li id="passwordRuleLetter"><i class="bi bi-check2-circle"></i>Inclui pelo menos uma letra</li>
-                            <li id="passwordRuleNumber"><i class="bi bi-check2-circle"></i>Inclui pelo menos um numero</li>
+                            <li id="passwordRuleNumber"><i class="bi bi-check2-circle"></i>Inclui pelo menos um número</li>
                             <li id="passwordRuleMatch"><i class="bi bi-check2-circle"></i>As duas palavras-passe coincidem</li>
                         </ul>
                     </div>
@@ -702,14 +702,14 @@
                         <div class="register-section-head">
                             <div>
                                 <h3>5. Consentimentos</h3>
-                                <p>Usados para operacao da conta, contacto e fins de empregabilidade.</p>
+                                <p>Usados para operação da conta, contacto e fins de empregabilidade.</p>
                             </div>
-                            <span class="register-section-badge" id="consentBadge">Obrigatorio</span>
+                            <span class="register-section-badge" id="consentBadge">Obrigatório</span>
                         </div>
 
                         <div class="register-consent-box mb-3" id="consentBox">
                             <strong class="d-block mb-1" id="consentTitle">Consentimentos ativos para esta conta</strong>
-                            <div class="register-help" id="consentHelpText">Para perfis publicos, estes campos sao obrigatorios.</div>
+                            <div class="register-help" id="consentHelpText">Para perfis públicos, estes campos são obrigatórios.</div>
                         </div>
 
                         <div class="row g-3">
@@ -729,7 +729,7 @@
                                         <input class="form-check-input" type="checkbox" name="consentimento_contacto" id="id_consentimento_contacto" {% if form.consentimento_contacto.value %}checked{% endif %}>
                                         <label class="form-check-label fw-semibold" for="id_consentimento_contacto">Autorizo ser contactado por SMS, WhatsApp ou email</label>
                                     </div>
-                                    <div class="register-help mt-2">Usado para mensagens de conta, atualizacoes e comunicacoes relevantes.</div>
+                                    <div class="register-help mt-2">Usado para mensagens de conta, atualizações e comunicações relevantes.</div>
                                     {% if form.consentimento_contacto.errors %}<div class="text-danger small mt-2">{{ form.consentimento_contacto.errors|striptags }}</div>{% endif %}
                                 </div>
                             </div>
@@ -739,7 +739,7 @@
                     <div class="register-submit">
                         <div class="register-help">
                             Ao continuar, confirmas a
-                            <a href="{% url 'privacy' %}" class="text-decoration-none fw-semibold">politica de privacidade</a>
+                            <a href="{% url 'privacy' %}" class="text-decoration-none fw-semibold">política de privacidade</a>
                             e os
                             <a href="{% url 'terms' %}" class="text-decoration-none fw-semibold">termos de uso</a>.
                         </div>

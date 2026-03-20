@@ -300,7 +300,7 @@ class UserProfileForm(forms.ModelForm):
 
 
 class AdminUserUpdateForm(forms.ModelForm):
-    """Formulario do admin para editar dados principais de um utilizador."""
+    'Formulário do admin para editar dados principais de um utilizador.'
 
     nif = forms.CharField(
         max_length=20,
@@ -312,7 +312,7 @@ class AdminUserUpdateForm(forms.ModelForm):
     bi_numero = forms.CharField(
         max_length=50,
         required=False,
-        label=_('Numero do BI'),
+        label=_('Número do BI'),
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
@@ -353,7 +353,7 @@ class AdminUserUpdateForm(forms.ModelForm):
         if self.instance and getattr(self.instance, 'pk', None):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError(_('Este telemovel ja esta registado.'))
+            raise forms.ValidationError(_('Este telemóvel já esta registado.'))
         return telefone
 
     def clean_email(self):
@@ -364,7 +364,7 @@ class AdminUserUpdateForm(forms.ModelForm):
         if self.instance and getattr(self.instance, 'pk', None):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError(_('Este email ja esta registado.'))
+            raise forms.ValidationError(_('Este email já esta registado.'))
         return email
 
     def clean_nif(self):
@@ -375,7 +375,7 @@ class AdminUserUpdateForm(forms.ModelForm):
         if self.instance and getattr(self.instance, 'pk', None):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError(_('Este NIF ja esta registado.'))
+            raise forms.ValidationError(_('Este NIF já esta registado.'))
         return nif
 
     def clean_bi_numero(self):
@@ -386,7 +386,7 @@ class AdminUserUpdateForm(forms.ModelForm):
         if self.instance and getattr(self.instance, 'pk', None):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise forms.ValidationError(_('Este numero de BI ja esta registado.'))
+            raise forms.ValidationError(_('Este número de BI já esta registado.'))
         return bi_numero
 
     def clean(self):
@@ -396,10 +396,10 @@ class AdminUserUpdateForm(forms.ModelForm):
         bi_numero = (cleaned_data.get('bi_numero') or '').strip()
 
         if perfil == User.ProfileType.EMPRESA and not nif:
-            self.add_error('nif', _('O NIF e obrigatorio para empresas.'))
+            self.add_error('nif', _('O NIF é obrigatório para empresas.'))
 
         if perfil == User.ProfileType.JOVEM and not bi_numero:
-            self.add_error('bi_numero', _('O numero do BI e obrigatorio para candidatos.'))
+            self.add_error('bi_numero', _('O número do BI é obrigatório para candidatos.'))
 
         return cleaned_data
 

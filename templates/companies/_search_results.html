@@ -14,19 +14,19 @@
           <span class="talent-results-pill"><i class="bi bi-check2-square"></i><span id="selectedCount">0</span> selecionados</span>
         </div>
         <div class="talent-bulk-copy">
-          Monte pedidos em massa quando encontrar varios perfis promissores. O contacto continua sujeito a aprovacao.
+          Monte pedidos em massa quando encontrar varios perfis promissores. O contacto continua sujeito a aprovação.
         </div>
       </div>
 
       <div class="form-check">
         <input id="selectAll" type="checkbox" class="form-check-input">
-        <label for="selectAll" class="form-check-label small">Selecionar todos nesta pagina</label>
+        <label for="selectAll" class="form-check-label small">Selecionar todos nesta página</label>
       </div>
     </div>
 
     <div class="talent-bulk-message">
       <label class="form-label fw-semibold">Mensagem base do pedido</label>
-      <textarea name="motivo" class="form-control" rows="3" placeholder="Explique resumidamente o tipo de oportunidade, a intencao do contacto ou o proximo passo esperado."></textarea>
+      <textarea name="motivo" class="form-control" rows="3" placeholder="Explique resumidamente o tipo de oportunidade, a intenção do contacto ou o próximo passo esperado."></textarea>
     </div>
 
     <div class="talent-card-grid">
@@ -47,7 +47,7 @@
                   <div>
                     <div class="talent-card-name">{{ r.nome_completo }}</div>
                     <div class="talent-card-subline">
-                      {{ r.localidade|default:"Localidade nao definida" }}{% if r.distrito %}, {{ r.distrito.nome }}{% endif %}
+                      {{ r.localidade|default:"Localidade não definida" }}{% if r.distrito %}, {{ r.distrito.nome }}{% endif %}
                     </div>
                   </div>
                   <div class="form-check">
@@ -61,7 +61,7 @@
                     {{ r.get_disponibilidade_display }}
                   </span>
                   <span class="talent-tag talent-tag-neutral">
-                    {% if experience_count %}Com experiencia{% else %}Sem experiencia{% endif %}
+                    {% if experience_count %}Com experiência{% else %}Sem experiência{% endif %}
                   </span>
                 </div>
               </div>
@@ -70,25 +70,25 @@
             {% if r.sobre %}
               <p class="talent-card-copy">{{ r.sobre|truncatechars:150 }}</p>
             {% else %}
-              <p class="talent-card-copy">Ainda sem resumo pessoal. O perfil completo e os dados base continuam disponiveis para analise detalhada.</p>
+              <p class="talent-card-copy">Ainda sem resumo pessoal. O perfil completo e os dados base continuam disponíveis para análise detalhada.</p>
             {% endif %}
 
             <div class="talent-card-meta">
               <div class="talent-card-meta-item">
-                <span class="talent-card-meta-label">Situacao atual</span>
+                <span class="talent-card-meta-label">Situação atual</span>
                 <span class="talent-card-meta-value">{{ r.get_situacao_atual_display }}</span>
               </div>
               <div class="talent-card-meta-item">
                 <span class="talent-card-meta-label">Idade</span>
-                <span class="talent-card-meta-value">{% if r.idade %}{{ r.idade }} anos{% else %}Nao informada{% endif %}</span>
+                <span class="talent-card-meta-value">{% if r.idade %}{{ r.idade }} anos{% else %}Não informada{% endif %}</span>
               </div>
               <div class="talent-card-meta-item">
                 <span class="talent-card-meta-label">Interesses</span>
-                <span class="talent-card-meta-value">{{ r.interesses_setoriais_display|default:"Nao definidos" }}</span>
+                <span class="talent-card-meta-value">{{ r.interesses_setoriais_display|default:"Não definidos" }}</span>
               </div>
               <div class="talent-card-meta-item">
                 <span class="talent-card-meta-label">Contacto</span>
-                <span class="talent-card-meta-value">{% if r.email %}Email disponivel{% else %}Via pedido aprovado{% endif %}</span>
+                <span class="talent-card-meta-value">{% if r.email %}Email disponível{% else %}Via pedido aprovado{% endif %}</span>
               </div>
             </div>
 
@@ -146,7 +146,7 @@
 {% else %}
   <div class="talent-empty">
     <i class="bi bi-search"></i>
-    Nenhum jovem encontrado com os filtros atuais. Vale alargar a localizacao, a disponibilidade ou remover algum criterio para descobrir mais perfis.
+    Nenhum jovem encontrado com os filtros atuais. Vale alargar a localização, a disponibilidade ou remover algum critério para descobrir mais perfis.
     <div class="mt-3">
       <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-secondary btn-sm">Limpar filtros</a>
     </div>

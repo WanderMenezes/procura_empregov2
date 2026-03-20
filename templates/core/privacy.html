@@ -2,81 +2,810 @@
 
 {% block title %}Política de Privacidade - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .privacy-page {
+    background:
+      radial-gradient(circle at top left, rgba(15, 90, 159, 0.1), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(30, 140, 108, 0.1), transparent 24%),
+      linear-gradient(180deg, #f6fafc 0%, #eef4f8 100%);
+  }
+
+  .privacy-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .privacy-hero,
+  .privacy-card,
+  .privacy-panel,
+  .privacy-cta,
+  .privacy-sidebar-card {
+    border-radius: 28px;
+    border: 1px solid rgba(17, 36, 58, 0.08);
+    box-shadow: 0 22px 44px rgba(17, 36, 58, 0.08);
+  }
+
+  .privacy-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%),
+      linear-gradient(135deg, #0b3556 0%, #0f5a9f 55%, #1b8d78 100%);
+  }
+
+  .privacy-hero::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    bottom: -105px;
+    width: 250px;
+    height: 250px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .privacy-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .privacy-kicker,
+  .privacy-section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .privacy-kicker {
+    margin-bottom: 0.9rem;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .privacy-title {
+    font-size: clamp(2.1rem, 4vw, 3.7rem);
+    line-height: 0.98;
+    margin-bottom: 0.85rem;
+    max-width: 11ch;
+  }
+
+  .privacy-copy,
+  .privacy-card-copy,
+  .privacy-step-copy,
+  .privacy-list li,
+  .privacy-meta,
+  .privacy-detail-copy {
+    color: #607287;
+  }
+
+  .privacy-hero .privacy-copy,
+  .privacy-hero .privacy-meta,
+  .privacy-panel-copy,
+  .privacy-panel-stat span {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .privacy-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .privacy-hero-actions,
+  .privacy-chip-list,
+  .privacy-panel-tags,
+  .privacy-step-meta,
+  .privacy-mini-tags,
+  .privacy-link-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .privacy-hero-actions {
+    margin-top: 1.15rem;
+  }
+
+  .privacy-hero-actions .btn,
+  .privacy-cta .btn {
+    border-radius: 16px;
+    padding-inline: 1rem;
+    font-weight: 700;
+  }
+
+  .privacy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.58rem 0.88rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .privacy-panel {
+    padding: 1.15rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .privacy-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .privacy-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .privacy-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .privacy-panel-stat {
+    padding: 0.95rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .privacy-panel-stat strong {
+    display: block;
+    font-size: 1.08rem;
+    margin-bottom: 0.22rem;
+  }
+
+  .privacy-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(285px, 320px);
+    gap: 1.35rem;
+    align-items: start;
+  }
+
+  .privacy-main {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .privacy-card,
+  .privacy-sidebar-card {
+    background: #fff;
+    padding: 1.35rem;
+  }
+
+  .privacy-section-kicker {
+    margin-bottom: 0.55rem;
+    background: rgba(15, 90, 159, 0.08);
+    color: #0f5a9f;
+  }
+
+  .privacy-section-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .privacy-summary-grid,
+  .privacy-data-grid,
+  .privacy-rights-grid,
+  .privacy-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .privacy-summary-card,
+  .privacy-data-card,
+  .privacy-right-card,
+  .privacy-trust-card {
+    border-radius: 22px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .privacy-summary-icon,
+  .privacy-data-icon,
+  .privacy-right-icon,
+  .privacy-trust-icon,
+  .privacy-step-index {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+    font-size: 1.1rem;
+  }
+
+  .privacy-summary-icon,
+  .privacy-step-index {
+    background: rgba(15, 90, 159, 0.1);
+    color: #0f5a9f;
+  }
+
+  .privacy-data-icon {
+    background: rgba(27, 141, 120, 0.1);
+    color: #1b8d78;
+  }
+
+  .privacy-right-icon {
+    background: rgba(242, 169, 59, 0.12);
+    color: #b97a10;
+  }
+
+  .privacy-trust-icon {
+    background: rgba(17, 36, 58, 0.08);
+    color: #1b3956;
+  }
+
+  .privacy-summary-card h3,
+  .privacy-data-card h3,
+  .privacy-right-card h3,
+  .privacy-trust-card h3,
+  .privacy-sidebar-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    color: #10253a;
+  }
+
+  .privacy-process {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .privacy-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: start;
+    padding: 1rem;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .privacy-step-index {
+    margin-bottom: 0;
+    font-weight: 800;
+  }
+
+  .privacy-step h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #10253a;
+  }
+
+  .privacy-step-meta span,
+  .privacy-mini-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(15, 90, 159, 0.08);
+    color: #214766;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .privacy-split-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .privacy-detail-box {
+    border-radius: 22px;
+    padding: 1.15rem;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+  }
+
+  .privacy-detail-box h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    color: #10253a;
+  }
+
+  .privacy-list {
+    display: grid;
+    gap: 0.7rem;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .privacy-list li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .privacy-list i {
+    color: #1b8d78;
+    margin-top: 0.15rem;
+  }
+
+  .privacy-sidebar {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .privacy-sidebar-card {
+    border-radius: 24px;
+    box-shadow: 0 18px 34px rgba(17, 36, 58, 0.06);
+  }
+
+  .privacy-link-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .privacy-link {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff, #f8fbfe);
+    border: 1px solid rgba(17, 36, 58, 0.08);
+    text-decoration: none;
+    color: #10253a;
+    font-weight: 600;
+  }
+
+  .privacy-link small {
+    display: block;
+    color: #697b8f;
+    font-weight: 500;
+  }
+
+  .privacy-cta {
+    position: relative;
+    overflow: hidden;
+    padding: 1.55rem;
+    color: #fff;
+    background: linear-gradient(135deg, #143354 0%, #1b8d78 100%);
+  }
+
+  .privacy-cta::after {
+    content: "";
+    position: absolute;
+    inset: auto -70px -100px auto;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .privacy-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .privacy-cta-copy {
+    color: rgba(255, 255, 255, 0.84);
+    max-width: 62ch;
+  }
+
+  @media (max-width: 1199.98px) {
+    .privacy-summary-grid,
+    .privacy-data-grid,
+    .privacy-rights-grid,
+    .privacy-trust-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .privacy-hero-grid,
+    .privacy-main-grid,
+    .privacy-summary-grid,
+    .privacy-data-grid,
+    .privacy-rights-grid,
+    .privacy-trust-grid,
+    .privacy-split-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .privacy-panel-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .privacy-hero,
+    .privacy-card,
+    .privacy-sidebar-card,
+    .privacy-cta {
+      border-radius: 22px;
+    }
+
+    .privacy-hero,
+    .privacy-card,
+    .privacy-sidebar-card,
+    .privacy-cta {
+      padding: 1.15rem;
+    }
+
+    .privacy-panel-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .privacy-step {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h1 class="text-center mb-4">Política de Privacidade</h1>
-                    
-                    <p class="text-muted mb-4">Última atualização: 12 de Fevereiro de 2026</p>
-                    
-                    <h3>1. Introdução</h3>
-                    <p>
-                        A Base Nacional de Jovens está comprometida em proteger a privacidade dos 
-                        utilizadores da nossa plataforma. Esta política descreve como recolhemos, 
-                        usamos e protegemos os teus dados pessoais.
-                    </p>
-                    
-                    <h3>2. Dados que Recolhemos</h3>
-                    <p>Podemos recolher os seguintes tipos de informação:</p>
-                    <ul>
-                        <li><strong>Informações pessoais:</strong> Nome, data de nascimento, sexo, contactos</li>
-                        <li><strong>Informações educacionais:</strong> Nível de educação, área de formação, instituição</li>
-                        <li><strong>Informações profissionais:</strong> Experiência, skills, interesses</li>
-                        <li><strong>Documentos:</strong> CV, certificados (opcional)</li>
-                    </ul>
-                    
-                    <h3>3. Como Usamos os Teus Dados</h3>
-                    <p>Os teus dados são usados para:</p>
-                    <ul>
-                        <li>Criar e gerir o teu perfil na plataforma</li>
-                        <li>Conectar-te com empresas e oportunidades</li>
-                        <li>Enviar notificações sobre vagas e candidaturas</li>
-                        <li>Gerar relatórios estatísticos (dados anonimizados)</li>
-                    </ul>
-                    
-                    <h3>4. Partilha de Dados</h3>
-                    <p>
-                        Os teus dados pessoais só são partilhados com empresas quando:
-                    </p>
-                    <ul>
-                        <li>Autorizas explicitamente no teu perfil</li>
-                        <li>Uma empresa solicita contacto e o administrador aprova</li>
-                        <li>É exigido por lei ou autoridade competente</li>
-                    </ul>
-                    
-                    <h3>5. Os Teus Direitos</h3>
-                    <p>Tens o direito de:</p>
-                    <ul>
-                        <li>Aceder aos teus dados pessoais</li>
-                        <li>Corrigir informações incorretas</li>
-                        <li>Eliminar a tua conta e dados</li>
-                        <li>Tornar o teu perfil invisível</li>
-                        <li>Retirar o consentimento de uso de dados</li>
-                    </ul>
-                    
-                    <h3>6. Segurança</h3>
-                    <p>
-                        Implementamos medidas de segurança técnicas e organizacionais para proteger 
-                        os teus dados contra acesso não autorizado, alteração, divulgação ou destruição.
-                    </p>
-                    
-                    <h3>7. Retenção de Dados</h3>
-                    <p>
-                        Os teus dados são mantidos enquanto a tua conta estiver ativa. Podes solicitar 
-                        a eliminação da tua conta a qualquer momento.
-                    </p>
-                    
-                    <h3>8. Contacto</h3>
-                    <p>
-                        Para questões sobre privacidade, contacta-nos através de 
-                        <a href="mailto:info@basenacionaljovens.st">info@basenacionaljovens.st</a>.
-                    </p>
-                </div>
+<div class="privacy-page py-4 py-lg-5">
+  <div class="container">
+    <div class="privacy-shell">
+      <section class="privacy-hero">
+        <div class="privacy-hero-grid">
+          <div>
+            <div class="privacy-kicker"><i class="bi bi-shield-lock"></i>Privacidade e confiança</div>
+            <h1 class="privacy-title">Os teus dados devem servir-te com clareza e controlo.</h1>
+            <p class="privacy-copy mb-0">
+              Esta política explica que dados a Base Nacional de Jovens recolhe, para que são usados,
+              em que situações podem ser partilhados e que controlo manténs sobre o teu perfil.
+            </p>
+
+            <div class="privacy-hero-actions">
+              <a href="{% url 'terms' %}" class="btn btn-light">
+                <i class="bi bi-file-text me-2"></i>Ver termos
+              </a>
+              <a href="{% url 'help' %}" class="btn btn-outline-light">
+                <i class="bi bi-question-circle me-2"></i>Ajuda
+              </a>
             </div>
+
+            <div class="privacy-chip-list mt-3">
+              <span class="privacy-chip"><i class="bi bi-person-check"></i>Consentimentos claros</span>
+              <span class="privacy-chip"><i class="bi bi-building"></i>Partilha com contexto</span>
+              <span class="privacy-chip"><i class="bi bi-eye-slash"></i>Controlo de visibilidade</span>
+            </div>
+          </div>
+
+          <aside class="privacy-panel">
+            <div class="privacy-panel-head">
+              <div>
+                <div class="privacy-panel-badge"><i class="bi bi-info-circle"></i>Resumo rápido</div>
+              </div>
+            </div>
+            <div class="privacy-panel-grid">
+              <div class="privacy-panel-stat">
+                <strong>Última atualização</strong>
+                <span>12 de Fevereiro de 2026</span>
+              </div>
+              <div class="privacy-panel-stat">
+                <strong>Partilha de dados</strong>
+                <span>Com consentimento, aprovação administrativa ou exigência legal.</span>
+              </div>
+              <div class="privacy-panel-stat">
+                <strong>Visibilidade</strong>
+                <span>Podes tornar o teu perfil invisível e ajustar permissões.</span>
+              </div>
+              <div class="privacy-panel-stat">
+                <strong>Retenção</strong>
+                <span>Os dados ficam ativos enquanto a conta existir.</span>
+              </div>
+            </div>
+            <div class="privacy-panel-tags mt-3">
+              <span class="privacy-mini-tag"><i class="bi bi-check2-circle"></i>Perfil gerível</span>
+              <span class="privacy-mini-tag"><i class="bi bi-lock"></i>Medidas de segurança</span>
+            </div>
+          </aside>
         </div>
+      </section>
+
+      <div class="privacy-main-grid">
+        <main class="privacy-main">
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-compass"></i>Introdução</div>
+            <h2 class="privacy-section-title">O objetivo desta política</h2>
+            <p class="privacy-copy mb-0">
+              A Base Nacional de Jovens está comprometida em proteger a privacidade dos utilizadores.
+              Esta política descreve como recolhemos, usamos, protegemos e, quando necessário,
+              partilhamos os teus dados pessoais dentro da plataforma.
+            </p>
+
+            <div class="privacy-summary-grid">
+              <article class="privacy-summary-card">
+                <div class="privacy-summary-icon"><i class="bi bi-collection"></i></div>
+                <h3>Recolha com propósito</h3>
+                <p class="privacy-card-copy mb-0">
+                  Pedimos apenas informação útil para criar o perfil, melhorar a ligação com oportunidades e apoiar a operação.
+                </p>
+              </article>
+              <article class="privacy-summary-card">
+                <div class="privacy-summary-icon"><i class="bi bi-sliders"></i></div>
+                <h3>Controlo do utilizador</h3>
+                <p class="privacy-card-copy mb-0">
+                  Consentimentos, visibilidade e contacto não são tratados como detalhe técnico, mas como parte central da experiência.
+                </p>
+              </article>
+              <article class="privacy-summary-card">
+                <div class="privacy-summary-icon"><i class="bi bi-shield-check"></i></div>
+                <h3>Confiança operacional</h3>
+                <p class="privacy-card-copy mb-0">
+                  A plataforma combina medidas técnicas, regras de processo e supervisão administrativa para reduzir riscos.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-database"></i>Dados recolhidos</div>
+            <h2 class="privacy-section-title">Que informação pode ser guardada</h2>
+            <p class="privacy-copy mb-0">
+              Dependendo do teu perfil e do que decides preencher, a plataforma pode guardar diferentes conjuntos de informação.
+            </p>
+
+            <div class="privacy-data-grid">
+              <article class="privacy-data-card">
+                <div class="privacy-data-icon"><i class="bi bi-person-vcard"></i></div>
+                <h3>Informações pessoais</h3>
+                <p class="privacy-card-copy mb-0">Nome, data de nascimento, sexo, telemóvel, email e outros dados de contacto.</p>
+              </article>
+              <article class="privacy-data-card">
+                <div class="privacy-data-icon"><i class="bi bi-mortarboard"></i></div>
+                <h3>Informações educacionais</h3>
+                <p class="privacy-card-copy mb-0">Nível de educação, área de formação, instituição, curso e percurso associado.</p>
+              </article>
+              <article class="privacy-data-card">
+                <div class="privacy-data-icon"><i class="bi bi-briefcase"></i></div>
+                <h3>Informações profissionais</h3>
+                <p class="privacy-card-copy mb-0">Experiência, skills, situação atual, interesses e preferências de oportunidade.</p>
+              </article>
+              <article class="privacy-data-card">
+                <div class="privacy-data-icon"><i class="bi bi-file-earmark-check"></i></div>
+                <h3>Documentos</h3>
+                <p class="privacy-card-copy mb-0">CV, certificados e outros anexos opcionais que reforcem o contexto do perfil.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-diagram-3"></i>Uso dos dados</div>
+            <h2 class="privacy-section-title">Como os teus dados são usados</h2>
+
+            <div class="privacy-process">
+              <article class="privacy-step">
+                <div class="privacy-step-index">1</div>
+                <div>
+                  <h3>Criar e gerir o teu perfil</h3>
+                  <p class="privacy-step-copy mb-0">
+                    Os dados suportam o registo, a organização do perfil e a evolução da tua presença na plataforma.
+                  </p>
+                </div>
+              </article>
+
+              <article class="privacy-step">
+                <div class="privacy-step-index">2</div>
+                <div>
+                  <h3>Ligar-te a empresas e oportunidades</h3>
+                  <p class="privacy-step-copy mb-0">
+                    As informações do perfil ajudam a aproximar jovens, vagas e processos de contacto mais relevantes.
+                  </p>
+                  <div class="privacy-step-meta">
+                    <span><i class="bi bi-search"></i>Pesquisa de perfis</span>
+                    <span><i class="bi bi-send-check"></i>Candidaturas</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="privacy-step">
+                <div class="privacy-step-index">3</div>
+                <div>
+                  <h3>Enviar notificações e atualizações</h3>
+                  <p class="privacy-step-copy mb-0">
+                    A plataforma pode usar os teus dados para comunicar estados de candidatura, vagas e mensagens relevantes.
+                  </p>
+                </div>
+              </article>
+
+              <article class="privacy-step">
+                <div class="privacy-step-index">4</div>
+                <div>
+                  <h3>Gerar leitura estatística</h3>
+                  <p class="privacy-step-copy mb-0">
+                    Podem ser produzidos relatórios estatísticos com base em dados anonimizados para apoiar leitura e coordenação.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-share"></i>Partilha e permissões</div>
+            <h2 class="privacy-section-title">Quando os teus dados podem ser partilhados</h2>
+
+            <div class="privacy-split-grid">
+              <article class="privacy-detail-box">
+                <h3>Partilha com empresas</h3>
+                <ul class="privacy-list mt-3">
+                  <li><i class="bi bi-check2"></i><span>Quando autorizas explicitamente no teu perfil.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Quando existe pedido de contacto e aprovação administrativa.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Dentro das regras de visibilidade e consentimento definidas por ti.</span></li>
+                </ul>
+              </article>
+
+              <article class="privacy-detail-box">
+                <h3>Outras situações possíveis</h3>
+                <ul class="privacy-list mt-3">
+                  <li><i class="bi bi-check2"></i><span>Quando houver exigência legal ou ordem de autoridade competente.</span></li>
+                  <li><i class="bi bi-check2"></i><span>Quando a partilha for necessária para funcionamento legítimo da operação.</span></li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-person-check"></i>Os teus direitos</div>
+            <h2 class="privacy-section-title">O que podes fazer em relação aos teus dados</h2>
+
+            <div class="privacy-rights-grid">
+              <article class="privacy-right-card">
+                <div class="privacy-right-icon"><i class="bi bi-eye"></i></div>
+                <h3>Aceder</h3>
+                <p class="privacy-card-copy mb-0">Consultar os teus dados e perceber o que está associado à tua conta.</p>
+              </article>
+              <article class="privacy-right-card">
+                <div class="privacy-right-icon"><i class="bi bi-pencil-square"></i></div>
+                <h3>Corrigir</h3>
+                <p class="privacy-card-copy mb-0">Atualizar informação incorreta ou desatualizada no perfil.</p>
+              </article>
+              <article class="privacy-right-card">
+                <div class="privacy-right-icon"><i class="bi bi-trash3"></i></div>
+                <h3>Eliminar</h3>
+                <p class="privacy-card-copy mb-0">Solicitar eliminação da conta e dos dados associados.</p>
+              </article>
+              <article class="privacy-right-card">
+                <div class="privacy-right-icon"><i class="bi bi-eye-slash"></i></div>
+                <h3>Ocultar</h3>
+                <p class="privacy-card-copy mb-0">Tornar o teu perfil invisível ou reduzir exposição.</p>
+              </article>
+              <article class="privacy-right-card">
+                <div class="privacy-right-icon"><i class="bi bi-toggle-off"></i></div>
+                <h3>Retirar consentimento</h3>
+                <p class="privacy-card-copy mb-0">Rever permissões de uso de dados e canais de contacto.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-card">
+            <div class="privacy-section-kicker"><i class="bi bi-lock"></i>Segurança e retenção</div>
+            <h2 class="privacy-section-title">Como protegemos e durante quanto tempo guardamos</h2>
+
+            <div class="privacy-trust-grid">
+              <article class="privacy-trust-card">
+                <div class="privacy-trust-icon"><i class="bi bi-shield-lock"></i></div>
+                <h3>Medidas de segurança</h3>
+                <p class="privacy-card-copy mb-0">
+                  Implementamos medidas técnicas e organizacionais para proteger os dados contra acesso indevido, alteração ou destruição.
+                </p>
+              </article>
+              <article class="privacy-trust-card">
+                <div class="privacy-trust-icon"><i class="bi bi-clock-history"></i></div>
+                <h3>Retenção de dados</h3>
+                <p class="privacy-card-copy mb-0">
+                  Os dados são mantidos enquanto a conta estiver ativa, podendo ser removidos mediante pedido de eliminação.
+                </p>
+              </article>
+              <article class="privacy-trust-card">
+                <div class="privacy-trust-icon"><i class="bi bi-chat-left-text"></i></div>
+                <h3>Canal de contacto</h3>
+                <p class="privacy-card-copy mb-0">
+                  Questões sobre privacidade podem ser tratadas através de <a href="mailto:info@basenacionaljovens.st">info@basenacionaljovens.st</a>.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="privacy-cta">
+            <div class="privacy-section-kicker text-white border border-white border-opacity-25 bg-white bg-opacity-10"><i class="bi bi-envelope-paper"></i>Precisas de apoio?</div>
+            <h2 class="privacy-section-title text-white">Se tiveres dúvidas sobre esta política, fala connosco.</h2>
+            <p class="privacy-cta-copy mb-4">
+              A página de ajuda resume os fluxos principais da plataforma, e o email de contacto pode ser usado para questões específicas de privacidade.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="{% url 'help' %}" class="btn btn-light">
+                <i class="bi bi-question-circle me-2"></i>Ir para ajuda
+              </a>
+              <a href="mailto:info@basenacionaljovens.st" class="btn btn-outline-light">
+                <i class="bi bi-envelope me-2"></i>Enviar email
+              </a>
+            </div>
+          </section>
+        </main>
+
+        <aside class="privacy-sidebar">
+          <section class="privacy-sidebar-card">
+            <div class="privacy-section-kicker"><i class="bi bi-check2-circle"></i>Pontos-chave</div>
+            <h3>O essencial desta política</h3>
+            <ul class="privacy-list mt-3">
+              <li><i class="bi bi-check2"></i><span>Os teus dados são usados para perfil, oportunidades, notificações e leitura estatística.</span></li>
+              <li><i class="bi bi-check2"></i><span>A partilha com empresas depende de consentimento, contexto e aprovação quando aplicável.</span></li>
+              <li><i class="bi bi-check2"></i><span>Podes ajustar visibilidade, permissões e pedir eliminação da conta.</span></li>
+            </ul>
+          </section>
+
+          <section class="privacy-sidebar-card">
+            <div class="privacy-section-kicker"><i class="bi bi-sliders"></i>O que podes controlar</div>
+            <h3>Decisões que ficam do teu lado</h3>
+            <ul class="privacy-list mt-3">
+              <li><i class="bi bi-check2"></i><span>Consentimento de uso de dados.</span></li>
+              <li><i class="bi bi-check2"></i><span>Canal de contacto autorizado.</span></li>
+              <li><i class="bi bi-check2"></i><span>Visibilidade do perfil.</span></li>
+              <li><i class="bi bi-check2"></i><span>Correção e atualização da informação.</span></li>
+            </ul>
+          </section>
+
+          <section class="privacy-sidebar-card">
+            <div class="privacy-section-kicker"><i class="bi bi-compass"></i>Ligações úteis</div>
+            <div class="privacy-link-list">
+              <a href="{% url 'terms' %}" class="privacy-link">
+                <div>
+                  Termos de uso
+                  <small>Consulta as regras gerais de utilização da plataforma.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'help' %}" class="privacy-link">
+                <div>
+                  Centro de ajuda
+                  <small>Vê o fluxo de registo, perfil, vagas e contacto.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{% url 'accounts:register' %}" class="privacy-link">
+                <div>
+                  Criar conta
+                  <small>Entrar na plataforma com o perfil adequado.</small>
+                </div>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

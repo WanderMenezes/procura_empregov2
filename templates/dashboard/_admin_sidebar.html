@@ -10,7 +10,7 @@
                     <span>{% if request.user.is_admin %}Admin CNJ{% else %}Operador{% endif %}</span>
                 </div>
             </div>
-            <span class="admin-sidebar-chip">{% if request.user.is_admin %}Ativo{% else %}Validacao{% endif %}</span>
+            <span class="admin-sidebar-chip">{% if request.user.is_admin %}Ativo{% else %}Validação{% endif %}</span>
         </div>
 
         <div class="admin-sidebar-nav">
@@ -46,7 +46,7 @@
                 </a>
                 <a href="{% url 'dashboard:reports' %}" class="admin-nav-link{% if active_page == 'reports' %} active{% endif %}">
                     <i class="bi bi-graph-up"></i>
-                    <span>Relatorios</span>
+                    <span>Relatérios</span>
                 </a>
                 <a href="{% url 'dashboard:offline_registrations' %}" class="admin-nav-link{% if active_page == 'offline_registrations' %} active{% endif %}">
                     <i class="bi bi-file-earmark-arrow-down"></i>
@@ -58,7 +58,7 @@
         <div class="admin-sidebar-note">
             <div class="admin-sidebar-note-title">Fila atual</div>
             <p class="mb-0">
-                {{ admin_nav.pending_profiles }} perfil{{ admin_nav.pending_profiles|pluralize }} aguardam validacao.
+                {{ admin_nav.pending_profiles }} perfil{{ admin_nav.pending_profiles|pluralize }} aguardam validação.
                 {% if request.user.is_admin %}
                     {{ admin_nav.pending_contacts }} pedido{{ admin_nav.pending_contacts|pluralize }} de contacto ainda precisam de resposta.
                 {% endif %}

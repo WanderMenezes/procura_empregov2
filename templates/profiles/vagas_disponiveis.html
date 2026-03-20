@@ -83,7 +83,7 @@
     <div class="jobs-hero-head">
       <div>
         <div class="jobs-kicker">Oportunidades para ti</div>
-        <h1 class="jobs-title">Vagas disponiveis</h1>
+        <h1 class="jobs-title">Vagas disponíveis</h1>
         <p class="jobs-subtitle">Explora oportunidades abertas, aplica filtros com rapidez e ve primeiro as vagas que mais combinam com o teu perfil atual.</p>
         <div class="jobs-chips">
           <span class="jobs-chip"><i class="bi bi-briefcase"></i>{{ total_available_jobs }} vagas abertas</span>
@@ -95,15 +95,15 @@
       <div class="jobs-actions">
         <a href="{% url 'profiles:detail' %}" class="btn btn-light"><i class="bi bi-person me-2"></i>Meu perfil</a>
         <a href="{% url 'profiles:my_applications' %}" class="btn btn-outline-light"><i class="bi bi-chat-square-text me-2"></i>Minhas candidaturas</a>
-        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Inicio</a>
+        <a href="{% url 'home' %}" class="btn btn-dark"><i class="bi bi-house-door me-2"></i>Início</a>
       </div>
     </div>
 
     <div class="jobs-stats">
       <div class="jobs-stat"><span class="jobs-stat-label">Resultados</span><span class="jobs-stat-value">{{ filtered_jobs_count }}</span><span class="jobs-stat-meta">{% if has_active_filters %}apos filtros ativos{% else %}na lista atual{% endif %}</span></div>
       <div class="jobs-stat"><span class="jobs-stat-label">No teu distrito</span><span class="jobs-stat-value">{{ local_jobs_count }}</span><span class="jobs-stat-meta">{% if profile.distrito %}vagas em {{ profile.distrito.nome }}{% else %}define distrito no perfil{% endif %}</span></div>
-      <div class="jobs-stat"><span class="jobs-stat-label">Novas esta semana</span><span class="jobs-stat-value">{{ recent_jobs_count }}</span><span class="jobs-stat-meta">publicadas nos ultimos 7 dias</span></div>
-      <div class="jobs-stat"><span class="jobs-stat-label">A fechar em breve</span><span class="jobs-stat-value">{{ closing_soon_count }}</span><span class="jobs-stat-meta">com prazo nos proximos dias</span></div>
+      <div class="jobs-stat"><span class="jobs-stat-label">Novas esta semana</span><span class="jobs-stat-value">{{ recent_jobs_count }}</span><span class="jobs-stat-meta">publicadas nos últimos 7 dias</span></div>
+      <div class="jobs-stat"><span class="jobs-stat-label">A fechar em breve</span><span class="jobs-stat-value">{{ closing_soon_count }}</span><span class="jobs-stat-meta">com prazo nos próximos dias</span></div>
     </div>
   </section>
 
@@ -113,7 +113,7 @@
         <div class="jobs-panel-head">
           <div>
             <h2 class="jobs-panel-title">O que combina contigo</h2>
-            <p class="jobs-panel-subtitle">Usamos o teu perfil para destacar afinidades rapidas.</p>
+            <p class="jobs-panel-subtitle">Usamos o teu perfil para destacar afinidades rápidas.</p>
           </div>
         </div>
         <div class="jobs-profile">
@@ -148,8 +148,8 @@
           <div class="jobs-copy">{% if profile_interests_display %}{{ profile_interests_display }}{% else %}Atualiza o teu perfil para receber correspondencias mais relevantes.{% endif %}</div>
         </div>
         <div class="jobs-insight">
-          <strong>Sugestao rapida</strong>
-          <div class="jobs-copy">{% if not profile_interests_display or not preferred_tipo_display %}Completa interesses e preferencia no perfil para melhorar as recomendacoes desta pagina.{% else %}Tens base suficiente para comparar vagas por afinidade, local e tipo de oportunidade.{% endif %}</div>
+          <strong>Sugestão rápida</strong>
+          <div class="jobs-copy">{% if not profile_interests_display or not preferred_tipo_display %}Completa interesses e preferencia no perfil para melhorar as recomendações desta página.{% else %}Tens base suficiente para comparar vagas por afinidade, local e tipo de oportunidade.{% endif %}</div>
         </div>
       </section>
 
@@ -157,7 +157,7 @@
         <div class="jobs-panel-head">
           <div>
             <h2 class="jobs-panel-title">Filtrar vagas</h2>
-            <p class="jobs-panel-subtitle">Refina por palavra-chave, tipo, distrito e area.</p>
+            <p class="jobs-panel-subtitle">Refina por palavra-chave, tipo, distrito e Área.</p>
           </div>
           {% if has_active_filters %}
             <span class="jobs-tag"><i class="bi bi-funnel"></i>{{ active_filter_count }}</span>
@@ -167,7 +167,7 @@
         <form method="get" class="jobs-filter-grid">
           <div class="jobs-field">
             <label for="jobs-query">Palavra-chave</label>
-            <input id="jobs-query" type="text" name="q" class="form-control" placeholder="Titulo, empresa ou descricao" value="{{ selected_query }}">
+            <input id="jobs-query" type="text" name="q" class="form-control" placeholder="Titulo, empresa ou descrição" value="{{ selected_query }}">
           </div>
           <div class="jobs-field">
             <label for="jobs-tipo">Tipo</label>
@@ -188,7 +188,7 @@
             </select>
           </div>
           <div class="jobs-field">
-            <label for="jobs-area">Area</label>
+            <label for="jobs-area">Área</label>
             <select id="jobs-area" name="area" class="form-select">
               <option value="">Todas</option>
               {% for value,label in areas_formacao %}
@@ -214,7 +214,7 @@
           {% if recommended_jobs_count %}
             <span class="jobs-tag highlight"><i class="bi bi-stars"></i>{{ recommended_jobs_count }} com afinidade</span>
           {% endif %}
-          <span class="jobs-tag muted"><i class="bi bi-grid"></i>Pagina {{ vagas_page.number }} de {{ vagas_page.paginator.num_pages }}</span>
+          <span class="jobs-tag muted"><i class="bi bi-grid"></i>Página {{ vagas_page.number }} de {{ vagas_page.paginator.num_pages }}</span>
         </div>
       </div>
 
@@ -250,15 +250,15 @@
 
               <div class="job-grid">
                 <div class="job-fact">
-                  <span class="job-fact-label">Area</span>
-                  <span class="job-fact-value">{% if vaga.area_label %}{{ vaga.area_label }}{% else %}Sem area definida{% endif %}</span>
+                  <span class="job-fact-label">Área</span>
+                  <span class="job-fact-value">{% if vaga.area_label %}{{ vaga.area_label }}{% else %}Sem área definida{% endif %}</span>
                 </div>
                 <div class="job-fact">
                   <span class="job-fact-label">Vagas restantes</span>
                   <span class="job-fact-value">{{ vaga.vagas_restantes }} de {{ vaga.numero_vagas }}</span>
                 </div>
                 <div class="job-fact">
-                  <span class="job-fact-label">Remuneracao</span>
+                  <span class="job-fact-label">Remuneração</span>
                   <span class="job-fact-value">{% if vaga.salario %}{{ vaga.salario }}{% else %}A combinar{% endif %}</span>
                 </div>
                 <div class="job-fact">
@@ -298,12 +298,12 @@
                       <span class="job-pill {% if estado == 'ACEITE' %}highlight{% elif estado == 'REJEITADA' %}danger{% elif estado == 'EM_ANALISE' %}warning{% else %}muted{% endif %}">
                         <i class="bi bi-check2-circle"></i>{{ candidaturas_map|get_item:vaga.id }}
                       </span>
-                      <button class="btn btn-outline-secondary" disabled><i class="bi bi-send-check me-2"></i>Ja candidatado</button>
+                      <button class="btn btn-outline-secondary" disabled><i class="bi bi-send-check me-2"></i>Já candidatado</button>
                     </div>
                   {% endwith %}
                 {% else %}
                   <div class="job-footer-actions">
-                    <div class="job-footer-note">{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Ler a descricao ajuda a decidir se queres avancar com a candidatura.{% endif %}</div>
+                    <div class="job-footer-note">{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Ler a descrição ajuda a decidir se queres avançar com a candidatura.{% endif %}</div>
                     <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
                       {% csrf_token %}
                       <button type="button"
@@ -325,7 +325,7 @@
         </div>
 
         {% if vagas_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Paginacao de vagas">
+          <nav class="mt-4" aria-label="Páginação de vagas">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not vagas_page.has_previous %}disabled{% endif %}">
                 {% if vagas_page.has_previous %}
@@ -334,12 +334,12 @@
                   <span class="page-link">Anterior</span>
                 {% endif %}
               </li>
-              <li class="page-item disabled"><span class="page-link">Pagina {{ vagas_page.number }} de {{ vagas_page.paginator.num_pages }}</span></li>
+              <li class="page-item disabled"><span class="page-link">Página {{ vagas_page.number }} de {{ vagas_page.paginator.num_pages }}</span></li>
               <li class="page-item {% if not vagas_page.has_next %}disabled{% endif %}">
                 {% if vagas_page.has_next %}
-                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ vagas_page.next_page_number }}">Proxima</a>
+                  <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ vagas_page.next_page_number }}">Próxima</a>
                 {% else %}
-                  <span class="page-link">Proxima</span>
+                  <span class="page-link">Próxima</span>
                 {% endif %}
               </li>
             </ul>
@@ -348,7 +348,7 @@
       {% else %}
         <div class="jobs-empty">
           <i class="bi bi-search"></i>
-          <h2 class="jobs-results-title mb-2">Sem vagas para esta combinacao</h2>
+          <h2 class="jobs-results-title mb-2">Sem vagas para esta combinação</h2>
           <p class="jobs-empty-copy mb-3">Tenta limpar filtros, mudar o distrito ou usar uma palavra-chave mais ampla para veres mais oportunidades.</p>
           <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary">Ver todas as vagas</a>
         </div>

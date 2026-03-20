@@ -1,135 +1,1250 @@
-{% extends 'base/base.html' %}
+﻿{% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}Ajuda - Base Nacional de Jovens{% endblock %}
 
+{% block extra_css %}
+<style>
+  .help-page {
+    --help-ink: #11243a;
+    --help-muted: #65758b;
+    --help-border: rgba(17, 36, 58, .08);
+    --help-panel: #ffffff;
+    --help-accent: #0d6c8f;
+    --help-accent-2: #2aa06b;
+    --help-warm: #f2a93b;
+    background:
+      radial-gradient(circle at top left, rgba(13, 108, 143, .14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(42, 160, 107, .16), transparent 24%),
+      linear-gradient(180deg, #f6fafc 0%, #eff4f8 100%);
+    color: var(--help-ink);
+  }
+
+  .help-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .help-hero,
+  .help-card,
+  .help-sidebar-card {
+    border-radius: 28px;
+    border: 1px solid var(--help-border);
+    box-shadow: 0 20px 44px rgba(17, 36, 58, .08);
+  }
+
+  .help-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, .22), transparent 30%),
+      linear-gradient(135deg, #0b3556 0%, #0d6c8f 56%, #2aa06b 100%);
+  }
+
+  .help-hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    bottom: -120px;
+    width: 240px;
+    height: 240px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .08);
+  }
+
+  .help-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .help-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .9rem;
+    padding: .45rem .8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .18);
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .help-title {
+    font-size: clamp(2.1rem, 3vw, 3.3rem);
+    line-height: 1.02;
+    max-width: 12ch;
+    margin-bottom: .8rem;
+  }
+
+  .help-copy,
+  .help-meta-copy,
+  .help-card-copy,
+  .help-demo-note,
+  .help-support-copy,
+  .help-demo-bullets li,
+  .help-link-copy {
+    color: var(--help-muted);
+  }
+
+  .help-hero .help-copy,
+  .help-hero .help-meta-copy {
+    color: rgba(255, 255, 255, .84);
+  }
+
+  .help-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .help-hero-actions,
+  .help-hero-pills,
+  .help-demo-dots,
+  .help-demo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .7rem;
+  }
+
+  .help-hero-actions {
+    margin-top: 1.2rem;
+  }
+
+  .help-hero-actions .btn {
+    border-radius: 14px;
+    padding-inline: 1rem;
+  }
+
+  .help-hero-pills {
+    margin-top: 1rem;
+  }
+
+  .help-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .5rem .85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .16);
+    font-size: .84rem;
+    font-weight: 600;
+  }
+
+  .help-stat-card {
+    display: grid;
+    gap: .85rem;
+    padding: 1.15rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .16);
+    backdrop-filter: blur(10px);
+  }
+
+  .help-stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    align-items: center;
+  }
+
+  .help-stat-row strong {
+    font-size: 1.1rem;
+  }
+
+  .help-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 1.35rem;
+    align-items: start;
+  }
+
+  .help-main {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .help-card,
+  .help-sidebar-card {
+    background: var(--help-panel);
+    padding: 1.35rem;
+  }
+
+  .help-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .5rem;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--help-accent);
+  }
+
+  .help-section-title {
+    font-size: 1.25rem;
+    margin-bottom: .3rem;
+  }
+
+  .help-demo-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(260px, .95fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .help-demo-copy {
+    display: grid;
+    gap: .95rem;
+    align-content: start;
+  }
+
+  .help-demo-title {
+    font-size: 1.55rem;
+    line-height: 1.08;
+    margin-bottom: .2rem;
+  }
+
+  .help-video-card {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(13, 108, 143, .06), rgba(255, 255, 255, .98));
+    border: 1px solid var(--help-border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .65);
+  }
+
+  .help-video-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .help-video-player {
+    width: 100%;
+    display: block;
+    border: 0;
+    border-radius: 22px;
+    background: #06131d;
+    aspect-ratio: 16 / 9;
+    box-shadow: 0 22px 48px rgba(9, 25, 42, .22);
+  }
+
+  .help-video-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .7rem;
+  }
+
+  .help-demo-bullets {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: .55rem;
+  }
+
+  .help-demo-browser {
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    border-radius: 26px;
+    background: linear-gradient(180deg, #0d1726 0%, #11243a 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 18px 40px rgba(9, 25, 42, .22);
+  }
+
+  .help-demo-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .9rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .help-demo-lights {
+    display: flex;
+    gap: .4rem;
+  }
+
+  .help-demo-lights span {
+    width: .7rem;
+    height: .7rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .help-demo-lights span:nth-child(1) { background: #ff6b6b; }
+  .help-demo-lights span:nth-child(2) { background: #ffd166; }
+  .help-demo-lights span:nth-child(3) { background: #2ecb71; }
+
+  .help-demo-address {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: .45rem .8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .08);
+    color: rgba(255, 255, 255, .78);
+    font-size: .84rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .help-demo-frame {
+    position: relative;
+    min-height: 360px;
+    padding: 1rem;
+  }
+
+  .help-demo-slide {
+    position: absolute;
+    inset: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    gap: .9rem;
+    opacity: 0;
+    transform: translateX(24px) scale(.98);
+    pointer-events: none;
+    transition: opacity .45s ease, transform .45s ease;
+  }
+
+  .help-demo-slide.is-active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .help-demo-caption,
+  .help-demo-screen {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .help-demo-caption {
+    display: grid;
+    align-content: start;
+    gap: .8rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+  }
+
+  .help-demo-step {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    gap: .4rem;
+    padding: .38rem .7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .08);
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .help-demo-caption h3 {
+    font-size: 1.28rem;
+    line-height: 1.08;
+    margin-bottom: 0;
+  }
+
+  .help-demo-caption p,
+  .help-demo-caption li {
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .help-demo-caption ul {
+    margin: 0;
+    padding-left: 1rem;
+    display: grid;
+    gap: .45rem;
+  }
+
+  .help-demo-screen {
+    padding: 1rem;
+    background:
+      radial-gradient(circle at top left, rgba(42, 160, 107, .18), transparent 28%),
+      linear-gradient(180deg, #f7fbfd 0%, #ecf3f8 100%);
+    color: var(--help-ink);
+    overflow: hidden;
+  }
+
+  .help-ui-chip-row,
+  .help-ui-mini-row,
+  .help-ui-card-grid,
+  .help-ui-stat-grid,
+  .help-ui-step-list {
+    display: grid;
+    gap: .7rem;
+  }
+
+  .help-ui-chip-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .help-ui-chip,
+  .help-ui-stat,
+  .help-ui-panel,
+  .help-ui-step,
+  .help-link-row {
+    border-radius: 18px;
+    border: 1px solid rgba(17, 36, 58, .08);
+    background: rgba(255, 255, 255, .82);
+  }
+
+  .help-ui-chip {
+    padding: .7rem .8rem;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--help-accent);
+    background: linear-gradient(180deg, rgba(13, 108, 143, .1), rgba(255, 255, 255, .88));
+  }
+
+  .help-ui-search {
+    margin-top: .8rem;
+    padding: .8rem .95rem;
+    border-radius: 18px;
+    border: 1px solid rgba(17, 36, 58, .08);
+    background: #fff;
+    color: #8796aa;
+    font-size: .88rem;
+  }
+
+  .help-ui-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: .8rem;
+  }
+
+  .help-ui-panel {
+    padding: .9rem;
+    display: grid;
+    gap: .45rem;
+  }
+
+  .help-ui-title {
+    font-size: .92rem;
+    font-weight: 800;
+  }
+
+  .help-ui-line {
+    height: .55rem;
+    border-radius: 999px;
+    background: #dbe8f2;
+  }
+
+  .help-ui-line.short { width: 58%; }
+  .help-ui-line.medium { width: 72%; }
+  .help-ui-line.long { width: 100%; }
+  .help-ui-line.accent { background: linear-gradient(90deg, #0d6c8f, #2aa06b); }
+  .help-ui-line.warm { background: linear-gradient(90deg, #f2a93b, #ffc76d); }
+
+  .help-ui-mini-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: .8rem;
+  }
+
+  .help-ui-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: .8rem;
+  }
+
+  .help-ui-stat {
+    padding: .85rem;
+  }
+
+  .help-ui-stat strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--help-accent);
+  }
+
+  .help-ui-step-list {
+    margin-top: .8rem;
+  }
+
+  .help-ui-step {
+    display: flex;
+    gap: .8rem;
+    align-items: flex-start;
+    padding: .9rem;
+  }
+
+  .help-ui-step-number {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 108, 143, .1);
+    color: var(--help-accent);
+    font-size: .84rem;
+    font-weight: 800;
+  }
+
+  .help-ui-step-copy {
+    display: grid;
+    gap: .35rem;
+  }
+
+  .help-ui-step-copy strong {
+    font-size: .9rem;
+  }
+
+  .help-ui-step-copy span {
+    color: var(--help-muted);
+    font-size: .82rem;
+  }
+
+  .help-demo-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-top: 1rem;
+  }
+
+  .help-demo-dots button {
+    width: .85rem;
+    height: .85rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #d6e1ea;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  .help-demo-dots button.is-active {
+    background: linear-gradient(90deg, var(--help-accent), var(--help-accent-2));
+    transform: scale(1.14);
+  }
+
+  .help-demo-actions .btn {
+    border-radius: 12px;
+  }
+
+  .accordion.help-accordion {
+    margin-top: 1rem;
+    display: grid;
+    gap: .9rem;
+  }
+
+  .help-accordion .accordion-item {
+    overflow: hidden;
+    border: 1px solid var(--help-border);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 12px 24px rgba(17, 36, 58, .05);
+  }
+
+  .help-accordion .accordion-button {
+    gap: .75rem;
+    padding: 1rem 1.1rem;
+    font-weight: 700;
+    color: var(--help-ink);
+    box-shadow: none;
+  }
+
+  .help-accordion .accordion-button:not(.collapsed) {
+    color: var(--help-accent);
+    background: linear-gradient(180deg, rgba(13, 108, 143, .08), rgba(255, 255, 255, .98));
+  }
+
+  .help-accordion .accordion-body {
+    padding: 1rem 1.1rem 1.15rem;
+    color: var(--help-muted);
+  }
+
+  .help-sidebar {
+    display: grid;
+    gap: 1rem;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .help-link-list,
+  .help-contact-list {
+    display: grid;
+    gap: .75rem;
+    margin-top: .95rem;
+  }
+
+  .help-link-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+    padding: .95rem 1rem;
+    color: inherit;
+    text-decoration: none;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+
+  .help-link-row:hover {
+    transform: translateY(-2px);
+    border-color: rgba(13, 108, 143, .22);
+    box-shadow: 0 16px 30px rgba(17, 36, 58, .08);
+  }
+
+  .help-link-icon,
+  .help-contact-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 108, 143, .1);
+    color: var(--help-accent);
+  }
+
+  .help-link-copy strong,
+  .help-contact-copy strong {
+    display: block;
+    color: var(--help-ink);
+  }
+
+  .help-contact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+  }
+
+  .help-tip {
+    margin-top: .95rem;
+    padding: 1rem;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #fff7e8, #fff);
+    border: 1px solid rgba(242, 169, 59, .18);
+  }
+
+  .help-tip strong {
+    color: #8a5a08;
+  }
+
+  .help-tip p {
+    color: #89683a;
+    margin: .35rem 0 0;
+  }
+
+  @media (max-width: 991.98px) {
+    .help-hero-grid,
+    .help-layout,
+    .help-demo-wrap,
+    .help-demo-slide {
+      grid-template-columns: 1fr;
+    }
+
+    .help-sidebar {
+      position: static;
+    }
+
+    .help-demo-browser {
+      min-height: 620px;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .help-hero,
+    .help-card,
+    .help-sidebar-card {
+      border-radius: 24px;
+    }
+
+    .help-hero {
+      padding: 1.45rem;
+    }
+
+    .help-ui-chip-row,
+    .help-ui-card-grid,
+    .help-ui-mini-row,
+    .help-ui-stat-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .help-demo-browser {
+      min-height: 720px;
+    }
+
+    .help-demo-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .help-demo-actions .btn {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .help-demo-slide,
+    .help-demo-dots button,
+    .help-link-row {
+      transition: none;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h1 class="text-center mb-5"><i class="bi bi-question-circle me-2"></i>Centro de Ajuda</h1>
-            
-            <!-- FAQ Accordion -->
-            <div class="accordion" id="faqAccordion">
-                <!-- Registo -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#registo">
-                            <i class="bi bi-person-plus me-2"></i>Como me registo?
-                        </button>
-                    </h2>
-                    <div id="registo" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            <ol>
-                                <li>Clica em "Criar Conta" no menu superior</li>
-                                <li>Escolhe o tipo de perfil (Jovem ou Empresa)</li>
-                                <li>Preenche os teus dados pessoais</li>
-                                <li>Aceita os consentimentos de uso de dados</li>
-                                <li>Clica em "Criar Conta"</li>
-                            </ol>
-                            <p class="mb-0">Se és jovem, depois do registo deverás completar o teu perfil em 4 passos simples.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Perfil -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#perfil">
-                            <i class="bi bi-person me-2"></i>Como completo o meu perfil?
-                        </button>
-                    </h2>
-                    <div id="perfil" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            <p>O perfil é completado em 4 passos:</p>
-                            <ol>
-                                <li><strong>Dados Pessoais:</strong> Data de nascimento, sexo e localidade</li>
-                                <li><strong>Educação e Skills:</strong> Nível de educação, área de formação e competências</li>
-                                <li><strong>Experiência e Interesses:</strong> Situação atual, disponibilidade e setor de interesse</li>
-                                <li><strong>Documentos:</strong> CV, certificados (opcional)</li>
-                            </ol>
-                            <p class="mb-0">Podes guardar o progresso a qualquer momento e continuar depois.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Empresas -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#empresas">
-                            <i class="bi bi-building me-2"></i>Sou empresa. Como funciona?
-                        </button>
-                    </h2>
-                    <div id="empresas" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            <ol>
-                                <li>Regista-te como empresa</li>
-                                <li>Completa o perfil da empresa</li>
-                                <li>Publica vagas de emprego, estágio ou formação</li>
-                                <li>Pesquisa jovens por distrito, nível de educação, skills</li>
-                                <li>Solicita contacto dos jovens que te interessam</li>
-                            </ol>
-                            <p class="mb-0">Todos os pedidos de contacto são aprovados pelo administrador antes de serem enviados.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Privacidade -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacidade">
-                            <i class="bi bi-shield-check me-2"></i>Os meus dados estão seguros?
-                        </button>
-                    </h2>
-                    <div id="privacidade" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            <p>Sim! A proteção dos teus dados é uma prioridade:</p>
-                            <ul>
-                                <li>Os teus dados só são partilhados com empresas quando autorizas</li>
-                                <li>Podes tornar o teu perfil invisível a qualquer momento</li>
-                                <li>Os pedidos de contacto são aprovados pelo administrador</li>
-                                <li>Todos os acessos são registados em logs de auditoria</li>
-                                <li>A plataforma segue as melhores práticas de segurança</li>
-                            </ul>
-                            <p class="mb-0">Consulta a nossa <a href="{% url 'privacy' %}">Política de Privacidade</a> para mais informações.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Contacto -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contacto">
-                            <i class="bi bi-envelope me-2"></i>Como entro em contacto?
-                        </button>
-                    </h2>
-                    <div id="contacto" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            <p>Para questões ou suporte, podes contactar-nos através de:</p>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-envelope me-2 text-primary"></i>Email: info@basenacionaljovens.st</li>
-                                <li><i class="bi bi-telephone me-2 text-primary"></i>Telefone: +239 123 4567</li>
-                                <li><i class="bi bi-geo-alt me-2 text-primary"></i>Endereço: São Tomé, São Tomé e Príncipe</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<div class="help-page py-4 py-lg-5">
+  <div class="container">
+    <div class="help-shell">
+      <section class="help-hero">
+        <div class="help-hero-grid">
+          <div>
+            <div class="help-kicker"><i class="bi bi-question-circle"></i>Centro de ajuda</div>
+            <h1 class="help-title">Guia rápido para entrar, completar o perfil e avançar.</h1>
+            <p class="help-copy mb-0">
+              Esta página junta respostas frequentes, um tutorial visual do fluxo principal e atalhos para as Áreas mais importantes da plataforma.
+            </p>
+            <div class="help-hero-actions">
+              <a href="{% url 'accounts:register' %}" class="btn btn-light"><i class="bi bi-person-plus me-2"></i>Criar conta</a>
+              <a href="{% url 'accounts:login' %}" class="btn btn-outline-light"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar</a>
+              <a href="#faqAccordion" class="btn btn-dark"><i class="bi bi-life-preserver me-2"></i>Ver FAQ</a>
             </div>
-            
-            <!-- Video Tutorial -->
-            <div class="card mt-5">
-                <div class="card-body text-center p-5">
-                    <i class="bi bi-play-circle text-primary" style="font-size: 4rem;"></i>
-                    <h3 class="mt-3">Vídeo Tutorial</h3>
-                    <p class="text-muted">Aprende a usar a plataforma em poucos minutos</p>
-                    <div class="ratio ratio-16x9 mt-3">
-                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                                title="Tutorial Base Nacional de Jovens" 
-                                allowfullscreen></iframe>
-                    </div>
-                    <p class="text-muted mt-3"><small>Em breve: vídeo tutorial completo em português</small></p>
-                </div>
+            <div class="help-hero-pills">
+              <span class="help-pill"><i class="bi bi-clock-history"></i>Leitura rápida</span>
+              <span class="help-pill"><i class="bi bi-play-circle"></i>Tutorial visual local</span>
+              <span class="help-pill"><i class="bi bi-shield-check"></i>Privacidade explicada</span>
             </div>
+          </div>
+
+          <div class="help-stat-card">
+            <div>
+              <div class="help-section-label text-white-50 mb-2"><i class="bi bi-activity"></i>Resumo</div>
+              <p class="help-meta-copy mb-0">Se és jovem, o fluxo mais comum fica assim: criar conta, completar perfil, ativar consentimentos e candidatar-se.</p>
+            </div>
+            <div class="help-stat-row"><span>Percurso inicial</span><strong>4 passos</strong></div>
+            <div class="help-stat-row"><span>Conta empresa</span><strong>Perfil + vagas</strong></div>
+            <div class="help-stat-row"><span>Ajuda rápida</span><strong>FAQ + atalhos</strong></div>
+          </div>
         </div>
+      </section>
+
+      <div class="help-layout">
+        <div class="help-main">
+          <section class="help-card">
+            <div class="help-section-label"><i class="bi bi-play-btn"></i>Tutorial visual</div>
+            <h2 class="help-section-title">Vídeo MP4 gravado da interface real + resumo rápido</h2>
+            <p class="help-card-copy mb-0">
+              O bloco abaixo traz um vídeo MP4 local com capturas reais do site e, logo depois, um resumo visual para rever os passos com calma.
+            </p>
+
+            <div class="help-video-card">
+              <div class="help-video-head">
+                <div>
+                  <div class="help-section-label mb-2"><i class="bi bi-camera-video"></i>Vídeo MP4 real</div>
+                  <h3 class="help-demo-title mb-2">Tutorial gravado diretamente da interface do site.</h3>
+                  <p class="help-card-copy mb-0">
+                    Mostra o fluxo principal em seis momentos: página inicial, registo, login, wizard do jovem, vagas disponíveis e painel da empresa.
+                  </p>
+                </div>
+                <div class="help-video-actions">
+                  <a href="{% static 'help/help-tutorial.mp4' %}" class="btn btn-outline-primary btn-sm" download><i class="bi bi-download me-2"></i>Descarregar MP4</a>
+                </div>
+              </div>
+
+              <video class="help-video-player mt-3" controls preload="metadata" playsinline poster="{% static 'help/help-tutorial-poster.jpg' %}">
+                <source src="{% static 'help/help-tutorial.mp4' %}" type="video/mp4">
+                O teu navegador não conseguiu carregar o vídeo MP4 local.
+              </video>
+
+              <p class="help-demo-note mt-3 mb-0"><small>Gravado localmente com a interface real da plataforma para demonstrações, onboarding e apoio remoto.</small></p>
+            </div>
+
+            <div class="help-demo-wrap">
+              <div class="help-demo-copy">
+                <div>
+                  <h3 class="help-demo-title">Resumo em passos para acompanhar o vídeo ou rever depois.</h3>
+                  <p class="help-card-copy mb-0">
+                    Este resumo continua disponível como apoio visual rápido, mesmo quando preferires não abrir o vídeo completo.
+                  </p>
+                </div>
+
+                <ul class="help-demo-bullets">
+                  <li>Explorar a página inicial e perceber o objetivo da plataforma.</li>
+                  <li>Criar conta com o perfil certo e entrar sem fricção.</li>
+                  <li>Completar o perfil jovem por etapas e guardar progresso.</li>
+                  <li>Entender o lado das empresas e as regras de privacidade.</li>
+                </ul>
+
+                <div class="help-tip">
+                  <strong>Dica prática</strong>
+                  <p>Se éstiveres a apoiar um utilizador ao telefone ou presencialmente, esta sequência serve como roteiro rápido de onboarding.</p>
+                </div>
+              </div>
+
+              <div>
+                <div class="help-demo-browser" data-help-demo>
+                  <div class="help-demo-topbar">
+                    <div class="help-demo-lights" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <div class="help-demo-address">https://basenacionaljovens.st/guia-rápido</div>
+                  </div>
+
+                  <div class="help-demo-frame">
+                    <article class="help-demo-slide is-active" data-demo-slide>
+                      <div class="help-demo-caption">
+                        <span class="help-demo-step">Cena 1</span>
+                        <h3>Começar pela página certa.</h3>
+                        <p>A página inicial resume o que existe na plataforma, quem pode entrar e quais os próximos passos mais comuns.</p>
+                        <ul>
+                          <li>Ver oportunidades e objetivos da plataforma.</li>
+                          <li>Entrar ou criar conta sem perder contexto.</li>
+                          <li>Perceber rápidamente o valor para jovens e empresas.</li>
+                        </ul>
+                      </div>
+                      <div class="help-demo-screen">
+                        <div class="help-ui-chip-row">
+                          <div class="help-ui-chip">Início</div>
+                          <div class="help-ui-chip">Oportunidades</div>
+                          <div class="help-ui-chip">Perfis</div>
+                        </div>
+                        <div class="help-ui-search">Pesquisar vagas, apoio ou tipo de perfil</div>
+                        <div class="help-ui-card-grid">
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Ligação entre jovens e oportunidades</div>
+                            <div class="help-ui-line accent long"></div>
+                            <div class="help-ui-line medium"></div>
+                            <div class="help-ui-line short"></div>
+                          </div>
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Entrar rápidamente</div>
+                            <div class="help-ui-line warm medium"></div>
+                            <div class="help-ui-line short"></div>
+                            <div class="help-ui-line long"></div>
+                          </div>
+                        </div>
+                        <div class="help-ui-stat-grid">
+                          <div class="help-ui-stat"><strong>Jovens</strong><span>Perfil e candidaturas</span></div>
+                          <div class="help-ui-stat"><strong>Empresas</strong><span>Vagas e pedidos</span></div>
+                          <div class="help-ui-stat"><strong>Ajuda</strong><span>FAQ e suporte</span></div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="help-demo-slide" data-demo-slide>
+                      <div class="help-demo-caption">
+                        <span class="help-demo-step">Cena 2</span>
+                        <h3>Escolher o perfil e criar conta.</h3>
+                        <p>O registo orienta cada utilizador para o fluxo certo logo no início, reduzindo erros e retrabalho.</p>
+                        <ul>
+                          <li>Selecionar jovem, empresa ou perfil interno.</li>
+                          <li>Preencher telefone, nome e dados base.</li>
+                          <li>Ativar consentimentos quando o perfil é público.</li>
+                        </ul>
+                      </div>
+                      <div class="help-demo-screen">
+                        <div class="help-ui-mini-row">
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Perfil Jovem</div>
+                            <div class="help-ui-line accent medium"></div>
+                            <div class="help-ui-line short"></div>
+                          </div>
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Perfil Empresa</div>
+                            <div class="help-ui-line warm medium"></div>
+                            <div class="help-ui-line long"></div>
+                          </div>
+                        </div>
+                        <div class="help-ui-step-list">
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">1</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Escolher o tipo de conta</strong>
+                              <span>O sistema adapta o resto do formulário.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">2</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Preencher dados base</strong>
+                              <span>Nome, contacto e dados obrigatórios conforme o perfil.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">3</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Concluir com palavra-passe e consentimentos</strong>
+                              <span>Pronto para entrar e seguir o fluxo correto.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="help-demo-slide" data-demo-slide>
+                      <div class="help-demo-caption">
+                        <span class="help-demo-step">Cena 3</span>
+                        <h3>Completar o perfil do jovem por etapas.</h3>
+                        <p>O wizard organiza informação pessoal, formação, experiência e documentos em blocos curtos e guardaveis.</p>
+                        <ul>
+                          <li>Passos claros com progresso visível.</li>
+                          <li>Campos opcionais para experiência e documentos.</li>
+                          <li>Perfil mais completo melhora pesquisas e candidaturas.</li>
+                        </ul>
+                      </div>
+                      <div class="help-demo-screen">
+                        <div class="help-ui-step-list">
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">1</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Dados pessoais</strong>
+                              <span>Identidade, contacto e localização.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">2</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Educação e skills</strong>
+                              <span>Curso, nivel e competencias principais.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">3</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Experiência e interesses</strong>
+                              <span>Disponibilidade, setores e objetivos.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number">4</span>
+                            <div class="help-ui-step-copy">
+                              <strong>Documentos e consentimentos</strong>
+                              <span>CV, certificado e canais de contacto.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="help-demo-slide" data-demo-slide>
+                      <div class="help-demo-caption">
+                        <span class="help-demo-step">Cena 4</span>
+                        <h3>Empresas, pedidos de contacto e privacidade.</h3>
+                        <p>As empresas publicam vagas e pedem contacto com controlo administrativo, enquanto o jovem continua a decidir a visibilidade do perfil.</p>
+                        <ul>
+                          <li>Perfil empresarial antes da publicação de vagas.</li>
+                          <li>Pedidos de contacto com aprovação administrativa.</li>
+                          <li>Consentimentos e visibilidade ajustaveis.</li>
+                        </ul>
+                      </div>
+                      <div class="help-demo-screen">
+                        <div class="help-ui-card-grid">
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Empresa</div>
+                            <div class="help-ui-line accent long"></div>
+                            <div class="help-ui-line medium"></div>
+                            <div class="help-ui-line short"></div>
+                          </div>
+                          <div class="help-ui-panel">
+                            <div class="help-ui-title">Privacidade</div>
+                            <div class="help-ui-line warm long"></div>
+                            <div class="help-ui-line medium"></div>
+                            <div class="help-ui-line short"></div>
+                          </div>
+                        </div>
+                        <div class="help-ui-step-list">
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number"><i class="bi bi-building"></i></span>
+                            <div class="help-ui-step-copy">
+                              <strong>Vagas e pedidos</strong>
+                              <span>A empresa gere oportunidades e acompanha respostas.</span>
+                            </div>
+                          </div>
+                          <div class="help-ui-step">
+                            <span class="help-ui-step-number"><i class="bi bi-shield-lock"></i></span>
+                            <div class="help-ui-step-copy">
+                              <strong>Dados protegidos</strong>
+                              <span>O jovem controla visibilidade e canais de contacto.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+
+                <div class="help-demo-footer">
+                  <div class="help-demo-dots" aria-label="Navegação do tutorial">
+                    <button type="button" class="is-active" data-demo-dot aria-label="Mostrar cena 1"></button>
+                    <button type="button" data-demo-dot aria-label="Mostrar cena 2"></button>
+                    <button type="button" data-demo-dot aria-label="Mostrar cena 3"></button>
+                    <button type="button" data-demo-dot aria-label="Mostrar cena 4"></button>
+                  </div>
+                  <div class="help-demo-actions">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-demo-prev><i class="bi bi-arrow-left me-2"></i>Anterior</button>
+                    <button type="button" class="btn btn-primary btn-sm" data-demo-next><i class="bi bi-arrow-right me-2"></i>Seguinte</button>
+                  </div>
+                </div>
+                <p class="help-demo-note mt-3 mb-0"><small>Usa este resumo interativo para rever cada cena ou apoiar uma explicação passo a passo durante a demonstração.</small></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="help-card">
+            <div class="help-section-label"><i class="bi bi-life-preserver"></i>Perguntas frequentes</div>
+            <h2 class="help-section-title">Respostas diretas para o que costuma bloquear mais</h2>
+            <p class="help-card-copy mb-0">
+              Estas respostas cobrem registo, conclusao de perfil, fluxo das empresas, privacidade e canais de contacto.
+            </p>
+
+            <div class="accordion help-accordion" id="faqAccordion">
+              <div class="accordion-item" id="registo">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqRegisto" aria-expanded="true" aria-controls="faqRegisto">
+                    <i class="bi bi-person-plus"></i>Como me registo?
+                  </button>
+                </h2>
+                <div id="faqRegisto" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    <ol>
+                      <li>Clica em "Criar conta" no menu superior.</li>
+                      <li>Escolhe o tipo de perfil certo para o teu caso.</li>
+                      <li>Preenche os dados base pedidos pelo formulário.</li>
+                      <li>Aceita os consentimentos de uso de dados quando o perfil for público.</li>
+                      <li>Clica em "Criar conta" e entra para continuar.</li>
+                    </ol>
+                    <p class="mb-0">Se fores jovem, o passo seguinte normal é completar o perfil em quatro etapas simples.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item" id="perfil">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqPerfil" aria-expanded="false" aria-controls="faqPerfil">
+                    <i class="bi bi-person-vcard"></i>Como completo o meu perfil?
+                  </button>
+                </h2>
+                <div id="faqPerfil" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    <p>O perfil do jovem fica organizado em quatro blocos:</p>
+                    <ol>
+                      <li><strong>Dados pessoais:</strong> data de nascimento, sexo, localidade e contactos.</li>
+                      <li><strong>Educação e skills:</strong> nivel, Área de formação e competencias.</li>
+                      <li><strong>Experiência e interesses:</strong> situação atual, disponibilidade e setores de interesse.</li>
+                      <li><strong>Documentos e consentimentos:</strong> CV, certificados e canais permitidos de contacto.</li>
+                    </ol>
+                    <p class="mb-0">Podes guardar progresso e continuar depois, sem perder o que já preencheste.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item" id="empresas">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqEmpresas" aria-expanded="false" aria-controls="faqEmpresas">
+                    <i class="bi bi-building"></i>Sou empresa. Como funciona?
+                  </button>
+                </h2>
+                <div id="faqEmpresas" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    <ol>
+                      <li>Regista-te como empresa.</li>
+                      <li>Completa o perfil empresarial com identidade, setores e localização.</li>
+                      <li>Publica vagas de emprego, estágio ou formação.</li>
+                      <li>Pesquisa jovens e acompanha candidaturas.</li>
+                      <li>Pede contacto quando existir interesse real e enquadrado.</li>
+                    </ol>
+                    <p class="mb-0">Os pedidos de contacto passam por validação administrativa antes de libertar dados diretos do jovem.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item" id="privacidade">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqPrivacidade" aria-expanded="false" aria-controls="faqPrivacidade">
+                    <i class="bi bi-shield-check"></i>Os meus dados estão seguros?
+                  </button>
+                </h2>
+                <div id="faqPrivacidade" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    <p>Sim. A proteção dos teus dados faz parte do desenho da plataforma:</p>
+                    <ul>
+                      <li>O teu perfil só é partilhado dentro das regras definidas pelos consentimentos.</li>
+                      <li>Podes ajustar visibilidade e canais de contacto no teu perfil.</li>
+                      <li>Pedidos de contacto passam por controlo administrativo.</li>
+                      <li>Os acessos e operações relevantes ficam registados em auditoria.</li>
+                      <li>Existe uma página de privacidade para consulta clara das regras.</li>
+                    </ul>
+                    <p class="mb-0">Podes rever os detalhes na <a href="{% url 'privacy' %}">Política de Privacidade</a>.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item" id="contacto">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqContacto" aria-expanded="false" aria-controls="faqContacto">
+                    <i class="bi bi-envelope"></i>Como entro em contacto?
+                  </button>
+                </h2>
+                <div id="faqContacto" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    <p>Se precisares de apoio, podes usar estes canais:</p>
+                    <ul class="mb-0">
+                      <li><strong>Email:</strong> info@basenacionaljovens.st</li>
+                      <li><strong>Telefone:</strong> +239 123 4567</li>
+                      <li><strong>Endereço:</strong> São Tomé, São Tomé e Príncipe</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="help-sidebar">
+          <section class="help-sidebar-card">
+            <div class="help-section-label"><i class="bi bi-signpost"></i>Atalhos uteis</div>
+            <h2 class="help-section-title">Entrar logo na Área certa</h2>
+            <p class="help-support-copy mb-0">Se já sabes o que queres fazer, estes atalhos evitam passos desnecessarios.</p>
+
+            <div class="help-link-list">
+              <a href="{% url 'accounts:register' %}" class="help-link-row">
+                <span class="help-link-icon"><i class="bi bi-person-plus"></i></span>
+                <span class="help-link-copy">
+                  <strong>Criar conta</strong>
+                  <span>Começa o registo com o perfil adequado.</span>
+                </span>
+              </a>
+              <a href="{% url 'accounts:login' %}" class="help-link-row">
+                <span class="help-link-icon"><i class="bi bi-box-arrow-in-right"></i></span>
+                <span class="help-link-copy">
+                  <strong>Entrar na plataforma</strong>
+                  <span>Acede ao teu fluxo atual sem recomeçar.</span>
+                </span>
+              </a>
+              <a href="{% url 'about' %}" class="help-link-row">
+                <span class="help-link-icon"><i class="bi bi-info-circle"></i></span>
+                <span class="help-link-copy">
+                  <strong>Sobre a plataforma</strong>
+                  <span>Percebe contexto, objetivo e público do projeto.</span>
+                </span>
+              </a>
+              <a href="{% url 'privacy' %}" class="help-link-row">
+                <span class="help-link-icon"><i class="bi bi-shield-lock"></i></span>
+                <span class="help-link-copy">
+                  <strong>Política de Privacidade</strong>
+                  <span>Consulta regras de partilha, visibilidade e proteção.</span>
+                </span>
+              </a>
+            </div>
+          </section>
+
+          <section class="help-sidebar-card">
+            <div class="help-section-label"><i class="bi bi-headset"></i>Suporte</div>
+            <h2 class="help-section-title">Quando precisares de apoio humano</h2>
+            <p class="help-support-copy mb-0">Usa estes contactos para tirar dúvidas, reportar problemas ou acompanhar um caso específico.</p>
+
+            <div class="help-contact-list">
+              <div class="help-contact-row">
+                <span class="help-contact-icon"><i class="bi bi-envelope"></i></span>
+                <span class="help-contact-copy">
+                  <strong>Email</strong>
+                  <span>info@basenacionaljovens.st</span>
+                </span>
+              </div>
+              <div class="help-contact-row">
+                <span class="help-contact-icon"><i class="bi bi-telephone"></i></span>
+                <span class="help-contact-copy">
+                  <strong>Telefone</strong>
+                  <span>+239 123 4567</span>
+                </span>
+              </div>
+              <div class="help-contact-row">
+                <span class="help-contact-icon"><i class="bi bi-geo-alt"></i></span>
+                <span class="help-contact-copy">
+                  <strong>Localização</strong>
+                  <span>São Tomé, São Tomé e Príncipe</span>
+                </span>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const root = document.querySelector('[data-help-demo]');
+    if (!root) return;
+
+    const slides = Array.from(root.querySelectorAll('[data-demo-slide]'));
+    const dots = Array.from(document.querySelectorAll('[data-demo-dot]'));
+    const nextButton = document.querySelector('[data-demo-next]');
+    const prevButton = document.querySelector('[data-demo-prev]');
+    let currentIndex = 0;
+    let autoplayId = null;
+
+    function render(index) {
+      currentIndex = (index + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-active', slideIndex === currentIndex);
+      });
+      dots.forEach((dot, dotIndex) => {
+        dot.classList.toggle('is-active', dotIndex === currentIndex);
+      });
+    }
+
+    function stopAutoplay() {
+      if (autoplayId) {
+        window.clearInterval(autoplayId);
+        autoplayId = null;
+      }
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      autoplayId = window.setInterval(() => {
+        render(currentIndex + 1);
+      }, 4200);
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        render(index);
+        startAutoplay();
+      });
+    });
+
+    if (nextButton) {
+      nextButton.addEventListener('click', () => {
+        render(currentIndex + 1);
+        startAutoplay();
+      });
+    }
+
+    if (prevButton) {
+      prevButton.addEventListener('click', () => {
+        render(currentIndex - 1);
+        startAutoplay();
+      });
+    }
+
+    root.addEventListener('mouseenter', stopAutoplay);
+    root.addEventListener('mouseleave', startAutoplay);
+
+    render(0);
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      startAutoplay();
+    }
+  })();
+</script>
+{% endblock %}
+
+

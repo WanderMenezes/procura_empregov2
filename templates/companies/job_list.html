@@ -39,7 +39,7 @@
         <div class="job-card-meta">
           <span><i class="bi bi-calendar-event me-1"></i>Publicada em {{ vaga.data_publicacao|date:"d/m/Y" }}</span>
           <span><i class="bi bi-geo-alt me-1"></i>{{ vaga.local_trabalho|default:vaga.distrito.nome|default:"Local a definir" }}</span>
-          <span><i class="bi bi-eye me-1"></i>{{ vaga.visualizacoes }} visualizacao{{ vaga.visualizacoes|pluralize }}</span>
+          <span><i class="bi bi-eye me-1"></i>{{ vaga.visualizacoes }} visualização{{ vaga.visualizacoes|pluralize }}</span>
         </div>
 
         <p class="job-card-copy">{{ vaga.descricao|truncatewords:28 }}</p>
@@ -61,7 +61,7 @@
 
         <div class="job-progress">
           <div class="job-progress-top">
-            <span>Ocupacao da vaga</span>
+            <span>Ocupação da vaga</span>
             <strong>{{ vaga.vagas_preenchidas }}/{{ vaga.numero_vagas }} preenchida{{ vaga.vagas_preenchidas|pluralize }}</strong>
           </div>
           <div class="job-progress-track">
@@ -74,7 +74,7 @@
 {% else %}
   <div class="job-empty">
     <i class="bi bi-briefcase"></i>
-    Ainda nao existem vagas publicadas. Crie a primeira oportunidade para comecar a receber candidaturas e medir interesse real.
+    Ainda não existem vagas publicadas. Crie a primeira oportunidade para começar a receber candidaturas e medir interesse real.
     <div class="mt-3">
       <a href="{% url 'companies:job_create' %}" class="btn btn-primary btn-sm">Publicar primeira vaga</a>
     </div>

@@ -24,7 +24,7 @@
                 <div class="card-body">
                     <div class="admin-sidebar-head">
                         <div>
-                            <div class="admin-sidebar-kicker">Monitorizacao nacional</div>
+                            <div class="admin-sidebar-kicker">Monitorização nacional</div>
                             <div class="admin-sidebar-title">
                                 <i class="bi bi-activity"></i>
                                 <span>{{ request.user.get_perfil_display }}</span>
@@ -36,11 +36,11 @@
                     <div class="admin-sidebar-nav">
                         <a href="{% url 'dashboard:tecnico' %}" class="admin-nav-link active">
                             <i class="bi bi-speedometer2"></i>
-                            <span>Dashboard tecnico</span>
+                            <span>Dashboard técnico</span>
                         </a>
                         <a href="{% url 'accounts:notifications' %}" class="admin-nav-link">
                             <i class="bi bi-bell"></i>
-                            <span>Notificacoes</span>
+                            <span>Notificações</span>
                             {% if unread_notifications_count %}
                                 <span class="admin-nav-count">{{ unread_notifications_count }}</span>
                             {% endif %}
@@ -51,14 +51,14 @@
                         </a>
                         <a href="{% url 'home' %}" class="admin-nav-link">
                             <i class="bi bi-house-door"></i>
-                            <span>Voltar ao inicio</span>
+                            <span>Voltar ao início</span>
                         </a>
                     </div>
 
                     <div class="admin-sidebar-note">
                         <div class="admin-sidebar-note-title">Foco deste painel</div>
                         <p class="mb-0">
-                            Acompanhar volume, cobertura territorial, formacao e atividade recente da plataforma sem entrar em fluxos de validacao.
+                            Acompanhar volume, cobertura territorial, formação e atividade recente da plataforma sem entrar em fluxos de validação.
                         </p>
                     </div>
 
@@ -69,7 +69,7 @@
                         </div>
                         <div class="admin-sidebar-meta-item">
                             <span class="admin-sidebar-meta-value">{{ areas_ativas|intcomma }}</span>
-                            <span class="admin-sidebar-meta-label">area{{ areas_ativas|pluralize }} de formacao</span>
+                            <span class="admin-sidebar-meta-label">área{{ areas_ativas|pluralize }} de formação</span>
                         </div>
                     </div>
                 </div>
@@ -81,9 +81,9 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Observatorio da plataforma</div>
-                        <h1 class="admin-page-title">Dashboard Tecnico PNUD</h1>
+                        <h1 class="admin-page-title">Dashboard Técnico PNUD</h1>
                         <p class="admin-subtitle mb-0">
-                            Veja a evolucao da base, a distribuicao dos jovens e os sinais mais relevantes para leitura tecnica e institucional.
+                            Vejá a evolução da base, a distribuição dos jovens e os sinais mais relevantes para leitura técnica e institucional.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -107,7 +107,7 @@
 
                     <div class="admin-hero-actions">
                         <a href="{% url 'accounts:notifications' %}" class="btn btn-light btn-sm">
-                            <i class="bi bi-bell me-1"></i>Ver notificacoes
+                            <i class="bi bi-bell me-1"></i>Ver notificações
                         </a>
                         <a href="{% url 'accounts:profile' %}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-person me-1"></i>Resumo da conta
@@ -150,7 +150,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start gap-3">
                                 <div>
-                                    <div class="stat-label">Validacoes pendentes</div>
+                                    <div class="stat-label">Validações pendentes</div>
                                     <h3 class="mb-1">{{ stats.validacoes_pendentes|intcomma }}</h3>
                                     <small>{{ stats.jovens_nao_completos|intcomma }} perfil{{ stats.jovens_nao_completos|pluralize }} ainda incompleto{{ stats.jovens_nao_completos|pluralize }}</small>
                                 </div>
@@ -183,7 +183,7 @@
                                 <div>
                                     <div class="admin-section-kicker">Saude da base</div>
                                     <h5 class="mb-1">Indicadores de cobertura e atividade</h5>
-                                    <p class="text-muted mb-0">Leitura consolidada para perceber ritmo de adesao, validacao e dinamica de oportunidades.</p>
+                                    <p class="text-muted mb-0">Leitura consolidada para perceber ritmo de adesão, validação e dinâmica de oportunidades.</p>
                                 </div>
                             </div>
 
@@ -222,11 +222,11 @@
 
                             <div class="admin-inline-stat-list">
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Novos utilizadores nos ultimos 7 dias</span>
+                                    <span class="admin-inline-stat-label">Novos utilizadores nos últimos 7 dias</span>
                                     <strong>{{ stats.novos_utilizadores_7d|intcomma }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Novas vagas nos ultimos 30 dias</span>
+                                    <span class="admin-inline-stat-label">Novas vagas nos últimos 30 dias</span>
                                     <strong>{{ stats.novas_vagas_30d|intcomma }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
@@ -247,7 +247,7 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Sinais rapidos</div>
+                                    <div class="admin-section-kicker">Sinais rápidos</div>
                                     <h5 class="mb-1">Onde olhar primeiro</h5>
                                     <p class="text-muted mb-0">Resumo dos pontos mais fortes da base neste momento.</p>
                                 </div>
@@ -261,7 +261,7 @@
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Distrito com mais jovens</div>
                                         <div class="admin-priority-text">
-                                            {% if top_district %}{{ top_district.nome }} lidera a distribuicao atual.{% else %}Ainda nao existem dados de distribuicao.{% endif %}
+                                            {% if top_district %}{{ top_district.nome }} lidera a distribuição atual.{% else %}Ainda não existem dados de distribuição.{% endif %}
                                         </div>
                                     </div>
                                     <div class="admin-priority-value">{% if top_district %}{{ top_district.total|intcomma }}{% else %}0{% endif %}</div>
@@ -271,9 +271,9 @@
                                         <i class="bi bi-mortarboard"></i>
                                     </div>
                                     <div class="admin-priority-copy">
-                                        <div class="admin-priority-title">Nivel de educacao dominante</div>
+                                        <div class="admin-priority-title">Nivel de educação dominante</div>
                                         <div class="admin-priority-text">
-                                            {% if top_level %}{{ top_level.nome }} aparece com maior peso na base.{% else %}Sem dados de educacao para consolidar.{% endif %}
+                                            {% if top_level %}{{ top_level.nome }} aparece com maior peso na base.{% else %}Sem dados de educação para consolidar.{% endif %}
                                         </div>
                                     </div>
                                     <div class="admin-priority-value">{% if top_level %}{{ top_level.total|intcomma }}{% else %}0{% endif %}</div>
@@ -283,9 +283,9 @@
                                         <i class="bi bi-diagram-3"></i>
                                     </div>
                                     <div class="admin-priority-copy">
-                                        <div class="admin-priority-title">Area com mais registos</div>
+                                        <div class="admin-priority-title">Área com mais registos</div>
                                         <div class="admin-priority-text">
-                                            {% if top_area %}{{ top_area.nome }} concentra mais perfis formativos.{% else %}Sem areas de formacao consolidadas ainda.{% endif %}
+                                            {% if top_area %}{{ top_area.nome }} concentra mais perfis formativos.{% else %}Sem áreas de formação consolidadas ainda.{% endif %}
                                         </div>
                                     </div>
                                     <div class="admin-priority-value">{% if top_area %}{{ top_area.total|intcomma }}{% else %}0{% endif %}</div>
@@ -295,8 +295,8 @@
                                         <i class="bi bi-hourglass-split"></i>
                                     </div>
                                     <div class="admin-priority-copy">
-                                        <div class="admin-priority-title">Perfis a aguardar validacao</div>
-                                        <div class="admin-priority-text">Indicador util para leitura do backlog operacional.</div>
+                                        <div class="admin-priority-title">Perfis a aguardar validação</div>
+                                        <div class="admin-priority-text">Indicador Útil para leitura do backlog operacional.</div>
                                     </div>
                                     <div class="admin-priority-value">{{ stats.validacoes_pendentes|intcomma }}</div>
                                 </div>
@@ -312,7 +312,7 @@
                         <div class="card-body">
                             <div class="admin-section-head compact">
                                 <div>
-                                    <div class="admin-section-kicker">Distribuicao</div>
+                                    <div class="admin-section-kicker">Distribuição</div>
                                     <h5 class="mb-1">Jovens por distrito</h5>
                                 </div>
                             </div>
@@ -339,7 +339,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-bar-chart-line"></i>
-                                    <p class="mb-0">Ainda nao existem dados suficientes para este recorte.</p>
+                                    <p class="mb-0">Ainda não existem dados suficientes para este recorte.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -351,8 +351,8 @@
                         <div class="card-body">
                             <div class="admin-section-head compact">
                                 <div>
-                                    <div class="admin-section-kicker">Formacao</div>
-                                    <h5 class="mb-1">Nivel de educacao</h5>
+                                    <div class="admin-section-kicker">Formação</div>
+                                    <h5 class="mb-1">Nivel de educação</h5>
                                 </div>
                             </div>
                             {% if educacao_stats %}
@@ -378,7 +378,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-book"></i>
-                                    <p class="mb-0">Sem registos de formacao para apresentar.</p>
+                                    <p class="mb-0">Sem registos de formação para apresentar.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -390,8 +390,8 @@
                         <div class="card-body">
                             <div class="admin-section-head compact">
                                 <div>
-                                    <div class="admin-section-kicker">Areas</div>
-                                    <h5 class="mb-1">Area de formacao</h5>
+                                    <div class="admin-section-kicker">Áreas</div>
+                                    <h5 class="mb-1">Área de formação</h5>
                                 </div>
                             </div>
                             {% if area_stats %}
@@ -417,7 +417,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-diagram-3"></i>
-                                    <p class="mb-0">Sem areas de formacao consolidadas neste momento.</p>
+                                    <p class="mb-0">Sem Áreas de formação consolidadas neste momento.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -441,7 +441,7 @@
                                         <div class="admin-activity-item">
                                             <div>
                                                 <div class="admin-activity-title">{{ jovem.nome_completo }}</div>
-                                                <small class="text-muted">{{ jovem.distrito.nome|default:"Sem distrito" }} - {{ jovem.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ jovem.distrito.nome|default:"Sem distrito" }} - {{ jovem.created_at|timesince }} atrás</small>
                                             </div>
                                             <span class="admin-status-pill {% if jovem.validado %}success{% else %}pending{% endif %}">
                                                 {% if jovem.validado %}Validado{% else %}Pendente{% endif %}
@@ -452,7 +452,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-person-plus"></i>
-                                    <p class="mb-0">Ainda nao ha entradas recentes de jovens.</p>
+                                    <p class="mb-0">Ainda não há entradas recentes de jovens.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -474,7 +474,7 @@
                                         <div class="admin-activity-item">
                                             <div>
                                                 <div class="admin-activity-title">{{ empresa.nome }}</div>
-                                                <small class="text-muted">{{ empresa.user.nome|default:"Sem responsavel" }} - {{ empresa.created_at|timesince }} atras</small>
+                                                <small class="text-muted">{{ empresa.user.nome|default:"Sem responsavel" }} - {{ empresa.created_at|timesince }} atrás</small>
                                             </div>
                                             <span class="admin-status-pill {% if empresa.ativa %}success{% else %}neutral{% endif %}">
                                                 {% if empresa.ativa %}Ativa{% else %}Inativa{% endif %}
@@ -485,7 +485,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-building-add"></i>
-                                    <p class="mb-0">Ainda nao ha empresas recentes para mostrar.</p>
+                                    <p class="mb-0">Ainda não há empresas recentes para mostrar.</p>
                                 </div>
                             {% endif %}
                         </div>
