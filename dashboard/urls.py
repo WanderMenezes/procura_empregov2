@@ -29,6 +29,9 @@ urlpatterns = [
     path('relatorios/', views.reports, name='reports'),
     path('relatorios/exportar-csv/', views.export_report_csv, name='export_report_csv'),
     path('relatorios/exportar-pdf/', views.export_report_pdf, name='export_report_pdf'),
+    path('registos-offline/', views.offline_registrations, name='offline_registrations'),
+    path('registos-offline/gerar/', views.offline_registration_export, name='offline_registration_export'),
+    path('registos-offline/importar/', views.offline_registration_import, name='offline_registration_import'),
     
     # API
     path('api/estatisticas/', views.api_stats, name='api_stats'),

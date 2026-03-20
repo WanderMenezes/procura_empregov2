@@ -1,12 +1,14 @@
+import json
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from companies.models import Application, Company, ContactRequest, JobPost
-from core.models import District, Notification
+from core.models import AuditLog, District, Notification
 from profiles.models import Education, YouthProfile
 
 
@@ -249,3 +251,215 @@ class ReportsExportTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertTrue(response.content.startswith(b'%PDF'))
+
+
+class OfflineRegistrationFlowTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000030',
+            nome='Admin Offline',
+            perfil=User.ProfileType.ADMIN,
+        )
+        self.district, _ = District.objects.get_or_create(
+            codigo='MES',
+            defaults={'nome': 'Me-Zochi'},
+        )
+        self.company_user = User.objects.create_user(
+            telefone='+2399000031',
+            nome='Empresa Existente',
+            perfil=User.ProfileType.EMPRESA,
+            email='empresa.existente@example.com',
+        )
+
+    def test_admin_can_open_offline_registrations_page(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:offline_registrations'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Registos offline')
+        self.assertContains(response, 'Gerar formulario offline')
+        self.assertContains(response, 'Importar ficheiro offline')
+
+    def test_non_admin_cannot_open_offline_registrations_page(self):
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('dashboard:offline_registrations'))
+
+        self.assertRedirects(response, reverse('home'))
+
+    def test_admin_can_export_fillable_offline_youth_registration_file(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse('dashboard:offline_registration_export'),
+            {
+                'profile_type': 'JO',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('text/html', response['Content-Type'])
+        self.assertIn('registo_offline_jovem.html', response['Content-Disposition'])
+        self.assertContains(response, 'Formulario offline de registo - Jovem')
+        self.assertContains(response, 'Gerar ficheiro para importacao')
+        self.assertContains(response, 'bnj_offline_registration')
+        self.assertTrue(
+            AuditLog.objects.filter(
+                user=self.admin,
+                acao='Registo offline exportado',
+                payload__profile_type='JO',
+            ).exists()
+        )
+
+    def test_admin_can_import_offline_youth_registration(self):
+        self.client.force_login(self.admin)
+
+        payload = {
+            'schema': 'bnj_offline_registration',
+            'version': 1,
+            'profile_type': 'JO',
+            'registration_data': {
+                'nome': 'Jovem Offline',
+                'telefone': '+2399000090',
+                'email': 'jovem.offline@example.com',
+                'distrito_codigo': self.district.codigo,
+                'consentimento_dados': True,
+                'consentimento_contacto': True,
+                'password': 'offline123',
+                'password_confirm': 'offline123',
+                'bi_numero': 'BI-900090',
+                'data_nascimento': '2002-05-10',
+                'sexo': 'F',
+                'localidade': 'Trindade',
+                'contacto_alternativo': '+2399000099',
+                'situacao_atual': 'DES',
+                'disponibilidade': 'SIM',
+                'preferencia_oportunidade': 'EMP',
+                'nivel': 'SEC',
+                'area_formacao': 'INF',
+                'instituicao': 'Liceu Nacional',
+                'ano': '2024',
+                'curso': 'Informatica',
+                'collected_offline_at': '2026-03-20 10:00',
+                'collected_by_name': 'Operador Distrital',
+                'collected_by_role': 'Operador',
+                'observacoes': 'Registo recolhido em zona sem internet.',
+            },
+        }
+        uploaded = SimpleUploadedFile(
+            'registo_jovem_offline.json',
+            json.dumps(payload).encode('utf-8'),
+            content_type='application/json',
+        )
+
+        response = self.client.post(
+            reverse('dashboard:offline_registration_import'),
+            {'file': uploaded},
+        )
+
+        self.assertRedirects(response, reverse('dashboard:offline_registrations'))
+        user = User.objects.get(telefone='+2399000090')
+        self.assertEqual(user.perfil, User.ProfileType.JOVEM)
+        self.assertEqual(user.bi_numero, 'BI-900090')
+        self.assertTrue(user.check_password('offline123'))
+        self.assertTrue(user.has_youth_profile())
+        self.assertTrue(user.youth_profile.completo)
+        self.assertFalse(user.youth_profile.validado)
+        self.assertTrue(
+            Education.objects.filter(
+                profile=user.youth_profile,
+                nivel='SEC',
+                area_formacao='INF',
+            ).exists()
+        )
+        self.assertTrue(
+            Notification.objects.filter(
+                user=user,
+                titulo='Registo offline recebido',
+            ).exists()
+        )
+        self.assertTrue(
+            AuditLog.objects.filter(
+                user=self.admin,
+                acao='Registo offline importado',
+                payload__file_name='registo_jovem_offline.json',
+                payload__profile_type='JO',
+                payload__user_name='Jovem Offline',
+            ).exists()
+        )
+
+    def test_admin_can_import_offline_company_registration(self):
+        self.client.force_login(self.admin)
+
+        payload = {
+            'schema': 'bnj_offline_registration',
+            'version': 1,
+            'profile_type': 'EMP',
+            'registration_data': {
+                'nome': 'Empresa Offline Nova',
+                'telefone': '+2399000091',
+                'email': 'empresa.nova@example.com',
+                'distrito_codigo': self.district.codigo,
+                'consentimento_dados': True,
+                'consentimento_contacto': True,
+                'password': 'empresa123',
+                'password_confirm': 'empresa123',
+                'nif': 'NIF-900091',
+                'setor_codes': ['TIC', 'SER'],
+                'descricao': 'Empresa criada a partir de registo offline.',
+                'website': 'https://empresa.example.com',
+                'endereco': 'Avenida Central, Sao Tome',
+                'collected_by_name': 'Admin Offline',
+            },
+        }
+        uploaded = SimpleUploadedFile(
+            'registo_empresa_offline.json',
+            json.dumps(payload).encode('utf-8'),
+            content_type='application/json',
+        )
+
+        response = self.client.post(
+            reverse('dashboard:offline_registration_import'),
+            {'file': uploaded},
+        )
+
+        self.assertRedirects(response, reverse('dashboard:offline_registrations'))
+        user = User.objects.get(telefone='+2399000091')
+        self.assertEqual(user.perfil, User.ProfileType.EMPRESA)
+        self.assertEqual(user.nif, 'NIF-900091')
+        self.assertTrue(user.has_company_profile())
+        self.assertEqual(user.company_profile.nome, 'Empresa Offline Nova')
+        self.assertEqual(user.company_profile.setor, ['TIC', 'SER'])
+        self.assertFalse(user.company_profile.verificada)
+
+    def test_import_requires_password_confirmation(self):
+        self.client.force_login(self.admin)
+
+        payload = {
+            'schema': 'bnj_offline_registration',
+            'version': 1,
+            'profile_type': 'JO',
+            'registration_data': {
+                'nome': 'Jovem Sem Confirmacao',
+                'telefone': '+2399000092',
+                'distrito_codigo': self.district.codigo,
+                'password': 'offline123',
+                'password_confirm': 'outra123',
+                'bi_numero': 'BI-900092',
+            },
+        }
+        uploaded = SimpleUploadedFile(
+            'registo_invalido.json',
+            json.dumps(payload).encode('utf-8'),
+            content_type='application/json',
+        )
+
+        response = self.client.post(
+            reverse('dashboard:offline_registration_import'),
+            {'file': uploaded},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'A palavra-passe e a confirmacao nao coincidem')
+        self.assertFalse(User.objects.filter(telefone='+2399000092').exists())

@@ -8,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from django.utils import timezone
 from datetime import datetime, timedelta, time
 from io import BytesIO
@@ -26,9 +28,10 @@ from reportlab.graphics import renderPDF
 
 from accounts.models import User
 from accounts.forms import UserRegistrationForm, AdminUserUpdateForm
+from dashboard.forms import OfflineRegistrationExportForm, OfflineRegistrationImportForm
 from profiles.models import YouthProfile, Education
 from companies.models import Company, JobPost, Application, ContactRequest
-from core.models import District, Notification
+from core.models import AuditLog, District, Notification
 
 
 def _get_date_range(request):
@@ -98,6 +101,382 @@ def _with_admin_context(request, context=None):
     if context:
         nav_context.update(context)
     return nav_context
+
+
+def _get_client_ip(request):
+    forwarded = (request.META.get('HTTP_X_FORWARDED_FOR') or '').split(',')[0].strip()
+    return forwarded or request.META.get('REMOTE_ADDR')
+
+
+def _coerce_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        return value.strip().lower() in {'1', 'true', 'sim', 'yes', 'y'}
+    return False
+
+
+def _decode_offline_json(uploaded_file):
+    raw = uploaded_file.read()
+    uploaded_file.seek(0)
+
+    decoded = None
+    for encoding in ('utf-8-sig', 'utf-8', 'cp1252'):
+        try:
+            decoded = raw.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+
+    if decoded is None:
+        raise ValueError(_('Nao foi possivel ler o ficheiro offline.'))
+
+    try:
+        return json.loads(decoded)
+    except json.JSONDecodeError as exc:
+        raise ValueError(_('O ficheiro offline nao contem um JSON valido.')) from exc
+
+
+def _build_choice_reference(choices):
+    return [
+        {
+            'value': value,
+            'label': str(label),
+        }
+        for value, label in choices
+    ]
+
+
+def _clean_text(value):
+    return str(value or '').strip()
+
+
+def _normalize_code_list(value):
+    if isinstance(value, str):
+        raw_items = value.split(',') if ',' in value else [value]
+    elif isinstance(value, (list, tuple, set)):
+        raw_items = list(value)
+    else:
+        raw_items = []
+
+    normalized = []
+    for item in raw_items:
+        current = str(item or '').strip().upper()
+        if current and current not in normalized:
+            normalized.append(current)
+    return normalized
+
+
+def _build_offline_registration_payload(profile_type, admin_user):
+    districts = [
+        {
+            'code': district.codigo,
+            'name': district.nome,
+        }
+        for district in District.objects.order_by('nome')
+    ]
+    profile_label = 'Jovem' if profile_type == 'JO' else 'Empresa'
+
+    registration_data = {
+        'nome': '',
+        'telefone': '',
+        'email': '',
+        'distrito_codigo': '',
+        'consentimento_dados': False,
+        'consentimento_contacto': False,
+        'password': '',
+        'password_confirm': '',
+        'collected_offline_at': '',
+        'collected_by_name': '',
+        'collected_by_role': '',
+        'observacoes': '',
+    }
+
+    references = {
+        'districts': districts,
+    }
+
+    if profile_type == 'JO':
+        registration_data.update({
+            'bi_numero': '',
+            'data_nascimento': '',
+            'sexo': '',
+            'localidade': '',
+            'contacto_alternativo': '',
+            'situacao_atual': 'DES',
+            'disponibilidade': 'SIM',
+            'preferencia_oportunidade': 'EMP',
+            'nivel': '',
+            'area_formacao': '',
+            'instituicao': '',
+            'ano': '',
+            'curso': '',
+        })
+        references.update({
+            'sexo_choices': _build_choice_reference(YouthProfile.SEXO_CHOICES),
+            'situacao_choices': _build_choice_reference(YouthProfile.SITUACAO_CHOICES),
+            'disponibilidade_choices': _build_choice_reference(YouthProfile.DISPONIBILIDADE_CHOICES),
+            'preferencia_choices': _build_choice_reference(YouthProfile.OPORTUNIDADE_CHOICES),
+            'education_level_choices': _build_choice_reference(Education.NIVEL_CHOICES),
+            'area_formacao_choices': _build_choice_reference(settings.AREAS_FORMACAO),
+        })
+    else:
+        registration_data.update({
+            'nif': '',
+            'setor_codes': [],
+            'descricao': '',
+            'website': '',
+            'endereco': '',
+        })
+        references.update({
+            'setor_choices': _build_choice_reference(Company.SETOR_CHOICES),
+        })
+
+    return {
+        'schema': 'bnj_offline_registration',
+        'version': 1,
+        'profile_type': profile_type,
+        'profile_label': profile_label,
+        'generated_at': timezone.now().isoformat(),
+        'generated_by': {
+            'admin_id': admin_user.id,
+            'admin_name': admin_user.nome,
+        },
+        'instructions': [
+            'Preencha apenas os campos dentro de "registration_data".',
+            'Use os codigos apresentados em "references" para distrito, setor ou escolhas do perfil.',
+            'A palavra-passe deve ter pelo menos 8 caracteres e ser confirmada no proprio ficheiro.',
+            'Depois da importacao, elimine o ficheiro local se ele contiver dados sensiveis.',
+        ],
+        'references': references,
+        'registration_data': registration_data,
+    }
+
+
+def _offline_registrations_context(request, export_form=None, import_form=None):
+    recent_logs = AuditLog.objects.filter(
+        acao__in=['Registo offline exportado', 'Registo offline importado']
+    ).order_by('-created_at')[:6]
+
+    context = {
+        'export_form': export_form or OfflineRegistrationExportForm(),
+        'import_form': import_form or OfflineRegistrationImportForm(),
+        'offline_summary': {
+            'jovens': User.objects.filter(perfil=User.ProfileType.JOVEM).count(),
+            'empresas': User.objects.filter(perfil=User.ProfileType.EMPRESA).count(),
+            'exports': AuditLog.objects.filter(acao='Registo offline exportado').count(),
+            'imports': AuditLog.objects.filter(acao='Registo offline importado').count(),
+        },
+        'recent_offline_logs': recent_logs,
+    }
+    return _with_admin_context(request, context)
+
+
+def _import_offline_registration_payload(payload, admin_user, file_name, ip_address):
+    if payload.get('schema') != 'bnj_offline_registration':
+        raise ValueError(_('O ficheiro nao pertence ao formato de registo offline da plataforma.'))
+    if payload.get('version') != 1:
+        raise ValueError(_('A versao do ficheiro offline nao e suportada.'))
+
+    profile_type = _clean_text(payload.get('profile_type')).upper()
+    if profile_type not in {User.ProfileType.JOVEM, User.ProfileType.EMPRESA}:
+        raise ValueError(_('O tipo de registo offline deve ser Jovem ou Empresa.'))
+
+    data = payload.get('registration_data') or {}
+
+    nome = _clean_text(data.get('nome'))
+    telefone = _clean_text(data.get('telefone'))
+    email = _clean_text(data.get('email')) or None
+    district_code = _clean_text(data.get('distrito_codigo')).upper()
+    password = _clean_text(data.get('password'))
+    password_confirm = _clean_text(data.get('password_confirm'))
+    consentimento_dados = _coerce_bool(data.get('consentimento_dados'))
+    consentimento_contacto = _coerce_bool(data.get('consentimento_contacto'))
+    collected_offline_at = _clean_text(data.get('collected_offline_at'))
+    collected_by_name = _clean_text(data.get('collected_by_name'))
+    collected_by_role = _clean_text(data.get('collected_by_role'))
+    observacoes = _clean_text(data.get('observacoes'))
+
+    if not nome:
+        raise ValueError(_('O nome e obrigatorio no registo offline.'))
+    if not telefone:
+        raise ValueError(_('O telemovel e obrigatorio no registo offline.'))
+    if not district_code:
+        raise ValueError(_('O distrito e obrigatorio no registo offline.'))
+    if len(password) < 8:
+        raise ValueError(_('A palavra-passe do registo offline deve ter pelo menos 8 caracteres.'))
+    if password != password_confirm:
+        raise ValueError(_('A palavra-passe e a confirmacao nao coincidem.'))
+
+    if User.objects.filter(telefone=telefone).exists():
+        raise ValueError(_('Ja existe um utilizador com este telemovel.'))
+    if email and User.objects.filter(email__iexact=email).exists():
+        raise ValueError(_('Ja existe um utilizador com este email.'))
+
+    try:
+        district = District.objects.get(codigo__iexact=district_code)
+    except District.DoesNotExist as exc:
+        raise ValueError(_('O distrito indicado no ficheiro offline nao existe.')) from exc
+
+    data_consentimento = timezone.now() if consentimento_dados or consentimento_contacto else None
+
+    with transaction.atomic():
+        if profile_type == User.ProfileType.JOVEM:
+            bi_numero = _clean_text(data.get('bi_numero'))
+            if not bi_numero:
+                raise ValueError(_('O numero do BI e obrigatorio para registos offline de jovens.'))
+            if User.objects.filter(bi_numero__iexact=bi_numero).exists():
+                raise ValueError(_('Ja existe um utilizador com este numero de BI.'))
+
+            data_nascimento_raw = _clean_text(data.get('data_nascimento'))
+            data_nascimento = None
+            if data_nascimento_raw:
+                try:
+                    data_nascimento = datetime.strptime(data_nascimento_raw, '%Y-%m-%d').date()
+                except ValueError as exc:
+                    raise ValueError(_('A data de nascimento deve estar no formato AAAA-MM-DD.')) from exc
+
+            sexo = _clean_text(data.get('sexo')).upper()
+            localidade = _clean_text(data.get('localidade'))
+            contacto_alternativo = _clean_text(data.get('contacto_alternativo'))
+            situacao_atual = _clean_text(data.get('situacao_atual') or 'DES').upper()
+            disponibilidade = _clean_text(data.get('disponibilidade') or 'SIM').upper()
+            preferencia_oportunidade = _clean_text(data.get('preferencia_oportunidade') or 'EMP').upper()
+            nivel = _clean_text(data.get('nivel')).upper()
+            area_formacao = _clean_text(data.get('area_formacao')).upper()
+            instituicao = _clean_text(data.get('instituicao'))
+            ano_raw = _clean_text(data.get('ano'))
+            curso = _clean_text(data.get('curso'))
+
+            if sexo and sexo not in dict(YouthProfile.SEXO_CHOICES):
+                raise ValueError(_('O valor de sexo indicado no ficheiro offline e invalido.'))
+            if situacao_atual not in dict(YouthProfile.SITUACAO_CHOICES):
+                raise ValueError(_('A situacao atual indicada no ficheiro offline e invalida.'))
+            if disponibilidade not in dict(YouthProfile.DISPONIBILIDADE_CHOICES):
+                raise ValueError(_('A disponibilidade indicada no ficheiro offline e invalida.'))
+            if preferencia_oportunidade not in dict(YouthProfile.OPORTUNIDADE_CHOICES):
+                raise ValueError(_('A preferencia de oportunidade indicada no ficheiro offline e invalida.'))
+
+            if nivel and nivel not in dict(Education.NIVEL_CHOICES):
+                raise ValueError(_('O nivel de educacao indicado no ficheiro offline e invalido.'))
+            if area_formacao and area_formacao not in dict(settings.AREAS_FORMACAO):
+                raise ValueError(_('A area de formacao indicada no ficheiro offline e invalida.'))
+            if any([nivel, area_formacao, instituicao, ano_raw, curso]) and (not nivel or not area_formacao):
+                raise ValueError(_('Para guardar educacao offline, informe pelo menos nivel e area de formacao.'))
+
+            ano = None
+            if ano_raw:
+                try:
+                    ano = int(ano_raw)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(_('O ano de conclusao do registo offline deve ser numerico.')) from exc
+
+            user = User.objects.create_user(
+                telefone=telefone,
+                nome=nome,
+                password=password,
+                email=email,
+                perfil=User.ProfileType.JOVEM,
+                distrito=district,
+                consentimento_dados=consentimento_dados,
+                consentimento_contacto=consentimento_contacto,
+                data_consentimento=data_consentimento,
+                bi_numero=bi_numero,
+            )
+            YouthProfile.objects.create(
+                user=user,
+                data_nascimento=data_nascimento,
+                sexo=sexo,
+                localidade=localidade,
+                contacto_alternativo=contacto_alternativo,
+                situacao_atual=situacao_atual,
+                disponibilidade=disponibilidade,
+                preferencia_oportunidade=preferencia_oportunidade,
+                consentimento_sms=consentimento_contacto,
+                consentimento_whatsapp=consentimento_contacto,
+                consentimento_email=bool(email) and consentimento_contacto,
+                completo=True,
+                validado=False,
+            )
+            if nivel and area_formacao:
+                Education.objects.create(
+                    profile=user.youth_profile,
+                    nivel=nivel,
+                    area_formacao=area_formacao,
+                    instituicao=instituicao or 'Nao especificado',
+                    ano=ano,
+                    curso=curso,
+                )
+            imported_label = 'Jovem'
+        else:
+            nif = _clean_text(data.get('nif'))
+            if not nif:
+                raise ValueError(_('O NIF e obrigatorio para registos offline de empresas.'))
+            if User.objects.filter(nif__iexact=nif).exists():
+                raise ValueError(_('Ja existe um utilizador com este NIF.'))
+
+            setor_codes = _normalize_code_list(data.get('setor_codes'))
+            invalid_setores = [code for code in setor_codes if code not in dict(Company.SETOR_CHOICES)]
+            if invalid_setores:
+                raise ValueError(_('O ficheiro offline contem setores invalidos para a empresa.'))
+
+            user = User.objects.create_user(
+                telefone=telefone,
+                nome=nome,
+                password=password,
+                email=email,
+                perfil=User.ProfileType.EMPRESA,
+                distrito=district,
+                consentimento_dados=consentimento_dados,
+                consentimento_contacto=consentimento_contacto,
+                data_consentimento=data_consentimento,
+                nome_empresa=nome,
+                nif=nif,
+            )
+            Company.objects.create(
+                user=user,
+                nome=nome,
+                nif=nif,
+                setor=setor_codes,
+                descricao=_clean_text(data.get('descricao')),
+                telefone=telefone,
+                email=email or '',
+                website=_clean_text(data.get('website')),
+                distrito=district,
+                endereco=_clean_text(data.get('endereco')),
+                ativa=True,
+                verificada=False,
+            )
+            imported_label = 'Empresa'
+
+        Notification.objects.create(
+            user=user,
+            titulo=_('Registo offline recebido'),
+            mensagem=_('O teu registo offline foi importado com sucesso na plataforma.'),
+            tipo='SUCESSO',
+        )
+
+        AuditLog.objects.create(
+            user=admin_user,
+            acao='Registo offline importado',
+            payload={
+                'file_name': file_name,
+                'profile_type': profile_type,
+                'user_id': user.id,
+                'user_name': user.nome,
+                'telefone': user.telefone,
+                'district_code': district.codigo,
+                'collected_offline_at': collected_offline_at,
+                'collected_by_name': collected_by_name,
+                'collected_by_role': collected_by_role,
+                'observacoes': observacoes,
+            },
+            ip_address=ip_address,
+        )
+
+    return user, imported_label
 
 
 def admin_required(view_func):
@@ -634,6 +1013,113 @@ def contact_request_action(request, pk, action):
     
     next_url = request.GET.get('next')
     return redirect(next_url or 'dashboard:manage_contact_requests')
+
+
+@admin_required
+def offline_registrations(request):
+    """Area para gerar e importar registos offline de utilizadores."""
+    context = _offline_registrations_context(request)
+    return render(request, 'dashboard/offline_registrations.html', context)
+
+
+@admin_required
+def offline_registration_export(request):
+    """Gerar ficheiro preenchivel para registo offline."""
+    if request.method != 'POST':
+        return redirect('dashboard:offline_registrations')
+
+    export_form = OfflineRegistrationExportForm(request.POST)
+    import_form = OfflineRegistrationImportForm()
+    if not export_form.is_valid():
+        context = _offline_registrations_context(
+            request,
+            export_form=export_form,
+            import_form=import_form,
+        )
+        return render(request, 'dashboard/offline_registrations.html', context)
+
+    profile_type = export_form.cleaned_data['profile_type']
+    payload = _build_offline_registration_payload(profile_type, request.user)
+    profile_label = 'jovem' if profile_type == User.ProfileType.JOVEM else 'empresa'
+
+    AuditLog.objects.create(
+        user=request.user,
+        acao='Registo offline exportado',
+        payload={
+            'profile_type': profile_type,
+            'profile_label': profile_label,
+        },
+        ip_address=_get_client_ip(request),
+    )
+
+    document = render_to_string(
+        'dashboard/offline_registration_form_document.html',
+        {
+            'payload': payload,
+            'profile_type': profile_type,
+            'profile_label': 'Jovem' if profile_type == User.ProfileType.JOVEM else 'Empresa',
+            'districts': payload['references']['districts'],
+            'sexo_choices': payload['references'].get('sexo_choices', []),
+            'situacao_choices': payload['references'].get('situacao_choices', []),
+            'disponibilidade_choices': payload['references'].get('disponibilidade_choices', []),
+            'preferencia_choices': payload['references'].get('preferencia_choices', []),
+            'education_level_choices': payload['references'].get('education_level_choices', []),
+            'area_formacao_choices': payload['references'].get('area_formacao_choices', []),
+            'setor_choices': payload['references'].get('setor_choices', []),
+        },
+    )
+
+    filename = f'registo_offline_{profile_label}.html'
+    response = HttpResponse(
+        document,
+        content_type='text/html; charset=utf-8',
+    )
+    response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
+    return response
+
+
+@admin_required
+def offline_registration_import(request):
+    """Importar ficheiro offline e criar o registo do utilizador."""
+    if request.method != 'POST':
+        return redirect('dashboard:offline_registrations')
+
+    export_form = OfflineRegistrationExportForm()
+    import_form = OfflineRegistrationImportForm(request.POST, request.FILES)
+    if not import_form.is_valid():
+        context = _offline_registrations_context(
+            request,
+            export_form=export_form,
+            import_form=import_form,
+        )
+        return render(request, 'dashboard/offline_registrations.html', context)
+
+    uploaded_file = import_form.cleaned_data['file']
+    try:
+        payload = _decode_offline_json(uploaded_file)
+        imported_user, imported_label = _import_offline_registration_payload(
+            payload,
+            request.user,
+            uploaded_file.name,
+            _get_client_ip(request),
+        )
+    except ValueError as exc:
+        import_form.add_error('file', str(exc))
+        context = _offline_registrations_context(
+            request,
+            export_form=export_form,
+            import_form=import_form,
+        )
+        return render(request, 'dashboard/offline_registrations.html', context)
+
+    messages.success(
+        request,
+        _('Registo offline importado com sucesso para %(tipo)s "%(nome)s".') % {
+            'tipo': imported_label.lower(),
+            'nome': imported_user.nome,
+        }
+    )
+    return redirect('dashboard:offline_registrations')
 
 
 # Relatórios
