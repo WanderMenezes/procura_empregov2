@@ -219,7 +219,7 @@
           </a>
           <a href="#educacao-skills" class="candidate-check {% if step_stats.2.filled == step_stats.2.total %}done{% else %}pending{% endif %}">
             <span class="candidate-check-icon"><i class="bi {% if step_stats.2.filled == step_stats.2.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
-            <div><strong>Educação e skills</strong><p>{{ step_stats.2.filled }}/{{ step_stats.2.total }} preenchidos{% if step_stats.2.missing %} &middot; faltam {{ step_stats.2.missing }}{% endif %}</p></div>
+            <div><strong>Educação, skills e idiomas</strong><p>{{ step_stats.2.filled }}/{{ step_stats.2.total }} preenchidos{% if step_stats.2.missing %} &middot; faltam {{ step_stats.2.missing }}{% endif %}</p></div>
           </a>
           <a href="#experiencia" class="candidate-check {% if step_stats.3.filled == step_stats.3.total %}done{% else %}pending{% endif %}">
             <span class="candidate-check-icon"><i class="bi {% if step_stats.3.filled == step_stats.3.total %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
@@ -281,6 +281,7 @@
         <div class="candidate-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="candidate-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
         <div class="candidate-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="candidate-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="candidate-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
         {% if profile.interesse_setorial %}
           <div class="candidate-tag-list mt-3">
@@ -365,6 +366,27 @@
             {% endif %}
           </div>
         </div>
+      </div>
+
+      <div class="candidate-panel mt-4" id="idiomas">
+        <div class="candidate-panel-head">
+          <div>
+            <h5>Idiomas</h5>
+            <p class="candidate-panel-subtitle">Linguas que consegues usar e a forma como melhor te expressas em cada uma.</p>
+          </div>
+        </div>
+        {% if profile.idiomas_detalhados %}
+          <div class="candidate-list">
+            {% for idioma in profile.idiomas_detalhados %}
+              <article class="candidate-card">
+                <div class="candidate-entry-title">{{ idioma.idioma }}</div>
+                <div class="candidate-entry-copy">{{ idioma.dominio_label }}</div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="candidate-empty"><i class="bi bi-translate"></i>Ainda não indicaste idiomas no teu perfil.</div>
+        {% endif %}
       </div>
 
       <div class="candidate-panel profile-section mt-4" id="experiencia">

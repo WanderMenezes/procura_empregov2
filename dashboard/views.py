@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.db import transaction
@@ -787,17 +788,23 @@ def user_list(request):
     if ativo:
         users = users.filter(is_active=(ativo == 'sim'))
 
+    filtered_total = users.count()
+    paginator = Paginator(users, 10)
+    page_number = request.GET.get('page')
+    users_page = paginator.get_page(page_number)
+
     summary = {
         'total': User.objects.count(),
         'ativos': User.objects.filter(is_active=True).count(),
         'empresas': User.objects.filter(perfil='EMP').count(),
         'equipa': User.objects.filter(perfil__in=['ADM', 'OP', 'TEC']).count(),
         'novos_7d': User.objects.filter(date_joined__gte=timezone.now() - timedelta(days=7)).count(),
-        'filtrados': users.count(),
+        'filtrados': filtered_total,
     }
 
     context = _with_admin_context(request, {
-        'users': users,
+        'users': users_page.object_list,
+        'users_page': users_page,
         'filtro_q': query,
         'filtro_perfil': perfil,
         'filtro_ativo': ativo,

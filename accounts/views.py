@@ -3,7 +3,7 @@ Views para autenticação e gestão de usuários
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -80,51 +80,29 @@ class LoginView(FormView):
     form_class = UserLoginForm
     
     def form_valid(self, form):
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
         remember_me = form.cleaned_data.get('remember_me', False)
+        user = form.get_user()
         
-        # Tentar autenticar por telefone ou email
-        user = None
-        if '@' in username:
-            try:
-                user_obj = User.objects.get(email=username)
-                user = authenticate(
-                    self.request,
-                    username=user_obj.telefone,
-                    password=password
-                )
-            except User.DoesNotExist:
-                pass
-        else:
-            user = authenticate(
-                self.request,
-                username=username,
-                password=password
-            )
+        login(self.request, user)
         
-        if user is not None:
-            login(self.request, user)
+
             
             # Configurar sessão
-            if not remember_me:
-                self.request.session.set_expiry(0)
-            
-            messages.success(self.request, _('Bem-vindo, {}!').format(user.nome))
+        if not remember_me:
+            self.request.session.set_expiry(0)
 
-            next_url = self.request.POST.get('next') or self.request.GET.get('next')
-            if next_url and url_has_allowed_host_and_scheme(
-                next_url,
-                allowed_hosts={self.request.get_host()},
-                require_https=self.request.is_secure(),
-            ):
-                return redirect(next_url)
+        messages.success(self.request, _('Bem-vindo, {}!').format(user.nome))
+
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return redirect(next_url)
             
-            # Redirecionar conforme o perfil
-            return self.get_success_url_for_user(user)
-        else:
-            form.add_error(None, _('Telemóvel/Email ou palavra-passe incorretos.'))
-            return self.form_invalid(form)
+        # Redirecionar conforme o perfil
+        return self.get_success_url_for_user(user)
     
     def get_success_url_for_user(self, user):
         """Redireciona o usuário conforme seu perfil"""

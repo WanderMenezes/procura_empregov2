@@ -11,7 +11,7 @@
         </aside>
 
         <div class="admin-shell-main">
-            <div class="card admin-hero admin-hero-split mb-4">
+            <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Centro de comando</div>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
 
-                    <div class="admin-hero-actions">
+                    <div class="admin-hero-actions" data-tour-id="admin-hero-actions">
                         <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light btn-sm">
                             <i class="bi bi-check-circle me-1"></i>Ver fila de validação
                         </a>
@@ -113,7 +113,7 @@
 
             <div class="row g-4 mb-4">
                 <div class="col-xl-8">
-                    <div class="card admin-panel h-100">
+                    <div class="card admin-panel h-100" data-tour-id="admin-priorities">
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
@@ -170,7 +170,7 @@
                 </div>
 
                 <div class="col-xl-4">
-                    <div class="card admin-panel h-100">
+                    <div class="card admin-panel h-100" data-tour-id="admin-health">
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>

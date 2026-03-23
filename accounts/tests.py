@@ -36,6 +36,28 @@ class LoginViewTests(TestCase):
 
         self.assertRedirects(response, reverse('about'), fetch_redirect_response=False)
 
+    def test_login_accepts_email(self):
+        response = self.client.post(
+            reverse('accounts:login'),
+            {
+                'username': self.user.email,
+                'password': 'SenhaSegura123',
+            },
+        )
+
+        self.assertRedirects(response, reverse('profiles:wizard'), fetch_redirect_response=False)
+
+    def test_login_accepts_email_case_insensitively(self):
+        response = self.client.post(
+            reverse('accounts:login'),
+            {
+                'username': 'JOVEM.LOGIN@EXAMPLE.COM',
+                'password': 'SenhaSegura123',
+            },
+        )
+
+        self.assertRedirects(response, reverse('profiles:wizard'), fetch_redirect_response=False)
+
     def test_login_ignores_external_next_url(self):
         response = self.client.post(
             f"{reverse('accounts:login')}?next=https://example.com/fora",

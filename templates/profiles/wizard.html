@@ -316,6 +316,26 @@
               </div>
             </div>
           </div>
+          <div class="wizard-section">
+            <div class="wizard-section-label"><i class="bi bi-translate"></i>Idiomas</div>
+            <h2 class="wizard-section-title">Idiomas que dominas</h2>
+            <p class="wizard-panel-copy">Indica os idiomas que consegues usar e se o teu ponto forte esta na oralidade, na escrita ou nas duas dimensoes.</p>
+            <div class="wizard-grid mt-3">
+              {% for row in form.idioma_rows %}
+                <div class="wizard-field">
+                  <label for="{{ row.nome.id_for_label }}">{{ row.nome.label }}</label>
+                  {{ row.nome }}
+                  {% if row.nome.errors %}<div class="wizard-error">{{ row.nome.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="wizard-field">
+                  <label for="{{ row.dominio.id_for_label }}">{{ row.dominio.label }}</label>
+                  {{ row.dominio }}
+                  {% if row.dominio.errors %}<div class="wizard-error">{{ row.dominio.errors|striptags }}</div>{% endif %}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="wizard-field-help mt-2">Exemplo: Ingles - bom na oralidade e na escrita.</div>
+          </div>
         {% elif step == 3 %}
           <div class="wizard-section">
             <div class="wizard-section-label"><i class="bi bi-briefcase"></i>Objetivo profissional</div>

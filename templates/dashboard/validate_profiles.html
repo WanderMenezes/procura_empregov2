@@ -10,7 +10,7 @@
         </aside>
 
         <div class="admin-shell-main">
-            <div class="card admin-hero admin-hero-split mb-4">
+            <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">{% if request.user.is_admin %}Validação central{% else %}Fila do operador{% endif %}</div>
@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+            <form method="get" class="card admin-panel admin-filter-panel mb-4" data-tour-id="validate-filter">
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-7">
@@ -99,7 +99,7 @@
             </form>
 
             {% if perfis %}
-                <div class="admin-review-grid">
+                <div class="admin-review-grid" data-tour-id="validate-queue">
                     {% for perfil in perfis %}
                         <div class="card admin-review-card">
                             <div class="card-body">
@@ -125,6 +125,11 @@
                                 <div class="admin-review-footer">
                                     <small class="text-muted">Submetido em {{ perfil.created_at|date:"d/m/Y" }} - {{ perfil.created_at|timesince }} atrás</small>
                                     <div class="admin-queue-actions">
+                                        {% if request.user.is_admin %}
+                                            <a href="{% url 'dashboard:user_detail' perfil.user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-dark">
+                                                <i class="bi bi-eye me-1"></i>Ver perfil
+                                            </a>
+                                        {% endif %}
                                         <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
                                             <i class="bi bi-check2 me-1"></i>Aprovar
                                         </a>

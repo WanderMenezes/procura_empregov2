@@ -24,7 +24,8 @@ from .forms import (
     YouthProfileStep1Form, YouthProfileStep2Form,
     YouthProfileStep3Form, YouthProfileStep4Form,
     AssistedRegistrationForm, YouthProfileEditForm, YouthSkillsForm,
-    EducationForm, ExperienceForm, DocumentForm
+    EducationForm, ExperienceForm, DocumentForm,
+    build_idioma_initial_data, parse_idioma_payload
 )
 from core.models import District, Skill, Notification, AuditLog
 from accounts.models import User
@@ -56,7 +57,7 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
     # expected fields per step (mirror wizard)
     expected = {
         '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
-        '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
+        '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'idiomas'],
         '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
         '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
     }
@@ -100,6 +101,8 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
             elif step == '2':
                 if f == 'skills':
                     val = skills_qs.exists()
+                elif f == 'idiomas':
+                    val = bool(profile.idiomas_detalhados)
                 else:
                     if edu:
                         val = getattr(edu, f, None)
@@ -150,7 +153,7 @@ class ProfileWizardView(View):
     template_name = 'profiles/wizard.html'
     STEP_META = {
         1: {'title': 'Dados Pessoais', 'icon': 'bi-person'},
-        2: {'title': 'Educação e Skills', 'icon': 'bi-book'},
+        2: {'title': 'Educação, Skills e Idiomas', 'icon': 'bi-book'},
         3: {'title': 'Experiência e Interesses', 'icon': 'bi-briefcase'},
         4: {'title': 'Documentos e Consentimentos', 'icon': 'bi-file-earmark'},
     }
@@ -222,6 +225,7 @@ class ProfileWizardView(View):
             'outra_skill_nome': '',
             'outra_skill_tipo': ''
         }
+        step2.update(build_idioma_initial_data(profile.idiomas))
 
         step3 = {
             'situacao_atual': profile.situacao_atual or '',
@@ -426,7 +430,7 @@ class ProfileWizardView(View):
         """Return a dict mapping step -> {'filled': int, 'total': int} based on expected fields."""
         expected = {
             '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
-            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills'],
+            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'idiomas'],
             '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
             '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
         }
@@ -444,6 +448,18 @@ class ProfileWizardView(View):
             filled = 0
             step_data = wizard_data.get(step, {})
             for f in fields:
+                if f == 'idiomas':
+                    payload = parse_idioma_payload(step_data.get('idiomas_data'))
+                    if payload:
+                        filled += 1
+                        continue
+                    has_partial_idioma = any(
+                        step_data.get(f'idioma_{index}_nome') or step_data.get(f'idioma_{index}_dominio')
+                        for index in range(1, 5)
+                    )
+                    if has_partial_idioma:
+                        filled += 1
+                    continue
                 val = step_data.get(f)
                 if isinstance(val, bool):
                     if f in always_count_bool:
@@ -467,6 +483,7 @@ class ProfileWizardView(View):
             step2 = wizard_data.get('2', {})
             step3 = wizard_data.get('3', {})
             step4 = wizard_data.get('4', {})
+            idiomas = parse_idioma_payload(step2.get('idiomas_data'))
 
             visivel = self._to_bool(step4.get('visivel', True))
             consentimento_sms = self._to_bool(step4.get('consentimento_sms'))
@@ -500,6 +517,7 @@ class ProfileWizardView(View):
                 profile.interesse_setorial = step3.get('interesse_setorial')
                 profile.preferencia_oportunidade = step3.get('preferencia_oportunidade', profile.preferencia_oportunidade)
                 profile.sobre = step3.get('sobre', '') or ''
+                profile.idiomas = idiomas
                 profile.visivel = visivel
                 profile.consentimento_sms = consentimento_sms
                 profile.consentimento_whatsapp = consentimento_whatsapp
@@ -519,6 +537,7 @@ class ProfileWizardView(View):
                     interesse_setorial=step3.get('interesse_setorial'),
                     preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
                     sobre=step3.get('sobre', ''),
+                    idiomas=idiomas,
                     visivel=visivel,
                     consentimento_sms=consentimento_sms,
                     consentimento_whatsapp=consentimento_whatsapp,
@@ -1318,6 +1337,7 @@ def assisted_register(request):
         if form.is_valid():
             # Criar usuário jovem
             data = form.cleaned_data
+            idiomas = parse_idioma_payload(data.get('idiomas_data'))
             
             # Verificar se telefone já existe
             if User.objects.filter(telefone=data['telefone']).exists():
@@ -1344,6 +1364,7 @@ def assisted_register(request):
                 situacao_atual=data['situacao_atual'],
                 disponibilidade=data['disponibilidade'],
                 preferencia_oportunidade=data['preferencia_oportunidade'],
+                idiomas=idiomas,
                 consentimento_sms=True,
                 consentimento_whatsapp=True,
                 consentimento_email=True,

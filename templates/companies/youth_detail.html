@@ -300,6 +300,7 @@
         <div class="talent-detail-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="talent-detail-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
       </section>
 
@@ -398,6 +399,27 @@
           </section>
         </div>
       </div>
+
+      <section class="talent-detail-panel mt-4">
+        <div class="talent-detail-panel-head">
+          <div>
+            <h5>Idiomas</h5>
+            <p class="talent-detail-panel-subtitle">Idiomas registados no perfil e a forma como o jovem melhor se expressa em cada um.</p>
+          </div>
+        </div>
+        {% if profile.idiomas_detalhados %}
+          <div class="talent-detail-skill-grid">
+            {% for idioma in profile.idiomas_detalhados %}
+              <article class="talent-detail-skill">
+                <div class="talent-detail-skill-title">{{ idioma.idioma }}</div>
+                <span class="talent-detail-skill-level"><i class="bi bi-translate"></i>{{ idioma.dominio_label }}</span>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="talent-detail-empty"><i class="bi bi-translate"></i>Sem idiomas registados neste momento.</div>
+        {% endif %}
+      </section>
 
       <section class="talent-detail-panel mt-4">
         <div class="talent-detail-panel-head">

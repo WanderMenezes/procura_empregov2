@@ -2,6 +2,7 @@
 Forms para perfis de jovens
 """
 
+import json
 import re
 import unicodedata
 
@@ -69,6 +70,107 @@ def combine_interest_sector_values(selected_values, raw_custom_values):
     if custom:
         selected = [value for value in selected if value != 'OUT']
     return list(dict.fromkeys(selected + custom))
+
+
+IDIOMA_SLOT_COUNT = 4
+
+
+def parse_idioma_payload(raw_value):
+    if not raw_value:
+        return []
+    if isinstance(raw_value, list):
+        return [item for item in raw_value if isinstance(item, dict)]
+    if isinstance(raw_value, str):
+        try:
+            parsed = json.loads(raw_value)
+        except Exception:
+            return []
+        return [item for item in parsed if isinstance(item, dict)]
+    return []
+
+
+def build_idioma_initial_data(entries):
+    initial = {}
+    parsed_entries = parse_idioma_payload(entries)
+    for index, item in enumerate(parsed_entries[:IDIOMA_SLOT_COUNT], start=1):
+        initial[f'idioma_{index}_nome'] = item.get('idioma', '')
+        initial[f'idioma_{index}_dominio'] = item.get('dominio', '')
+    if parsed_entries:
+        initial['idiomas_data'] = json.dumps(parsed_entries[:IDIOMA_SLOT_COUNT], ensure_ascii=False)
+    return initial
+
+
+def attach_idioma_fields(form):
+    dominio_choices = [('', _('Selecione...'))] + list(YouthProfile.IDIOMA_DOMINIO_CHOICES)
+    for index in range(1, IDIOMA_SLOT_COUNT + 1):
+        form.fields[f'idioma_{index}_nome'] = forms.CharField(
+            label=_('Idioma {}').format(index),
+            required=False,
+            widget=forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Ex: Português, Inglês, Francês')
+            })
+        )
+        form.fields[f'idioma_{index}_dominio'] = forms.ChoiceField(
+            label=_('Como domina este idioma'),
+            required=False,
+            choices=dominio_choices,
+            widget=forms.Select(attrs={'class': 'form-select'})
+        )
+
+    form.fields['idiomas_data'] = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    if not form.is_bound:
+        idioma_entries = form.initial.get('idiomas')
+        if not idioma_entries and form.initial.get('idiomas_data'):
+            idioma_entries = parse_idioma_payload(form.initial.get('idiomas_data'))
+        instance = getattr(form, 'instance', None)
+        if not idioma_entries and getattr(instance, 'pk', None):
+            idioma_entries = getattr(instance, 'idiomas', [])
+        form.initial.update(build_idioma_initial_data(idioma_entries))
+
+    form.idioma_rows = [
+        {
+            'nome': form[f'idioma_{index}_nome'],
+            'dominio': form[f'idioma_{index}_dominio'],
+            'index': index,
+        }
+        for index in range(1, IDIOMA_SLOT_COUNT + 1)
+    ]
+
+
+def clean_idioma_entries(form, cleaned_data):
+    entries = []
+    seen = set()
+
+    for index in range(1, IDIOMA_SLOT_COUNT + 1):
+        nome_key = f'idioma_{index}_nome'
+        dominio_key = f'idioma_{index}_dominio'
+        idioma = ' '.join(str(cleaned_data.get(nome_key) or '').split()).strip()
+        dominio = cleaned_data.get(dominio_key) or ''
+
+        if not idioma and not dominio:
+            continue
+        if dominio and not idioma:
+            form.add_error(nome_key, _('Indica o idioma.'))
+            continue
+        if idioma and not dominio:
+            form.add_error(dominio_key, _('Escolhe se o domínio é na oralidade, na escrita ou em ambos.'))
+            continue
+
+        idioma_key = idioma.casefold()
+        if idioma_key in seen:
+            form.add_error(nome_key, _('Este idioma já foi indicado.'))
+            continue
+
+        seen.add(idioma_key)
+        entries.append({
+            'idioma': idioma,
+            'dominio': dominio,
+        })
+
+    cleaned_data['idiomas_data'] = json.dumps(entries, ensure_ascii=False)
+    return cleaned_data
 
 
 class YouthProfileStep1Form(forms.ModelForm):
@@ -245,7 +347,12 @@ class YouthProfileStep2Form(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        attach_idioma_fields(self)
         self.fields['skills'].queryset = Skill.objects.filter(aprovada=True).order_by('nome')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return clean_idioma_entries(self, cleaned_data)
 
 
 class YouthProfileStep3Form(forms.ModelForm):
@@ -616,8 +723,13 @@ class AssistedRegistrationForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        attach_idioma_fields(self)
         from core.models import District
         self.fields['distrito'].queryset = District.objects.all()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return clean_idioma_entries(self, cleaned_data)
 
 
 class YouthProfileEditForm(forms.ModelForm):

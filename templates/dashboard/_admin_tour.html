@@ -1,0 +1,671 @@
+<style>
+  .admin-sidebar-tour {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+  }
+  .admin-sidebar-tour-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .admin-sidebar-tour-kicker {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0e7193;
+  }
+  .admin-sidebar-tour-meta {
+    color: #607083;
+    line-height: 1.45;
+  }
+  .admin-sidebar-tour-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(14, 113, 147, 0.12);
+    color: #0e7193;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .admin-sidebar-tour .btn {
+    border-radius: 14px;
+  }
+  .admin-tour-layer[hidden] {
+    display: none !important;
+  }
+  .admin-tour-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+  }
+  .admin-tour-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 18, 35, 0.52);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .admin-tour-highlight {
+    position: fixed;
+    z-index: 2001;
+    border: 2px solid rgba(255, 255, 255, 0.96);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+    background: transparent;
+    pointer-events: none;
+    transition: all 0.18s ease;
+    animation: admin-tour-pulse 1.8s ease-in-out infinite;
+  }
+  .admin-tour-focus {
+    position: relative;
+    z-index: 2001 !important;
+    isolation: isolate;
+  }
+  .admin-tour-focus,
+  .admin-tour-focus * {
+    pointer-events: auto;
+  }
+  .admin-tour-card {
+    position: fixed;
+    z-index: 2002;
+    width: min(380px, calc(100vw - 2rem));
+    background: #ffffff;
+    color: #122033;
+    border-radius: 24px;
+    border: 1px solid rgba(18, 32, 51, 0.08);
+    box-shadow: 0 24px 60px rgba(8, 18, 35, 0.25);
+    padding: 1rem;
+    outline: none;
+  }
+  .admin-tour-card::after {
+    content: "";
+    position: absolute;
+    left: var(--admin-tour-arrow-left, 42px);
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-left: 1px solid rgba(18, 32, 51, 0.08);
+    border-top: 1px solid rgba(18, 32, 51, 0.08);
+    transform: rotate(45deg);
+  }
+  .admin-tour-card[data-placement="bottom"]::after {
+    top: -9px;
+  }
+  .admin-tour-card[data-placement="top"]::after {
+    bottom: -9px;
+    transform: rotate(225deg);
+  }
+  .admin-tour-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .admin-tour-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.6rem;
+    padding: 0.32rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(14, 113, 147, 0.12);
+    color: #0e7193;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .admin-tour-close-icon {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(18, 32, 51, 0.08);
+    border-radius: 12px;
+    background: #f7f9fc;
+    color: #53657a;
+  }
+  .admin-tour-title {
+    margin-bottom: 0.45rem;
+    font-size: 1.04rem;
+    font-weight: 700;
+  }
+  .admin-tour-copy {
+    margin-bottom: 1rem;
+    color: #516275;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .admin-tour-progress {
+    height: 8px;
+    border-radius: 999px;
+    background: #edf2f7;
+    overflow: hidden;
+    margin-bottom: 0.85rem;
+  }
+  .admin-tour-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0f6f93, #10a2b7);
+    transition: width 0.2s ease;
+  }
+  .admin-tour-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.85rem;
+  }
+  .admin-tour-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #d7e2ec;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .admin-tour-dot.is-active {
+    background: #0e7193;
+    transform: scale(1.15);
+  }
+  .admin-tour-dot.is-complete {
+    background: #6dc0d2;
+  }
+  .admin-tour-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #6a7b8c;
+    font-size: 0.84rem;
+  }
+  .admin-tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .admin-tour-actions-left,
+  .admin-tour-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  @keyframes admin-tour-pulse {
+    0%, 100% { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25), 0 0 0 0 rgba(255, 255, 255, 0.25); }
+    50% { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25), 0 0 0 10px rgba(255, 255, 255, 0); }
+  }
+  @media (max-width: 767.98px) {
+    .admin-tour-card {
+      left: 1rem !important;
+      right: 1rem !important;
+      width: auto;
+      bottom: 1rem !important;
+      top: auto !important;
+    }
+    .admin-tour-card::after {
+      display: none;
+    }
+  }
+</style>
+
+<div class="admin-sidebar-tour">
+  <div class="admin-sidebar-tour-head">
+    <div>
+      <div class="admin-sidebar-tour-kicker">Guia rapido</div>
+      <small class="admin-sidebar-tour-meta d-block" data-admin-tour-meta></small>
+    </div>
+    <span class="admin-sidebar-tour-badge" data-admin-tour-badge>Novo</span>
+  </div>
+  <button type="button" class="btn btn-outline-primary btn-sm w-100" data-admin-tour-start>
+    <i class="bi bi-signpost-split me-1"></i><span data-admin-tour-start-label>Iniciar tour</span>
+  </button>
+  <small class="text-muted d-block mt-2" data-admin-tour-caption>Mostra um guia curto com os pontos mais importantes desta pagina.</small>
+</div>
+
+<div class="admin-tour-layer" hidden data-admin-tour-layer>
+  <button type="button" class="admin-tour-backdrop" aria-label="Fechar tour" data-admin-tour-close></button>
+  <div class="admin-tour-highlight" data-admin-tour-highlight></div>
+  <div class="admin-tour-card" role="dialog" aria-modal="true" aria-label="Tour do painel admin" tabindex="-1" data-admin-tour-card>
+    <div class="admin-tour-header">
+      <div>
+        <div class="admin-tour-step" data-admin-tour-step></div>
+        <div class="admin-tour-title" data-admin-tour-title></div>
+      </div>
+      <button type="button" class="admin-tour-close-icon" aria-label="Fechar tour" data-admin-tour-close>
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="admin-tour-copy" data-admin-tour-copy></div>
+    <div class="admin-tour-progress" aria-hidden="true">
+      <span class="admin-tour-progress-fill" data-admin-tour-progress-fill></span>
+    </div>
+    <div class="admin-tour-dots" aria-hidden="true" data-admin-tour-dots></div>
+    <div class="admin-tour-hint">
+      <i class="bi bi-keyboard"></i>
+      <span data-admin-tour-hint>Usa as setas do teclado para navegar e Esc para fechar.</span>
+    </div>
+    <div class="admin-tour-actions">
+      <div class="admin-tour-actions-left">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-admin-tour-prev>Anterior</button>
+      </div>
+      <div class="admin-tour-actions-right">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-admin-tour-close>Saltar</button>
+        <button type="button" class="btn btn-primary btn-sm" data-admin-tour-next>Seguinte</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const pageKey = '{{ request.resolver_match.url_name|default:""|escapejs }}';
+  const startButton = document.querySelector('[data-admin-tour-start]');
+  const startLabel = document.querySelector('[data-admin-tour-start-label]');
+  const meta = document.querySelector('[data-admin-tour-meta]');
+  const caption = document.querySelector('[data-admin-tour-caption]');
+  const badge = document.querySelector('[data-admin-tour-badge]');
+  const layer = document.querySelector('[data-admin-tour-layer]');
+  const highlight = document.querySelector('[data-admin-tour-highlight]');
+  const card = document.querySelector('[data-admin-tour-card]');
+  const stepLabel = document.querySelector('[data-admin-tour-step]');
+  const title = document.querySelector('[data-admin-tour-title]');
+  const copy = document.querySelector('[data-admin-tour-copy]');
+  const progressFill = document.querySelector('[data-admin-tour-progress-fill]');
+  const dots = document.querySelector('[data-admin-tour-dots]');
+  const hint = document.querySelector('[data-admin-tour-hint]');
+  const prevButton = document.querySelector('[data-admin-tour-prev]');
+  const nextButton = document.querySelector('[data-admin-tour-next]');
+  const closeButtons = document.querySelectorAll('[data-admin-tour-close]');
+
+  if (!startButton || !layer || !highlight || !card || !prevButton || !nextButton) {
+    return;
+  }
+
+  const storageKey = 'admin-tour-seen:' + pageKey;
+  const pendingTourKey = 'admin-tour-pending-page';
+  const tours = {
+    admin: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Esta lateral e o mapa principal do painel.\n\nAqui mudas de modulo e, nos contadores, ves quantos perfis, pedidos ou utilizadores exigem atencao imediata.' },
+      { id: 'admin-hero', title: 'Resumo do painel', copy: 'Este cabecalho mostra o estado atual da operacao num relance.\n\nOs chips resumem hora de atualizacao, validacoes pendentes e pedidos por responder.' },
+      { id: 'admin-hero-actions', title: 'Atalhos do topo', copy: 'Estes botoes levam diretamente para as areas mais usadas do admin.\n\nServem para abrir a fila de validacao, gerir utilizadores, entrar nos relatorios ou exportar a base sem procurar no menu.' },
+      { id: 'admin-priorities', title: 'Fila de trabalho', copy: 'Cada linha desta area representa uma frente de trabalho importante.\n\nO texto explica o tipo de tarefa e o numero a direita mostra quanto ha para tratar naquele tema.' },
+      { id: 'admin-health', title: 'Saude da plataforma', copy: 'Aqui tens indicadores de cobertura e desempenho da plataforma.\n\nAs barras mostram percentagens de validacao, empresas ativas e vagas abertas, enquanto os totais ajudam a perceber ritmo e volume.' }
+    ],
+    user_list: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Nesta lateral mantens acesso ao resto do admin enquanto geres contas.\n\nTambem ves contagens operacionais para perceber se ha outras filas a precisar de atencao.' },
+      { id: 'admin-hero', title: 'Gestao de utilizadores', copy: 'O topo resume o tamanho da base e o resultado da vista atual.\n\nAqui percebes quantos utilizadores existem, quantos filtros estao aplicados e quantas contas entraram recentemente.' },
+      { id: 'users-create', title: 'Criar utilizador', copy: 'Este formulario cria a conta base do utilizador.\n\nPrimeiro escolhes o perfil e depois preenches identidade, contacto, documento e acesso; alguns campos mudam conforme seja jovem, empresa ou equipa interna.' },
+      { id: 'users-filter', title: 'Filtros da lista', copy: 'Esta area serve para afinar a lista antes de procurar ou agir.\n\nPodes filtrar por texto, perfil e estado e pesquisar por nome, telefone, email, NIF ou BI.' },
+      { id: 'users-table', title: 'Acoes da tabela', copy: 'A tabela junta os dados essenciais de cada conta: identificacao, perfil, documento, distrito, estado e registo.\n\nNos botoes finais podes abrir o detalhe, editar a conta ou ativar e desativar o acesso.' }
+    ],
+    user_edit: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'O menu lateral continua disponivel enquanto editas a conta.\n\nAssim podes voltar rapidamente a outras areas do painel sem perder a referencia do modulo atual.' },
+      { id: 'admin-hero', title: 'Contexto da conta', copy: 'Este cabecalho lembra quem esta a ser editado.\n\nOs chips mostram o perfil, o telefone principal e se o acesso da conta esta ativo ou inativo.' },
+      { id: 'user-edit-form', title: 'Formulario principal', copy: 'Aqui alteras os dados operacionais da conta.\n\nO formulario esta dividido por blocos de identidade, contacto, localizacao e campos especificos do perfil, como NIF para empresa ou BI para jovem.' },
+      { id: 'user-edit-summary', title: 'Resumo lateral', copy: 'Este resumo ajuda a confirmar o estado atual antes de gravares.\n\nServe para rever perfil, estado, data de registo e distrito e comparar com as alteracoes que estas a fazer.' }
+    ],
+    user_detail: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'O menu lateral continua acessivel mesmo durante a consulta deste registo.\n\nPodes mudar de area sem fechar a pagina e sem perder o contexto do painel.' },
+      { id: 'admin-hero', title: 'Ficha do utilizador', copy: 'O topo identifica rapidamente o utilizador aberto.\n\nMostra perfil, telefone, distrito e os atalhos principais para regressar a lista ou seguir para a edicao.' },
+      { id: 'user-detail-account', title: 'Dados da conta', copy: 'Esta secao mostra a conta base do sistema.\n\nAqui confirmas contacto, privilegios, consentimentos e estado de acesso antes de qualquer decisao administrativa.' },
+      { id: 'user-detail-profile', title: 'Perfil associado', copy: 'Aqui aparece o perfil ligado a esta conta.\n\nSe for jovem, veras foto, estado do perfil, disponibilidade e dados pessoais; se for empresa, surgem os dados institucionais e de contacto.' },
+      { id: 'user-detail-actions', title: 'Acoes rapidas', copy: 'Este bloco concentra as acoes finais desta consulta.\n\nServe para abrir a edicao da conta ou regressar ao ecra anterior sem ter de voltar ao topo da pagina.' }
+    ],
+    validate_profiles: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Esta lateral ajuda a alternar entre a fila de validacao e os outros modulos.\n\nOs contadores permitem perceber rapidamente se ha mais pressao em perfis, contactos ou gestao geral.' },
+      { id: 'admin-hero', title: 'Fila de validacao', copy: 'Este topo resume o tamanho da fila atual.\n\nMostra quantos perfis estao pendentes, quantos ficaram no filtro aplicado e quantos distritos estao representados.' },
+      { id: 'validate-filter', title: 'Filtros da fila', copy: 'Usa estes filtros para reduzir a fila antes de decidir.\n\nA pesquisa aceita nome, telefone, email ou BI, e o filtro por distrito ajuda a repartir a analise por zona.' },
+      { id: 'validate-queue', title: 'Cartoes pendentes', copy: 'Cada cartao mostra o essencial para validar um candidato.\n\nAqui ves contacto, distrito, documento, situacao atual, preferencia de oportunidade e a data de submissao, com botoes para aprovar ou rejeitar de imediato.' }
+    ],
+    manage_contact_requests: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'A lateral mantem o resto do painel acessivel enquanto trabalhas os pedidos.\n\nTambem ajuda a comparar esta fila com validacoes pendentes e outras tarefas do dia.' },
+      { id: 'admin-hero', title: 'Pedidos de contacto', copy: 'Este cabecalho da-te uma leitura rapida do estado dos pedidos.\n\nOs indicadores separam pendentes, aprovados, desativados, rejeitados e o total que ficou no filtro atual.' },
+      { id: 'contact-filter', title: 'Filtros dos pedidos', copy: 'Este filtro serve para localizar pedidos especificos ou separar estados.\n\nPodes procurar por empresa, jovem ou telefone e reduzir a tabela para pendentes, aprovados, desativados ou rejeitados.' },
+      { id: 'contact-table', title: 'Tabela de decisoes', copy: 'A tabela mostra quem pediu contacto, qual jovem esta envolvido, o estado atual e as datas do pedido e da resposta.\n\nNa ultima coluna decides aprovar, rejeitar ou desativar conforme o caso.' }
+    ],
+    reports: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Usa esta lateral para cruzar a leitura dos relatorios com o resto da operacao.\n\nSe um numero chamar atencao, daqui saltas logo para o modulo correspondente.' },
+      { id: 'admin-hero', title: 'Resumo executivo', copy: 'Este cabecalho define o intervalo analisado e resume o volume do periodo.\n\nOs chips mostram as datas consideradas, o total de movimentos e a media diaria calculada.' },
+      { id: 'admin-hero-actions', title: 'Exportacoes', copy: 'Estes botoes exportam exatamente o periodo que esta no relatorio.\n\nO CSV serve para analise detalhada em folha de calculo e o PDF gera um resumo pronto para partilha.' },
+      { id: 'reports-filter', title: 'Periodo do relatorio', copy: 'Aqui escolhes a data inicial e final do recorte.\n\nQuando atualizas, todos os cards e indicadores abaixo passam a refletir apenas o intervalo selecionado.' },
+      { id: 'reports-mix', title: 'Leitura dos indicadores', copy: 'Este grafico distribui o peso de cada indicador no total do periodo.\n\nAjuda a perceber se o movimento veio mais de novos jovens, empresas, vagas ou candidaturas.' }
+    ],
+    offline_registrations: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'A lateral deixa-te sair do fluxo offline e voltar ao resto do painel sem te perderes.\n\nContinua a mostrar as prioridades gerais do admin enquanto trabalhas este processo especial.' },
+      { id: 'admin-hero', title: 'Fluxo offline', copy: 'O topo resume o ciclo completo do registo offline.\n\nAqui percebes que primeiro se gera um formulario, depois ele e preenchido sem internet e por fim o JSON e importado de volta para o sistema.' },
+      { id: 'offline-export', title: 'Gerar formulario', copy: 'Esta e a primeira etapa do processo.\n\nEscolhes se o formulario sera para jovem ou empresa e descarregas um ficheiro preenchivel com campos, listas e botoes que no fim gera o JSON de importacao.' },
+      { id: 'offline-import', title: 'Importar ficheiro', copy: 'Esta e a segunda etapa do processo.\n\nAqui carregas o JSON final produzido offline para criar a conta e o perfil correspondente sem voltar a preencher todos os dados.' }
+    ]
+  };
+  const pageFlow = [
+    {% if request.user.is_admin %}
+    { key: 'admin', label: 'Dashboard', url: '{% url "dashboard:admin" %}' },
+    { key: 'user_list', label: 'Utilizadores', url: '{% url "dashboard:user_list" %}' },
+    { key: 'validate_profiles', label: 'Validar perfis', url: '{% url "dashboard:validate_profiles" %}' },
+    { key: 'manage_contact_requests', label: 'Pedidos de contacto', url: '{% url "dashboard:manage_contact_requests" %}' },
+    { key: 'reports', label: 'Relatorios', url: '{% url "dashboard:reports" %}' },
+    { key: 'offline_registrations', label: 'Registos offline', url: '{% url "dashboard:offline_registrations" %}' }
+    {% else %}
+    { key: 'validate_profiles', label: 'Validar perfis', url: '{% url "dashboard:validate_profiles" %}' }
+    {% endif %}
+  ];
+
+  const tourSteps = (tours[pageKey] || []).filter(function (step) {
+    return document.querySelector('[data-tour-id="' + step.id + '"]');
+  });
+
+  if (!tourSteps.length) {
+    startButton.hidden = true;
+    if (meta) {
+      meta.textContent = '';
+    }
+    if (badge) {
+      badge.hidden = true;
+    }
+    return;
+  }
+
+  let activeIndex = 0;
+  let activeTarget = null;
+
+  function safeReadSeen() {
+    try {
+      return window.localStorage.getItem(storageKey) === '1';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function safeWriteSeen() {
+    try {
+      window.localStorage.setItem(storageKey, '1');
+    } catch (error) {
+      return;
+    }
+  }
+
+  function safeReadPendingTour() {
+    try {
+      return window.sessionStorage.getItem(pendingTourKey) || '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function safeWritePendingTour(nextPageKey) {
+    try {
+      window.sessionStorage.setItem(pendingTourKey, nextPageKey);
+    } catch (error) {
+      return;
+    }
+  }
+
+  function safeClearPendingTour() {
+    try {
+      window.sessionStorage.removeItem(pendingTourKey);
+    } catch (error) {
+      return;
+    }
+  }
+
+  function getNextPage() {
+    const currentIndex = pageFlow.findIndex(function (page) {
+      return page.key === pageKey;
+    });
+    if (currentIndex === -1 || currentIndex >= pageFlow.length - 1) {
+      return null;
+    }
+    return pageFlow[currentIndex + 1];
+  }
+
+  function findKnownPageByUrl(url) {
+    return pageFlow.find(function (page) {
+      return new window.URL(page.url, window.location.origin).href === url;
+    }) || null;
+  }
+
+  function updateTriggerState() {
+    const seen = safeReadSeen();
+    const nextPage = getNextPage();
+    if (startLabel) {
+      startLabel.textContent = seen ? 'Rever tour desta pagina' : 'Iniciar tour';
+    }
+    if (meta) {
+      meta.textContent = tourSteps.length + ' passo' + (tourSteps.length > 1 ? 's' : '') + ' disponive' + (tourSteps.length > 1 ? 'is' : 'l') + ' neste ecra.';
+    }
+    if (caption) {
+      caption.textContent = seen
+        ? 'Podes reabrir o guia sempre que precisares de rever os pontos principais.'
+        : nextPage
+          ? 'Percurso guiado que explica o conteudo de cada bloco nesta pagina e continua na pagina seguinte.'
+          : 'Percurso guiado que explica o que aparece em cada bloco e que acoes podes usar nesta pagina.';
+    }
+    if (badge) {
+      badge.hidden = seen;
+    }
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function renderDots() {
+    if (!dots) {
+      return;
+    }
+    dots.innerHTML = '';
+    tourSteps.forEach(function (step, index) {
+      const dot = document.createElement('span');
+      dot.className = 'admin-tour-dot';
+      if (index < activeIndex) {
+        dot.classList.add('is-complete');
+      } else if (index === activeIndex) {
+        dot.classList.add('is-active');
+      }
+      dots.appendChild(dot);
+    });
+  }
+
+  function clearFocusTarget() {
+    if (activeTarget) {
+      activeTarget.classList.remove('admin-tour-focus');
+    }
+  }
+
+  function setFocusTarget(element) {
+    clearFocusTarget();
+    activeTarget = element;
+    if (activeTarget) {
+      activeTarget.classList.add('admin-tour-focus');
+    }
+  }
+
+  function positionElements() {
+    if (!activeTarget || layer.hidden) {
+      return;
+    }
+
+    const rect = activeTarget.getBoundingClientRect();
+    const padding = 10;
+    highlight.style.top = Math.max(8, rect.top - padding) + 'px';
+    highlight.style.left = Math.max(8, rect.left - padding) + 'px';
+    highlight.style.width = Math.max(80, rect.width + (padding * 2)) + 'px';
+    highlight.style.height = Math.max(56, rect.height + (padding * 2)) + 'px';
+
+    const cardWidth = card.offsetWidth || 340;
+    const cardHeight = card.offsetHeight || 250;
+    const spacing = 18;
+    const centeredLeft = rect.left + (rect.width / 2) - (cardWidth / 2);
+    const left = clamp(centeredLeft, 16, window.innerWidth - cardWidth - 16);
+    let top = rect.bottom + spacing;
+    let placement = 'bottom';
+
+    if ((top + cardHeight) > (window.innerHeight - 16)) {
+      top = rect.top - cardHeight - spacing;
+      placement = 'top';
+    }
+    if (top < 16) {
+      top = clamp(window.innerHeight - cardHeight - 16, 16, window.innerHeight - cardHeight - 16);
+      placement = 'bottom';
+    }
+
+    card.dataset.placement = placement;
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+    card.style.setProperty('--admin-tour-arrow-left', clamp((rect.left + (rect.width / 2)) - left - 8, 26, cardWidth - 42) + 'px');
+  }
+
+  function renderStep() {
+    const step = tourSteps[activeIndex];
+    if (!step) {
+      return;
+    }
+
+    const target = document.querySelector('[data-tour-id="' + step.id + '"]');
+    if (!target) {
+      return;
+    }
+
+    setFocusTarget(target);
+    title.textContent = step.title;
+    copy.textContent = step.copy;
+    stepLabel.textContent = 'Passo ' + (activeIndex + 1) + ' de ' + tourSteps.length;
+    progressFill.style.width = (((activeIndex + 1) / tourSteps.length) * 100) + '%';
+    renderDots();
+    prevButton.disabled = activeIndex === 0;
+    if (activeIndex === tourSteps.length - 1) {
+      const nextPage = getNextPage();
+      nextButton.textContent = nextPage ? 'Pagina seguinte' : 'Concluir';
+      if (hint) {
+        hint.textContent = nextPage
+          ? 'No ultimo passo podes abrir a pagina seguinte e continuar o tour automaticamente.'
+          : 'Usa as setas do teclado para navegar, Esc para fechar e o bloco destacado continua clicavel.';
+      }
+    } else {
+      nextButton.textContent = 'Seguinte';
+      if (hint) {
+        hint.textContent = 'Usa as setas do teclado para navegar, Esc para fechar e o bloco destacado continua clicavel.';
+      }
+    }
+
+    activeTarget.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    window.setTimeout(function () {
+      positionElements();
+      card.focus();
+    }, 180);
+  }
+
+  function openTour() {
+    layer.hidden = false;
+    renderStep();
+  }
+
+  function closeTour(markSeen) {
+    layer.hidden = true;
+    highlight.removeAttribute('style');
+    clearFocusTarget();
+    activeTarget = null;
+    if (markSeen) {
+      safeWriteSeen();
+      updateTriggerState();
+    }
+  }
+
+  function continueToNextPage() {
+    const nextPage = getNextPage();
+    if (!nextPage) {
+      closeTour(true);
+      return;
+    }
+
+    safeWriteSeen();
+    safeWritePendingTour(nextPage.key);
+    window.location.href = nextPage.url;
+  }
+
+  startButton.addEventListener('click', function () {
+    activeIndex = 0;
+    openTour();
+  });
+
+  prevButton.addEventListener('click', function () {
+    if (activeIndex > 0) {
+      activeIndex -= 1;
+      renderStep();
+    }
+  });
+
+  nextButton.addEventListener('click', function () {
+    if (activeIndex >= tourSteps.length - 1) {
+      if (getNextPage()) {
+        continueToNextPage();
+      } else {
+        closeTour(true);
+      }
+      return;
+    }
+    activeIndex += 1;
+    renderStep();
+  });
+
+  document.addEventListener('click', function (event) {
+    if (layer.hidden || !activeTarget) {
+      return;
+    }
+
+    const link = event.target.closest('a[href]');
+    if (!link || !activeTarget.contains(link)) {
+      return;
+    }
+
+    const linkedPage = findKnownPageByUrl(link.href);
+    if (linkedPage && linkedPage.key !== pageKey) {
+      safeWritePendingTour(linkedPage.key);
+    }
+  }, true);
+
+  closeButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      closeTour(false);
+    });
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (layer.hidden) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      closeTour(false);
+    } else if (event.key === 'ArrowRight') {
+      nextButton.click();
+    } else if (event.key === 'ArrowLeft') {
+      prevButton.click();
+    }
+  });
+
+  window.addEventListener('resize', positionElements);
+  window.addEventListener('scroll', function () {
+    window.requestAnimationFrame(positionElements);
+  }, true);
+
+  updateTriggerState();
+
+  if (safeReadPendingTour() === pageKey) {
+    safeClearPendingTour();
+    window.setTimeout(function () {
+      activeIndex = 0;
+      openTour();
+    }, 220);
+  }
+})();
+</script>

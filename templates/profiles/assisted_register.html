@@ -282,6 +282,26 @@
         </section>
 
         <section class="assisted-section">
+          <div class="assisted-section-label"><i class="bi bi-translate"></i>Idiomas</div>
+          <h2 class="assisted-section-title">Idiomas dominados</h2>
+          <p class="assisted-section-copy">Registe os idiomas mais relevantes e indique se o jovem se destaca na oralidade, na escrita ou em ambos.</p>
+          <div class="assisted-grid">
+            {% for row in form.idioma_rows %}
+              <div class="assisted-field">
+                <label for="{{ row.nome.id_for_label }}">{{ row.nome.label }}</label>
+                {{ row.nome }}
+                {% if row.nome.errors %}<div class="assisted-error">{{ row.nome.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="assisted-field">
+                <label for="{{ row.dominio.id_for_label }}">{{ row.dominio.label }}</label>
+                {{ row.dominio }}
+                {% if row.dominio.errors %}<div class="assisted-error">{{ row.dominio.errors|striptags }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="assisted-section">
           <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observações</div>
           <h2 class="assisted-section-title">Notas internas do aténdimento</h2>
           <p class="assisted-section-copy">Use éste campo para registar contexto Útil do aténdimento, barreiras encontradas ou próximos passos combinados.</p>

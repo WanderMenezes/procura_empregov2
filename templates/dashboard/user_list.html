@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load humanize %}
+{% load humanize querystring %}
 
 {% block title %}Utilizadores - Painel de Administracao{% endblock %}
 
@@ -11,7 +11,7 @@
         </aside>
 
         <div class="admin-shell-main">
-            <div class="card admin-hero admin-hero-split mb-4">
+            <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Gestão central</div>
@@ -87,7 +87,7 @@
 
             <div class="row g-4 mb-4" id="criar-utilizador">
                 <div class="col-xl-8">
-                    <div class="card admin-panel h-100">
+                    <div class="card admin-panel h-100" data-tour-id="users-create">
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
@@ -294,7 +294,7 @@
                 </div>
             </div>
 
-            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+            <form method="get" class="card admin-panel admin-filter-panel mb-4" data-tour-id="users-filter">
                 <div class="card-body">
                     <div class="admin-section-head compact">
                         <div>
@@ -334,7 +334,7 @@
                 </div>
             </form>
 
-            <div class="card admin-panel" id="lista-utilizadores">
+            <div class="card admin-panel" id="lista-utilizadores" data-tour-id="users-table">
                 <div class="card-body p-0">
                     <div class="admin-table-header">
                         <div>
@@ -420,6 +420,29 @@
                         </table>
                     </div>
                 </div>
+                {% if users_page.paginator.num_pages > 1 %}
+                    <nav class="p-3 border-top" aria-label="PÃ¡ginaÃ§Ã£o da lista de utilizadores">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item {% if not users_page.has_previous %}disabled{% endif %}">
+                                {% if users_page.has_previous %}
+                                    <a class="page-link" href="{% query_string users_page.previous_page_number %}#lista-utilizadores">Anterior</a>
+                                {% else %}
+                                    <span class="page-link">Anterior</span>
+                                {% endif %}
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">PÃ¡gina {{ users_page.number }} de {{ users_page.paginator.num_pages }}</span>
+                            </li>
+                            <li class="page-item {% if not users_page.has_next %}disabled{% endif %}">
+                                {% if users_page.has_next %}
+                                    <a class="page-link" href="{% query_string users_page.next_page_number %}#lista-utilizadores">PrÃ³xima</a>
+                                {% else %}
+                                    <span class="page-link">PrÃ³xima</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </nav>
+                {% endif %}
             </div>
         </div>
     </div>

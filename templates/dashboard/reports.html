@@ -11,7 +11,7 @@
         </aside>
 
         <div class="admin-shell-main">
-            <div class="card admin-hero admin-hero-split mb-4">
+            <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Leitura executiva</div>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
 
-                    <div class="admin-hero-actions">
+                    <div class="admin-hero-actions" data-tour-id="admin-hero-actions">
                         <a href="{% url 'dashboard:export_report_csv' %}?data_inicio={{ data_inicio_value }}&data_fim={{ data_fim_value }}" class="btn btn-light btn-sm">
                             <i class="bi bi-download me-1"></i>Exportar CSV
                         </a>
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+            <form method="get" class="card admin-panel admin-filter-panel mb-4" data-tour-id="reports-filter">
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-4">
@@ -106,7 +106,7 @@
 
             <div class="row g-4">
                 <div class="col-xl-7">
-                    <div class="card admin-panel h-100">
+                    <div class="card admin-panel h-100" data-tour-id="reports-mix">
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>

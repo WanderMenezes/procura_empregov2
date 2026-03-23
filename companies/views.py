@@ -466,7 +466,7 @@ def search_youth(request):
     # Lista inicial: últimos jovens visíveis e completos
     base_qs = (
         YouthProfile.objects
-        .filter(visivel=True, completo=True)
+        .filter(visivel=True, completo=True, validado=True)
         .select_related('user')
         .prefetch_related('youth_skills__skill', 'education', 'experiences')
         .order_by('-created_at')
@@ -563,7 +563,8 @@ def youth_detail(request, pk):
         ),
         pk=pk,
         visivel=True,
-        completo=True
+        completo=True,
+        validado=True
     )
     
     # Incrementar visualizações (se implementado)
@@ -605,7 +606,9 @@ def contact_request_create(request, youth_pk):
             'experiences',
         ),
         pk=youth_pk,
-        visivel=True
+        visivel=True,
+        completo=True,
+        validado=True
     )
     
     # Verificar se já existe pedido
@@ -684,7 +687,7 @@ def contact_request_bulk_create(request):
     skipped = 0
     for yid in youth_ids:
         try:
-            youth = YouthProfile.objects.get(pk=int(yid), visivel=True, completo=True)
+            youth = YouthProfile.objects.get(pk=int(yid), visivel=True, completo=True, validado=True)
         except (YouthProfile.DoesNotExist, ValueError):
             skipped += 1
             continue

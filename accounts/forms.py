@@ -4,7 +4,7 @@ Forms para autenticação e gestão de usuários
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
@@ -221,6 +221,37 @@ class UserLoginForm(AuthenticationForm):
         label=_('Lembrar-me'),
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        'invalid_login': _('Telemóvel/Email ou palavra-passe incorretos.'),
+    }
+
+    def clean(self):
+        username = (self.cleaned_data.get('username') or '').strip()
+        password = self.cleaned_data.get('password')
+
+        if username and password:
+            auth_username = username
+            if '@' in username:
+                try:
+                    auth_username = User.objects.get(email__iexact=username).telefone
+                except User.DoesNotExist:
+                    auth_username = username
+
+            self.user_cache = authenticate(
+                self.request,
+                username=auth_username,
+                password=password,
+            )
+
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
+
+            self.confirm_login_allowed(self.user_cache)
+
+        self.cleaned_data['username'] = username
+        return self.cleaned_data
 
 
 class PasswordResetRequestForm(forms.Form):

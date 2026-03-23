@@ -180,6 +180,44 @@ class TechnicalDashboardTests(TestCase):
         self.assertRedirects(response, reverse('home'))
 
 
+class ProfileValidationQueueTests(TestCase):
+    def setUp(self):
+        self.district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        self.admin = User.objects.create_user(
+            telefone='+2399000015',
+            nome='Admin Validador',
+            perfil=User.ProfileType.ADMIN,
+            distrito=self.district,
+        )
+        self.youth_user = User.objects.create_user(
+            telefone='+2399000016',
+            nome='Jovem Pendente',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='pendente@example.com',
+        )
+        self.profile = YouthProfile.objects.create(
+            user=self.youth_user,
+            completo=True,
+            validado=False,
+        )
+
+    def test_validation_queue_shows_admin_link_to_profile_detail(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:validate_profiles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ver perfil')
+        self.assertContains(
+            response,
+            reverse('dashboard:user_detail', args=[self.youth_user.pk]),
+        )
+
+
 class ReportsExportTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
@@ -463,3 +501,55 @@ class OfflineRegistrationFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'A palavra-passe e a confirmacao nao coincidem')
         self.assertFalse(User.objects.filter(telefone='+2399000092').exists())
+
+
+class AdminUserListPaginationTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000100',
+            nome='Admin Utilizadores',
+            perfil=User.ProfileType.ADMIN,
+        )
+        base_time = timezone.now() - timedelta(days=1)
+        for index in range(21):
+            User.objects.create_user(
+                telefone=f'+2399110{index:03d}',
+                nome=f'Utilizador paginado {index:02d}',
+                perfil=User.ProfileType.JOVEM,
+                date_joined=base_time + timedelta(minutes=index),
+            )
+
+    def test_admin_user_list_is_paginated_and_keeps_filters(self):
+        self.client.force_login(self.admin)
+
+        first_page = self.client.get(reverse('dashboard:user_list'), {'perfil': 'JO'})
+
+        self.assertEqual(first_page.status_code, 200)
+        self.assertEqual(first_page.context['users_page'].number, 1)
+        self.assertEqual(first_page.context['users_page'].paginator.count, 21)
+        self.assertEqual(first_page.context['users_page'].paginator.num_pages, 3)
+        self.assertEqual(len(first_page.context['users']), 10)
+        self.assertContains(first_page, 'perfil=JO')
+        self.assertContains(first_page, 'page=2#lista-utilizadores')
+
+        second_page = self.client.get(
+            reverse('dashboard:user_list'),
+            {'perfil': 'JO', 'page': 2},
+        )
+
+        self.assertEqual(second_page.status_code, 200)
+        self.assertEqual(second_page.context['users_page'].number, 2)
+        self.assertEqual(len(second_page.context['users']), 10)
+        self.assertContains(second_page, 'page=3#lista-utilizadores')
+        self.assertContains(second_page, 'Utilizador paginado 10')
+        self.assertNotContains(second_page, 'Utilizador paginado 20')
+
+        third_page = self.client.get(
+            reverse('dashboard:user_list'),
+            {'perfil': 'JO', 'page': 3},
+        )
+
+        self.assertEqual(third_page.status_code, 200)
+        self.assertEqual(third_page.context['users_page'].number, 3)
+        self.assertEqual(len(third_page.context['users']), 1)
+        self.assertContains(third_page, 'Utilizador paginado 00')

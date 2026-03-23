@@ -38,6 +38,12 @@ class YouthProfile(models.Model):
         ('EMPRE', _('Empreendedorismo')),
     ]
     
+    IDIOMA_DOMINIO_CHOICES = [
+        ('ORAL', _('Bom na oralidade')),
+        ('ESCRITA', _('Bom na escrita')),
+        ('AMBOS', _('Bom na oralidade e na escrita')),
+    ]
+
     # Relação com User
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -82,6 +88,9 @@ class YouthProfile(models.Model):
     # Sobre
     sobre = models.TextField(_('sobre mim'), blank=True, help_text=_('Breve descrição sobre ti'))
     
+    # Idiomas
+    idiomas = models.JSONField(_('idiomas dominados'), default=list, blank=True)
+
     # Foto de perfil do jovem
     photo = models.ImageField(
         _('foto de perfil'),
@@ -152,6 +161,24 @@ class YouthProfile(models.Model):
     @property
     def interesses_setoriais_display(self):
         return ', '.join(self.interesses_setoriais_labels)
+
+    @property
+    def idiomas_detalhados(self):
+        mapping = dict(self.IDIOMA_DOMINIO_CHOICES)
+        items = []
+        for item in self.idiomas or []:
+            if not isinstance(item, dict):
+                continue
+            idioma = ' '.join(str(item.get('idioma') or '').split()).strip()
+            dominio = item.get('dominio')
+            if not idioma:
+                continue
+            items.append({
+                'idioma': idioma,
+                'dominio': dominio,
+                'dominio_label': mapping.get(dominio, dominio or ''),
+            })
+        return items
     
     def get_skills(self):
         """Retorna todas as skills do jovem"""
