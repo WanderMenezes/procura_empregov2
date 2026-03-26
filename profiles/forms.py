@@ -214,11 +214,11 @@ class YouthProfileStep1Form(forms.ModelForm):
     )
 
     distrito = forms.ModelChoiceField(
-        label=_('Distrito'),
+        label=_('Distrito em Sao Tome e Principe'),
         queryset=District.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        empty_label=_('Selecione...'),
-        required=True
+        empty_label=_('Fora de Sao Tome e Principe / nao definido'),
+        required=False
     )
     
     data_nascimento = forms.DateField(
@@ -241,7 +241,7 @@ class YouthProfileStep1Form(forms.ModelForm):
         label=_('Localidade'),
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Sua localidade')
+            'placeholder': _('Cidade, regiao ou pais onde vive')
         }),
         required=False
     )
@@ -649,9 +649,11 @@ class AssistedRegistrationForm(forms.Form):
     )
     
     distrito = forms.ModelChoiceField(
-        label=_('Distrito'),
+        label=_('Distrito em Sao Tome e Principe'),
         queryset=None,
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label=_('Fora de Sao Tome e Principe / nao definido'),
+        required=False,
     )
     
     localidade = forms.CharField(
@@ -659,7 +661,7 @@ class AssistedRegistrationForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Localidade')
+            'placeholder': _('Cidade, regiao ou pais')
         })
     )
     
@@ -725,7 +727,7 @@ class AssistedRegistrationForm(forms.Form):
         super().__init__(*args, **kwargs)
         attach_idioma_fields(self)
         from core.models import District
-        self.fields['distrito'].queryset = District.objects.all()
+        self.fields['distrito'].queryset = District.objects.order_by('nome')
 
     def clean(self):
         cleaned_data = super().clean()

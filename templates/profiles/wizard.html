@@ -247,11 +247,13 @@
                 <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
                 {{ form.distrito }}
                 {% if form.distrito.errors %}<div class="wizard-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+                <div class="wizard-field-help">Opcional. Usa este campo apenas se estiveres em Sao Tome e Principe.</div>
               </div>
               <div class="wizard-field">
                 <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
                 {{ form.localidade }}
                 {% if form.localidade.errors %}<div class="wizard-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
+                <div class="wizard-field-help">Podes escrever bairro, cidade, regiao ou pais onde estas.</div>
               </div>
             </div>
           </div>

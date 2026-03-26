@@ -111,7 +111,7 @@
           <div>
             <div class="contact-form-youth-name">{{ youth.user.nome }}</div>
             <div class="contact-form-youth-meta">
-              {{ youth.distrito.nome|default:"Distrito não definido" }}{% if youth.localidade %} - {{ youth.localidade }}{% endif %}
+              {{ youth.location_display }}
             </div>
             <div class="contact-form-tags mt-3">
               {% if youth.idade %}<span class="contact-form-tag"><i class="bi bi-person"></i>{{ youth.idade }} anos</span>{% endif %}

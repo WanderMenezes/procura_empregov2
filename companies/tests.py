@@ -1,14 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from companies.forms import CompanyProfileForm
-from companies.models import Company
+from companies.models import Company, ContactRequest
 from core.models import District
 from profiles.models import YouthProfile
 
 
 User = get_user_model()
+
+
+def _years_ago(years):
+    today = timezone.localdate()
+    try:
+        return today.replace(year=today.year - years)
+    except ValueError:
+        return today.replace(month=2, day=28, year=today.year - years)
 
 
 class CompanySectorTests(TestCase):
@@ -97,12 +106,14 @@ class CompanyYouthVisibilityTests(TestCase):
             visivel=True,
             completo=True,
             validado=True,
+            data_nascimento=_years_ago(19),
         )
         self.unvalidated_profile = YouthProfile.objects.create(
             user=self.unvalidated_user,
             visivel=True,
             completo=True,
             validado=False,
+            data_nascimento=_years_ago(17),
         )
 
     def test_search_youth_only_shows_admin_validated_profiles(self):
@@ -121,16 +132,63 @@ class CompanyYouthVisibilityTests(TestCase):
         self.client.force_login(self.company_user)
 
         response = self.client.get(
-            reverse('companies:youth_detail', args=[self.unvalidated_profile.pk])
+            reverse('companies:youth_detail', args=[self.unvalidated_profile.pk]),
+            follow=True,
         )
 
-        self.assertEqual(response.status_code, 404)
+        self.assertRedirects(response, reverse('companies:search_youth'))
+        self.assertContains(response, 'dispon')
 
     def test_company_cannot_create_contact_request_for_unvalidated_profile(self):
         self.client.force_login(self.company_user)
 
         response = self.client.get(
-            reverse('companies:contact_request_create', args=[self.unvalidated_profile.pk])
+            reverse('companies:contact_request_create', args=[self.unvalidated_profile.pk]),
+            follow=True,
         )
 
-        self.assertEqual(response.status_code, 404)
+        self.assertRedirects(response, reverse('companies:search_youth'))
+        self.assertContains(response, 'novos pedidos de contacto')
+
+    def test_company_can_open_disabled_contact_profile_without_seeing_contacts(self):
+        contact_request = ContactRequest.objects.create(
+            company=self.company,
+            youth=self.validated_profile,
+            motivo='Queremos falar sobre uma oportunidade.',
+            estado='DESATIVADO',
+            resposta_admin='Acesso desativado por regra de idade.',
+        )
+        self.validated_profile.data_nascimento = _years_ago(9)
+        self.validated_profile.save()
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('companies:youth_detail', args=[self.validated_profile.pk]))
+
+        self.validated_profile.refresh_from_db()
+        self.assertFalse(self.validated_profile.validado)
+        self.assertFalse(self.validated_profile.visivel)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Desativado')
+        self.assertContains(response, 'deixou de estar dispon')
+        self.assertNotContains(response, self.validated_user.telefone)
+        contact_request.refresh_from_db()
+
+    def test_contact_request_list_hides_phone_for_stale_underage_approved_request(self):
+        ContactRequest.objects.create(
+            company=self.company,
+            youth=self.validated_profile,
+            motivo='Queremos falar sobre uma oportunidade.',
+            estado='APROVADO',
+        )
+        YouthProfile.objects.filter(pk=self.validated_profile.pk).update(
+            data_nascimento=_years_ago(9),
+            validado=True,
+            visivel=True,
+        )
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('companies:contact_request_list'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.validated_user.telefone)
+        self.assertContains(response, 'dados diretos do jovem ja nao estao disponiveis')

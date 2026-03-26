@@ -68,3 +68,17 @@ class LoginViewTests(TestCase):
         )
 
         self.assertRedirects(response, reverse('profiles:wizard'), fetch_redirect_response=False)
+
+    def test_protected_account_page_redirects_to_localized_login_url(self):
+        response = self.client.get(reverse('accounts:profile'))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={reverse('accounts:profile')}",
+            fetch_redirect_response=False,
+        )
+
+    def test_legacy_login_url_redirects_to_current_login_page(self):
+        response = self.client.get('/accounts/login/')
+
+        self.assertRedirects(response, reverse('accounts:login'), fetch_redirect_response=False)

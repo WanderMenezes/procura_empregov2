@@ -580,8 +580,8 @@
             <div class="terms-eligibility-grid">
               <article class="terms-eligibility-card">
                 <div class="terms-eligibility-icon"><i class="bi bi-geo-alt"></i></div>
-                <h3>Residência</h3>
-                <p class="terms-card-copy mb-0">Ser residente em São Tomé e Príncipe.</p>
+                <h3>Localização declarada</h3>
+                <p class="terms-card-copy mb-0">Residir em São Tomé e Príncipe ou no exterior, com localização e contactos atualizados.</p>
               </article>
               <article class="terms-eligibility-card">
                 <div class="terms-eligibility-icon"><i class="bi bi-calendar-check"></i></div>
@@ -734,7 +734,7 @@
               <a href="{% url 'privacy' %}" class="btn btn-light">
                 <i class="bi bi-shield-lock me-2"></i>Política de privacidade
               </a>
-              <a href="mailto:info@basenacionaljovens.st" class="btn btn-outline-light">
+              <a href="mailto:{{ cnj_contact.email }}" class="btn btn-outline-light">
                 <i class="bi bi-envelope me-2"></i>Contactar
               </a>
             </div>

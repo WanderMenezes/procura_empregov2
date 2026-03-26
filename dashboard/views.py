@@ -339,8 +339,6 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
         raise ValueError(_('O nome é obrigatório no registo offline.'))
     if not telefone:
         raise ValueError(_('O telemóvel é obrigatório no registo offline.'))
-    if not district_code:
-        raise ValueError(_('O distrito é obrigatório no registo offline.'))
     if len(password) < 8:
         raise ValueError(_('A palavra-passe do registo offline deve ter pelo menos 8 caracteres.'))
     if password != password_confirm:
@@ -351,10 +349,14 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
     if email and User.objects.filter(email__iexact=email).exists():
         raise ValueError(_('Já existe um utilizador com este email.'))
 
-    try:
-        district = District.objects.get(codigo__iexact=district_code)
-    except District.DoesNotExist as exc:
-        raise ValueError(_('O distrito indicado no ficheiro offline não existe.')) from exc
+    district = None
+    if district_code:
+        try:
+            district = District.objects.get(codigo__iexact=district_code)
+        except District.DoesNotExist as exc:
+            raise ValueError(_('O distrito indicado no ficheiro offline não existe.')) from exc
+    elif profile_type == User.ProfileType.EMPRESA:
+        raise ValueError(_('O distrito é obrigatório para registos offline de empresas.'))
 
     data_consentimento = timezone.now() if consentimento_dados or consentimento_contacto else None
 
@@ -503,7 +505,7 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
                 'user_id': user.id,
                 'user_name': user.nome,
                 'telefone': user.telefone,
-                'district_code': district.codigo,
+                'district_code': district.codigo if district else '',
                 'collected_offline_at': collected_offline_at,
                 'collected_by_name': collected_by_name,
                 'collected_by_role': collected_by_role,
@@ -1069,6 +1071,25 @@ def validate_profile(request, pk, action):
     profile = get_object_or_404(YouthProfile, pk=pk)
     
     if action == 'aprovar':
+        if profile.is_underage_for_validation:
+            Notification.objects.create(
+                user=profile.user,
+                titulo=_('Perfil pendente por idade minima'),
+                mensagem=profile.validation_age_message,
+                tipo='ALERTA'
+            )
+
+            messages.error(
+                request,
+                _('Perfil nao pode ser validado: o candidato tem %(age)s anos e a idade minima e %(minimum_age)s.') % {
+                    'age': profile.idade,
+                    'minimum_age': profile.MINIMUM_VALIDATION_AGE,
+                }
+            )
+
+            next_url = request.GET.get('next')
+            return redirect(next_url or 'dashboard:validate_profiles')
+
         profile.validado = True
         profile.save()
         

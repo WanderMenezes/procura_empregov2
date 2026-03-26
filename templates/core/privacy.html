@@ -732,7 +732,7 @@
                 <div class="privacy-trust-icon"><i class="bi bi-chat-left-text"></i></div>
                 <h3>Canal de contacto</h3>
                 <p class="privacy-card-copy mb-0">
-                  Questões sobre privacidade podem ser tratadas através de <a href="mailto:info@basenacionaljovens.st">info@basenacionaljovens.st</a>.
+                  Questões sobre privacidade podem ser tratadas através de <a href="mailto:{{ cnj_contact.email }}">{{ cnj_contact.email }}</a> ou dos contactos {{ cnj_contact.phones_display }}.
                 </p>
               </article>
             </div>
@@ -748,7 +748,7 @@
               <a href="{% url 'help' %}" class="btn btn-light">
                 <i class="bi bi-question-circle me-2"></i>Ir para ajuda
               </a>
-              <a href="mailto:info@basenacionaljovens.st" class="btn btn-outline-light">
+              <a href="mailto:{{ cnj_contact.email }}" class="btn btn-outline-light">
                 <i class="bi bi-envelope me-2"></i>Enviar email
               </a>
             </div>

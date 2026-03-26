@@ -170,7 +170,7 @@
                 <div>
                   <div class="job-app-name">{{ app.youth.user.nome }}</div>
                   <div class="job-app-subline">
-                    {{ app.youth.distrito.nome|default:"Distrito não definido" }}{% if app.youth.localidade %} - {{ app.youth.localidade }}{% endif %}
+                    {{ app.youth.location_display }}
                   </div>
                   <div class="job-app-tags">
                     {% if app.youth.idade %}<span class="job-app-tag"><i class="bi bi-person"></i>{{ app.youth.idade }} anos</span>{% endif %}
@@ -190,11 +190,19 @@
             <div class="job-app-grid">
               <div class="job-app-grid-item">
                 <span class="job-app-label">Telefone</span>
-                {{ app.youth.user.telefone|default:"-" }}
+                {% if app.youth.can_apply_to_jobs and app.youth.visivel %}
+                  {{ app.youth.user.telefone|default:"-" }}
+                {% else %}
+                  Contacto indisponivel
+                {% endif %}
               </div>
               <div class="job-app-grid-item">
                 <span class="job-app-label">Email</span>
-                {{ app.youth.user.email|default:"-" }}
+                {% if app.youth.can_apply_to_jobs and app.youth.visivel %}
+                  {{ app.youth.user.email|default:"-" }}
+                {% else %}
+                  Contacto indisponivel
+                {% endif %}
               </div>
               <div class="job-app-grid-item">
                 <span class="job-app-label">Candidatura</span>

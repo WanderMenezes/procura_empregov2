@@ -1093,9 +1093,9 @@
                   <div class="accordion-body">
                     <p>Se precisares de apoio, podes usar estes canais:</p>
                     <ul class="mb-0">
-                      <li><strong>Email:</strong> info@basenacionaljovens.st</li>
-                      <li><strong>Telefone:</strong> +239 123 4567</li>
-                      <li><strong>Endereço:</strong> São Tomé, São Tomé e Príncipe</li>
+                      <li><strong>Email:</strong> {{ cnj_contact.email }}</li>
+                      <li><strong>Contactos:</strong> {{ cnj_contact.phones_display }}</li>
+                      <li><strong>Sede:</strong> {{ cnj_contact.address }}</li>
                     </ul>
                   </div>
                 </div>
@@ -1152,21 +1152,21 @@
                 <span class="help-contact-icon"><i class="bi bi-envelope"></i></span>
                 <span class="help-contact-copy">
                   <strong>Email</strong>
-                  <span>info@basenacionaljovens.st</span>
+                  <span>{{ cnj_contact.email }}</span>
                 </span>
               </div>
               <div class="help-contact-row">
                 <span class="help-contact-icon"><i class="bi bi-telephone"></i></span>
                 <span class="help-contact-copy">
-                  <strong>Telefone</strong>
-                  <span>+239 123 4567</span>
+                  <strong>Contactos</strong>
+                  <span>{{ cnj_contact.phones_display }}</span>
                 </span>
               </div>
               <div class="help-contact-row">
                 <span class="help-contact-icon"><i class="bi bi-geo-alt"></i></span>
                 <span class="help-contact-copy">
-                  <strong>Localização</strong>
-                  <span>São Tomé, São Tomé e Príncipe</span>
+                  <strong>Sede</strong>
+                  <span>{{ cnj_contact.address }}</span>
                 </span>
               </div>
             </div>

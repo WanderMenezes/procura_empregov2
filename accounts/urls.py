@@ -3,12 +3,14 @@ URLs para o app accounts
 """
 
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'accounts'
 
 urlpatterns = [
     # Autenticação
+    path('login/', RedirectView.as_view(pattern_name='accounts:login', permanent=False), name='login_legacy'),
     path('registar/', views.RegisterView.as_view(), name='register'),
     path('entrar/', views.LoginView.as_view(), name='login'),
     path('sair/', views.LogoutView.as_view(), name='logout'),

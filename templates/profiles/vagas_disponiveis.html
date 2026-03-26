@@ -101,11 +101,18 @@
 
     <div class="jobs-stats">
       <div class="jobs-stat"><span class="jobs-stat-label">Resultados</span><span class="jobs-stat-value">{{ filtered_jobs_count }}</span><span class="jobs-stat-meta">{% if has_active_filters %}apos filtros ativos{% else %}na lista atual{% endif %}</span></div>
-      <div class="jobs-stat"><span class="jobs-stat-label">No teu distrito</span><span class="jobs-stat-value">{{ local_jobs_count }}</span><span class="jobs-stat-meta">{% if profile.distrito %}vagas em {{ profile.distrito.nome }}{% else %}define distrito no perfil{% endif %}</span></div>
+      <div class="jobs-stat"><span class="jobs-stat-label">No teu distrito</span><span class="jobs-stat-value">{{ local_jobs_count }}</span><span class="jobs-stat-meta">{% if profile.distrito %}vagas em {{ profile.distrito.nome }}{% else %}distrito em STP e opcional{% endif %}</span></div>
       <div class="jobs-stat"><span class="jobs-stat-label">Novas esta semana</span><span class="jobs-stat-value">{{ recent_jobs_count }}</span><span class="jobs-stat-meta">publicadas nos últimos 7 dias</span></div>
       <div class="jobs-stat"><span class="jobs-stat-label">A fechar em breve</span><span class="jobs-stat-value">{{ closing_soon_count }}</span><span class="jobs-stat-meta">com prazo nos próximos dias</span></div>
     </div>
   </section>
+
+  {% if not profile.can_apply_to_jobs %}
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
+      <i class="bi bi-hourglass-split"></i>
+      <div>Podes explorar todas as vagas, mas a candidatura so fica disponivel depois da validacao do administrador.</div>
+    </div>
+  {% endif %}
 
   <div class="jobs-shell">
     <aside class="jobs-sidebar">
@@ -126,7 +133,7 @@
           </div>
           <div>
             <div class="jobs-profile-name">{{ user.nome }}</div>
-            <p class="jobs-profile-line">{% if profile.distrito %}Distrito {{ profile.distrito.nome }}{% else %}Sem distrito definido{% endif %}</p>
+            <p class="jobs-profile-line">{{ profile.location_display }}</p>
             <p class="jobs-profile-line">{% if preferred_tipo_display %}Preferencia: {{ preferred_tipo_display }}{% else %}Sem preferencia definida{% endif %}</p>
           </div>
         </div>
@@ -304,19 +311,25 @@
                 {% else %}
                   <div class="job-footer-actions">
                     <div class="job-footer-note">{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Ler a descrição ajuda a decidir se queres avançar com a candidatura.{% endif %}</div>
-                    <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
-                      {% csrf_token %}
-                      <button type="button"
-                              class="btn btn-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target="#confirmApplyModal"
-                              data-form-id="apply-form-{{ vaga.id }}"
-                              data-job-title="{{ vaga.titulo|escapejs }}"
-                              data-company="{{ vaga.company.nome|escapejs }}"
-                              data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}">
-                        <i class="bi bi-send me-2"></i>Candidatar-me
+                    {% if profile.can_apply_to_jobs %}
+                      <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
+                        {% csrf_token %}
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmApplyModal"
+                                data-form-id="apply-form-{{ vaga.id }}"
+                                data-job-title="{{ vaga.titulo|escapejs }}"
+                                data-company="{{ vaga.company.nome|escapejs }}"
+                                data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}">
+                          <i class="bi bi-send me-2"></i>Candidatar-me
+                        </button>
+                      </form>
+                    {% else %}
+                      <button type="button" class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-hourglass-split me-2"></i>Aguardar validacao
                       </button>
-                    </form>
+                    {% endif %}
                   </div>
                 {% endif %}
               </div>
@@ -349,7 +362,7 @@
         <div class="jobs-empty">
           <i class="bi bi-search"></i>
           <h2 class="jobs-results-title mb-2">Sem vagas para esta combinação</h2>
-          <p class="jobs-empty-copy mb-3">Tenta limpar filtros, mudar o distrito ou usar uma palavra-chave mais ampla para veres mais oportunidades.</p>
+          <p class="jobs-empty-copy mb-3">Tenta limpar filtros, ajustar a area ou usar uma palavra-chave mais ampla para veres mais oportunidades.</p>
           <a href="{% url 'profiles:available_jobs' %}" class="btn btn-primary">Ver todas as vagas</a>
         </div>
       {% endif %}

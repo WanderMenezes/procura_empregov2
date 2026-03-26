@@ -15,6 +15,14 @@ from profiles.models import Education, YouthProfile
 User = get_user_model()
 
 
+def _years_ago(years):
+    today = timezone.localdate()
+    try:
+        return today.replace(year=today.year - years)
+    except ValueError:
+        return today.replace(month=2, day=28, year=today.year - years)
+
+
 class ContactRequestAdminActionTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
@@ -217,6 +225,35 @@ class ProfileValidationQueueTests(TestCase):
             reverse('dashboard:user_detail', args=[self.youth_user.pk]),
         )
 
+    def test_admin_cannot_approve_underage_profile(self):
+        self.profile.data_nascimento = _years_ago(17)
+        self.profile.save(update_fields=['data_nascimento'])
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse('dashboard:validate_profile', args=[self.profile.pk, 'aprovar'])
+        )
+
+        self.assertRedirects(response, reverse('dashboard:validate_profiles'))
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.validado)
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.youth_user,
+                titulo='Perfil pendente por idade minima',
+            ).exists()
+        )
+
+    def test_validation_queue_marks_underage_profile_as_blocked(self):
+        self.profile.data_nascimento = _years_ago(17)
+        self.profile.save(update_fields=['data_nascimento'])
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:validate_profiles'))
+
+        self.assertContains(response, 'Menor de 18 anos')
+        self.assertContains(response, 'A idade minima para aprovacao e 18 anos.')
+
 
 class ReportsExportTests(TestCase):
     def setUp(self):
@@ -316,7 +353,7 @@ class OfflineRegistrationFlowTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Registos offline')
-        self.assertContains(response, 'Gerar formulario offline')
+        self.assertContains(response, 'Gerar formulário offline')
         self.assertContains(response, 'Importar ficheiro offline')
 
     def test_non_admin_cannot_open_offline_registrations_page(self):
@@ -340,7 +377,7 @@ class OfflineRegistrationFlowTests(TestCase):
         self.assertIn('text/html', response['Content-Type'])
         self.assertIn('registo_offline_jovem.html', response['Content-Disposition'])
         self.assertContains(response, 'Formulario offline de registo - Jovem')
-        self.assertContains(response, 'Gerar ficheiro para importacao')
+        self.assertContains(response, 'Gerar ficheiro para importação')
         self.assertContains(response, 'bnj_offline_registration')
         self.assertTrue(
             AuditLog.objects.filter(
@@ -427,6 +464,44 @@ class OfflineRegistrationFlowTests(TestCase):
             ).exists()
         )
 
+    def test_admin_can_import_offline_youth_registration_without_district(self):
+        self.client.force_login(self.admin)
+
+        payload = {
+            'schema': 'bnj_offline_registration',
+            'version': 1,
+            'profile_type': 'JO',
+            'registration_data': {
+                'nome': 'Jovem Exterior Offline',
+                'telefone': '+351912300201',
+                'email': 'jovem.exterior@example.com',
+                'password': 'offline123',
+                'password_confirm': 'offline123',
+                'bi_numero': 'BI-EXT-201',
+                'data_nascimento': '2001-04-18',
+                'sexo': 'F',
+                'localidade': 'Porto, Portugal',
+                'situacao_atual': 'DES',
+                'disponibilidade': 'SIM',
+                'preferencia_oportunidade': 'EMP',
+            },
+        }
+        uploaded = SimpleUploadedFile(
+            'registo_jovem_exterior_offline.json',
+            json.dumps(payload).encode('utf-8'),
+            content_type='application/json',
+        )
+
+        response = self.client.post(
+            reverse('dashboard:offline_registration_import'),
+            {'file': uploaded},
+        )
+
+        self.assertRedirects(response, reverse('dashboard:offline_registrations'))
+        user = User.objects.get(telefone='+351912300201')
+        self.assertIsNone(user.distrito)
+        self.assertEqual(user.youth_profile.localidade, 'Porto, Portugal')
+
     def test_admin_can_import_offline_company_registration(self):
         self.client.force_login(self.admin)
 
@@ -499,7 +574,7 @@ class OfflineRegistrationFlowTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'A palavra-passe e a confirmacao nao coincidem')
+        self.assertContains(response, 'A palavra-passe e a confirmação não coincidem')
         self.assertFalse(User.objects.filter(telefone='+2399000092').exists())
 
 

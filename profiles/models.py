@@ -7,10 +7,13 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from datetime import datetime
 
 
 class YouthProfile(models.Model):
     """Perfil completo do jovem"""
+
+    MINIMUM_VALIDATION_AGE = 18
     
     SEXO_CHOICES = [
         ('M', _('Masculino')),
@@ -122,17 +125,158 @@ class YouthProfile(models.Model):
     
     def __str__(self):
         return f"Perfil de {self.user.nome}"
+
+    @classmethod
+    def normalize_birth_date(cls, birth_date):
+        if isinstance(birth_date, str):
+            try:
+                return datetime.strptime(birth_date, '%Y-%m-%d').date()
+            except ValueError:
+                return None
+        return birth_date
+
+    @classmethod
+    def calculate_age_from_birth_date(cls, birth_date):
+        """Calcula a idade com base na data de nascimento informada."""
+        birth_date = cls.normalize_birth_date(birth_date)
+        if not birth_date:
+            return None
+        today = timezone.localdate()
+        return today.year - birth_date.year - (
+            (today.month, today.day) < (birth_date.month, birth_date.day)
+        )
+
+    @classmethod
+    def minimum_validation_birth_date(cls):
+        """Data maxima de nascimento para cumprir a idade minima."""
+        today = timezone.localdate()
+        try:
+            return today.replace(year=today.year - cls.MINIMUM_VALIDATION_AGE)
+        except ValueError:
+            return today.replace(month=2, day=28, year=today.year - cls.MINIMUM_VALIDATION_AGE)
+
+    def _disable_approved_contact_requests_for_underage(self):
+        """Desativa acessos de empresas quando o perfil fica menor de idade."""
+        if not self.pk:
+            return 0
+
+        from companies.models import ContactRequest
+        from core.models import Notification
+
+        approved_requests = ContactRequest.objects.select_related(
+            'company',
+            'company__user',
+        ).filter(
+            youth=self,
+            estado='APROVADO',
+        )
+
+        disabled_count = 0
+        responded_at = timezone.now()
+        admin_reason = _(
+            'O acesso direto ao contacto foi desativado automaticamente porque o perfil ficou abaixo da idade minima de %(minimum_age)s anos.'
+        ) % {
+            'minimum_age': self.MINIMUM_VALIDATION_AGE,
+        }
+
+        for contact in approved_requests:
+            contact.estado = 'DESATIVADO'
+            contact.responded_at = responded_at
+            contact.resposta_admin = admin_reason
+            contact.save(update_fields=['estado', 'responded_at', 'resposta_admin'])
+            disabled_count += 1
+
+            Notification.objects.create(
+                user=contact.company.user,
+                titulo=_('Pedido de contacto desativado'),
+                mensagem=_(
+                    'O acesso ao contacto de %(youth_name)s foi desativado automaticamente porque o perfil ficou abaixo da idade minima.'
+                ) % {
+                    'youth_name': self.user.nome,
+                },
+                tipo='ALERTA'
+            )
+
+        return disabled_count
+
+    def save(self, *args, **kwargs):
+        self.data_nascimento = self.normalize_birth_date(self.data_nascimento)
+        previous = None
+        if self.pk:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                'data_nascimento',
+                'validado',
+                'visivel',
+            ).first()
+
+        update_fields = kwargs.get('update_fields')
+        normalized_update_fields = set(update_fields) if update_fields is not None else None
+
+        if self.is_underage_for_validation:
+            if self.validado:
+                self.validado = False
+                if normalized_update_fields is not None:
+                    normalized_update_fields.add('validado')
+            if self.visivel:
+                self.visivel = False
+                if normalized_update_fields is not None:
+                    normalized_update_fields.add('visivel')
+
+        if normalized_update_fields is not None:
+            kwargs['update_fields'] = list(normalized_update_fields)
+
+        super().save(*args, **kwargs)
+
+        if not previous or not self.is_underage_for_validation:
+            return
+
+        previous_age = self.calculate_age_from_birth_date(previous.get('data_nascimento'))
+        previous_underage = previous_age is not None and previous_age < self.MINIMUM_VALIDATION_AGE
+        previous_validado = bool(previous.get('validado'))
+        previous_visivel = bool(previous.get('visivel'))
+
+        disabled_contacts = self._disable_approved_contact_requests_for_underage()
+        if previous_underage and not previous_validado and not previous_visivel and disabled_contacts == 0:
+            return
+
+        from core.models import Notification
+
+        message = self.validation_age_message
+        if disabled_contacts == 1:
+            message += _(' Tambem desativamos 1 acesso de empresa ao teu contacto.')
+        elif disabled_contacts > 1:
+            message += _(' Tambem desativamos %(count)s acessos de empresas ao teu contacto.') % {
+                'count': disabled_contacts,
+            }
+
+        Notification.objects.create(
+            user=self.user,
+            titulo=_('Validacao removida por idade'),
+            mensagem=message,
+            tipo='ALERTA'
+        )
     
     @property
     def idade(self):
         """Calcula a idade do jovem"""
-        if self.data_nascimento:
-            from datetime import date
-            today = date.today()
-            return today.year - self.data_nascimento.year - (
-                (today.month, today.day) < (self.data_nascimento.month, self.data_nascimento.day)
-            )
-        return None
+        return self.calculate_age_from_birth_date(self.data_nascimento)
+
+    @property
+    def is_underage_for_validation(self):
+        age = self.idade
+        return age is not None and age < self.MINIMUM_VALIDATION_AGE
+
+    @property
+    def validation_age_message(self):
+        if not self.is_underage_for_validation:
+            return ''
+        return _(
+            'O teu perfil nao pode ser aprovado porque tens %(age)s anos. '
+            'A idade minima para aprovacao e %(minimum_age)s anos.'
+        ) % {
+            'age': self.idade,
+            'minimum_age': self.MINIMUM_VALIDATION_AGE,
+        }
     
     @property
     def nome_completo(self):
@@ -149,6 +293,21 @@ class YouthProfile(models.Model):
     @property
     def distrito(self):
         return self.user.distrito
+
+    @property
+    def location_display(self):
+        parts = []
+        if self.distrito:
+            parts.append(self.distrito.nome)
+        if self.localidade:
+            parts.append(self.localidade)
+        if parts:
+            return ' - '.join(parts)
+        return _('Localizacao nao indicada')
+
+    @property
+    def can_apply_to_jobs(self):
+        return self.validado and not self.is_underage_for_validation
 
     @property
     def interesses_setoriais_labels(self):

@@ -350,13 +350,14 @@
                                 <input id="email" name="email" type="email">
                             </div>
                             <div class="field">
-                                <label for="distrito_codigo">Distrito <span class="required">*</span></label>
-                                <select id="distrito_codigo" name="distrito_codigo" required>
+                                <label for="distrito_codigo">Distrito em São Tomé e Príncipe</label>
+                                <select id="distrito_codigo" name="distrito_codigo">
                                     <option value="">Selecione...</option>
                                     {% for item in districts %}
                                         <option value="{{ item.code }}">{{ item.name }} ({{ item.code }})</option>
                                     {% endfor %}
                                 </select>
+                                <div class="hint">Opcional para jovens fora de São Tomé e Príncipe. Obrigatório para empresas.</div>
                             </div>
                             <div class="field">
                                 <label for="password">Palavra-passe <span class="required">*</span></label>

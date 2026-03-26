@@ -320,12 +320,18 @@ def job_apply(request, pk):
     if request.method != 'POST':
         return redirect('profiles:detail')
 
+    profile = request.user.youth_profile
+    if not profile.can_apply_to_jobs:
+        messages.warning(
+            request,
+            _('Podes ver as vagas, mas so podes candidatar-te depois da validacao do administrador.')
+        )
+        return redirect('profiles:available_jobs')
+
     job = get_object_or_404(JobPost, pk=pk, estado='ATIVA')
     if not job.tem_vagas_disponiveis:
         messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
         return redirect('profiles:available_jobs')
-    profile = request.user.youth_profile
-
     application, created = Application.objects.get_or_create(job=job, youth=profile)
     if created:
         Notification.objects.create(
@@ -433,6 +439,9 @@ def application_manage(request, pk):
 def application_messages(request, pk):
     """Histórico de mensagens de uma candidatura (empresa)"""
     application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
+    if not application.youth.can_apply_to_jobs or not application.youth.visivel:
+        application.youth.user.telefone = ''
+        application.youth.user.email = ''
     messages_qs = application.messages.all().order_by('-created_at')
     paginator = Paginator(messages_qs, 10)
     page_number = request.GET.get('page') or 1
@@ -462,11 +471,18 @@ def search_youth(request):
 
     company = request.user.company_profile
     form = YouthSearchForm(request.GET or None)
+    minimum_birth_date = YouthProfile.minimum_validation_birth_date()
 
     # Lista inicial: últimos jovens visíveis e completos
     base_qs = (
         YouthProfile.objects
-        .filter(visivel=True, completo=True, validado=True)
+        .filter(
+            visivel=True,
+            completo=True,
+            validado=True,
+            data_nascimento__isnull=False,
+            data_nascimento__lte=minimum_birth_date,
+        )
         .select_related('user')
         .prefetch_related('youth_skills__skill', 'education', 'experiences')
         .order_by('-created_at')
@@ -554,6 +570,7 @@ def youth_detail(request, pk):
         return redirect('home')
     
     company = request.user.company_profile
+    minimum_birth_date = YouthProfile.minimum_validation_birth_date()
     profile = get_object_or_404(
         YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
             'youth_skills__skill',
@@ -562,9 +579,7 @@ def youth_detail(request, pk):
             'documents',
         ),
         pk=pk,
-        visivel=True,
         completo=True,
-        validado=True
     )
     
     # Incrementar visualizações (se implementado)
@@ -574,6 +589,16 @@ def youth_detail(request, pk):
         company=company,
         youth=profile
     ).first()
+    is_profile_available = bool(
+        profile.visivel and
+        profile.validado and
+        profile.data_nascimento and
+        profile.data_nascimento <= minimum_birth_date
+    )
+
+    if not is_profile_available and not existing_request:
+        messages.warning(request, _('Este perfil jÃ¡ nÃ£o estÃ¡ disponÃ­vel para empresas.'))
+        return redirect('companies:search_youth')
     
     context = {
         'company': company,
@@ -583,7 +608,8 @@ def youth_detail(request, pk):
         'skills': profile.youth_skills.select_related('skill').all(),
         'existing_request': existing_request,
         'documents': profile.get_documents(),
-        'can_view_contact': bool(existing_request and existing_request.estado == 'APROVADO'),
+        'can_view_contact': bool(existing_request and existing_request.estado == 'APROVADO' and is_profile_available),
+        'profile_available_to_companies': is_profile_available,
     }
     
     return render(request, 'companies/youth_detail.html', context)
@@ -598,6 +624,7 @@ def contact_request_create(request, youth_pk):
         return redirect('home')
     
     company = request.user.company_profile
+    minimum_birth_date = YouthProfile.minimum_validation_birth_date()
     youth = get_object_or_404(
         YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
             'youth_skills__skill',
@@ -606,10 +633,18 @@ def contact_request_create(request, youth_pk):
             'experiences',
         ),
         pk=youth_pk,
-        visivel=True,
         completo=True,
-        validado=True
     )
+
+    is_profile_available = bool(
+        youth.visivel and
+        youth.validado and
+        youth.data_nascimento and
+        youth.data_nascimento <= minimum_birth_date
+    )
+    if not is_profile_available:
+        messages.warning(request, _('Este perfil jÃ¡ nÃ£o estÃ¡ disponÃ­vel para novos pedidos de contacto.'))
+        return redirect('companies:search_youth')
     
     # Verificar se já existe pedido
     if ContactRequest.objects.filter(
@@ -682,12 +717,20 @@ def contact_request_bulk_create(request):
     youth_ids = request.POST.getlist('youth_ids')
     motivo = request.POST.get('motivo', '').strip() or _('A empresa demonstrou interesse. Por favor verifique o seu perfil.')
     company = request.user.company_profile
+    minimum_birth_date = YouthProfile.minimum_validation_birth_date()
 
     created = 0
     skipped = 0
     for yid in youth_ids:
         try:
-            youth = YouthProfile.objects.get(pk=int(yid), visivel=True, completo=True, validado=True)
+            youth = YouthProfile.objects.get(
+                pk=int(yid),
+                visivel=True,
+                completo=True,
+                validado=True,
+                data_nascimento__isnull=False,
+                data_nascimento__lte=minimum_birth_date,
+            )
         except (YouthProfile.DoesNotExist, ValueError):
             skipped += 1
             continue

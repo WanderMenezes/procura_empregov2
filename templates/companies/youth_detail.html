@@ -159,8 +159,7 @@
             <div class="talent-detail-kicker">Talento em destaque</div>
             <h1 class="talent-detail-title">{{ profile.nome_completo }}</h1>
             <p class="talent-detail-subtitle">
-              {{ profile.distrito.nome|default:"Distrito não definido" }}
-              {% if profile.localidade %}<span class="mx-1">&middot;</span>{{ profile.localidade }}{% endif %}
+              {{ profile.location_display }}
               <span class="mx-1">&middot;</span>Perfil pronto para avaliação, contacto e enquadramento em oportunidades.
             </p>
             <div class="talent-detail-chips">
@@ -215,6 +214,12 @@
             <p class="talent-detail-panel-subtitle">Acesso direto e próximos passos para a empresa.</p>
           </div>
         </div>
+
+        {% if not profile_available_to_companies %}
+          <div class="alert alert-warning mb-3" role="alert">
+            Este perfil deixou de estar disponÃ­vel para novas consultas da empresa. Os contactos diretos ficam bloqueados.
+          </div>
+        {% endif %}
 
         {% if can_view_contact %}
           <div class="talent-detail-status">
@@ -296,7 +301,7 @@
         </div>
         <div class="talent-detail-summary-row"><span>Idade</span><span>{% if profile.idade %}{{ profile.idade }} anos{% else %}Não informada{% endif %}</span></div>
         <div class="talent-detail-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"Não informado" }}</span></div>
-        <div class="talent-detail-summary-row"><span>Localização</span><span>{{ profile.distrito.nome|default:"Não definida" }}{% if profile.localidade %} - {{ profile.localidade }}{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Localização</span><span>{{ profile.location_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>

@@ -280,7 +280,7 @@ def profile_view(request):
             bool(user.nome),
             bool(user.email),
             bool(user.telefone),
-            bool(user.distrito_id),
+            bool(user.distrito_id or profile.localidade),
             bool(profile.data_nascimento),
             bool(profile.sexo),
             bool(profile.localidade),

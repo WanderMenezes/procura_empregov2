@@ -506,8 +506,13 @@ class ProfileWizardView(View):
 
             profile = user.youth_profile if user.has_youth_profile() else None
             editing = profile is not None
+            validation_revoked_for_age = False
+            disabled_company_contacts = 0
 
             if editing:
+                was_validated = profile.validado
+                if was_validated:
+                    disabled_company_contacts = profile.contact_requests.filter(estado='APROVADO').count()
                 profile.data_nascimento = step1.get('data_nascimento')
                 profile.sexo = step1.get('sexo') or ''
                 profile.localidade = step1.get('localidade') or ''
@@ -525,6 +530,11 @@ class ProfileWizardView(View):
                 profile.completo = True
                 profile.wizard_step = 4
                 profile.save()
+
+                if was_validated:
+                    profile.refresh_from_db()
+                    if profile.is_underage_for_validation:
+                        validation_revoked_for_age = True
             else:
                 profile = YouthProfile.objects.create(
                     user=user,
@@ -654,7 +664,31 @@ class ProfileWizardView(View):
                 del request.session['wizard_data']
             
             # Notificação
-            if editing:
+            if profile.is_underage_for_validation:
+                if validation_revoked_for_age:
+                    title = _('Validacao removida por idade')
+                    message = str(_('O teu perfil foi atualizado, mas a validacao anterior foi removida automaticamente. ')) + profile.validation_age_message
+                    if disabled_company_contacts == 1:
+                        message += str(_(' Tambem desativamos 1 acesso de empresa ao teu contacto.'))
+                    elif disabled_company_contacts > 1:
+                        message += str(_(' Tambem desativamos %(count)s acessos de empresas ao teu contacto.')) % {
+                            'count': disabled_company_contacts,
+                        }
+                elif editing:
+                    title = _('Perfil atualizado com restricao de idade')
+                    message = str(_('O teu perfil foi atualizado. ')) + profile.validation_age_message
+                else:
+                    title = _('Perfil criado com restricao de idade')
+                    message = str(_('O teu perfil foi criado. ')) + profile.validation_age_message
+
+                Notification.objects.create(
+                    user=request.user,
+                    titulo=title,
+                    mensagem=message,
+                    tipo='ALERTA'
+                )
+                messages.warning(request, message)
+            elif editing:
                 Notification.objects.create(
                     user=request.user,
                     titulo=_('Perfil atualizado com sucesso!'),

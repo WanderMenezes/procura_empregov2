@@ -147,7 +147,7 @@
           <div>
             <div class="app-messages-name">{{ application.youth.user.nome }}</div>
             <div class="app-messages-copy">
-              {{ application.youth.distrito.nome|default:"Distrito não definido" }}{% if application.youth.localidade %} - {{ application.youth.localidade }}{% endif %}
+              {{ application.youth.location_display }}
             </div>
             <div class="app-messages-tags mt-3">
               <span class="app-messages-tag"><i class="bi bi-briefcase"></i>{{ application.youth.get_situacao_atual_display }}</span>

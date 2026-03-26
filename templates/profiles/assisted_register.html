@@ -143,7 +143,7 @@
         <div class="assisted-mini-list mt-4">
           <div class="assisted-mini-item">
             <span class="assisted-mini-icon"><i class="bi bi-geo-alt"></i></span>
-            <div><strong>Local de referencia</strong><p id="assistedPreviewDistrict">Distrito por escolher</p></div>
+            <div><strong>Local de referencia</strong><p id="assistedPreviewDistrict">Localizacao por indicar</p></div>
           </div>
           <div class="assisted-mini-item">
             <span class="assisted-mini-icon"><i class="bi bi-stars"></i></span>
@@ -232,18 +232,19 @@
         <section class="assisted-section">
           <div class="assisted-section-label"><i class="bi bi-geo-alt"></i>Localização</div>
           <h2 class="assisted-section-title">Onde o jovem esta baseado</h2>
-          <p class="assisted-section-copy">Estes dados ajudam o perfil a entrar logo nas pesquisas certas.</p>
+          <p class="assisted-section-copy">Estes dados ajudam o perfil a entrar nas pesquisas certas, esteja o jovem em Sao Tome e Principe ou no exterior.</p>
           <div class="assisted-grid">
             <div class="assisted-field">
               <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
               {{ form.distrito }}
               {% if form.distrito.errors %}<div class="assisted-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
+              <div class="assisted-help">Opcional para jovens fora de Sao Tome e Principe.</div>
             </div>
             <div class="assisted-field">
               <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
               {{ form.localidade }}
               {% if form.localidade.errors %}<div class="assisted-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
-              <div class="assisted-help">Bairro, comunidade ou ponto de referencia ajudam bastante.</div>
+              <div class="assisted-help">Pode ser bairro, cidade, regiao, pais ou outro ponto de referencia util.</div>
             </div>
           </div>
         </section>
@@ -303,8 +304,8 @@
 
         <section class="assisted-section">
           <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observações</div>
-          <h2 class="assisted-section-title">Notas internas do aténdimento</h2>
-          <p class="assisted-section-copy">Use éste campo para registar contexto Útil do aténdimento, barreiras encontradas ou próximos passos combinados.</p>
+          <h2 class="assisted-section-title">Notas internas do atendimento</h2>
+          <p class="assisted-section-copy">Use este campo para registar contexto util do atendimento, barreiras encontradas ou proximos passos combinados.</p>
           <div class="assisted-grid">
             <div class="assisted-field full">
               <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
@@ -362,7 +363,7 @@
       avatar.textContent = initialsFromName(nameValue);
       nameTarget.textContent = nameValue || 'Novo jovem';
       phoneTarget.textContent = phoneValue || 'Telemóvel por preencher';
-      districtTarget.textContent = selectedText(districtInput, 'Distrito por escolher');
+      districtTarget.textContent = selectedText(districtInput, 'Exterior ou sem distrito em STP');
       opportunityTarget.textContent = selectedText(opportunityInput, 'Oportunidade por definir');
     }
 

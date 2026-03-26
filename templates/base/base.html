@@ -310,25 +310,25 @@
                     <div class="footer-card">
                         <div class="footer-section-label">Contacto</div>
                         <div class="footer-contact-list">
-                            <a class="footer-contact-item" href="mailto:info@basenacionaljovens.st">
+                            <a class="footer-contact-item" href="mailto:{{ cnj_contact.email }}">
                                 <span class="footer-contact-icon"><i class="bi bi-envelope"></i></span>
                                 <span>
                                     <strong>Email</strong>
-                                    <small>info@basenacionaljovens.st</small>
-                                </span>
-                            </a>
-                            <a class="footer-contact-item" href="tel:+2391234567">
-                                <span class="footer-contact-icon"><i class="bi bi-telephone"></i></span>
-                                <span>
-                                    <strong>Telefone</strong>
-                                    <small>+239 123 4567</small>
+                                    <small>{{ cnj_contact.email }}</small>
                                 </span>
                             </a>
                             <div class="footer-contact-item">
+                                <span class="footer-contact-icon"><i class="bi bi-telephone"></i></span>
+                                <span>
+                                    <strong>Contactos</strong>
+                                    <small>{{ cnj_contact.phones_display }}</small>
+                                </span>
+                            </div>
+                            <div class="footer-contact-item">
                                 <span class="footer-contact-icon"><i class="bi bi-geo-alt"></i></span>
                                 <span>
-                                    <strong>Localização</strong>
-                                    <small>São Tomé, São Tomé e Príncipe</small>
+                                    <strong>Sede</strong>
+                                    <small>{{ cnj_contact.address }}</small>
                                 </span>
                             </div>
                         </div>

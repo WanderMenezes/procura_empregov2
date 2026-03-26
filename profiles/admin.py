@@ -2,7 +2,7 @@
 Admin para o app profiles
 """
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from .models import YouthProfile, Education, Experience, Document, YouthSkill
 from django.utils.translation import gettext_lazy as _
 
@@ -74,11 +74,55 @@ class YouthProfileAdmin(admin.ModelAdmin):
     actions = ['validar_perfis', 'tornar_visiveis', 'tornar_invisiveis', 'exportar_csv']
     
     def validar_perfis(self, request, queryset):
-        queryset.update(validado=True)
+        approved = 0
+        blocked = 0
+        for profile in queryset:
+            if profile.is_underage_for_validation:
+                profile.validado = False
+                profile.visivel = False
+                profile.save()
+                blocked += 1
+                continue
+            if not profile.validado:
+                profile.validado = True
+                profile.save()
+            approved += 1
+        if blocked:
+            self.message_user(
+                request,
+                _('{} perfil(is) não puderam ser validados por terem menos de 18 anos.').format(blocked),
+                level=messages.WARNING,
+            )
+        if approved:
+            self.message_user(
+                request,
+                _('{} perfil(is) validados com sucesso.').format(approved),
+                level=messages.SUCCESS,
+            )
     validar_perfis.short_description = _('Validar perfis selecionados')
     
     def tornar_visiveis(self, request, queryset):
-        queryset.update(visivel=True)
+        visible = 0
+        blocked = 0
+        for profile in queryset:
+            profile.visivel = True
+            profile.save()
+            if profile.visivel:
+                visible += 1
+            else:
+                blocked += 1
+        if blocked:
+            self.message_user(
+                request,
+                _('{} perfil(is) continuaram ocultos por terem menos de 18 anos.').format(blocked),
+                level=messages.WARNING,
+            )
+        if visible:
+            self.message_user(
+                request,
+                _('{} perfil(is) tornados visíveis.').format(visible),
+                level=messages.SUCCESS,
+            )
     tornar_visiveis.short_description = _('Tornar visíveis para empresas')
     
     def tornar_invisiveis(self, request, queryset):
