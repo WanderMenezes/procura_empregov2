@@ -72,6 +72,27 @@ def combine_interest_sector_values(selected_values, raw_custom_values):
     return list(dict.fromkeys(selected + custom))
 
 
+def area_formacao_choices(include_empty=False):
+    choices = list(getattr(settings, 'AREAS_FORMACAO', []))
+    if include_empty:
+        return [('', _('Selecione...'))] + choices
+    return choices
+
+
+def clean_other_area_formacao(form, cleaned_data, area_field='area_formacao', other_field='outra_area_formacao'):
+    area_value = cleaned_data.get(area_field) or ''
+    other_value = ' '.join(str(cleaned_data.get(other_field) or '').split()).strip()
+
+    if area_value == 'OUT':
+        if not other_value:
+            form.add_error(other_field, _('Especifica qual é a área de formação.'))
+    else:
+        other_value = ''
+
+    cleaned_data[other_field] = other_value
+    return cleaned_data
+
+
 IDIOMA_SLOT_COUNT = 4
 
 
@@ -263,26 +284,18 @@ class YouthProfileStep2Form(forms.ModelForm):
     )
     
     area_formacao = forms.ChoiceField(
-        choices=[('', _('Selecione...'))] + list(forms.fields.ChoiceField(
-            choices=[
-                ('AGR', _('Agricultura')),
-                ('TUR', _('Turismo')),
-                ('TIC', _('Tecnologias de Informação')),
-                ('IND', _('Indústria')),
-                ('SER', _('Serviços')),
-                ('ENE', _('Energias Renováveis')),
-                ('ADM', _('Administração')),
-                ('SAU', _('Saúde')),
-                ('EDU', _('Educação')),
-                ('CON', _('Construção')),
-                ('ELE', _('Eletricidade')),
-                ('CAN', _('Canalização')),
-                ('INF', _('Informática')),
-                ('OUT', _('Outra')),
-            ]
-        ).choices),
+        choices=area_formacao_choices(include_empty=True),
         label=_('Área de formação'),
         widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
+    )
+
+    outra_area_formacao = forms.CharField(
+        label=_('Qual área de formação?'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Escreve a área de formação')
+        }),
         required=False
     )
     
@@ -341,7 +354,7 @@ class YouthProfileStep2Form(forms.ModelForm):
     
     class Meta:
         model = YouthProfile
-        fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'outra_skill_nome', 'outra_skill_tipo']
+        fields = ['nivel', 'area_formacao', 'outra_area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'outra_skill_nome', 'outra_skill_tipo']
 
 
 
@@ -352,6 +365,7 @@ class YouthProfileStep2Form(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        cleaned_data = clean_other_area_formacao(self, cleaned_data)
         return clean_idioma_entries(self, cleaned_data)
 
 
@@ -675,24 +689,18 @@ class AssistedRegistrationForm(forms.Form):
     
     area_formacao = forms.ChoiceField(
         label=_('Área de formação'),
-        choices=[
-            ('AGR', _('Agricultura')),
-            ('TUR', _('Turismo')),
-            ('TIC', _('Tecnologias de Informação')),
-            ('IND', _('Indústria')),
-            ('SER', _('Serviços')),
-            ('ENE', _('Energias Renováveis')),
-            ('ADM', _('Administração')),
-            ('SAU', _('Saúde')),
-            ('EDU', _('Educação')),
-            ('CON', _('Construção')),
-            ('ELE', _('Eletricidade')),
-            ('CAN', _('Canalização')),
-            ('INF', _('Informática')),
-            ('OUT', _('Outra')),
-        ],
+        choices=area_formacao_choices(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    outra_area_formacao = forms.CharField(
+        label=_('Qual área de formação?'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Escreve a área de formação')
+        })
     )
     
     situacao_atual = forms.ChoiceField(
@@ -731,6 +739,7 @@ class AssistedRegistrationForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        cleaned_data = clean_other_area_formacao(self, cleaned_data)
         return clean_idioma_entries(self, cleaned_data)
 
 
@@ -804,14 +813,19 @@ class EducationForm(forms.ModelForm):
     
     class Meta:
         model = Education
-        fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso']
+        fields = ['nivel', 'area_formacao', 'outra_area_formacao', 'instituicao', 'ano', 'curso']
         widgets = {
             'nivel': forms.Select(attrs={'class': 'form-select'}),
             'area_formacao': forms.Select(attrs={'class': 'form-select'}),
+            'outra_area_formacao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Escreve a área de formação')}),
             'instituicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome da escola, centro ou instituição')}),
             'ano': forms.NumberInput(attrs={'class': 'form-control', 'min': 1950, 'max': 2030, 'placeholder': _('Ex: 2024')}),
             'curso': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Curso, especialidade ou área principal')}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return clean_other_area_formacao(self, cleaned_data)
 
 
 class ExperienceForm(forms.ModelForm):

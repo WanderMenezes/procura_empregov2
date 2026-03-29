@@ -170,7 +170,7 @@
                         {% for item in youth_education %}
                           <tr>
                             <td>{{ item.get_nivel_display }}</td>
-                            <td>{{ item.get_area_formacao_display }}</td>
+                            <td>{{ item.area_formacao_display }}</td>
                             <td>{{ item.instituicao }}</td>
                             <td>{{ item.curso|default:"-" }}</td>
                             <td>{{ item.ano|default:"-" }}</td>

@@ -155,7 +155,7 @@ class YouthProfileAdmin(admin.ModelAdmin):
                 profile.get_situacao_atual_display(),
                 profile.get_disponibilidade_display(),
                 educacao.get_nivel_display() if educacao else '',
-                educacao.get_area_formacao_display() if educacao else '',
+                educacao.area_formacao_display if educacao else '',
                 'Sim' if profile.completo else 'Não',
                 'Sim' if profile.validado else 'Não',
                 profile.created_at.strftime('%d/%m/%Y')

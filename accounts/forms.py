@@ -78,6 +78,12 @@ class UserRegistrationForm(UserCreationForm):
         })
     )
 
+    confirmacao_empresa = forms.BooleanField(
+        required=False,
+        label=_('Confirmo que este registo é para uma empresa ou instituição'),
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     photo = forms.ImageField(
         required=False,
         label=_('Foto (opcional)'),
@@ -114,7 +120,7 @@ class UserRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ['perfil', 'nome', 'telefone', 'email', 'nif', 'bi_numero', 'password1', 'password2',
+        fields = ['perfil', 'nome', 'telefone', 'email', 'nif', 'bi_numero', 'confirmacao_empresa', 'password1', 'password2',
                   'consentimento_dados', 'consentimento_contacto']
     
     def __init__(self, *args, **kwargs):
@@ -167,6 +173,9 @@ class UserRegistrationForm(UserCreationForm):
 
         if perfil == 'EMP' and not nif:
             self.add_error('nif', _('O NIF é obrigatório para empresas.'))
+
+        if perfil == 'EMP' and not cleaned_data.get('confirmacao_empresa'):
+            self.add_error('confirmacao_empresa', _('Confirma que este registo é para uma empresa antes de continuar.'))
 
         if perfil == 'JO' and not bi_numero:
             self.add_error('bi_numero', _('O número do BI é obrigatório para candidatos.'))

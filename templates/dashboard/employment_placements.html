@@ -1,0 +1,177 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block title %}Colocacoes em Emprego - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 admin-dashboard">
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='placements' %}
+        </aside>
+
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4">
+                <div class="card-body">
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Impacto da plataforma</div>
+                        <h1 class="admin-page-title">Colocacoes em emprego</h1>
+                        <p class="admin-subtitle mb-0">
+                            Esta lista mostra as candidaturas do tipo emprego que ficaram com estado aceite, para o admin saber quantos jovens foram colocados e em que empresas estao.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-person-check"></i>
+                                {{ employment_summary.youths|intcomma }} jov{{ employment_summary.youths|pluralize:"em,ens" }} colocad{{ employment_summary.youths|pluralize:"o,os" }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-building"></i>
+                                {{ employment_summary.companies|intcomma }} empresa{{ employment_summary.companies|pluralize }} envolvida{{ employment_summary.companies|pluralize }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-briefcase"></i>
+                                {{ employment_summary.placements|intcomma }} colocacoes aceites
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-funnel"></i>
+                                {{ employment_summary.filtered|intcomma }} no filtro atual
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="admin-hero-actions">
+                        <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Jovens colocados</div>
+                            <div class="admin-summary-value">{{ employment_summary.youths|intcomma }}</div>
+                            <small class="text-muted">Contagem unica de jovens</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Colocacoes</div>
+                            <div class="admin-summary-value">{{ employment_summary.placements|intcomma }}</div>
+                            <small class="text-muted">Candidaturas aceites</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Empresas</div>
+                            <div class="admin-summary-value">{{ employment_summary.companies|intcomma }}</div>
+                            <small class="text-muted">Com pelo menos uma colocacao</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Filtrados</div>
+                            <div class="admin-summary-value">{{ employment_summary.filtered|intcomma }}</div>
+                            <small class="text-muted">Resultados desta vista</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="get" class="card admin-panel admin-filter-panel mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-10">
+                            <label class="form-label">Pesquisar</label>
+                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Nome do jovem, telefone, empresa ou vaga">
+                        </div>
+                        <div class="col-md-2 d-grid gap-2">
+                            <button class="btn btn-primary">Aplicar</button>
+                            <a href="{% url 'dashboard:employment_placements' %}" class="btn btn-outline-secondary">Limpar</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="card admin-panel">
+                <div class="card-body p-0">
+                    <div class="admin-table-header">
+                        <div>
+                            <h5 class="mb-1">Jovens colocados e empresas</h5>
+                            <p class="text-muted mb-0">Tabela de leitura direta para saber quem foi aceite, onde e em que vaga.</p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle admin-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Jovem</th>
+                                    <th>Empresa</th>
+                                    <th>Vaga</th>
+                                    <th>Distrito</th>
+                                    <th>Atualizado</th>
+                                    <th class="text-end">Acao</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in placements %}
+                                    <tr>
+                                        <td>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ item.youth.nome_completo }}</div>
+                                                <div class="admin-table-meta">{{ item.youth.telefone|default:"-" }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ item.job.company.nome }}</div>
+                                                <div class="admin-table-meta">{{ item.job.company.telefone|default:item.job.company.user.telefone|default:"-" }}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="admin-table-identity">
+                                                <div class="admin-table-title">{{ item.job.titulo }}</div>
+                                                <div class="admin-table-meta">Estado: {{ item.get_estado_display }}</div>
+                                            </div>
+                                        </td>
+                                        <td>{{ item.youth.distrito.nome|default:item.job.distrito.nome|default:"-" }}</td>
+                                        <td>{{ item.updated_at|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-end">
+                                            <div class="admin-queue-actions justify-content-end">
+                                                <a href="{% url 'dashboard:user_detail' item.youth.user.pk %}" class="btn btn-sm btn-outline-primary" title="Ver jovem">
+                                                    <i class="bi bi-person"></i>
+                                                </a>
+                                                <a href="{% url 'dashboard:user_detail' item.job.company.user.pk %}" class="btn btn-sm btn-outline-secondary" title="Ver empresa">
+                                                    <i class="bi bi-building"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="admin-empty-state">
+                                                <i class="bi bi-briefcase"></i>
+                                                <p class="mb-0">Ainda nao existem colocacoes em emprego com os filtros atuais.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

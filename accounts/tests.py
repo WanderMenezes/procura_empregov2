@@ -82,3 +82,50 @@ class LoginViewTests(TestCase):
         response = self.client.get('/accounts/login/')
 
         self.assertRedirects(response, reverse('accounts:login'), fetch_redirect_response=False)
+
+
+class RegisterViewTests(TestCase):
+    def _company_payload(self, **overrides):
+        payload = {
+            'perfil': User.ProfileType.EMPRESA,
+            'nome': 'Empresa Horizonte',
+            'telefone': '+2399000111',
+            'email': 'empresa.horizonte@example.com',
+            'nif': '123456789',
+            'password1': 'SenhaSegura123',
+            'password2': 'SenhaSegura123',
+            'consentimento_dados': 'on',
+            'consentimento_contacto': 'on',
+            'confirmacao_empresa': 'on',
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_register_page_includes_company_confirmation_prompt(self):
+        response = self.client.get(reverse('accounts:register'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Esta conta é mesmo para uma empresa?')
+        self.assertContains(response, 'confirmacao_empresa')
+
+    def test_company_registration_requires_company_confirmation(self):
+        response = self.client.post(
+            reverse('accounts:register'),
+            self._company_payload(confirmacao_empresa=''),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Confirma que este registo é para uma empresa antes de continuar.')
+        self.assertFalse(User.objects.filter(telefone='+2399000111').exists())
+
+    def test_company_registration_succeeds_with_company_confirmation(self):
+        response = self.client.post(
+            reverse('accounts:register'),
+            self._company_payload(),
+        )
+
+        self.assertRedirects(response, reverse('accounts:login'), fetch_redirect_response=False)
+        user = User.objects.get(telefone='+2399000111')
+        self.assertEqual(user.perfil, User.ProfileType.EMPRESA)
+        self.assertEqual(user.nome_empresa, 'Empresa Horizonte')
+        self.assertEqual(user.nif, '123456789')

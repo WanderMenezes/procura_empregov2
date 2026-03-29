@@ -107,6 +107,34 @@ class AssistedRegisterTests(TestCase):
         self.assertEqual(created_profile.localidade, 'Lisboa, Portugal')
         self.assertTrue(created_profile.completo)
 
+    def test_operator_can_create_assisted_registration_with_custom_training_area(self):
+        self.client.force_login(self.operator)
+
+        response = self.client.post(reverse('profiles:assisted_register'), {
+            'nome': 'Jovem Robotica',
+            'telefone': '+2399000210',
+            'email': 'robotica@example.com',
+            'data_nascimento': '2002-03-12',
+            'sexo': 'M',
+            'distrito': self.district.id,
+            'localidade': 'Riboque',
+            'nivel': 'TEC',
+            'area_formacao': 'OUT',
+            'outra_area_formacao': 'Robotica Industrial',
+            'situacao_atual': 'DES',
+            'disponibilidade': 'SIM',
+            'preferencia_oportunidade': 'EMP',
+            'observacoes': 'Area personalizada.',
+        })
+
+        self.assertRedirects(response, reverse('profiles:assisted_register'))
+
+        created_user = User.objects.get(telefone='+2399000210')
+        created_education = Education.objects.get(profile=created_user.youth_profile)
+        self.assertEqual(created_education.area_formacao, 'OUT')
+        self.assertEqual(created_education.outra_area_formacao, 'Robotica Industrial')
+        self.assertEqual(created_education.area_formacao_display, 'Robotica Industrial')
+
     def test_non_operator_cannot_access_assisted_registration(self):
         young_user = User.objects.create_user(
             telefone='+2399000300',
@@ -165,6 +193,29 @@ class YouthProfileInterestSectorTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('idioma_1_dominio', form.errors)
+
+    def test_step2_form_requires_custom_training_area_when_other_is_selected(self):
+        form = YouthProfileStep2Form(data={
+            'nivel': 'SEC',
+            'area_formacao': 'OUT',
+            'instituicao': 'Escola Tecnica',
+            'curso': 'Curso Livre',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('outra_area_formacao', form.errors)
+
+    def test_step2_form_accepts_custom_training_area_when_other_is_selected(self):
+        form = YouthProfileStep2Form(data={
+            'nivel': 'SEC',
+            'area_formacao': 'OUT',
+            'outra_area_formacao': 'Robotica Industrial',
+            'instituicao': 'Escola Tecnica',
+            'curso': 'Curso Livre',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['outra_area_formacao'], 'Robotica Industrial')
 
     def test_step3_form_accepts_custom_interest_sector(self):
         form = YouthProfileStep3Form(data={
@@ -437,3 +488,75 @@ class YouthProfileAgeWarningTests(TestCase):
                 titulo='Pedido de contacto desativado',
             ).exists()
         )
+
+
+class ProfileWizardEditingTests(TestCase):
+    def test_editing_step1_can_be_saved_without_finishing_all_steps(self):
+        district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        youth_user = User.objects.create_user(
+            telefone='+2399220200',
+            nome='Perfil Original',
+            perfil=User.ProfileType.JOVEM,
+            distrito=district,
+        )
+        profile = YouthProfile.objects.create(
+            user=youth_user,
+            completo=True,
+            validado=False,
+            data_nascimento=_years_ago(20),
+            sexo='M',
+            localidade='Riboque',
+            contacto_alternativo='Vizinho',
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            preferencia_oportunidade='EMP',
+            sobre='Texto inicial',
+            idiomas=[{'idioma': 'Ingles', 'dominio': 'AMBOS'}],
+            visivel=True,
+            consentimento_whatsapp=True,
+        )
+        Education.objects.create(
+            profile=profile,
+            nivel='SEC',
+            area_formacao='TIC',
+            instituicao='Liceu Nacional',
+            ano=2024,
+            curso='Informatica',
+        )
+
+        self.client.force_login(youth_user)
+        self.client.get(reverse('profiles:wizard_step', args=[1]) + '?reset=1')
+
+        response = self.client.post(
+            reverse('profiles:wizard_step', args=[1]),
+            {
+                'nome': 'Perfil Atualizado',
+                'telefone': youth_user.telefone,
+                'email': 'novoemail@example.com',
+                'contacto_alternativo': 'Irma',
+                'distrito': district.id,
+                'data_nascimento': _years_ago(20).isoformat(),
+                'sexo': 'F',
+                'localidade': 'Neves',
+                'save': '1',
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('profiles:detail'))
+        youth_user.refresh_from_db()
+        profile.refresh_from_db()
+        education = Education.objects.get(profile=profile)
+
+        self.assertEqual(youth_user.nome, 'Perfil Atualizado')
+        self.assertEqual(youth_user.email, 'novoemail@example.com')
+        self.assertEqual(profile.contacto_alternativo, 'Irma')
+        self.assertEqual(profile.localidade, 'Neves')
+        self.assertEqual(profile.sexo, 'F')
+        self.assertEqual(profile.situacao_atual, 'DES')
+        self.assertEqual(profile.preferencia_oportunidade, 'EMP')
+        self.assertEqual(education.area_formacao, 'TIC')
+        self.assertContains(response, 'Perfil atualizado com sucesso!')

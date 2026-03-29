@@ -2,6 +2,9 @@
 Views para dashboards (Admin e Técnico)
 """
 
+from collections import Counter
+from urllib.parse import urlencode
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -81,6 +84,535 @@ def _add_percent(items):
     return normalized
 
 
+def _employment_placements_queryset():
+    """Accepted job applications that represent employment placements."""
+    return Application.objects.select_related(
+        'job',
+        'job__company',
+        'job__company__user',
+        'youth',
+        'youth__user',
+        'youth__user__distrito',
+    ).filter(
+        estado='ACEITE',
+        job__tipo='EMP',
+    )
+
+
+def _employment_placements_summary(queryset):
+    latest_item = queryset.order_by('-updated_at', '-id').first()
+    return {
+        'placements': queryset.count(),
+        'youths': queryset.order_by().values('youth_id').distinct().count(),
+        'companies': queryset.order_by().values('job__company_id').distinct().count(),
+        'jobs': queryset.order_by().values('job_id').distinct().count(),
+        'latest_update': latest_item.updated_at if latest_item else None,
+    }
+
+
+def _resolve_report_range(request):
+    """Resolve report preset or custom dates."""
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+    year_start = today.replace(month=1, day=1)
+    available_periods = {'diario', 'quinzenal', 'mensal', 'anual', 'personalizado'}
+    has_custom_dates = bool(request.GET.get('data_inicio') or request.GET.get('data_fim'))
+
+    period_key = (request.GET.get('periodo') or '').strip().lower()
+    if period_key not in available_periods:
+        period_key = 'personalizado' if has_custom_dates else 'mensal'
+
+    def parse_date(value, fallback):
+        if not value:
+            return fallback
+        try:
+            return datetime.strptime(value, "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            return fallback
+
+    if period_key == 'diario':
+        start_date = end_date = today
+    elif period_key == 'quinzenal':
+        start_date = today - timedelta(days=14)
+        end_date = today
+    elif period_key == 'mensal':
+        start_date = month_start
+        end_date = today
+    elif period_key == 'anual':
+        start_date = year_start
+        end_date = today
+    else:
+        start_date = parse_date(request.GET.get('data_inicio'), month_start)
+        end_date = parse_date(request.GET.get('data_fim'), today)
+
+    invalid_range = start_date > end_date
+    if invalid_range:
+        start_dt = None
+        end_dt = None
+    else:
+        tz = timezone.get_current_timezone()
+        start_dt = timezone.make_aware(datetime.combine(start_date, time.min), tz)
+        end_dt = timezone.make_aware(datetime.combine(end_date, time.max), tz)
+
+    labels = {
+        'diario': 'Diario',
+        'quinzenal': 'Quinzenal',
+        'mensal': 'Mensal',
+        'anual': 'Anual',
+        'personalizado': 'Personalizado',
+    }
+    descriptions = {
+        'diario': 'Leitura do dia corrente.',
+        'quinzenal': 'Panorama acumulado dos ultimos 15 dias.',
+        'mensal': 'Leitura do mes em curso ate hoje.',
+        'anual': 'Consolidado do ano em curso ate hoje.',
+        'personalizado': 'Intervalo definido manualmente pela equipa.',
+    }
+
+    query_params = {'periodo': period_key}
+    if start_date and end_date:
+        query_params['data_inicio'] = start_date.strftime('%Y-%m-%d')
+        query_params['data_fim'] = end_date.strftime('%Y-%m-%d')
+
+    return {
+        'period_key': period_key,
+        'period_label': labels.get(period_key, 'Mensal'),
+        'period_description': descriptions.get(period_key, descriptions['mensal']),
+        'start_date': start_date,
+        'end_date': end_date,
+        'start_dt': start_dt,
+        'end_dt': end_dt,
+        'invalid_range': invalid_range,
+        'period_days': ((end_date - start_date).days + 1) if not invalid_range else 0,
+        'querystring': urlencode(query_params),
+    }
+
+
+def _safe_rate(numerator, denominator):
+    return round((numerator / denominator) * 100, 1) if denominator else 0
+
+
+def _format_decimal(value):
+    text = f"{value:.1f}"
+    return text[:-2] if text.endswith('.0') else text
+
+
+def _format_number(value):
+    return f"{int(value):,}".replace(',', ' ')
+
+
+def _format_percent(value):
+    return f"{_format_decimal(value)}%"
+
+
+def _top_counter_item(labels, empty_label):
+    counts = Counter(label for label in labels if label)
+    if not counts:
+        return {'label': empty_label, 'total': 0}
+    label, total = counts.most_common(1)[0]
+    return {'label': str(label), 'total': int(total)}
+
+
+def _top_group(queryset, value_field, mapping=None, empty_label='Sem dados no periodo.'):
+    item = queryset.first()
+    if not item:
+        return {'label': empty_label, 'total': 0}
+
+    raw_value = item.get(value_field)
+    total = int(item.get('total') or 0)
+    if not raw_value:
+        return {'label': empty_label, 'total': total}
+
+    label = mapping.get(raw_value, raw_value) if mapping else raw_value
+    return {'label': str(label), 'total': total}
+
+
+def _build_report_data(range_data):
+    start_date = range_data['start_date']
+    end_date = range_data['end_date']
+    start_dt = range_data['start_dt']
+    end_dt = range_data['end_dt']
+    invalid_range = range_data['invalid_range']
+    period_days = range_data['period_days']
+
+    district_fallback = 'Exterior / sem distrito em STP'
+    area_labels = dict(getattr(settings, 'AREAS_FORMACAO', []))
+    job_type_labels = dict(JobPost.TIPO_CHOICES)
+
+    if invalid_range:
+        jovens_qs = YouthProfile.objects.none()
+        empresas_qs = Company.objects.none()
+        vagas_qs = JobPost.objects.none()
+        candidaturas_qs = Application.objects.none()
+        contactos_qs = ContactRequest.objects.none()
+        jovens_novos = empresas_novas = vagas_novas = candidaturas_novas = 0
+        pedidos_contacto_novos = perfis_validados = candidaturas_aceites = 0
+        pedidos_contacto_aprovados = colocacoes_emprego = 0
+        pedidos_contacto_respondidos = 0
+        pending_profiles_snapshot = pending_contacts_snapshot = active_jobs_snapshot = 0
+        top_district = {'label': 'Sem entradas de jovens', 'total': 0}
+        top_company = {'label': 'Sem candidaturas', 'total': 0}
+        top_area = {'label': 'Sem area dominante', 'total': 0}
+        top_job_type = {'label': 'Sem tipo dominante', 'total': 0}
+        district_list = []
+        level_list = []
+        area_list = []
+        job_type_list = []
+    else:
+        jovens_qs = YouthProfile.objects.select_related('user__distrito').filter(
+            created_at__range=(start_dt, end_dt)
+        )
+        empresas_qs = Company.objects.select_related('distrito').filter(
+            created_at__range=(start_dt, end_dt)
+        )
+        vagas_qs = JobPost.objects.select_related('company', 'distrito').filter(
+            data_publicacao__range=(start_dt, end_dt)
+        )
+        candidaturas_qs = Application.objects.select_related(
+            'job',
+            'job__company',
+            'youth',
+            'youth__user',
+        ).filter(created_at__range=(start_dt, end_dt))
+        contactos_qs = ContactRequest.objects.select_related(
+            'company',
+            'company__user',
+            'youth',
+            'youth__user',
+        ).filter(created_at__range=(start_dt, end_dt))
+
+        jovens_novos = jovens_qs.count()
+        empresas_novas = empresas_qs.count()
+        vagas_novas = vagas_qs.count()
+        candidaturas_novas = candidaturas_qs.count()
+        pedidos_contacto_novos = contactos_qs.count()
+
+        perfis_validados = YouthProfile.objects.filter(
+            validado=True,
+            updated_at__range=(start_dt, end_dt),
+        ).count()
+        candidaturas_aceites = Application.objects.filter(
+            estado='ACEITE',
+            updated_at__range=(start_dt, end_dt),
+        ).count()
+        pedidos_contacto_aprovados = ContactRequest.objects.filter(
+            estado='APROVADO',
+            responded_at__range=(start_dt, end_dt),
+        ).count()
+        pedidos_contacto_respondidos = ContactRequest.objects.filter(
+            responded_at__range=(start_dt, end_dt),
+        ).count()
+        colocacoes_emprego = _employment_placements_queryset().filter(
+            updated_at__range=(start_dt, end_dt),
+        ).count()
+
+        pending_profiles_snapshot = YouthProfile.objects.filter(
+            completo=True,
+            validado=False,
+            created_at__lte=end_dt,
+        ).count()
+        pending_contacts_snapshot = ContactRequest.objects.filter(
+            estado='PENDENTE',
+            created_at__lte=end_dt,
+        ).count()
+        active_jobs_snapshot = JobPost.objects.filter(
+            estado='ATIVA',
+            data_publicacao__lte=end_dt,
+        ).count()
+
+        top_district = _top_counter_item(
+            [
+                profile.distrito.nome if profile.distrito else district_fallback
+                for profile in jovens_qs
+            ],
+            'Sem entradas de jovens',
+        )
+        top_company = _top_group(
+            Company.objects.filter(job_posts__applications__created_at__range=(start_dt, end_dt))
+            .values('nome')
+            .annotate(total=Count('job_posts__applications'))
+            .order_by('-total', 'nome'),
+            'nome',
+            empty_label='Sem candidaturas',
+        )
+        top_area = _top_group(
+            Education.objects.filter(profile__created_at__range=(start_dt, end_dt))
+            .values('area_formacao')
+            .annotate(total=Count('id'))
+            .order_by('-total', 'area_formacao'),
+            'area_formacao',
+            mapping=area_labels,
+            empty_label='Sem area dominante',
+        )
+        top_job_type = _top_group(
+            vagas_qs.values('tipo').annotate(total=Count('id')).order_by('-total', 'tipo'),
+            'tipo',
+            mapping=job_type_labels,
+            empty_label='Sem tipo dominante',
+        )
+
+        district_counter = Counter(
+            profile.distrito.nome if profile.distrito else district_fallback
+            for profile in jovens_qs
+        )
+        district_list = district_counter.most_common()
+
+        level_list = [
+            (
+                dict(Education.NIVEL_CHOICES).get(item['nivel'], item['nivel']),
+                int(item['total']),
+            )
+            for item in Education.objects.filter(profile__created_at__range=(start_dt, end_dt))
+            .values('nivel')
+            .annotate(total=Count('id'))
+            .order_by('-total', 'nivel')
+            if item['nivel']
+        ]
+        area_list = [
+            (
+                area_labels.get(item['area_formacao'], item['area_formacao']),
+                int(item['total']),
+            )
+            for item in Education.objects.filter(profile__created_at__range=(start_dt, end_dt))
+            .values('area_formacao')
+            .annotate(total=Count('id'))
+            .order_by('-total', 'area_formacao')
+            if item['area_formacao']
+        ]
+        job_type_list = [
+            (
+                job_type_labels.get(item['tipo'], item['tipo']),
+                int(item['total']),
+            )
+            for item in vagas_qs.values('tipo').annotate(total=Count('id')).order_by('-total', 'tipo')
+            if item['tipo']
+        ]
+
+    total_movimentos = (
+        jovens_novos
+        + empresas_novas
+        + vagas_novas
+        + candidaturas_novas
+        + pedidos_contacto_novos
+    )
+    media_diaria = round(total_movimentos / period_days, 1) if period_days else 0
+    validation_rate = _safe_rate(perfis_validados, jovens_novos)
+    acceptance_rate = _safe_rate(candidaturas_aceites, candidaturas_novas)
+    contact_response_rate = _safe_rate(pedidos_contacto_respondidos, pedidos_contacto_novos)
+    contact_approval_rate = _safe_rate(pedidos_contacto_aprovados, pedidos_contacto_respondidos)
+    applications_per_job = round(candidaturas_novas / vagas_novas, 1) if vagas_novas else 0
+
+    report_mix = _add_percent([
+        {'nome': 'Jovens', 'total': jovens_novos, 'icon': 'bi-person'},
+        {'nome': 'Empresas', 'total': empresas_novas, 'icon': 'bi-building'},
+        {'nome': 'Vagas', 'total': vagas_novas, 'icon': 'bi-briefcase'},
+        {'nome': 'Candidaturas', 'total': candidaturas_novas, 'icon': 'bi-send'},
+        {'nome': 'Contactos', 'total': pedidos_contacto_novos, 'icon': 'bi-telephone'},
+    ])
+
+    if invalid_range:
+        headline_insight = 'Ajuste o intervalo para gerar o relatorio.'
+    elif total_movimentos == 0:
+        headline_insight = 'Nao houve novos movimentos no periodo selecionado.'
+    elif colocacoes_emprego:
+        headline_insight = (
+            f"O periodo fechou com {_format_number(colocacoes_emprego)} colocacoes em emprego "
+            f"e {_format_number(candidaturas_aceites)} candidaturas aceites."
+        )
+    elif candidaturas_novas and top_company['total']:
+        headline_insight = (
+            f"A procura esteve mais concentrada em {top_company['label']}, "
+            f"que reuniu {_format_number(top_company['total'])} candidaturas."
+        )
+    elif vagas_novas and top_job_type['total']:
+        headline_insight = f"A oferta do periodo foi puxada por vagas de {top_job_type['label']}."
+    else:
+        headline_insight = (
+            f"Foram registados {_format_number(total_movimentos)} movimentos em "
+            f"{_format_number(period_days)} dias."
+        )
+
+    executive_metrics = [
+        {
+            'label': 'Novos jovens',
+            'value': _format_number(jovens_novos),
+            'subtitle': 'Entradas de perfis no periodo.',
+            'icon': 'bi-person',
+        },
+        {
+            'label': 'Novas empresas',
+            'value': _format_number(empresas_novas),
+            'subtitle': 'Perfis empresariais criados.',
+            'icon': 'bi-building',
+        },
+        {
+            'label': 'Novas vagas',
+            'value': _format_number(vagas_novas),
+            'subtitle': 'Publicacoes de oportunidades.',
+            'icon': 'bi-briefcase',
+        },
+        {
+            'label': 'Candidaturas',
+            'value': _format_number(candidaturas_novas),
+            'subtitle': f"{_format_decimal(applications_per_job)} candidaturas por vaga.",
+            'icon': 'bi-send',
+        },
+        {
+            'label': 'Pedidos de contacto',
+            'value': _format_number(pedidos_contacto_novos),
+            'subtitle': 'Solicitacoes abertas por empresas.',
+            'icon': 'bi-telephone',
+        },
+    ]
+
+    outcome_metrics = [
+        {
+            'label': 'Perfis validados',
+            'value': _format_number(perfis_validados),
+            'subtitle': f"Taxa de validacao: {_format_percent(validation_rate)}.",
+            'icon': 'bi-patch-check',
+        },
+        {
+            'label': 'Candidaturas aceites',
+            'value': _format_number(candidaturas_aceites),
+            'subtitle': f"Taxa de aceite: {_format_percent(acceptance_rate)}.",
+            'icon': 'bi-hand-thumbs-up',
+        },
+        {
+            'label': 'Pedidos aprovados',
+            'value': _format_number(pedidos_contacto_aprovados),
+            'subtitle': f"Aprovacao sobre respondidos: {_format_percent(contact_approval_rate)}.",
+            'icon': 'bi-telephone-forward',
+        },
+        {
+            'label': 'Pedidos respondidos',
+            'value': _format_number(pedidos_contacto_respondidos),
+            'subtitle': f"Taxa de resposta: {_format_percent(contact_response_rate)}.",
+            'icon': 'bi-reply',
+        },
+        {
+            'label': 'Colocacoes em emprego',
+            'value': _format_number(colocacoes_emprego),
+            'subtitle': 'Candidaturas aceites em vagas de emprego.',
+            'icon': 'bi-briefcase-fill',
+        },
+    ]
+
+    backlog_metrics = [
+        {'label': 'Perfis por validar', 'value': _format_number(pending_profiles_snapshot)},
+        {'label': 'Pedidos pendentes', 'value': _format_number(pending_contacts_snapshot)},
+        {'label': 'Vagas ativas', 'value': _format_number(active_jobs_snapshot)},
+    ]
+
+    highlights = [
+        {
+            'label': 'Distrito com mais entradas',
+            'value': top_district['label'],
+            'note': (
+                f"{_format_number(top_district['total'])} jovens."
+                if top_district['total'] else 'Sem entradas de jovens no periodo.'
+            ),
+        },
+        {
+            'label': 'Empresa com mais candidaturas',
+            'value': top_company['label'],
+            'note': (
+                f"{_format_number(top_company['total'])} candidaturas recebidas."
+                if top_company['total'] else 'Sem candidaturas registadas no periodo.'
+            ),
+        },
+        {
+            'label': 'Area formativa dominante',
+            'value': top_area['label'],
+            'note': (
+                f"{_format_number(top_area['total'])} registos de formacao."
+                if top_area['total'] else 'Sem area dominante neste intervalo.'
+            ),
+        },
+        {
+            'label': 'Tipo de vaga dominante',
+            'value': top_job_type['label'],
+            'note': (
+                f"{_format_number(top_job_type['total'])} vagas abertas."
+                if top_job_type['total'] else 'Sem publicacoes de vagas no periodo.'
+            ),
+        },
+    ]
+
+    overview_rows = [
+        ('Periodo', range_data['period_label']),
+        ('Intervalo', f"{start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}"),
+        ('Dias analisados', _format_number(period_days)),
+        ('Total de movimentos', _format_number(total_movimentos)),
+        ('Media diaria', _format_decimal(media_diaria)),
+        ('Novos jovens', _format_number(jovens_novos)),
+        ('Novas empresas', _format_number(empresas_novas)),
+        ('Novas vagas', _format_number(vagas_novas)),
+        ('Candidaturas', _format_number(candidaturas_novas)),
+        ('Pedidos de contacto', _format_number(pedidos_contacto_novos)),
+    ]
+
+    outcome_rows = [
+        ('Perfis validados', _format_number(perfis_validados)),
+        ('Taxa de validacao', _format_percent(validation_rate)),
+        ('Candidaturas aceites', _format_number(candidaturas_aceites)),
+        ('Taxa de aceite', _format_percent(acceptance_rate)),
+        ('Pedidos respondidos', _format_number(pedidos_contacto_respondidos)),
+        ('Taxa de resposta', _format_percent(contact_response_rate)),
+        ('Pedidos aprovados', _format_number(pedidos_contacto_aprovados)),
+        ('Taxa de aprovacao', _format_percent(contact_approval_rate)),
+        ('Colocacoes em emprego', _format_number(colocacoes_emprego)),
+    ]
+
+    snapshot_rows = [
+        ('Perfis por validar', _format_number(pending_profiles_snapshot)),
+        ('Pedidos pendentes', _format_number(pending_contacts_snapshot)),
+        ('Vagas ativas', _format_number(active_jobs_snapshot)),
+    ]
+
+    highlight_rows = [(item['label'], item['value'], item['note']) for item in highlights]
+
+    return {
+        'jovens_qs': jovens_qs,
+        'empresas_qs': empresas_qs,
+        'vagas_qs': vagas_qs,
+        'candidaturas_qs': candidaturas_qs,
+        'contactos_qs': contactos_qs,
+        'jovens_novos': jovens_novos,
+        'empresas_novas': empresas_novas,
+        'vagas_novas': vagas_novas,
+        'candidaturas_novas': candidaturas_novas,
+        'pedidos_contacto_novos': pedidos_contacto_novos,
+        'perfis_validados': perfis_validados,
+        'candidaturas_aceites': candidaturas_aceites,
+        'pedidos_contacto_aprovados': pedidos_contacto_aprovados,
+        'pedidos_contacto_respondidos': pedidos_contacto_respondidos,
+        'colocacoes_emprego': colocacoes_emprego,
+        'period_days': period_days,
+        'total_movimentos': total_movimentos,
+        'media_diaria': media_diaria,
+        'report_mix': report_mix,
+        'executive_metrics': executive_metrics,
+        'outcome_metrics': outcome_metrics,
+        'backlog_metrics': backlog_metrics,
+        'highlights': highlights,
+        'headline_insight': headline_insight,
+        'overview_rows': overview_rows,
+        'outcome_rows': outcome_rows,
+        'snapshot_rows': snapshot_rows,
+        'highlight_rows': highlight_rows,
+        'district_list': district_list,
+        'level_list': level_list,
+        'area_list': area_list,
+        'job_type_list': job_type_list,
+        'applications_per_job': applications_per_job,
+        'validation_rate': validation_rate,
+        'acceptance_rate': acceptance_rate,
+        'contact_response_rate': contact_response_rate,
+        'contact_approval_rate': contact_approval_rate,
+    }
+
+
 def _with_admin_context(request, context=None):
     """Attach shared navigation stats to admin dashboard pages."""
     nav_context = {
@@ -89,14 +621,17 @@ def _with_admin_context(request, context=None):
             'pending_contacts': 0,
             'total_users': 0,
             'active_jobs': 0,
+            'placed_youths': 0,
         }
     }
 
     if getattr(request.user, 'is_admin', False):
+        placement_qs = _employment_placements_queryset()
         nav_context['admin_nav'].update({
             'pending_contacts': ContactRequest.objects.filter(estado='PENDENTE').count(),
             'total_users': User.objects.count(),
             'active_jobs': JobPost.objects.filter(estado='ATIVA').count(),
+            'placed_youths': placement_qs.order_by().values('youth_id').distinct().count(),
         })
 
     if context:
@@ -552,6 +1087,8 @@ def admin_dashboard(request):
     """Dashboard do administrador"""
     seven_days_ago = timezone.now() - timedelta(days=7)
     thirty_days_ago = timezone.now() - timedelta(days=30)
+    employment_placements = _employment_placements_queryset()
+    employment_summary = _employment_placements_summary(employment_placements)
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -564,6 +1101,9 @@ def admin_dashboard(request):
         'total_candidaturas': Application.objects.count(),
         'pedidos_contacto_pendentes': ContactRequest.objects.filter(estado='PENDENTE').count(),
         'total_utilizadores': User.objects.count(),
+        'jovens_colocados': employment_summary['youths'],
+        'colocacoes_emprego': employment_summary['placements'],
+        'empresas_com_colocacoes': employment_summary['companies'],
     }
     stats['validacoes_pendentes'] = max(0, stats['jovens_completos'] - stats['jovens_validados'])
     stats['jovens_nao_completos'] = max(0, stats['total_jovens'] - stats['jovens_completos'])
@@ -626,6 +1166,7 @@ def admin_dashboard(request):
     perfis_pendentes = YouthProfile.objects.select_related('user').filter(
         completo=True, validado=False
     ).order_by('-created_at')[:10]
+    colocacoes_recentes = employment_placements.order_by('-updated_at', '-id')[:10]
     
     context = _with_admin_context(request, {
         'stats': stats,
@@ -637,9 +1178,39 @@ def admin_dashboard(request):
         'vagas_recentes': vagas_recentes,
         'pedidos_pendentes': pedidos_pendentes,
         'perfis_pendentes': perfis_pendentes,
+        'colocacoes_recentes': colocacoes_recentes,
     })
     
     return render(request, 'dashboard/admin.html', context)
+
+
+@admin_required
+def employment_placements(request):
+    """Admin view for youths placed in jobs through accepted applications."""
+    all_placements = _employment_placements_queryset().order_by('-updated_at', '-id')
+    query = (request.GET.get('q') or '').strip()
+    placements = all_placements
+
+    if query:
+        placements = placements.filter(
+            Q(youth__user__nome__icontains=query) |
+            Q(youth__user__telefone__icontains=query) |
+            Q(job__company__nome__icontains=query) |
+            Q(job__company__user__telefone__icontains=query) |
+            Q(job__titulo__icontains=query)
+        )
+
+    summary = _employment_placements_summary(all_placements)
+    summary['filtered'] = placements.count()
+    summary['filtered_youths'] = placements.order_by().values('youth_id').distinct().count()
+
+    context = _with_admin_context(request, {
+        'placements': placements,
+        'employment_summary': summary,
+        'filtro_q': query,
+    })
+
+    return render(request, 'dashboard/employment_placements.html', context)
 
 
 @tecnico_required
@@ -1352,7 +1923,7 @@ def offline_registration_import(request):
 
 # Relatórios
 @admin_required
-def reports(request):
+def _legacy_reports(request):
     """Página de relatórios"""
 
     start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
@@ -1395,7 +1966,7 @@ def reports(request):
 
 
 @admin_required
-def export_report_csv(request):
+def _legacy_export_report_csv(request):
     """Exportar relatório CSV"""
     start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
     if invalid_range:
@@ -1439,7 +2010,7 @@ def export_report_csv(request):
 
 
 @admin_required
-def export_report_pdf(request):
+def _legacy_export_report_pdf(request):
     """Exportar relatório em PDF (resumo)"""
     start_date, end_date, start_dt, end_dt, invalid_range = _get_date_range(request)
     if invalid_range:
@@ -1596,7 +2167,7 @@ def export_report_pdf(request):
     margin = 56
 
     y = draw_header(
-        "Relatório - Base Nacional de Jovens",
+        "Relatório - CNJ - Conselho Nacional da Juventude",
         f"Período: {start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}"
     )
     pdf.setFont("Helvetica", 9)
@@ -1654,7 +2225,373 @@ def export_report_pdf(request):
 
 # API para gráficos
 @admin_required
+def reports(request):
+    """Pagina de relatorios."""
+
+    range_data = _resolve_report_range(request)
+    report_data = _build_report_data(range_data)
+
+    if range_data['invalid_range']:
+        messages.error(request, _('A data final nao pode ser menor que a data inicial.'))
+
+    period_options = [
+        {'key': 'diario', 'label': 'Diario', 'url': f"{reverse('dashboard:reports')}?periodo=diario"},
+        {'key': 'quinzenal', 'label': 'Quinzenal', 'url': f"{reverse('dashboard:reports')}?periodo=quinzenal"},
+        {'key': 'mensal', 'label': 'Mensal', 'url': f"{reverse('dashboard:reports')}?periodo=mensal"},
+        {'key': 'anual', 'label': 'Anual', 'url': f"{reverse('dashboard:reports')}?periodo=anual"},
+        {'key': 'personalizado', 'label': 'Personalizado', 'url': reverse('dashboard:reports')},
+    ]
+    for option in period_options:
+        option['active'] = option['key'] == range_data['period_key']
+
+    context = _with_admin_context(request, {
+        'data_inicio': range_data['start_date'],
+        'data_fim': range_data['end_date'],
+        'data_inicio_value': range_data['start_date'].strftime('%Y-%m-%d'),
+        'data_fim_value': range_data['end_date'].strftime('%Y-%m-%d'),
+        'active_period_key': range_data['period_key'],
+        'active_period_label': range_data['period_label'],
+        'period_description': range_data['period_description'],
+        'report_querystring': range_data['querystring'],
+        'period_options': period_options,
+        **report_data,
+    })
+    return render(request, 'dashboard/reports.html', context)
+
+
+@admin_required
+def export_report_csv(request):
+    """Exportar relatorio CSV."""
+    range_data = _resolve_report_range(request)
+    report_data = _build_report_data(range_data)
+    if range_data['invalid_range']:
+        return HttpResponse(
+            'Data final nao pode ser menor que a data inicial.',
+            status=400,
+            content_type='text/plain; charset=utf-8',
+        )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Resumo executivo'])
+    writer.writerow(['Indicador', 'Valor'])
+    for label, value in report_data['overview_rows']:
+        writer.writerow([label, value])
+
+    writer.writerow([])
+    writer.writerow(['Resultados e conversao'])
+    writer.writerow(['Indicador', 'Valor'])
+    for label, value in report_data['outcome_rows']:
+        writer.writerow([label, value])
+
+    writer.writerow([])
+    writer.writerow(['Backlog operacional'])
+    writer.writerow(['Indicador', 'Valor'])
+    for label, value in report_data['snapshot_rows']:
+        writer.writerow([label, value])
+
+    writer.writerow([])
+    writer.writerow(['Destaques do periodo'])
+    writer.writerow(['Leitura', 'Destaque', 'Nota'])
+    for label, value, note in report_data['highlight_rows']:
+        writer.writerow([label, value, note])
+
+    writer.writerow([])
+    writer.writerow(['Jovens no periodo'])
+    writer.writerow(['ID', 'Nome', 'Localizacao', 'Data', 'Estado'])
+    for profile in report_data['jovens_qs']:
+        writer.writerow([
+            profile.id,
+            profile.nome_completo,
+            profile.location_display,
+            profile.created_at.strftime('%d/%m/%Y'),
+            'Validado' if profile.validado else 'Pendente',
+        ])
+
+    writer.writerow([])
+    writer.writerow(['Empresas no periodo'])
+    writer.writerow(['ID', 'Nome', 'Distrito', 'Data', 'Estado'])
+    for company in report_data['empresas_qs']:
+        writer.writerow([
+            company.id,
+            company.nome,
+            company.distrito.nome if company.distrito else '',
+            company.created_at.strftime('%d/%m/%Y'),
+            'Ativa' if company.ativa else 'Inativa',
+        ])
+
+    writer.writerow([])
+    writer.writerow(['Vagas no periodo'])
+    writer.writerow(['ID', 'Titulo', 'Empresa', 'Tipo', 'Data', 'Estado'])
+    for job in report_data['vagas_qs']:
+        writer.writerow([
+            job.id,
+            job.titulo,
+            job.company.nome,
+            job.get_tipo_display(),
+            timezone.localtime(job.data_publicacao).strftime('%d/%m/%Y'),
+            job.get_estado_display(),
+        ])
+
+    writer.writerow([])
+    writer.writerow(['Candidaturas no periodo'])
+    writer.writerow(['ID', 'Jovem', 'Vaga', 'Empresa', 'Data', 'Estado'])
+    for application in report_data['candidaturas_qs']:
+        writer.writerow([
+            application.id,
+            application.youth.user.nome,
+            application.job.titulo,
+            application.job.company.nome,
+            timezone.localtime(application.created_at).strftime('%d/%m/%Y'),
+            application.get_estado_display(),
+        ])
+
+    writer.writerow([])
+    writer.writerow(['Pedidos de contacto no periodo'])
+    writer.writerow(['ID', 'Empresa', 'Jovem', 'Data', 'Estado'])
+    for contact in report_data['contactos_qs']:
+        writer.writerow([
+            contact.id,
+            contact.company.nome,
+            contact.youth.user.nome,
+            timezone.localtime(contact.created_at).strftime('%d/%m/%Y'),
+            contact.get_estado_display(),
+        ])
+
+    return response
+
+
+@admin_required
 def api_stats(request):
+    """API para dados estatÃ­sticos (grÃ¡ficos)"""
+    
+    # Jovens por mÃªs (Ãºltimos 6 meses)
+    hoje = timezone.now()
+    jovens_por_mes = []
+    
+    for i in range(5, -1, -1):
+        mes = hoje - timedelta(days=30*i)
+        inicio_mes = mes.replace(day=1, hour=0, minute=0, second=0)
+        if mes.month < 12:
+            fim_mes = mes.replace(month=mes.month+1, day=1) - timedelta(seconds=1)
+        else:
+            fim_mes = mes.replace(year=mes.year+1, month=1, day=1) - timedelta(seconds=1)
+        
+        count = YouthProfile.objects.filter(created_at__gte=inicio_mes, created_at__lte=fim_mes).count()
+        jovens_por_mes.append({
+            'mes': mes.strftime('%b %Y'),
+            'total': count
+        })
+    
+    return JsonResponse({
+        'jovens_por_mes': jovens_por_mes,
+    })
+
+
+@admin_required
+def export_report_pdf(request):
+    """Exportar relatorio em PDF."""
+    range_data = _resolve_report_range(request)
+    report_data = _build_report_data(range_data)
+    if range_data['invalid_range']:
+        return HttpResponse(
+            'Data final nao pode ser menor que a data inicial.',
+            status=400,
+            content_type='text/plain; charset=utf-8',
+        )
+
+    def build_chart_data(items, max_items=6):
+        labels = []
+        values = []
+        for nome, total in items[:max_items]:
+            labels.append(str(nome))
+            values.append(total)
+        if len(items) > max_items:
+            labels.append('Outros')
+            values.append(sum(total for _, total in items[max_items:]))
+        return labels, values
+
+    def draw_header(title, subtitle):
+        header_height = 70
+        pdf.setFillColor(colors.HexColor("#0b3b6f"))
+        pdf.rect(0, height - header_height, width, header_height, fill=1, stroke=0)
+        pdf.setFillColor(colors.white)
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(margin, height - 28, title)
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(margin, height - 46, subtitle)
+
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'cnj_logo.jpg')
+        if os.path.exists(logo_path):
+            try:
+                pdf.drawImage(
+                    logo_path,
+                    width - margin - 140,
+                    height - 54,
+                    width=140,
+                    height=32,
+                    preserveAspectRatio=True,
+                    mask='auto',
+                )
+            except Exception:
+                pass
+        pdf.setFillColor(colors.HexColor("#1f2d3d"))
+        return height - header_height - 24
+
+    def draw_table(data, col_widths, right_align_last=True):
+        table = Table(data, colWidths=col_widths)
+        styles = [
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f6fb")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1f2d3d")),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#dbe3ef")),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e5e7eb")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ]
+        if right_align_last:
+            styles.append(("ALIGN", (-1, 1), (-1, -1), "RIGHT"))
+        table.setStyle(TableStyle(styles))
+        return table
+
+    def draw_table_block(title, headers, rows, y, col_widths, subtitle=None, right_align_last=True):
+        if subtitle:
+            pdf.setFont("Helvetica", 10)
+            pdf.drawString(margin, y, subtitle)
+            y -= 18
+
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.setFillColor(colors.HexColor("#1f2d3d"))
+        pdf.drawString(margin, y, title)
+        y -= 12
+
+        table = draw_table([headers] + rows, col_widths, right_align_last=right_align_last)
+        _, table_height = table.wrap(0, 0)
+        if y - table_height < 60:
+            pdf.showPage()
+            y = draw_header(title, range_data['period_description'])
+            table = draw_table([headers] + rows, col_widths, right_align_last=right_align_last)
+            _, table_height = table.wrap(0, 0)
+        table.drawOn(pdf, margin, y - table_height)
+        return y - table_height - 24
+
+    def draw_chart(labels, values, x, y, width_px=220, height_px=130):
+        if not values or max(values) == 0:
+            pdf.setFont("Helvetica", 10)
+            pdf.drawString(x, y + height_px - 12, "Sem dados.")
+            return
+        drawing = Drawing(width_px, height_px)
+        chart = VerticalBarChart()
+        chart.x = 0
+        chart.y = 16
+        chart.height = height_px - 24
+        chart.width = width_px
+        chart.data = [values]
+        chart.strokeColor = colors.HexColor("#0b5ed7")
+        chart.fillColor = colors.HexColor("#1a73e8")
+        max_val = max(values)
+        chart.valueAxis.valueMin = 0
+        chart.valueAxis.valueMax = max(5, int(max_val * 1.2))
+        chart.valueAxis.valueStep = max(1, int(max_val / 4) or 1)
+        chart.categoryAxis.categoryNames = labels
+        chart.categoryAxis.labels.boxAnchor = 'ne'
+        chart.categoryAxis.labels.angle = 30
+        chart.categoryAxis.labels.fontSize = 6
+        chart.categoryAxis.labels.dy = -2
+        chart.categoryAxis.labels.dx = -2
+        drawing.add(chart)
+        renderPDF.draw(drawing, pdf, x, y)
+
+    def draw_distribution_section(title, items, y):
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.setFillColor(colors.HexColor("#1f2d3d"))
+        pdf.drawString(margin, y, title)
+        y -= 12
+
+        table_rows = [[nome, str(total)] for nome, total in items[:10]] or [['Sem dados', '0']]
+        table = draw_table([["Categoria", "Total"]] + table_rows, [200, 60])
+        _, table_height = table.wrap(0, 0)
+        if y - max(table_height, 130) < 60:
+            pdf.showPage()
+            y = draw_header("Relatorio - Distribuicoes", range_data['period_description'])
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.setFillColor(colors.HexColor("#1f2d3d"))
+            pdf.drawString(margin, y, title)
+            y -= 12
+            table = draw_table([["Categoria", "Total"]] + table_rows, [200, 60])
+            _, table_height = table.wrap(0, 0)
+
+        table.drawOn(pdf, margin, y - table_height)
+        labels, values = build_chart_data(items, max_items=6)
+        draw_chart(labels, values, margin + 270, y - 124, 220, 130)
+        return y - max(table_height, 130) - 24
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    margin = 56
+
+    y = draw_header(
+        "Relatorio executivo - CNJ",
+        f"Periodo {range_data['period_label']}: {range_data['start_date'].strftime('%d/%m/%Y')} a {range_data['end_date'].strftime('%d/%m/%Y')}",
+    )
+    pdf.setFont("Helvetica", 9)
+    pdf.setFillColor(colors.HexColor("#1f2d3d"))
+    pdf.drawString(margin, y + 8, f"Gerado em: {timezone.now().strftime('%d/%m/%Y %H:%M')}")
+    y -= 12
+    y = draw_table_block(
+        "Leitura executiva",
+        ["Indicador", "Valor"],
+        [[label, value] for label, value in report_data['overview_rows']],
+        y,
+        [300, 160],
+        subtitle=report_data['headline_insight'],
+    )
+    y = draw_table_block(
+        "Resultados e conversao",
+        ["Indicador", "Valor"],
+        [[label, value] for label, value in report_data['outcome_rows']],
+        y,
+        [300, 160],
+    )
+
+    pdf.showPage()
+    y = draw_header("Relatorio - Destaques", range_data['period_description'])
+    y = draw_table_block(
+        "Destaques mais relevantes",
+        ["Leitura", "Destaque", "Nota"],
+        [[label, value, note] for label, value, note in report_data['highlight_rows']],
+        y,
+        [160, 120, 180],
+        right_align_last=False,
+    )
+    y = draw_table_block(
+        "Backlog operacional",
+        ["Indicador", "Valor"],
+        [[label, value] for label, value in report_data['snapshot_rows']],
+        y,
+        [300, 160],
+    )
+
+    pdf.showPage()
+    y = draw_header("Relatorio - Distribuicoes", "Panorama por origem e oferta")
+    y = draw_distribution_section("Jovens por distrito", report_data['district_list'], y)
+    y = draw_distribution_section("Por nivel de educacao", report_data['level_list'], y)
+    y = draw_distribution_section("Por area de formacao", report_data['area_list'], y)
+    y = draw_distribution_section("Por tipo de vaga", report_data['job_type_list'], y)
+
+    pdf.save()
+
+    buffer.seek(0)
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="relatorio_base_nacional.pdf"'
+    return response
+
+
+@admin_required
+def _legacy_api_stats(request):
     """API para dados estatísticos (gráficos)"""
     
     # Jovens por mês (últimos 6 meses)

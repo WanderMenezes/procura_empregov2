@@ -103,6 +103,11 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
                     val = skills_qs.exists()
                 elif f == 'idiomas':
                     val = bool(profile.idiomas_detalhados)
+                elif f == 'area_formacao':
+                    if edu and edu.area_formacao == 'OUT':
+                        val = edu.outra_area_formacao or ''
+                    else:
+                        val = getattr(edu, f, None) if edu else None
                 else:
                     if edu:
                         val = getattr(edu, f, None)
@@ -188,6 +193,11 @@ class ProfileWizardView(View):
     def _get_step_meta(self, step: int) -> dict:
         return self.STEP_META.get(step, {'title': '', 'icon': ''})
 
+    def _build_existing_profile_submission_data(self, profile: YouthProfile, step: int, step_data: dict) -> dict:
+        wizard_data = self._profile_to_wizard_data(profile)
+        wizard_data[str(step)] = step_data
+        return wizard_data
+
     def _profile_to_wizard_data(self, profile: YouthProfile) -> dict:
         user = profile.user
         edu = Education.objects.filter(profile=profile).order_by('-ano').first()
@@ -218,6 +228,7 @@ class ProfileWizardView(View):
         step2 = {
             'nivel': edu.nivel if edu else '',
             'area_formacao': edu.area_formacao if edu else '',
+            'outra_area_formacao': edu.outra_area_formacao if edu else '',
             'instituicao': edu.instituicao if edu else '',
             'ano': edu.ano if edu else '',
             'curso': edu.curso if edu else '',
@@ -333,7 +344,8 @@ class ProfileWizardView(View):
         if form.is_valid():
             # Salvar dados na sessão
             wizard_data = request.session.get('wizard_data', {})
-            wizard_data[str(step)] = self.get_form_data(form)
+            current_step_data = self.get_form_data(form)
+            wizard_data[str(step)] = current_step_data
             request.session['wizard_data'] = wizard_data
             
             if 'next' in request.POST and step < 4:
@@ -341,6 +353,13 @@ class ProfileWizardView(View):
             elif 'prev' in request.POST and step > 1:
                 return redirect('profiles:wizard_step', step=step - 1)
             elif 'save' in request.POST:
+                if request.user.has_youth_profile():
+                    request.session['wizard_data'] = self._build_existing_profile_submission_data(
+                        request.user.youth_profile,
+                        step,
+                        current_step_data,
+                    )
+                    return self.submit_profile(request)
                 # Salvar rascunho
                 messages.success(request, _('Progresso guardado! Podes continuar depois.'))
                 return redirect('home')
@@ -460,6 +479,12 @@ class ProfileWizardView(View):
                     if has_partial_idioma:
                         filled += 1
                     continue
+                if f == 'area_formacao':
+                    val = step_data.get(f)
+                    if val == 'OUT':
+                        if step_data.get('outra_area_formacao'):
+                            filled += 1
+                        continue
                 val = step_data.get(f)
                 if isinstance(val, bool):
                     if f in always_count_bool:
@@ -557,7 +582,7 @@ class ProfileWizardView(View):
                 )
 
             # Educação (atualiza ou cria)
-            edu_fields = ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso']
+            edu_fields = ['nivel', 'area_formacao', 'outra_area_formacao', 'instituicao', 'ano', 'curso']
             edu_data_present = any(step2.get(f) for f in edu_fields)
             edu = Education.objects.filter(profile=profile).order_by('-ano').first()
             if edu_data_present:
@@ -566,6 +591,8 @@ class ProfileWizardView(View):
                         edu.nivel = step2.get('nivel')
                     if 'area_formacao' in step2:
                         edu.area_formacao = step2.get('area_formacao') or edu.area_formacao
+                    if 'outra_area_formacao' in step2:
+                        edu.outra_area_formacao = step2.get('outra_area_formacao') or ''
                     if step2.get('instituicao'):
                         edu.instituicao = step2.get('instituicao')
                     if step2.get('ano'):
@@ -578,6 +605,7 @@ class ProfileWizardView(View):
                         profile=profile,
                         nivel=step2['nivel'],
                         area_formacao=step2.get('area_formacao', ''),
+                        outra_area_formacao=step2.get('outra_area_formacao', ''),
                         instituicao=step2['instituicao'],
                         ano=step2.get('ano'),
                         curso=step2.get('curso', '')
@@ -854,7 +882,7 @@ def available_jobs(request):
 
     preferred_tipo = profile.preferencia_oportunidade if profile.preferencia_oportunidade in valid_tipos else ''
     latest_education = Education.objects.filter(profile=profile).order_by('-ano', '-id').first()
-    education_area = latest_education.area_formacao if latest_education else ''
+    education_area = latest_education.area_formacao if latest_education and latest_education.area_formacao != 'OUT' else ''
     district_id = request.user.distrito_id
     now = timezone.now()
     today = timezone.localdate()
@@ -974,7 +1002,7 @@ def available_jobs(request):
         'profile_interest_count': len(interests),
         'profile_interests_display': profile.interesses_setoriais_display,
         'preferred_tipo_display': dict(JobPost.TIPO_CHOICES).get(preferred_tipo, ''),
-        'education_area_display': area_mapping.get(education_area, ''),
+        'education_area_display': latest_education.area_formacao_display if latest_education else '',
     }
 
     return render(request, 'profiles/vagas_disponiveis.html', context)
@@ -1412,6 +1440,7 @@ def assisted_register(request):
                     profile=profile,
                     nivel=data['nivel'],
                     area_formacao=data['area_formacao'],
+                    outra_area_formacao=data.get('outra_area_formacao', ''),
                     instituicao='Não específicado',
                     ano=None
                 )

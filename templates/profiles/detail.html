@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load dict_extras %}
 
-{% block title %}Meu Perfil - Base Nacional de Jovens{% endblock %}
+{% block title %}Meu Perfil - CNJ - Conselho Nacional da Juventude{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -334,7 +334,7 @@
                         <div class="candidate-entry-title">{{ edu.get_nivel_display }}</div>
                         <div class="candidate-entry-subtitle">{{ edu.instituicao }}</div>
                         <div class="candidate-entry-meta">
-                          <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
+                          <span class="badge bg-secondary">{{ edu.area_formacao_display }}</span>
                           {% if edu.ano %}<span class="badge bg-light text-dark border">{{ edu.ano }}</span>{% endif %}
                         </div>
                         {% if edu.curso %}<p class="candidate-entry-copy">{{ edu.curso }}</p>{% endif %}

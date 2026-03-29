@@ -840,7 +840,7 @@ def export_youth_csv(request):
             profile.get_situacao_atual_display(),
             profile.get_disponibilidade_display(),
             educacao.get_nivel_display() if educacao else '',
-            educacao.get_area_formacao_display() if educacao else '',
+            educacao.area_formacao_display if educacao else '',
             profile.interesses_setoriais_display,
             profile.get_preferencia_oportunidade_display(),
             'Sim' if profile.completo else 'Não',

@@ -5,8 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Base Nacional de Jovens - São Tomé e Príncipe. Plataforma para conectar jovens com oportunidades de emprego, estágios e formação.">
-    <title>{% block title %}Base Nacional de Jovens{% endblock %}</title>
+    <meta name="description" content="CNJ - Conselho Nacional da Juventude. Plataforma de registo, oportunidades e ligação entre jovens, empresas e equipas de apoio em São Tomé e Príncipe.">
+    <title>{% block title %}CNJ - Conselho Nacional da Juventude{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -27,7 +27,8 @@
             <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'home' %}">
                 <img src="{% static 'img/cnj_logo.jpg' %}" alt="CNJ" class="navbar-logo">
                 <span class="navbar-brand-copy">
-                    <span class="navbar-brand-title">Base Nacional de Jovens</span>
+                    <span class="navbar-brand-title">CNJ - Conselho Nacional da Juventude</span>
+                    <span class="navbar-brand-subtitle">Registo, oportunidades e ligação entre jovens e empresas</span>
                 </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menu">
@@ -95,6 +96,7 @@
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item {% if current_name == 'admin' %}active{% endif %}" href="{% url 'dashboard:admin' %}"><i class="bi bi-speedometer2 me-2"></i>Painel admin</a></li>
                                     <li><a class="dropdown-item {% if current_name == 'manage_contact_requests' %}active{% endif %}" href="{% url 'dashboard:manage_contact_requests' %}"><i class="bi bi-person-lines-fill me-2"></i>Pedidos de contacto</a></li>
+                                    <li><a class="dropdown-item {% if current_name == 'employment_placements' %}active{% endif %}" href="{% url 'dashboard:employment_placements' %}"><i class="bi bi-person-workspace me-2"></i>Colocacoes</a></li>
                                     <li><a class="dropdown-item {% if current_name == 'reports' %}active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-bar-chart me-2"></i>Relatérios</a></li>
                                 </ul>
                             </li>
@@ -242,12 +244,12 @@
             <section class="footer-hero">
                 <div class="footer-brand">
                     <div>
-                        <div class="footer-kicker">Empregabilidade jovem em São Tomé e Príncipe</div>
-                        <h2 class="footer-title">Base Nacional de Jovens</h2>
-                        <p class="footer-copy text-footer">
-                            Uma plataforma comum para jovens, empresas, operadores distritais e equipa técnica acompanharem registo, validação e oportunidades com mais contexto.
-                        </p>
+                        <div class="footer-kicker">Plataforma digital de empregabilidade jovem</div>
+                        <h2 class="footer-title">CNJ - Conselho Nacional da Juventude</h2>
                     </div>
+                    <p class="footer-copy text-footer">
+                        Registo, validação de perfis, oportunidades e ligação entre jovens, empresas, operadores distritais e equipa técnica num só lugar.
+                    </p>
                 </div>
                 <div class="footer-hero-chips">
                     <span class="footer-pill"><i class="bi bi-person-check"></i>Técnico PNUD</span>
@@ -341,7 +343,7 @@
 
             <div class="footer-bottom">
                 <div class="footer-bottom-copy">
-                    &copy; {% now "Y" %} Base Nacional de Jovens - São Tomé e Príncipe. Todos os direitos reservados.
+                    &copy; {% now "Y" %} CNJ - Conselho Nacional da Juventude. Todos os direitos reservados.
                 </div>
                 <div class="footer-bottom-links">
                     <a href="{% url 'privacy' %}">Privacidade</a>

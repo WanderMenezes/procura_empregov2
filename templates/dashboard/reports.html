@@ -1,5 +1,4 @@
 {% extends 'base/base.html' %}
-{% load humanize %}
 
 {% block title %}Relatorios - Painel de Administracao{% endblock %}
 
@@ -15,18 +14,18 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Leitura executiva</div>
-                        <h1 class="admin-page-title">Relatérios</h1>
+                        <h1 class="admin-page-title">Relatorios</h1>
                         <p class="admin-subtitle mb-0">
-                            Consulte o volume do período selecionado e exporte um resumo pronto para partilha.
+                            {{ period_description }} O painel destaca volume, resultados, backlog e os sinais mais relevantes do periodo.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
                                 <i class="bi bi-calendar-range"></i>
-                                {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
+                                {{ active_period_label }}: {{ data_inicio|date:"d/m/Y" }} ate {{ data_fim|date:"d/m/Y" }}
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-activity"></i>
-                                {{ total_movimentos|intcomma }} movimentos no período
+                                {{ total_movimentos }} movimentos no periodo
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-speedometer2"></i>
@@ -36,18 +35,32 @@
                     </div>
 
                     <div class="admin-hero-actions" data-tour-id="admin-hero-actions">
-                        <a href="{% url 'dashboard:export_report_csv' %}?data_inicio={{ data_inicio_value }}&data_fim={{ data_fim_value }}" class="btn btn-light btn-sm">
+                        <a href="{% url 'dashboard:export_report_csv' %}?{{ report_querystring }}" class="btn btn-light btn-sm">
                             <i class="bi bi-download me-1"></i>Exportar CSV
                         </a>
-                        <a href="{% url 'dashboard:export_report_pdf' %}?data_inicio={{ data_inicio_value }}&data_fim={{ data_fim_value }}" class="btn btn-outline-light btn-sm">
+                        <a href="{% url 'dashboard:export_report_pdf' %}?{{ report_querystring }}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF
                         </a>
                     </div>
                 </div>
             </div>
 
+            <div class="card admin-panel mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for option in period_options %}
+                            <a href="{{ option.url }}"
+                               class="btn btn-sm {% if option.active %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                {{ option.label }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
             <form method="get" class="card admin-panel admin-filter-panel mb-4" data-tour-id="reports-filter">
                 <div class="card-body">
+                    <input type="hidden" name="periodo" id="periodo" value="personalizado">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-4">
                             <label class="form-label">Data inicial</label>
@@ -58,61 +71,60 @@
                             <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim_value }}">
                         </div>
                         <div class="col-md-4 d-grid gap-2">
-                            <button class="btn btn-primary">Atualizar indicadores</button>
-                            <a href="{% url 'dashboard:reports' %}" class="btn btn-outline-secondary">Voltar ao padrao</a>
+                            <button class="btn btn-primary">Gerar relatorio personalizado</button>
+                            <a href="{% url 'dashboard:reports' %}?periodo=mensal" class="btn btn-outline-secondary">Voltar ao mensal</a>
                         </div>
                     </div>
                 </div>
             </form>
 
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-xl-3">
-                    <div class="card admin-summary-card h-100">
-                        <div class="card-body">
-                            <div class="admin-summary-label">Novos jovens</div>
-                            <div class="admin-summary-value">{{ jovens_novos|intcomma }}</div>
-                            <small class="text-muted">Entradas no período</small>
+                {% for metric in executive_metrics %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card admin-summary-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="admin-summary-label">{{ metric.label }}</div>
+                                        <div class="admin-summary-value">{{ metric.value }}</div>
+                                    </div>
+                                    <i class="bi {{ metric.icon }} fs-4 text-primary"></i>
+                                </div>
+                                <small class="text-muted">{{ metric.subtitle }}</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card admin-summary-card h-100">
-                        <div class="card-body">
-                            <div class="admin-summary-label">Novas empresas</div>
-                            <div class="admin-summary-value">{{ empresas_novas|intcomma }}</div>
-                            <small class="text-muted">Perfis empresariais criados</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card admin-summary-card h-100">
-                        <div class="card-body">
-                            <div class="admin-summary-label">Novas vagas</div>
-                            <div class="admin-summary-value">{{ vagas_novas|intcomma }}</div>
-                            <small class="text-muted">Publicações abertas no período</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card admin-summary-card h-100">
-                        <div class="card-body">
-                            <div class="admin-summary-label">Candidaturas</div>
-                            <div class="admin-summary-value">{{ candidaturas_novas|intcomma }}</div>
-                            <small class="text-muted">Movimento total de candidaturas</small>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 mb-4">
+                {% for metric in outcome_metrics %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card admin-panel h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="admin-summary-label">{{ metric.label }}</div>
+                                        <div class="admin-summary-value">{{ metric.value }}</div>
+                                    </div>
+                                    <i class="bi {{ metric.icon }} fs-4 text-primary"></i>
+                                </div>
+                                <small class="text-muted">{{ metric.subtitle }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="row g-4 mb-4">
                 <div class="col-xl-7">
                     <div class="card admin-panel h-100" data-tour-id="reports-mix">
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Distribuição</div>
-                                    <h5 class="mb-1">Peso de cada indicador</h5>
-                                    <p class="text-muted mb-0">Vejá onde o volume do período se concentrou.</p>
+                                    <div class="admin-section-kicker">Distribuicao</div>
+                                    <h5 class="mb-1">Peso do movimento</h5>
+                                    <p class="text-muted mb-0">Veja onde o volume do periodo se concentrou.</p>
                                 </div>
                             </div>
 
@@ -131,7 +143,7 @@
                             {% else %}
                                 <div class="admin-empty-state">
                                     <i class="bi bi-bar-chart"></i>
-                                    <p class="mb-0">Não houve movimentos no período selecionado.</p>
+                                    <p class="mb-0">Nao houve movimentos no periodo selecionado.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -143,32 +155,81 @@
                         <div class="card-body">
                             <div class="admin-section-head">
                                 <div>
-                                    <div class="admin-section-kicker">Leituras rápidas</div>
-                                    <h5 class="mb-1">Resumo do período</h5>
-                                    <p class="text-muted mb-0">Contexto suficiente para partilha rápida com a equipa.</p>
+                                    <div class="admin-section-kicker">Leitura rapida</div>
+                                    <h5 class="mb-1">Sinal principal</h5>
+                                    <p class="text-muted mb-0">{{ headline_insight }}</p>
+                                </div>
+                            </div>
+
+                            <div class="admin-inline-stat-list mb-4">
+                                {% for item in backlog_metrics %}
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">{{ item.label }}</span>
+                                        <strong>{{ item.value }}</strong>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="admin-note-card">
+                                <h6 class="mb-2">Exportacao pronta</h6>
+                                <p class="mb-0 text-muted">
+                                    O CSV traz resumo e detalhe operacional. O PDF entrega a leitura executiva, backlog e distribuicoes do mesmo intervalo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-8">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Destaques</div>
+                                    <h5 class="mb-1">Informacoes mais relevantes</h5>
+                                    <p class="text-muted mb-0">Os pontos de maior concentracao do periodo analisado.</p>
+                                </div>
+                            </div>
+
+                            <div class="list-group list-group-flush">
+                                {% for item in highlights %}
+                                    <div class="list-group-item px-0">
+                                        <div class="fw-semibold">{{ item.label }}</div>
+                                        <div>{{ item.value }}</div>
+                                        <small class="text-muted">{{ item.note }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Contexto</div>
+                                    <h5 class="mb-1">Resumo do intervalo</h5>
+                                    <p class="text-muted mb-0">Referencias rapidas para apresentacao ou partilha.</p>
                                 </div>
                             </div>
 
                             <div class="admin-inline-stat-list">
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Duração analisada</span>
-                                    <strong>{{ period_days }} dia{{ period_days|pluralize }}</strong>
+                                    <span class="admin-inline-stat-label">Dias analisados</span>
+                                    <strong>{{ period_days }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Total de movimentos</span>
-                                    <strong>{{ total_movimentos|intcomma }}</strong>
+                                    <span class="admin-inline-stat-label">Pedidos de contacto</span>
+                                    <strong>{{ pedidos_contacto_novos }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Media diaria</span>
-                                    <strong>{{ media_diaria|floatformat:1 }}</strong>
+                                    <span class="admin-inline-stat-label">Colocacoes em emprego</span>
+                                    <strong>{{ colocacoes_emprego }}</strong>
                                 </div>
-                            </div>
-
-                            <div class="admin-note-card">
-                                <h6 class="mb-2">Exportação pronta</h6>
-                                <p class="mb-0 text-muted">
-                                    O CSV ajuda em análise detalhada e o PDF gera um resumo executivo do mesmo intervalo.
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -184,6 +245,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const startInput = document.getElementById('data_inicio');
     const endInput = document.getElementById('data_fim');
+    const periodInput = document.getElementById('periodo');
     const form = startInput ? startInput.closest('form') : null;
 
     function syncMinDate() {
@@ -192,16 +254,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function markCustomPeriod() {
+        if (periodInput) {
+            periodInput.value = 'personalizado';
+        }
+    }
+
     syncMinDate();
+
     if (startInput) {
-        startInput.addEventListener('change', syncMinDate);
+        startInput.addEventListener('change', function () {
+            syncMinDate();
+            markCustomPeriod();
+        });
+    }
+
+    if (endInput) {
+        endInput.addEventListener('change', markCustomPeriod);
     }
 
     if (form) {
         form.addEventListener('submit', function (event) {
+            markCustomPeriod();
             if (startInput && endInput && startInput.value && endInput.value && endInput.value < startInput.value) {
                 event.preventDefault();
-                alert('A data final não pode ser menor que a data inicial.');
+                alert('A data final nao pode ser menor que a data inicial.');
             }
         });
     }

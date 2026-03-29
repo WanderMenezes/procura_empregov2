@@ -29,20 +29,22 @@ main {
 }
 
 .navbar-logo {
-    height: 34px;
-    width: auto;
-    max-width: 200px;
+    width: 46px;
+    height: 46px;
     display: block;
+    flex-shrink: 0;
+    object-fit: cover;
     background: rgba(255, 255, 255, 0.95);
-    padding: 4px 6px;
-    border-radius: 6px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.28);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 @media (max-width: 576px) {
     .navbar-logo {
-        height: 28px;
-        max-width: 160px;
+        width: 40px;
+        height: 40px;
     }
 }
 

@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load humanize %}
 
-{% block title %}Painel de Administracao - Base Nacional de Jovens{% endblock %}
+{% block title %}Painel de Administracao - CNJ - Conselho Nacional da Juventude{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -106,6 +106,75 @@
                                 </div>
                                 <i class="bi bi-briefcase fs-1 stat-icon"></i>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-4">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Impacto</div>
+                                    <h5 class="mb-1">Colocacoes em emprego</h5>
+                                    <p class="text-muted mb-0">Leitura baseada nas candidaturas do tipo emprego com estado aceite.</p>
+                                </div>
+                                <a href="{% url 'dashboard:employment_placements' %}" class="btn btn-outline-primary btn-sm">Ver lista completa</a>
+                            </div>
+
+                            <div class="admin-summary-value">{{ stats.jovens_colocados|intcomma }}</div>
+                            <p class="text-muted mb-4">{{ stats.jovens_colocados|intcomma }} jov{{ stats.jovens_colocados|pluralize:"em,ens" }} com emprego em {{ stats.empresas_com_colocacoes|intcomma }} empresa{{ stats.empresas_com_colocacoes|pluralize }} atraves da plataforma.</p>
+
+                            <div class="admin-inline-stat-list">
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Jovens com emprego</span>
+                                    <strong>{{ stats.jovens_colocados|intcomma }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Colocacoes aceites</span>
+                                    <strong>{{ stats.colocacoes_emprego|intcomma }}</strong>
+                                </div>
+                                <div class="admin-inline-stat">
+                                    <span class="admin-inline-stat-label">Empresas envolvidas</span>
+                                    <strong>{{ stats.empresas_com_colocacoes|intcomma }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-8">
+                    <div class="card admin-panel h-100">
+                        <div class="card-body">
+                            <div class="admin-section-head">
+                                <div>
+                                    <div class="admin-section-kicker">Lista rapida</div>
+                                    <h5 class="mb-1">Colocacoes recentes</h5>
+                                    <p class="text-muted mb-0">Quem conseguiu emprego e em que empresa aparece aqui para leitura imediata.</p>
+                                </div>
+                                <a href="{% url 'dashboard:employment_placements' %}" class="btn btn-outline-primary btn-sm">Abrir colocacoes</a>
+                            </div>
+
+                            {% if colocacoes_recentes %}
+                                <div class="admin-activity-list">
+                                    {% for item in colocacoes_recentes|slice:":6" %}
+                                        <div class="admin-activity-item">
+                                            <div>
+                                                <div class="admin-activity-title">{{ item.youth.nome_completo }}</div>
+                                                <small class="text-muted">{{ item.job.company.nome }} - {{ item.job.titulo }} - {{ item.updated_at|date:"d/m/Y H:i" }}</small>
+                                            </div>
+                                            <span class="admin-status-pill success">Aceite</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="admin-empty-state small">
+                                    <i class="bi bi-briefcase"></i>
+                                    <p class="mb-0">Ainda nao existem colocacoes em emprego registadas.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -88,7 +88,7 @@
     <div class="education-stats">
       <div class="education-stat"><span class="education-stat-label">Registos</span><span class="education-stat-value">{{ education_count }}</span><span class="education-stat-meta">formações no teu perfil</span></div>
       <div class="education-stat"><span class="education-stat-label">Nivel</span><span class="education-stat-value">{% if latest_education %}{{ latest_education.get_nivel_display|default:"--" }}{% else %}--{% endif %}</span><span class="education-stat-meta">Última referencia académica</span></div>
-      <div class="education-stat"><span class="education-stat-label">Área</span><span class="education-stat-value">{% if latest_education and latest_education.area_formacao %}{{ latest_education.get_area_formacao_display }}{% else %}--{% endif %}</span><span class="education-stat-meta">Última Área registada</span></div>
+      <div class="education-stat"><span class="education-stat-label">Área</span><span class="education-stat-value">{% if latest_education and latest_education.area_formacao %}{{ latest_education.area_formacao_display }}{% else %}--{% endif %}</span><span class="education-stat-meta">Última Área registada</span></div>
       <div class="education-stat"><span class="education-stat-label">Objetivo</span><span class="education-stat-value">+</span><span class="education-stat-meta">adicionar mais contexto ao perfil</span></div>
     </div>
   </section>
@@ -119,7 +119,7 @@
         <div class="education-tags">
           <span class="education-tag highlight"><i class="bi bi-mortarboard"></i>{{ education_count }} registo{{ education_count|pluralize }} de formação</span>
           {% if latest_education %}
-            <span class="education-tag"><i class="bi bi-book"></i>{{ latest_education.get_area_formacao_display }}</span>
+            <span class="education-tag"><i class="bi bi-book"></i>{{ latest_education.area_formacao_display }}</span>
           {% else %}
             <span class="education-tag muted"><i class="bi bi-plus-circle"></i>Primeiro registo</span>
           {% endif %}
@@ -173,6 +173,12 @@
               {{ form.area_formacao }}
               {% if form.area_formacao.errors %}<div class="education-field-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
             </div>
+            <div class="education-field full" id="educationOutraAreaWrap" {% if form.area_formacao.value != 'OUT' %}style="display:none;"{% endif %}>
+              <label for="{{ form.outra_area_formacao.id_for_label }}">{{ form.outra_area_formacao.label }}</label>
+              {{ form.outra_area_formacao }}
+              <div class="education-field-help">Especifica a área quando não estiver na lista.</div>
+              {% if form.outra_area_formacao.errors %}<div class="education-field-error">{{ form.outra_area_formacao.errors|striptags }}</div>{% endif %}
+            </div>
             <div class="education-field">
               <label for="{{ form.ano.id_for_label }}">{{ form.ano.label }}</label>
               {{ form.ano }}
@@ -224,4 +230,28 @@
     </section>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const areaInput = document.getElementById('id_area_formacao');
+    const otherInput = document.getElementById('id_outra_area_formacao');
+    const otherWrap = document.getElementById('educationOutraAreaWrap');
+
+    function toggleOtherArea() {
+      if (!areaInput || !otherInput || !otherWrap) return;
+      const isOther = areaInput.value === 'OUT';
+      otherWrap.style.display = isOther ? 'grid' : 'none';
+      otherInput.disabled = !isOther;
+      otherInput.required = isOther;
+      if (!isOther) {
+        otherInput.value = '';
+      }
+    }
+
+    toggleOtherArea();
+    if (areaInput) areaInput.addEventListener('change', toggleOtherArea);
+  });
+</script>
 {% endblock %}

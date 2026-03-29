@@ -272,6 +272,12 @@
                 {{ form.area_formacao }}
                 {% if form.area_formacao.errors %}<div class="wizard-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
               </div>
+              <div class="wizard-field full" id="wizardOutraAreaWrap" {% if form.area_formacao.value != 'OUT' %}style="display:none;"{% endif %}>
+                <label for="{{ form.outra_area_formacao.id_for_label }}">{{ form.outra_area_formacao.label }}</label>
+                {{ form.outra_area_formacao }}
+                <div class="wizard-field-help">Especifica a área quando não estiver na lista.</div>
+                {% if form.outra_area_formacao.errors %}<div class="wizard-error">{{ form.outra_area_formacao.errors|striptags }}</div>{% endif %}
+              </div>
               <div class="wizard-field">
                 <label for="{{ form.instituicao.id_for_label }}">{{ form.instituicao.label }}</label>
                 {{ form.instituicao }}
@@ -531,13 +537,13 @@
 
         <div class="wizard-nav">
           <div class="wizard-inline-meta">
-            <span><i class="bi bi-save2 me-1"></i>Podes sair e retomar depois.</span>
+            <span><i class="bi bi-save2 me-1"></i>{% if is_editing_profile %}Podes guardar este passo sem concluir os 4 passos.{% else %}Podes sair e retomar depois.{% endif %}</span>
           </div>
           <div class="wizard-nav-actions">
             {% if step > 1 %}
               <button type="submit" name="prev" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Passo anterior</button>
             {% endif %}
-            <button type="submit" name="save" class="btn btn-outline-primary"><i class="bi bi-floppy me-2"></i>Guardar rascunho</button>
+            <button type="submit" name="save" class="btn btn-outline-primary"><i class="bi bi-floppy me-2"></i>{% if is_editing_profile %}Guardar alteracoes{% else %}Guardar rascunho{% endif %}</button>
             {% if step < total_steps %}
               <button type="submit" name="next" class="btn btn-primary">Continuar<i class="bi bi-arrow-right ms-2"></i></button>
             {% else %}
@@ -561,6 +567,9 @@
     const expAtual = document.getElementById('id_exp_atual');
     const experienciaFields = document.getElementById('experiencia_fields');
     const expFimWrap = document.getElementById('exp_fim_wrap');
+    const areaFormacaoInput = document.getElementById('id_area_formacao');
+    const outraAreaInput = document.getElementById('id_outra_area_formacao');
+    const outraAreaWrap = document.getElementById('wizardOutraAreaWrap');
     const autosaveStatus = document.getElementById('wizard-autosave-status');
     const progressBar = document.getElementById('wizard-progress');
     const progressText = document.getElementById('wizard-progress-text');
@@ -604,6 +613,17 @@
       expFimWrap.style.display = expAtual.checked ? 'none' : 'grid';
     }
 
+    function toggleOutraAreaFormacao() {
+      if (!areaFormacaoInput || !outraAreaWrap || !outraAreaInput) return;
+      const isOther = areaFormacaoInput.value === 'OUT';
+      outraAreaWrap.style.display = isOther ? 'grid' : 'none';
+      outraAreaInput.disabled = !isOther;
+      outraAreaInput.required = isOther;
+      if (!isOther) {
+        outraAreaInput.value = '';
+      }
+    }
+
     async function runAutosave() {
       if (!form || submitting) return;
       setAutosaveState('is-saving', 'A guardar progresso');
@@ -640,12 +660,14 @@
     updateAge();
     toggleExperiencia();
     toggleExpFim();
+    toggleOutraAreaFormacao();
     if (birthDateInput) {
       birthDateInput.addEventListener('change', updateAge);
       birthDateInput.addEventListener('input', updateAge);
     }
     if (temExperiencia) temExperiencia.addEventListener('change', toggleExperiencia);
     if (expAtual) expAtual.addEventListener('change', toggleExpFim);
+    if (areaFormacaoInput) areaFormacaoInput.addEventListener('change', toggleOutraAreaFormacao);
     if (form) {
       form.addEventListener('input', scheduleAutosave);
       form.addEventListener('change', scheduleAutosave);

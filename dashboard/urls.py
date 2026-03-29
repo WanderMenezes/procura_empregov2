@@ -25,6 +25,7 @@ urlpatterns = [
     # Gestão de pedidos de contacto
     path('pedidos-contacto/', views.manage_contact_requests, name='manage_contact_requests'),
     path('pedidos-contacto/<int:pk>/<str:action>/', views.contact_request_action, name='contact_request_action'),
+    path('colocacoes-emprego/', views.employment_placements, name='employment_placements'),
     
     # Relatórios
     path('relatorios/', views.reports, name='reports'),

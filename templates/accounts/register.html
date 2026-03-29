@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Registar - Base Nacional de Jovens{% endblock %}
+{% block title %}Registar - CNJ - Conselho Nacional da Juventude{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -350,6 +350,7 @@
             text: document.getElementById('profileSummaryText'),
             step: document.getElementById('profileSummaryStep')
         };
+        const registerForm = document.getElementById('registerForm');
         const consentInputs = [document.getElementById('id_consentimento_dados'), document.getElementById('id_consentimento_contacto')].filter(Boolean);
         const consentBadge = document.getElementById('consentBadge');
         const consentTitle = document.getElementById('consentTitle');
@@ -357,6 +358,10 @@
         const nameFieldLabel = document.getElementById('nameFieldLabel');
         const nameFieldHelp = document.getElementById('nameFieldHelp');
         const nameInput = document.getElementById('id_nome');
+        const companyConfirmInput = document.getElementById('id_confirmacao_empresa');
+        const companyConfirmModalEl = document.getElementById('companyConfirmModal');
+        const companyConfirmApprove = document.getElementById('companyConfirmApprove');
+        const companyConfirmReject = document.getElementById('companyConfirmReject');
         const nifWrap = document.getElementById('nifFieldWrap');
         const nifInput = document.getElementById('id_nif');
         const biWrap = document.getElementById('biFieldWrap');
@@ -368,7 +373,13 @@
         const photoPreviewIcon = document.getElementById('photoPreviewIcon');
         const password1 = document.getElementById('id_password1');
         const password2 = document.getElementById('id_password2');
+        const companyConfirmModal = companyConfirmModalEl && window.bootstrap
+            ? new bootstrap.Modal(companyConfirmModalEl, { backdrop: 'static', keyboard: true })
+            : null;
         let photoObjectUrl = null;
+        let previousProfileValue = null;
+        let pendingFallbackProfileValue = 'JO';
+        let companyModalAccepted = false;
 
         function togglePassword(buttonId, inputId) {
             const button = document.getElementById(buttonId);
@@ -423,6 +434,20 @@
             photoPreviewIcon.classList.add('d-none');
         }
 
+        function isCompanyConfirmed() {
+            return Boolean(companyConfirmInput && companyConfirmInput.value === '1');
+        }
+
+        function setCompanyConfirmation(confirmed) {
+            if (!companyConfirmInput) return;
+            companyConfirmInput.value = confirmed ? '1' : '';
+        }
+
+        function setSelectedProfile(value) {
+            const radio = document.getElementById('perfil_' + value);
+            if (radio) radio.checked = true;
+        }
+
         function applyProfile(value) {
             const selected = document.querySelector('input[name="perfil"]:checked') || document.getElementById('perfil_' + value);
             if (!selected) return;
@@ -456,6 +481,9 @@
                 nameInput.placeholder = company ? 'Nome da empresa' : 'Teu nome completo';
                 nameInput.autocomplete = company ? 'organization' : 'name';
             }
+            if (companyConfirmInput) {
+                companyConfirmInput.disabled = !company;
+            }
 
             if (nifWrap) {
                 nifWrap.classList.toggle('d-none', !company);
@@ -478,21 +506,117 @@
             if (photoHelperText) photoHelperText.textContent = youth ? 'Uma foto nítida ajuda a tornar o perfil mais completo.' : 'A foto só será usada quando o perfil jovem estiver selecionado.';
         }
 
+        function revertProfileSelection() {
+            const fallbackValue = pendingFallbackProfileValue || 'JO';
+            setSelectedProfile(fallbackValue);
+            applyProfile(fallbackValue);
+            previousProfileValue = fallbackValue;
+            pendingFallbackProfileValue = fallbackValue;
+        }
+
+        function openCompanyConfirmModal() {
+            if (companyConfirmModal) {
+                companyModalAccepted = false;
+                companyConfirmModal.show();
+                return;
+            }
+
+            const confirmed = window.confirm('Este registo é mesmo para uma empresa ou instituição?');
+            if (confirmed) {
+                setCompanyConfirmation(true);
+                setSelectedProfile('EMP');
+                applyProfile('EMP');
+                previousProfileValue = 'EMP';
+                return;
+            }
+
+            setCompanyConfirmation(false);
+            revertProfileSelection();
+        }
+
         togglePassword('togglePassword1', 'id_password1');
         togglePassword('togglePassword2', 'id_password2');
         if (password1) password1.addEventListener('input', updatePasswordRules);
         if (password2) password2.addEventListener('input', updatePasswordRules);
         if (photoInput) photoInput.addEventListener('change', updatePhotoPreview);
         radios.forEach(function (radio) {
-            radio.addEventListener('change', function () { applyProfile(radio.value); });
+            radio.addEventListener('change', function () {
+                const nextValue = radio.value;
+
+                if (nextValue === 'EMP' && !isCompanyConfirmed()) {
+                    pendingFallbackProfileValue = previousProfileValue || 'JO';
+                    applyProfile(nextValue);
+                    openCompanyConfirmModal();
+                    return;
+                }
+
+                if (nextValue !== 'EMP') {
+                    setCompanyConfirmation(false);
+                }
+                applyProfile(nextValue);
+                previousProfileValue = nextValue;
+            });
         });
+
+        if (companyConfirmApprove) {
+            companyConfirmApprove.addEventListener('click', function () {
+                companyModalAccepted = true;
+                setCompanyConfirmation(true);
+                setSelectedProfile('EMP');
+                applyProfile('EMP');
+                previousProfileValue = 'EMP';
+                if (companyConfirmModal) companyConfirmModal.hide();
+            });
+        }
+
+        if (companyConfirmReject) {
+            companyConfirmReject.addEventListener('click', function () {
+                companyModalAccepted = false;
+                if (companyConfirmModal) {
+                    companyConfirmModal.hide();
+                    return;
+                }
+                setCompanyConfirmation(false);
+                revertProfileSelection();
+            });
+        }
+
+        if (companyConfirmModalEl) {
+            companyConfirmModalEl.addEventListener('hidden.bs.modal', function () {
+                if (!companyModalAccepted) {
+                    setCompanyConfirmation(false);
+                    revertProfileSelection();
+                }
+                companyModalAccepted = false;
+            });
+        }
 
         const tipo = new URLSearchParams(window.location.search).get('tipo');
         const urlRadio = tipo ? document.getElementById('perfil_' + tipo) : null;
         if (!isBoundForm && urlRadio) urlRadio.checked = true;
 
         const active = document.querySelector('input[name="perfil"]:checked') || radios[0];
-        if (active) applyProfile(active.value);
+        if (active) {
+            if (active.value !== 'EMP') {
+                setCompanyConfirmation(false);
+            }
+            applyProfile(active.value);
+            previousProfileValue = active.value;
+
+            if (active.value === 'EMP' && !isCompanyConfirmed()) {
+                pendingFallbackProfileValue = 'JO';
+                openCompanyConfirmModal();
+            }
+        }
+
+        if (registerForm) {
+            registerForm.addEventListener('submit', function () {
+                const selected = document.querySelector('input[name="perfil"]:checked');
+                if (selected && selected.value !== 'EMP') {
+                    setCompanyConfirmation(false);
+                }
+            });
+        }
         updatePasswordRules();
         updatePhotoPreview();
     });
@@ -539,7 +663,7 @@
                 <div class="register-form-head">
                     <div>
                         <h2>Criar conta</h2>
-                        <p>Preenche os dados essenciais para entrares na Base Nacional de Jovens com o perfil certo.</p>
+                        <p>Preenche os dados essenciais para entrares na plataforma do CNJ com o perfil certo.</p>
                     </div>
                     <a href="{% url 'accounts:login' %}" class="register-login-link">
                         <i class="bi bi-box-arrow-in-right"></i>
@@ -594,6 +718,7 @@
                                 {% endfor %}
                             </div>
                         {% endwith %}
+                        <input type="hidden" name="confirmacao_empresa" id="id_confirmacao_empresa" value="{% if form.confirmacao_empresa.value %}1{% endif %}">
                     </div>
 
                     <div class="register-section">
@@ -748,6 +873,31 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="modal fade" id="companyConfirmModal" tabindex="-1" aria-labelledby="companyConfirmModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <div>
+                                    <div class="register-section-badge mb-2">Confirmação</div>
+                                    <h5 class="modal-title" id="companyConfirmModalLabel">Esta conta é mesmo para uma empresa?</h5>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-3">Escolhe este perfil apenas se vais representar uma empresa, instituição ou organização na plataforma.</p>
+                                <div class="register-help">Se estás a criar uma conta pessoal para procurar oportunidades, o perfil certo é <strong>Jovem</strong>.</div>
+                                {% if form.confirmacao_empresa.errors %}
+                                    <div class="alert alert-danger mt-3 mb-0">{{ form.confirmacao_empresa.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" id="companyConfirmReject" data-bs-dismiss="modal">Não, voltar para Jovem</button>
+                                <button type="button" class="btn btn-primary" id="companyConfirmApprove">Sim, sou uma empresa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

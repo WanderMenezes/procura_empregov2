@@ -264,6 +264,12 @@
               {{ form.area_formacao }}
               {% if form.area_formacao.errors %}<div class="assisted-error">{{ form.area_formacao.errors|striptags }}</div>{% endif %}
             </div>
+            <div class="assisted-field full" id="assistedOutraAreaWrap" {% if form.area_formacao.value != 'OUT' %}style="display:none;"{% endif %}>
+              <label for="{{ form.outra_area_formacao.id_for_label }}">{{ form.outra_area_formacao.label }}</label>
+              {{ form.outra_area_formacao }}
+              <div class="assisted-help">Especifica a área quando não estiver na lista.</div>
+              {% if form.outra_area_formacao.errors %}<div class="assisted-error">{{ form.outra_area_formacao.errors|striptags }}</div>{% endif %}
+            </div>
             <div class="assisted-field">
               <label for="{{ form.situacao_atual.id_for_label }}">{{ form.situacao_atual.label }}</label>
               {{ form.situacao_atual }}
@@ -337,6 +343,9 @@
     const phoneInput = document.getElementById('{{ form.telefone.id_for_label }}');
     const districtInput = document.getElementById('{{ form.distrito.id_for_label }}');
     const opportunityInput = document.getElementById('{{ form.preferencia_oportunidade.id_for_label }}');
+    const areaFormacaoInput = document.getElementById('{{ form.area_formacao.id_for_label }}');
+    const outraAreaInput = document.getElementById('{{ form.outra_area_formacao.id_for_label }}');
+    const outraAreaWrap = document.getElementById('assistedOutraAreaWrap');
 
     const avatar = document.getElementById('assistedPreviewAvatar');
     const nameTarget = document.getElementById('assistedPreviewName');
@@ -367,12 +376,25 @@
       opportunityTarget.textContent = selectedText(opportunityInput, 'Oportunidade por definir');
     }
 
+    function toggleOtherArea() {
+      if (!areaFormacaoInput || !outraAreaInput || !outraAreaWrap) return;
+      const isOther = areaFormacaoInput.value === 'OUT';
+      outraAreaWrap.style.display = isOther ? 'grid' : 'none';
+      outraAreaInput.disabled = !isOther;
+      outraAreaInput.required = isOther;
+      if (!isOther) {
+        outraAreaInput.value = '';
+      }
+    }
+
     [nameInput, phoneInput, districtInput, opportunityInput].forEach(function (field) {
       if (!field) return;
       field.addEventListener('input', updatePreview);
       field.addEventListener('change', updatePreview);
     });
 
+    if (areaFormacaoInput) areaFormacaoInput.addEventListener('change', toggleOtherArea);
+    toggleOtherArea();
     updatePreview();
   });
 </script>

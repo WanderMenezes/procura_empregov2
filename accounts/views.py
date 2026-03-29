@@ -62,7 +62,7 @@ class RegisterView(CreateView):
         # Criar notificação de boas-vindas
         Notification.objects.create(
             user=user,
-            titulo=_('Bem-vindo à Base Nacional de Jovens!'),
+            titulo=_('Bem-vindo à plataforma do CNJ!'),
             mensagem=_('O seu registo foi realizado com sucesso. Complete o seu perfil para começar a receber oportunidades.'),
             tipo='SUCESSO'
         )

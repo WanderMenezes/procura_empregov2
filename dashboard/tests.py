@@ -108,7 +108,7 @@ class BaseNavbarTests(TestCase):
         response = self.client.get(reverse('home'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Tecnico PNUD')
+        self.assertContains(response, 'Técnico PNUD')
         self.assertContains(response, reverse('dashboard:tecnico'))
         self.assertContains(response, reverse('accounts:profile'))
 
@@ -174,7 +174,7 @@ class TechnicalDashboardTests(TestCase):
         response = self.client.get(reverse('dashboard:tecnico'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Dashboard Tecnico PNUD')
+        self.assertContains(response, 'Dashboard Técnico PNUD')
         self.assertContains(response, 'Jovens por distrito')
         self.assertContains(response, 'Jovem Tecnico')
         self.assertContains(response, 'Empresa Observatorio')
@@ -304,11 +304,116 @@ class ReportsExportTests(TestCase):
             tipo='EMP',
             estado='ATIVA',
         )
-        Application.objects.create(
+        self.application = Application.objects.create(
             job=self.job,
             youth=self.youth,
+            estado='ACEITE',
             mensagem='Quero participar.',
         )
+        self.contact_request = ContactRequest.objects.create(
+            company=self.company,
+            youth=self.youth,
+            motivo='Queremos falar sobre esta vaga.',
+            estado='APROVADO',
+            responded_at=timezone.now(),
+        )
+
+    def test_reports_page_supports_daily_period(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:reports'), {'periodo': 'diario'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['active_period_key'], 'diario')
+        self.assertEqual(response.context['period_days'], 1)
+        self.assertContains(response, 'Gerar relatorio personalizado')
+
+    def test_reports_page_quinzenal_excludes_older_records(self):
+        old_dt = timezone.now() - timedelta(days=30)
+
+        old_company_user = User.objects.create_user(
+            telefone='+2399000091',
+            nome='Empresa Antiga',
+            perfil=User.ProfileType.EMPRESA,
+        )
+        old_company = Company.objects.create(
+            user=old_company_user,
+            nome='Empresa Antiga',
+            ativa=True,
+        )
+        Company.objects.filter(pk=old_company.pk).update(created_at=old_dt, updated_at=old_dt)
+
+        old_youth_user = User.objects.create_user(
+            telefone='+2399000092',
+            nome='Jovem Antigo',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='jovem.antigo@example.com',
+        )
+        old_youth = YouthProfile.objects.create(
+            user=old_youth_user,
+            completo=True,
+            validado=True,
+        )
+        YouthProfile.objects.filter(pk=old_youth.pk).update(created_at=old_dt, updated_at=old_dt)
+        Education.objects.create(
+            profile=old_youth,
+            nivel='SEC',
+            area_formacao='TIC',
+            instituicao='Centro Antigo',
+            ano=2023,
+            curso='Informatica',
+        )
+
+        old_job = JobPost.objects.create(
+            company=old_company,
+            titulo='Tecnico Antigo',
+            descricao='Historico antigo.',
+            requisitos='Experiencia.',
+            tipo='EMP',
+            estado='ATIVA',
+        )
+        JobPost.objects.filter(pk=old_job.pk).update(data_publicacao=old_dt)
+
+        old_application = Application.objects.create(
+            job=old_job,
+            youth=old_youth,
+            estado='ACEITE',
+            mensagem='Candidatura antiga.',
+        )
+        Application.objects.filter(pk=old_application.pk).update(created_at=old_dt, updated_at=old_dt)
+
+        old_contact = ContactRequest.objects.create(
+            company=old_company,
+            youth=old_youth,
+            motivo='Pedido antigo.',
+            estado='APROVADO',
+            responded_at=old_dt,
+        )
+        ContactRequest.objects.filter(pk=old_contact.pk).update(created_at=old_dt, responded_at=old_dt)
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse('dashboard:reports'), {'periodo': 'quinzenal'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['jovens_novos'], 1)
+        self.assertEqual(response.context['empresas_novas'], 1)
+        self.assertEqual(response.context['vagas_novas'], 1)
+        self.assertEqual(response.context['candidaturas_novas'], 1)
+        self.assertEqual(response.context['pedidos_contacto_novos'], 1)
+
+    def test_export_report_csv_supports_annual_period_and_summary_sections(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:export_report_csv'), {'periodo': 'anual'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        body = response.content.decode('utf-8')
+        self.assertIn('Resumo executivo', body)
+        self.assertIn('Resultados e conversao', body)
+        self.assertIn('Destaques do periodo', body)
+        self.assertIn('Anual', body)
 
     def test_export_report_pdf_works_for_selected_date_range(self):
         today = timezone.localdate()
@@ -326,6 +431,99 @@ class ReportsExportTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertTrue(response.content.startswith(b'%PDF'))
+
+
+class EmploymentPlacementsAdminTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000025',
+            nome='Admin Colocacoes',
+            perfil=User.ProfileType.ADMIN,
+        )
+        self.district, _ = District.objects.get_or_create(
+            codigo='LOB',
+            defaults={'nome': 'Lobata'},
+        )
+        self.company_user = User.objects.create_user(
+            telefone='+2399000026',
+            nome='Empresa Coloca',
+            perfil=User.ProfileType.EMPRESA,
+        )
+        self.company = Company.objects.create(
+            user=self.company_user,
+            nome='Empresa Coloca',
+            ativa=True,
+        )
+        self.youth_user = User.objects.create_user(
+            telefone='+2399000027',
+            nome='Jovem Colocado',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+        )
+        self.youth = YouthProfile.objects.create(
+            user=self.youth_user,
+            completo=True,
+            validado=True,
+        )
+        self.job = JobPost.objects.create(
+            company=self.company,
+            titulo='Assistente Administrativo',
+            descricao='Apoio operacional.',
+            requisitos='Organizacao e pontualidade.',
+            tipo='EMP',
+            estado='ATIVA',
+            distrito=self.district,
+        )
+        Application.objects.create(
+            job=self.job,
+            youth=self.youth,
+            estado='ACEITE',
+            mensagem='Quero trabalhar nesta vaga.',
+        )
+
+        self.stage_job = JobPost.objects.create(
+            company=self.company,
+            titulo='Estagio TIC',
+            descricao='Estagio inicial.',
+            requisitos='Bases de informatica.',
+            tipo='EST',
+            estado='ATIVA',
+        )
+        Application.objects.create(
+            job=self.stage_job,
+            youth=self.youth,
+            estado='ACEITE',
+            mensagem='Aceite mas nao deve contar como emprego.',
+        )
+
+    def test_admin_can_view_employment_placements_page(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:employment_placements'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Colocacoes em emprego')
+        self.assertContains(response, 'Jovem Colocado')
+        self.assertContains(response, 'Empresa Coloca')
+        self.assertContains(response, 'Assistente Administrativo')
+        self.assertNotContains(response, 'Estagio TIC')
+
+    def test_admin_dashboard_shows_placements_summary(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:admin'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Colocacoes em emprego')
+        self.assertContains(response, 'Jovem Colocado')
+        self.assertContains(response, 'Empresa Coloca')
+
+    def test_non_admin_cannot_open_employment_placements_page(self):
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('dashboard:employment_placements'))
+
+        self.assertRedirects(response, reverse('home'))
 
 
 class OfflineRegistrationFlowTests(TestCase):

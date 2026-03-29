@@ -7,8 +7,8 @@ from .models import District, Notification
 
 CNJ_CONTACT = {
     'email': 'cnjstp2023@gmail.com',
-    'phones_display': '+239 9923317 / +239 9982220',
-    'primary_phone': '+2399923317',
+    'phones_display': '+239 9903424 / +239 9982220',
+    'primary_phone': '+2399903424',
     'address': 'Palácio dos Pioneiros Sala Nº 08 - Bairro da Quinta de Sto. António - S. Tomé - STP',
 }
 

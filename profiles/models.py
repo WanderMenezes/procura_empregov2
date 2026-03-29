@@ -383,6 +383,7 @@ class Education(models.Model):
         max_length=3,
         choices=settings.AREAS_FORMACAO
     )
+    outra_area_formacao = models.CharField(_('outra área de formação'), max_length=255, blank=True)
     instituicao = models.CharField(_('instituição'), max_length=255)
     ano = models.IntegerField(_('ano de conclusão'), null=True, blank=True)
     curso = models.CharField(_('curso/especialidade'), max_length=255, blank=True)
@@ -391,6 +392,18 @@ class Education(models.Model):
         verbose_name = _('formação')
         verbose_name_plural = _('formações')
         ordering = ['-ano']
+
+    def save(self, *args, **kwargs):
+        self.outra_area_formacao = ' '.join(str(self.outra_area_formacao or '').split()).strip()
+        if self.area_formacao != 'OUT':
+            self.outra_area_formacao = ''
+        super().save(*args, **kwargs)
+
+    @property
+    def area_formacao_display(self):
+        if self.area_formacao == 'OUT' and self.outra_area_formacao:
+            return self.outra_area_formacao
+        return self.get_area_formacao_display()
     
     def __str__(self):
         return f"{self.get_nivel_display()} - {self.instituicao}"

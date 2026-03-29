@@ -273,7 +273,7 @@
                       <div class="account-entry-subtitle">{{ edu.instituicao|default:"Instituição não informada" }}</div>
                       {% if edu.curso %}<p class="account-entry-copy mb-0">{{ edu.curso }}</p>{% endif %}
                       <div class="account-entry-meta">
-                        <span class="badge bg-secondary">{{ edu.get_area_formacao_display }}</span>
+                        <span class="badge bg-secondary">{{ edu.area_formacao_display }}</span>
                         {% if edu.ano %}<span class="badge bg-light text-dark border">{{ edu.ano }}</span>{% endif %}
                       </div>
                     </article>
