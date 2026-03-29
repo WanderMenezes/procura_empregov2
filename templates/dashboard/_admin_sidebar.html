@@ -53,14 +53,14 @@
                 </a>
                 <a href="{% url 'dashboard:employment_placements' %}" class="admin-nav-link{% if active_page == 'placements' %} active{% endif %}">
                     <i class="bi bi-person-workspace"></i>
-                    <span>Colocacoes</span>
+                    <span>Colocações</span>
                     {% if admin_nav.placed_youths %}
                         <span class="admin-nav-count">{{ admin_nav.placed_youths }}</span>
                     {% endif %}
                 </a>
                 <a href="{% url 'dashboard:reports' %}" class="admin-nav-link{% if active_page == 'reports' %} active{% endif %}">
                     <i class="bi bi-graph-up"></i>
-                    <span>Relatérios</span>
+                    <span>Relatórios</span>
                 </a>
                 <a href="{% url 'dashboard:offline_registrations' %}" class="admin-nav-link{% if active_page == 'offline_registrations' %} active{% endif %}">
                     <i class="bi bi-file-earmark-arrow-down"></i>

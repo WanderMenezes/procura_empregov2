@@ -110,7 +110,7 @@
         <div class="assisted-kicker">Operação no terreno</div>
         <h1 class="assisted-title">Registo assistido de jovem</h1>
         <p class="assisted-subtitle">
-          Recolha os dados essenciais, crie a conta do jovem numa unica passada e deixe o perfil pronto para seguir para validação administrativa.
+          Recolha os dados essenciais, crie a conta do jovem numa única passada e deixe o perfil pronto para seguir para validação administrativa.
         </p>
         <div class="assisted-chips">
           <span class="assisted-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_short_name|default:request.user.nome }}</span>
@@ -143,11 +143,11 @@
         <div class="assisted-mini-list mt-4">
           <div class="assisted-mini-item">
             <span class="assisted-mini-icon"><i class="bi bi-geo-alt"></i></span>
-            <div><strong>Local de referencia</strong><p id="assistedPreviewDistrict">Localizacao por indicar</p></div>
+            <div><strong>Local de referência</strong><p id="assistedPreviewDistrict">Localização por indicar</p></div>
           </div>
           <div class="assisted-mini-item">
             <span class="assisted-mini-icon"><i class="bi bi-stars"></i></span>
-            <div><strong>Preferencia principal</strong><p id="assistedPreviewOpportunity">Oportunidade por definir</p></div>
+            <div><strong>Preferência principal</strong><p id="assistedPreviewOpportunity">Oportunidade por definir</p></div>
           </div>
         </div>
       </section>
@@ -161,15 +161,15 @@
           </div>
           <div class="assisted-check">
             <span class="assisted-check-icon"><i class="bi bi-2-circle"></i></span>
-            <div><strong>Registar situação e formação</strong><p>Mesmo quando a formação não esta completa, vale guardar o nivel e a Área para facilitar a leitura futura.</p></div>
+            <div><strong>Registar situação e formação</strong><p>Mesmo quando a formação não está completa, vale guardar o nível e a área para facilitar a leitura futura.</p></div>
           </div>
           <div class="assisted-check">
             <span class="assisted-check-icon"><i class="bi bi-3-circle"></i></span>
-            <div><strong>Submeter e acompanhar</strong><p>Depois do envio, o perfil fica criado como completo mas aguarda a validação do administrador.</p></div>
+            <div><strong>Submeter e acompanhar</strong><p>Depois do envio, o perfil fica criado como completo, mas aguarda a validação do administrador.</p></div>
           </div>
         </div>
         <div class="assisted-note mt-4">
-          As observações do aténdimento ficam guardadas no registo interno da operação para referencia posterior.
+          As observações do atendimento ficam guardadas no registo interno da operação para referência posterior.
         </div>
       </section>
     </aside>
@@ -244,7 +244,7 @@
               <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
               {{ form.localidade }}
               {% if form.localidade.errors %}<div class="assisted-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
-              <div class="assisted-help">Pode ser bairro, cidade, regiao, pais ou outro ponto de referencia util.</div>
+              <div class="assisted-help">Pode ser bairro, cidade, região, país ou outro ponto de referência útil.</div>
             </div>
           </div>
         </section>
@@ -311,7 +311,7 @@
         <section class="assisted-section">
           <div class="assisted-section-label"><i class="bi bi-journal-text"></i>Observações</div>
           <h2 class="assisted-section-title">Notas internas do atendimento</h2>
-          <p class="assisted-section-copy">Use este campo para registar contexto util do atendimento, barreiras encontradas ou proximos passos combinados.</p>
+          <p class="assisted-section-copy">Use este campo para registar contexto útil do atendimento, barreiras encontradas ou próximos passos combinados.</p>
           <div class="assisted-grid">
             <div class="assisted-field full">
               <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>

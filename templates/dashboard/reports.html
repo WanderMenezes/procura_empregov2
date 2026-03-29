@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Relatorios - Painel de Administracao{% endblock %}
+{% block title %}Relatórios - Painel de Administração{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -14,14 +14,14 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Leitura executiva</div>
-                        <h1 class="admin-page-title">Relatorios</h1>
+                        <h1 class="admin-page-title">Relatórios</h1>
                         <p class="admin-subtitle mb-0">
-                            {{ period_description }} O painel destaca volume, resultados, backlog e os sinais mais relevantes do periodo.
+                            {{ period_description }} O painel destaca volume, resultados, backlog e os sinais mais relevantes do período.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
                                 <i class="bi bi-calendar-range"></i>
-                                {{ active_period_label }}: {{ data_inicio|date:"d/m/Y" }} ate {{ data_fim|date:"d/m/Y" }}
+                                {{ active_period_label }}: {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-activity"></i>
@@ -143,7 +143,7 @@
                             {% else %}
                                 <div class="admin-empty-state">
                                     <i class="bi bi-bar-chart"></i>
-                                    <p class="mb-0">Nao houve movimentos no periodo selecionado.</p>
+                                    <p class="mb-0">Não houve movimentos no período selecionado.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -227,7 +227,7 @@
                                     <strong>{{ pedidos_contacto_novos }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Colocacoes em emprego</span>
+                                    <span class="admin-inline-stat-label">Colocações em emprego</span>
                                     <strong>{{ colocacoes_emprego }}</strong>
                                 </div>
                             </div>

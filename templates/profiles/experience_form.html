@@ -70,7 +70,7 @@
       <div>
         <div class="experience-kicker">Percurso profissional</div>
         <h1 class="experience-title">Adicionar experiência</h1>
-        <p class="experience-subtitle">Regista um trabalho, estágio, voluntariado ou colaboração relevante para mostrar como já aplicaste as tuas competencias na prática.</p>
+        <p class="experience-subtitle">Regista um trabalho, estágio, voluntariado ou colaboração relevante para mostrar como já aplicaste as tuas competências na prática.</p>
         <div class="experience-chips">
           <span class="experience-chip"><i class="bi bi-briefcase"></i>{{ experience_count }} experiência{{ experience_count|pluralize }} registada{{ experience_count|pluralize }}</span>
           {% if latest_experience %}
@@ -91,7 +91,7 @@
     <div class="experience-stats">
       <div class="experience-stat"><span class="experience-stat-label">Registos</span><span class="experience-stat-value">{{ experience_count }}</span><span class="experience-stat-meta">experiências no teu perfil</span></div>
       <div class="experience-stat"><span class="experience-stat-label">Última entidade</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.entidade|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">referencia profissional mais recente</span></div>
-      <div class="experience-stat"><span class="experience-stat-label">Ultimo cargo</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.cargo|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">função registada por ultimo</span></div>
+      <div class="experience-stat"><span class="experience-stat-label">Último cargo</span><span class="experience-stat-value">{% if latest_experience %}{{ latest_experience.cargo|truncatechars:14 }}{% else %}--{% endif %}</span><span class="experience-stat-meta">função registada por último</span></div>
       <div class="experience-stat"><span class="experience-stat-label">Objetivo</span><span class="experience-stat-value">+</span><span class="experience-stat-meta">dar contexto prático ao teu perfil</span></div>
     </div>
   </section>
@@ -133,16 +133,16 @@
         <div class="experience-panel-head">
           <div>
             <h2 class="experience-panel-title">Dicas para preencher</h2>
-            <p class="experience-panel-subtitle">Mantem a experiência fácil de ler e credivel.</p>
+            <p class="experience-panel-subtitle">Mantém a experiência fácil de ler e credível.</p>
           </div>
         </div>
         <div class="experience-tip">
           <strong>Inclui experiências reais e relevantes.</strong>
-          <div class="experience-copy">Pode ser emprego, estágio, voluntariado, projeto comunitario ou colaboração profissional com responsabilidade clara.</div>
+          <div class="experience-copy">Pode ser emprego, estágio, voluntariado, projeto comunitário ou colaboração profissional com responsabilidade clara.</div>
         </div>
         <div class="experience-tip">
           <strong>Explica o que fazias.</strong>
-          <div class="experience-copy">Não basta dizer o cargo. Uma boa descrição ajuda a mostrar competencias, autonomia e resultados.</div>
+          <div class="experience-copy">Não basta dizer o cargo. Uma boa descrição ajuda a mostrar competências, autonomia e resultados.</div>
         </div>
         <div class="experience-tip">
           <strong>Usa “trabalho atual” quando ainda estas la.</strong>
@@ -164,7 +164,7 @@
         <div class="experience-section">
           <div class="experience-section-label"><i class="bi bi-building"></i>Entidade e função</div>
           <h2 class="experience-section-title">Onde trabalhaste e em que papel</h2>
-          <p class="experience-note mb-0">Usa o nome da entidade e um cargo ou papel que descreva bem a tua contribuicao.</p>
+          <p class="experience-note mb-0">Usa o nome da entidade e um cargo ou papel que descreva bem a tua contribuição.</p>
           <div class="experience-grid">
             <div class="experience-field">
               <label for="{{ form.entidade.id_for_label }}">{{ form.entidade.label }}</label>
@@ -213,7 +213,7 @@
             <div class="experience-field full">
               <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
               {{ form.descricao }}
-              <div class="experience-field-help">Foca nas tarefas principais, ferramentas usadas, tipo de público aténdido ou resultados que conseguiste.</div>
+              <div class="experience-field-help">Foca nas tarefas principais, ferramentas usadas, tipo de público atendido ou resultados que conseguiste.</div>
               {% if form.descricao.errors %}<div class="experience-field-error">{{ form.descricao.errors|striptags }}</div>{% endif %}
             </div>
           </div>

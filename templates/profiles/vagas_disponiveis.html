@@ -140,7 +140,7 @@
           <div>
             <div class="jobs-profile-name">{{ user.nome }}</div>
             <p class="jobs-profile-line">{{ profile.location_display }}</p>
-            <p class="jobs-profile-line">{% if preferred_tipo_display %}Preferencia: {{ preferred_tipo_display }}{% else %}Sem preferencia definida{% endif %}</p>
+            <p class="jobs-profile-line">{% if preferred_tipo_display %}Preferência: {{ preferred_tipo_display }}{% else %}Sem preferência definida{% endif %}</p>
           </div>
         </div>
         <div class="jobs-profile-tags">
@@ -158,11 +158,11 @@
         </div>
         <div class="jobs-insight">
           <strong>Setores que te interessam</strong>
-          <div class="jobs-copy">{% if profile_interests_display %}{{ profile_interests_display }}{% else %}Atualiza o teu perfil para receber correspondencias mais relevantes.{% endif %}</div>
+          <div class="jobs-copy">{% if profile_interests_display %}{{ profile_interests_display }}{% else %}Atualiza o teu perfil para receber correspondências mais relevantes.{% endif %}</div>
         </div>
         <div class="jobs-insight">
           <strong>Sugestão rápida</strong>
-          <div class="jobs-copy">{% if not profile_interests_display or not preferred_tipo_display %}Completa interesses e preferencia no perfil para melhorar as recomendações desta página.{% else %}Tens base suficiente para comparar vagas por afinidade, local e tipo de oportunidade.{% endif %}</div>
+          <div class="jobs-copy">{% if not profile_interests_display or not preferred_tipo_display %}Completa interesses e preferência no perfil para melhorar as recomendações desta página.{% else %}Tens base suficiente para comparar vagas por afinidade, local e tipo de oportunidade.{% endif %}</div>
         </div>
       </section>
 
@@ -180,7 +180,7 @@
         <form method="get" class="jobs-filter-grid">
           <div class="jobs-field">
             <label for="jobs-query">Palavra-chave</label>
-            <input id="jobs-query" type="text" name="q" class="form-control" placeholder="Titulo, empresa ou descrição" value="{{ selected_query }}">
+            <input id="jobs-query" type="text" name="q" class="form-control" placeholder="Título, empresa ou descrição" value="{{ selected_query }}">
           </div>
           <div class="jobs-field">
             <label for="jobs-tipo">Tipo</label>
@@ -333,7 +333,7 @@
                       </form>
                     {% else %}
                       <button type="button" class="btn btn-outline-secondary" disabled>
-                        <i class="bi bi-hourglass-split me-2"></i>{% if profile.validado %}Atingir 80% do perfil{% else %}Aguardar validacao{% endif %}
+                        <i class="bi bi-hourglass-split me-2"></i>{% if profile.validado %}Atingir 80% do perfil{% else %}Aguardar validação{% endif %}
                       </button>
                     {% endif %}
                   </div>
@@ -344,7 +344,7 @@
         </div>
 
         {% if vagas_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Páginação de vagas">
+          <nav class="mt-4" aria-label="Paginação de vagas">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not vagas_page.has_previous %}disabled{% endif %}">
                 {% if vagas_page.has_previous %}

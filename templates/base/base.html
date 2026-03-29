@@ -23,7 +23,7 @@
     <!-- Navbar -->
     {% with current_ns=request.resolver_match.namespace current_name=request.resolver_match.url_name %}
     <nav class="navbar navbar-expand-xl navbar-dark sticky-top site-navbar">
-        <div class="container">
+        <div class="container-fluid site-navbar-shell">
             <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'home' %}">
                 <img src="{% static 'img/cnj_logo.jpg' %}" alt="CNJ" class="navbar-logo">
                 <span class="navbar-brand-copy">
@@ -49,10 +49,10 @@
                     {% if user.is_authenticated %}
                         {% if user.is_jovem %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% if current_ns == 'profiles' %}active{% endif %}" href="#" id="areaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle {% if current_ns == 'profiles' %}active{% endif %}" href="#" id="youthAreaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-badge me-1"></i>Área Jovem
                                 </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" aria-labelledby="youthAreaDropdown">
                                     {% if user_has_profile %}
                                         <li><a class="dropdown-item {% if current_name == 'detail' %}active{% endif %}" href="{% url 'profiles:detail' %}"><i class="bi bi-person me-2"></i>Meu perfil</a></li>
                                         <li><a class="dropdown-item {% if current_name == 'available_jobs' %}active{% endif %}" href="{% url 'profiles:available_jobs' %}"><i class="bi bi-briefcase me-2"></i>Vagas disponíveis</a></li>
@@ -64,10 +64,10 @@
                             </li>
                         {% elif user.is_empresa %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% if current_ns == 'companies' %}active{% endif %}" href="#" id="areaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle {% if current_ns == 'companies' %}active{% endif %}" href="#" id="companyAreaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-building me-1"></i>Área Empresa
                                 </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" aria-labelledby="companyAreaDropdown">
                                     {% if user_has_profile %}
                                         <li><a class="dropdown-item {% if current_name == 'dashboard' %}active{% endif %}" href="{% url 'companies:dashboard' %}"><i class="bi bi-grid me-2"></i>Painel</a></li>
                                         <li><a class="dropdown-item {% if current_name == 'job_list' %}active{% endif %}" href="{% url 'companies:job_list' %}"><i class="bi bi-briefcase me-2"></i>Vagas</a></li>
@@ -80,24 +80,24 @@
                             </li>
                         {% elif user.is_operador %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% if current_ns == 'profiles' or current_ns == 'dashboard' %}active{% endif %}" href="#" id="areaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle {% if current_ns == 'profiles' or current_ns == 'dashboard' %}active{% endif %}" href="#" id="operatorAreaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-workspace me-1"></i>Área Operador
                                 </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" aria-labelledby="operatorAreaDropdown">
                                     <li><a class="dropdown-item {% if current_name == 'assisted_register' %}active{% endif %}" href="{% url 'profiles:assisted_register' %}"><i class="bi bi-person-plus me-2"></i>Registo assistido</a></li>
                                     <li><a class="dropdown-item {% if current_name == 'validate_profiles' %}active{% endif %}" href="{% url 'dashboard:validate_profiles' %}"><i class="bi bi-check-circle me-2"></i>Validar perfis</a></li>
                                 </ul>
                             </li>
                         {% elif user.is_admin %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% if current_ns == 'dashboard' %}active{% endif %}" href="#" id="areaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle {% if current_ns == 'dashboard' %}active{% endif %}" href="#" id="adminAreaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-shield-check me-1"></i>Área Admin
                                 </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" aria-labelledby="adminAreaDropdown">
                                     <li><a class="dropdown-item {% if current_name == 'admin' %}active{% endif %}" href="{% url 'dashboard:admin' %}"><i class="bi bi-speedometer2 me-2"></i>Painel admin</a></li>
                                     <li><a class="dropdown-item {% if current_name == 'manage_contact_requests' %}active{% endif %}" href="{% url 'dashboard:manage_contact_requests' %}"><i class="bi bi-person-lines-fill me-2"></i>Pedidos de contacto</a></li>
-                                    <li><a class="dropdown-item {% if current_name == 'employment_placements' %}active{% endif %}" href="{% url 'dashboard:employment_placements' %}"><i class="bi bi-person-workspace me-2"></i>Colocacoes</a></li>
-                                    <li><a class="dropdown-item {% if current_name == 'reports' %}active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-bar-chart me-2"></i>Relatérios</a></li>
+                                    <li><a class="dropdown-item {% if current_name == 'employment_placements' %}active{% endif %}" href="{% url 'dashboard:employment_placements' %}"><i class="bi bi-person-workspace me-2"></i>Colocações</a></li>
+                                    <li><a class="dropdown-item {% if current_name == 'reports' %}active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-bar-chart me-2"></i>Relatórios</a></li>
                                 </ul>
                             </li>
                         {% elif user.is_tecnico %}
@@ -419,6 +419,38 @@
                 const toast = new bootstrap.Toast(el, { autohide: true, delay: 4000 });
                 toast.show();
             });
+
+            const navbarCollapseEl = document.getElementById('navbarNav');
+            if (navbarCollapseEl) {
+                const collapseInstance = bootstrap.Collapse.getOrCreateInstance(navbarCollapseEl, { toggle: false });
+                const syncNavbarBodyLock = function (isOpen) {
+                    if (window.innerWidth < 1200) {
+                        document.body.classList.toggle('navbar-menu-open', isOpen);
+                    } else {
+                        document.body.classList.remove('navbar-menu-open');
+                    }
+                };
+
+                navbarCollapseEl.addEventListener('show.bs.collapse', function () {
+                    syncNavbarBodyLock(true);
+                });
+
+                navbarCollapseEl.addEventListener('hidden.bs.collapse', function () {
+                    syncNavbarBodyLock(false);
+                });
+
+                window.addEventListener('resize', function () {
+                    syncNavbarBodyLock(navbarCollapseEl.classList.contains('show'));
+                });
+
+                navbarCollapseEl.querySelectorAll('a[href]:not([href="#"])').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        if (window.innerWidth < 1200 && navbarCollapseEl.classList.contains('show')) {
+                            collapseInstance.hide();
+                        }
+                    });
+                });
+            }
 
             const modalEl = document.getElementById('docPreviewModal');
             if (!modalEl) return;

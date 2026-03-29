@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load humanize %}
 
-{% block title %}Colocacoes em Emprego - Painel de Administracao{% endblock %}
+{% block title %}Colocações em Emprego - Painel de Administração{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -15,7 +15,7 @@
                 <div class="card-body">
                     <div class="admin-hero-copy">
                         <div class="admin-kicker">Impacto da plataforma</div>
-                        <h1 class="admin-page-title">Colocacoes em emprego</h1>
+                        <h1 class="admin-page-title">Colocações em emprego</h1>
                         <p class="admin-subtitle mb-0">
                             Esta lista mostra as candidaturas do tipo emprego que ficaram com estado aceite, para o admin saber quantos jovens foram colocados e em que empresas estao.
                         </p>
@@ -53,14 +53,14 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Jovens colocados</div>
                             <div class="admin-summary-value">{{ employment_summary.youths|intcomma }}</div>
-                            <small class="text-muted">Contagem unica de jovens</small>
+                            <small class="text-muted">Contagem única de jovens</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <div class="admin-summary-label">Colocacoes</div>
+                            <div class="admin-summary-label">Colocações</div>
                             <div class="admin-summary-value">{{ employment_summary.placements|intcomma }}</div>
                             <small class="text-muted">Candidaturas aceites</small>
                         </div>
@@ -161,7 +161,7 @@
                                         <td colspan="6">
                                             <div class="admin-empty-state">
                                                 <i class="bi bi-briefcase"></i>
-                                                <p class="mb-0">Ainda nao existem colocacoes em emprego com os filtros atuais.</p>
+                                                <p class="mb-0">Ainda não existem colocações em emprego com os filtros atuais.</p>
                                             </div>
                                         </td>
                                     </tr>

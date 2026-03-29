@@ -144,13 +144,13 @@
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-calendar-event"></i></span><div><strong>A idade e calculada automaticamente.</strong><p class="wizard-panel-copy">Basta preencher a data de nascimento e o sistema atualiza o resumo sem trabalho extra.</p></div></div>
           {% elif step == 2 %}
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-mortarboard"></i></span><div><strong>Mostra o teu percurso.</strong><p class="wizard-panel-copy">Mesmo cursos curtos e formações informais ajudam a posicionar melhor o perfil nas pesquisas.</p></div></div>
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-tools"></i></span><div><strong>Marca as skills mais fortes.</strong><p class="wizard-panel-copy">Seleciona o que sabes fazer e usa o campo extra quando falta alguma competencia importante.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-tools"></i></span><div><strong>Marca as skills mais fortes.</strong><p class="wizard-panel-copy">Seleciona o que sabes fazer e usa o campo extra quando falta alguma competência importante.</p></div></div>
           {% elif step == 3 %}
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-briefcase"></i></span><div><strong>Interesses claros geram melhores oportunidades.</strong><p class="wizard-panel-copy">Escolhe setores e tipo de oportunidade para receber correspondencias mais próximas do teu objetivo.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-briefcase"></i></span><div><strong>Interesses claros geram melhores oportunidades.</strong><p class="wizard-panel-copy">Escolhe setores e tipo de oportunidade para receber correspondências mais próximas do teu objetivo.</p></div></div>
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-stars"></i></span><div><strong>Experiência pode ser opcional.</strong><p class="wizard-panel-copy">Se ainda não trabalhaste formalmente, mantem essa parte escondida e avanca sem fricção.</p></div></div>
           {% else %}
             <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-file-earmark-check"></i></span><div><strong>Documentos fortalecem a credibilidade.</strong><p class="wizard-panel-copy">CV e certificado ajudam muito, mas os consentimentos são o que controlam como o teu perfil pode ser visto.</p></div></div>
-            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-shield-check"></i></span><div><strong>Tu controlas a visibilidade.</strong><p class="wizard-panel-copy">Ativa apenas os canais de contacto com que te sentes confortavel para ser abordado.</p></div></div>
+            <div class="wizard-tip"><span class="wizard-tip-icon"><i class="bi bi-shield-check"></i></span><div><strong>Tu controlas a visibilidade.</strong><p class="wizard-panel-copy">Ativa apenas os canais de contacto com que te sentes confortável para ser abordado.</p></div></div>
           {% endif %}
         </div>
         <div class="wizard-note">
@@ -247,13 +247,13 @@
                 <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
                 {{ form.distrito }}
                 {% if form.distrito.errors %}<div class="wizard-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
-                <div class="wizard-field-help">Opcional. Usa este campo apenas se estiveres em Sao Tome e Principe.</div>
+                <div class="wizard-field-help">Opcional. Usa este campo apenas se estiveres em São Tomé e Príncipe.</div>
               </div>
               <div class="wizard-field">
                 <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
                 {{ form.localidade }}
                 {% if form.localidade.errors %}<div class="wizard-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
-                <div class="wizard-field-help">Podes escrever bairro, cidade, regiao ou pais onde estas.</div>
+                <div class="wizard-field-help">Podes escrever bairro, cidade, região ou país onde estás.</div>
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@
         {% elif step == 3 %}
           <div class="wizard-section">
             <div class="wizard-section-label"><i class="bi bi-briefcase"></i>Objetivo profissional</div>
-            <h2 class="wizard-section-title">Disponibilidade e preferencias</h2>
+            <h2 class="wizard-section-title">Disponibilidade e preferências</h2>
             <div class="wizard-grid mt-3">
               <div class="wizard-field">
                 <label for="{{ form.situacao_atual.id_for_label }}">{{ form.situacao_atual.label }}</label>
@@ -382,7 +382,7 @@
               <div class="wizard-field full">
                 <label for="{{ form.outros_setores_interesse.id_for_label }}">{{ form.outros_setores_interesse.label }}</label>
                 {{ form.outros_setores_interesse }}
-                <div class="wizard-field-help">Podes indicar um ou mais setores separados por virgulas.</div>
+                <div class="wizard-field-help">Podes indicar um ou mais setores separados por vírgulas.</div>
                 {% if form.outros_setores_interesse.errors %}<div class="wizard-error">{{ form.outros_setores_interesse.errors|striptags }}</div>{% endif %}
               </div>
               <div class="wizard-field full">
@@ -507,7 +507,7 @@
                 {{ form.visivel }}
                 <div>
                   <div class="wizard-toggle-title">{{ form.visivel.label }}</div>
-                  <p class="wizard-panel-copy">Antes dos 80%, esta opcao controla a partilha. Depois da aprovacao do admin, a visibilidade para empresas ativa-se automaticamente quando o perfil chega a 80%.</p>
+                  <p class="wizard-panel-copy">Antes dos 80%, esta opção controla a partilha. Depois da aprovação do admin, a visibilidade para empresas ativa-se automaticamente quando o perfil chega a 80%.</p>
                 </div>
               </label>
               <label class="wizard-toggle-card">
@@ -528,7 +528,7 @@
                 {{ form.consentimento_email }}
                 <div>
                   <div class="wizard-toggle-title">{{ form.consentimento_email.label }}</div>
-                  <p class="wizard-panel-copy">Ideal para receber convites formais, instrucoes e seguimento.</p>
+                  <p class="wizard-panel-copy">Ideal para receber convites formais, instruções e seguimento.</p>
                 </div>
               </label>
             </div>
@@ -543,7 +543,7 @@
             {% if step > 1 %}
               <button type="submit" name="prev" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Passo anterior</button>
             {% endif %}
-            <button type="submit" name="save" class="btn btn-outline-primary"><i class="bi bi-floppy me-2"></i>{% if is_editing_profile %}Guardar alteracoes{% else %}Guardar rascunho{% endif %}</button>
+            <button type="submit" name="save" class="btn btn-outline-primary"><i class="bi bi-floppy me-2"></i>{% if is_editing_profile %}Guardar alterações{% else %}Guardar rascunho{% endif %}</button>
             {% if step < total_steps %}
               <button type="submit" name="next" class="btn btn-primary">Continuar<i class="bi bi-arrow-right ms-2"></i></button>
             {% else %}

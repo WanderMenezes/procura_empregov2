@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Historico de Mensagens{% endblock %}
+{% block title %}Histórico de Mensagens{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -94,7 +94,7 @@
         <div class="app-messages-kicker">Histórico da candidatura</div>
         <h1 class="app-messages-title">Mensagens da candidatura</h1>
         <p class="app-messages-subtitle">
-          Acompanhe a conversa associada a esta candidatura, com contexto do candidato e da vaga numa unica vista.
+          Acompanhe a conversa associada a esta candidatura, com contexto do candidato e da vaga numa única vista.
         </p>
         <div class="app-messages-chips">
           <span class="app-messages-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -104,11 +104,11 @@
         </div>
       </div>
       <div class="app-messages-actions">
-        <a href="{% url 'companies:job_applications' application.job.id %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as candidaturas</a>
+        <a href="{% url 'companies:job_applications' application.job.id %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar às candidaturas</a>
         {% if application.youth.is_visible_to_companies %}
           <a href="{% url 'companies:youth_detail' application.youth.id %}" class="btn btn-outline-light"><i class="bi bi-person-vcard me-2"></i>Ver perfil</a>
         {% else %}
-          <button type="button" class="btn btn-outline-light" disabled><i class="bi bi-person-slash me-2"></i>Perfil indisponivel</button>
+          <button type="button" class="btn btn-outline-light" disabled><i class="bi bi-person-slash me-2"></i>Perfil indisponível</button>
         {% endif %}
       </div>
     </div>
@@ -199,7 +199,7 @@
         <div class="app-messages-checklist">
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-1-circle"></i></span>
-            <div><strong>Vejá o ultimo contexto</strong><p>As mensagens mais recentes aparecem primeiro nesta página.</p></div>
+            <div><strong>Veja o último contexto</strong><p>As mensagens mais recentes aparecem primeiro nesta página.</p></div>
           </div>
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-2-circle"></i></span>
@@ -207,7 +207,7 @@
           </div>
           <div class="app-messages-check">
             <span class="app-messages-check-icon"><i class="bi bi-3-circle"></i></span>
-            <div><strong>Volte a lista para agir</strong><p>A atualização do estado continua centralizada na lista de candidaturas.</p></div>
+            <div><strong>Volte à lista para agir</strong><p>A atualização do estado continua centralizada na lista de candidaturas.</p></div>
           </div>
         </div>
       </section>

@@ -428,7 +428,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label for="preferencia_oportunidade">Preferencia de oportunidade <span class="required">*</span></label>
+                                    <label for="preferencia_oportunidade">Preferência de oportunidade <span class="required">*</span></label>
                                     <select id="preferencia_oportunidade" name="preferencia_oportunidade" required>
                                         {% for item in preferencia_choices %}
                                             <option value="{{ item.value }}"{% if item.value == 'EMP' %} selected{% endif %}>{{ item.label }} ({{ item.value }})</option>
@@ -442,7 +442,7 @@
                             <div class="section-label">Educação</div>
                             <div class="grid">
                                 <div class="field">
-                                    <label for="nivel">Nivel</label>
+                                    <label for="nivel">Nível</label>
                                     <select id="nivel" name="nivel">
                                         <option value="">Selecione...</option>
                                         {% for item in education_level_choices %}

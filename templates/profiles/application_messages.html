@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Historico de Mensagens - CNJ - Conselho Nacional da Juventude{% endblock %}
+{% block title %}Histórico de Mensagens - CNJ - Conselho Nacional da Juventude{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -75,7 +75,7 @@
         </div>
       </div>
       <div class="messages-actions">
-        <a href="{% url 'profiles:my_applications' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as candidaturas</a>
+        <a href="{% url 'profiles:my_applications' %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar às candidaturas</a>
         <a href="{% url 'profiles:available_jobs' %}" class="btn btn-outline-light"><i class="bi bi-briefcase me-2"></i>Ver vagas</a>
         <a href="{% url 'profiles:detail' %}" class="btn btn-dark"><i class="bi bi-person me-2"></i>Meu perfil</a>
       </div>
@@ -84,8 +84,8 @@
     <div class="messages-stats">
       <div class="messages-stat"><span class="messages-stat-label">Total</span><span class="messages-stat-value">{{ message_count }}</span><span class="messages-stat-meta">na linha de conversa</span></div>
       <div class="messages-stat"><span class="messages-stat-label">Da empresa</span><span class="messages-stat-value">{{ company_message_count }}</span><span class="messages-stat-meta">respostas empresariais</span></div>
-      <div class="messages-stat"><span class="messages-stat-label">Do sistema</span><span class="messages-stat-value">{{ system_message_count }}</span><span class="messages-stat-meta">atualizações automaticas</span></div>
-      <div class="messages-stat"><span class="messages-stat-label">Ultimo toque</span><span class="messages-stat-value">{% if latest_message %}{{ latest_message.created_at|date:"d/m" }}{% else %}--{% endif %}</span><span class="messages-stat-meta">{% if latest_message %}{{ latest_message.created_at|date:"H:i" }}{% else %}sem mensagens ainda{% endif %}</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Do sistema</span><span class="messages-stat-value">{{ system_message_count }}</span><span class="messages-stat-meta">atualizações automáticas</span></div>
+      <div class="messages-stat"><span class="messages-stat-label">Último toque</span><span class="messages-stat-value">{% if latest_message %}{{ latest_message.created_at|date:"d/m" }}{% else %}--{% endif %}</span><span class="messages-stat-meta">{% if latest_message %}{{ latest_message.created_at|date:"H:i" }}{% else %}sem mensagens ainda{% endif %}</span></div>
     </div>
   </section>
 
@@ -156,7 +156,7 @@
           </div>
           <div class="messages-fact">
             <span class="messages-fact-label">Sistema</span>
-            <span class="messages-fact-value">Atualizações automaticas ligadas ao processo.</span>
+            <span class="messages-fact-value">Atualizações automáticas ligadas ao processo.</span>
           </div>
           <div class="messages-fact">
             <span class="messages-fact-label">Sugestão</span>
@@ -203,7 +203,7 @@
         </div>
 
         {% if messages_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Páginação do histórico">
+          <nav class="mt-4" aria-label="Paginação do histórico">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not messages_page.has_previous %}disabled{% endif %}">
                 {% if messages_page.has_previous %}

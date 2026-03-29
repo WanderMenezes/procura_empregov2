@@ -235,10 +235,10 @@ class YouthProfileStep1Form(forms.ModelForm):
     )
 
     distrito = forms.ModelChoiceField(
-        label=_('Distrito em Sao Tome e Principe'),
+        label=_('Distrito em São Tomé e Príncipe'),
         queryset=District.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        empty_label=_('Fora de Sao Tome e Principe / nao definido'),
+        empty_label=_('Fora de São Tomé e Príncipe / não definido'),
         required=False
     )
     
@@ -262,7 +262,7 @@ class YouthProfileStep1Form(forms.ModelForm):
         label=_('Localidade'),
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Cidade, regiao ou pais onde vive')
+            'placeholder': _('Cidade, região ou país onde vive')
         }),
         required=False
     )
@@ -397,7 +397,7 @@ class YouthProfileStep3Form(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': 'form-control',
             'rows': 3,
-            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por virgulas')
+            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por vírgulas')
         })
     )
 
@@ -412,7 +412,7 @@ class YouthProfileStep3Form(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': 'form-control',
             'rows': 4,
-            'placeholder': _('Fale um pouco sobre ti, tuas aspirações e objetivos profissionais...')
+            'placeholder': _('Fala um pouco sobre ti, as tuas aspirações e os teus objetivos profissionais...')
         }),
         required=False
     )
@@ -663,10 +663,10 @@ class AssistedRegistrationForm(forms.Form):
     )
     
     distrito = forms.ModelChoiceField(
-        label=_('Distrito em Sao Tome e Principe'),
+        label=_('Distrito em São Tomé e Príncipe'),
         queryset=None,
         widget=forms.Select(attrs={'class': 'form-select'}),
-        empty_label=_('Fora de Sao Tome e Principe / nao definido'),
+        empty_label=_('Fora de São Tomé e Príncipe / não definido'),
         required=False,
     )
     
@@ -675,7 +675,7 @@ class AssistedRegistrationForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Cidade, regiao ou pais')
+            'placeholder': _('Cidade, região ou país')
         })
     )
     
@@ -759,7 +759,7 @@ class YouthProfileEditForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': 'form-control',
             'rows': 3,
-            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por virgulas')
+            'placeholder': _('Se não encontrares na lista, escreve um ou mais setores separados por vírgulas')
         })
     )
     

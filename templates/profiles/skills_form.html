@@ -69,14 +69,14 @@
   <section class="skills-hero mb-4">
     <div class="skills-hero-head">
       <div>
-        <div class="skills-kicker">Competencias do perfil</div>
+        <div class="skills-kicker">Competências do perfil</div>
         <h1 class="skills-title">Editar skills</h1>
-        <p class="skills-subtitle">Seleciona as competencias que melhor representam o teu perfil e adiciona uma skill nova quando ainda não existir na lista.</p>
+        <p class="skills-subtitle">Seleciona as competências que melhor representam o teu perfil e adiciona uma skill nova quando ainda não existir na lista.</p>
         <div class="skills-chips">
           <span class="skills-chip"><i class="bi bi-stars"></i>{{ selected_total_count }} skill{{ selected_total_count|pluralize }} selecionada{{ selected_total_count|pluralize }}</span>
           <span class="skills-chip"><i class="bi bi-tools"></i>{{ selected_technical_count }} técnica{{ selected_technical_count|pluralize }}</span>
           <span class="skills-chip"><i class="bi bi-people"></i>{{ selected_transversal_count }} transversal{{ selected_transversal_count|pluralize }}</span>
-          <span class="skills-chip"><i class="bi bi-grid"></i>{{ available_skill_count }} opção{{ available_skill_count|pluralize }} disponive{{ available_skill_count|pluralize:"l,is" }}</span>
+          <span class="skills-chip"><i class="bi bi-grid"></i>{{ available_skill_count }} opção{{ available_skill_count|pluralize }} disponíve{{ available_skill_count|pluralize:"l,is" }}</span>
         </div>
       </div>
       <div class="skills-actions">
@@ -87,7 +87,7 @@
 
     <div class="skills-stats">
       <div class="skills-stat"><span class="skills-stat-label">Selecionadas</span><span class="skills-stat-value">{{ selected_total_count }}</span><span class="skills-stat-meta">já ligadas ao teu perfil</span></div>
-      <div class="skills-stat"><span class="skills-stat-label">Técnicas</span><span class="skills-stat-value">{{ technical_skills|length }}</span><span class="skills-stat-meta">ferramentas, oficios e software</span></div>
+      <div class="skills-stat"><span class="skills-stat-label">Técnicas</span><span class="skills-stat-value">{{ technical_skills|length }}</span><span class="skills-stat-meta">ferramentas, ofícios e software</span></div>
       <div class="skills-stat"><span class="skills-stat-label">Transversais</span><span class="skills-stat-value">{{ transversal_skills|length }}</span><span class="skills-stat-meta">comunicação e colaboração</span></div>
       <div class="skills-stat"><span class="skills-stat-label">Nova skill</span><span class="skills-stat-value">+</span><span class="skills-stat-meta">podes sugerir uma que falte</span></div>
     </div>
@@ -99,7 +99,7 @@
         <div class="skills-panel-head">
           <div>
             <h2 class="skills-panel-title">Resumo do perfil</h2>
-            <p class="skills-panel-subtitle">Contexto rápido para organizares melhor as competencias.</p>
+            <p class="skills-panel-subtitle">Contexto rápido para organizares melhor as competências.</p>
           </div>
         </div>
         <div class="skills-profile">
@@ -127,12 +127,12 @@
         <div class="skills-panel-head">
           <div>
             <h2 class="skills-panel-title">Dicas para escolher</h2>
-            <p class="skills-panel-subtitle">Mantem a lista relevante e fácil de ler.</p>
+            <p class="skills-panel-subtitle">Mantém a lista relevante e fácil de ler.</p>
           </div>
         </div>
         <div class="skills-tip">
           <strong>Prioriza o que realmente sabes usar.</strong>
-          <div class="skills-copy">Seleciona primeiro as competencias que consegues demonstrar em entrevista, teste ou experiência prática.</div>
+          <div class="skills-copy">Seleciona primeiro as competências que consegues demonstrar em entrevista, teste ou experiência prática.</div>
         </div>
         <div class="skills-tip">
           <strong>Mistura técnica com transversal.</strong>
@@ -140,7 +140,7 @@
         </div>
         <div class="skills-tip">
           <strong>Sugere uma skill nova quando faltar algo importante.</strong>
-          <div class="skills-copy">Usa o campo extra apenas para competencias que ainda não existem na plataforma.</div>
+          <div class="skills-copy">Usa o campo extra apenas para competências que ainda não existem na plataforma.</div>
         </div>
       </section>
     </aside>
@@ -156,9 +156,9 @@
         {% csrf_token %}
 
         <div class="skills-section">
-          <div class="skills-section-label"><i class="bi bi-tools"></i>Competencias técnicas</div>
+          <div class="skills-section-label"><i class="bi bi-tools"></i>Competências técnicas</div>
           <h2 class="skills-section-title">Ferramentas, software e saber fazer técnico</h2>
-          <p class="skills-note mb-0">Marca as competencias ligadas a função, oficio, tecnologia ou processo que já consegues executar.</p>
+          <p class="skills-note mb-0">Marca as competências ligadas a função, ofício, tecnologia ou processo que já consegues executar.</p>
           {% if technical_skills %}
             <div class="skills-grid">
               {% for skill in technical_skills %}
@@ -179,9 +179,9 @@
         </div>
 
         <div class="skills-section">
-          <div class="skills-section-label"><i class="bi bi-people"></i>Competencias transversais</div>
+          <div class="skills-section-label"><i class="bi bi-people"></i>Competências transversais</div>
           <h2 class="skills-section-title">Comunicação, colaboração e comportamento profissional</h2>
-          <p class="skills-note mb-0">Seleciona as competencias que mostram como trabalhas, aprendes e te relacionas em contexto profissional.</p>
+          <p class="skills-note mb-0">Seleciona as competências que mostram como trabalhas, aprendes e te relacionas em contexto profissional.</p>
           {% if transversal_skills %}
             <div class="skills-grid">
               {% for skill in transversal_skills %}
@@ -204,7 +204,7 @@
         <div class="skills-section">
           <div class="skills-section-label"><i class="bi bi-plus-circle"></i>Skill em falta</div>
           <h2 class="skills-section-title">Sugerir outra skill</h2>
-          <p class="skills-note mb-0">Se a competencia não existir na lista, escreve aqui e escolhe o tipo certo para ela entrar corretamente no teu perfil.</p>
+          <p class="skills-note mb-0">Se a competência não existir na lista, escreve aqui e escolhe o tipo certo para ela entrar corretamente no teu perfil.</p>
           <div class="skills-field-grid">
             <div class="skills-field">
               <label for="id_outra_skill_nome">Indica uma skill que não esta na lista</label>

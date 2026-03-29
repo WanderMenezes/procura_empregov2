@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Validar Perfis - Painel de Administracao{% endblock %}
+{% block title %}Validar Perfis - Painel de Administração{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -57,7 +57,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Fila total</div>
                             <div class="admin-summary-value">{{ validation_summary.total_pending }}</div>
-                            <small class="text-muted">Perfis com pelo menos {{ validation_summary.minimum_progress }}% prontos para avaliacao</small>
+                            <small class="text-muted">Perfis com pelo menos {{ validation_summary.minimum_progress }}% prontos para avaliação</small>
                         </div>
                     </div>
                 </div>
@@ -151,7 +151,7 @@
                                 </div>
 
                                 <div class="admin-review-footer">
-                                    <small class="text-muted">Ultima atividade em {{ perfil.updated_at|date:"d/m/Y H:i" }} - {{ perfil.updated_at|timesince }} atras</small>
+                                    <small class="text-muted">Última atividade em {{ perfil.updated_at|date:"d/m/Y H:i" }} - {{ perfil.updated_at|timesince }} atrás</small>
                                     <div class="admin-queue-actions">
                                         {% if request.user.is_admin %}
                                             <a href="{% url 'dashboard:user_detail' perfil.user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-dark">
@@ -186,10 +186,10 @@
                     <div class="card-body">
                         <div class="admin-empty-state">
                             <i class="bi bi-check2-all"></i>
-                            <p class="mb-0">Nao existem perfis pendentes com os filtros atuais.</p>
+                            <p class="mb-0">Não existem perfis pendentes com os filtros atuais.</p>
                             {% if validation_summary.incomplete_profiles %}
                                 <p class="mt-2 mb-0 text-muted">
-                                    Existem {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} ainda abaixo de {{ validation_summary.minimum_progress }}%, por isso esses candidatos ainda nao aparecem nesta fila.
+                                    Existem {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} ainda abaixo de {{ validation_summary.minimum_progress }}%, por isso esses candidatos ainda não aparecem nesta fila.
                                 </p>
                             {% endif %}
                         </div>

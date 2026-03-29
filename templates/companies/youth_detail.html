@@ -195,12 +195,12 @@
       <div class="talent-detail-stat">
         <span class="talent-detail-stat-label">Skills</span>
         <span class="talent-detail-stat-value">{{ skills|length }}</span>
-        <span class="talent-detail-stat-meta">competencia{{ skills|length|pluralize }} associada{{ skills|length|pluralize }}</span>
+        <span class="talent-detail-stat-meta">competência{{ skills|length|pluralize }} associada{{ skills|length|pluralize }}</span>
       </div>
       <div class="talent-detail-stat">
         <span class="talent-detail-stat-label">Documentos</span>
         <span class="talent-detail-stat-value">{{ documents|length }}</span>
-        <span class="talent-detail-stat-meta">anexo{{ documents|length|pluralize }} disponive{{ documents|length|pluralize:"l,is" }}</span>
+        <span class="talent-detail-stat-meta">anexo{{ documents|length|pluralize }} disponíve{{ documents|length|pluralize:"l,is" }}</span>
       </div>
     </div>
   </section>
@@ -217,7 +217,7 @@
 
         {% if not profile_available_to_companies %}
           <div class="alert alert-warning mb-3" role="alert">
-            Este perfil deixou de estar disponivel para novas consultas da empresa. Os contactos diretos ficam bloqueados quando o perfil deixa de cumprir a aprovacao do admin ou o minimo de 80%.
+            Este perfil deixou de estar disponível para novas consultas da empresa. Os contactos diretos ficam bloqueados quando o perfil deixa de cumprir a aprovação do admin ou o mínimo de 80%.
           </div>
         {% endif %}
 
@@ -304,17 +304,17 @@
         <div class="talent-detail-summary-row"><span>Localização</span><span>{{ profile.location_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
-        <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Preferência</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="talent-detail-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
-        <div class="talent-detail-summary-row"><span>Visibilidade</span><span>{% if profile.is_visible_to_companies %}Aprovado + 80%{% else %}Indisponivel{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Visibilidade</span><span>{% if profile.is_visible_to_companies %}Aprovado + 80%{% else %}Indisponível{% endif %}</span></div>
       </section>
 
       <section class="talent-detail-panel">
         <div class="talent-detail-panel-head">
           <div>
             <h6>Interesses e canais</h6>
-            <p class="talent-detail-panel-subtitle">Sinais uteis para encaixe e abordagem.</p>
+            <p class="talent-detail-panel-subtitle">Sinais úteis para encaixe e abordagem.</p>
           </div>
         </div>
         {% if profile.interesses_setoriais_display %}

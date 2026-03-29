@@ -191,7 +191,7 @@
           <div class="account-panel-head">
             <div>
               <h5>Resumo do candidato</h5>
-              <p class="account-panel-subtitle">Leitura rápida do teu posicionamento e preferencia atual.</p>
+              <p class="account-panel-subtitle">Leitura rápida do teu posicionamento e preferência atual.</p>
             </div>
           </div>
           <div class="account-copy mb-3">
@@ -207,7 +207,7 @@
                 <div class="account-summary-row"><span>Idade</span><span>{% if youth_profile.idade %}{{ youth_profile.idade }} anos{% else %}Não informada{% endif %}</span></div>
                 <div class="account-summary-row"><span>Situação</span><span>{{ youth_profile.get_situacao_atual_display }}</span></div>
                 <div class="account-summary-row"><span>Disponibilidade</span><span>{{ youth_profile.get_disponibilidade_display }}</span></div>
-                <div class="account-summary-row"><span>Preferencia</span><span>{{ youth_profile.get_preferencia_oportunidade_display }}</span></div>
+                <div class="account-summary-row"><span>Preferência</span><span>{{ youth_profile.get_preferencia_oportunidade_display }}</span></div>
                 <div class="account-summary-row"><span>Interesses</span><span>{{ youth_profile.interesses_setoriais_display|default:"Não definidos" }}</span></div>
               </div>
             </div>
@@ -317,7 +317,7 @@
           <div class="account-panel-head">
             <div>
               <h5>Documentos</h5>
-              <p class="account-panel-subtitle">Arquivos que apoiam validação e candidaturas.</p>
+              <p class="account-panel-subtitle">Documentos que apoiam a validação e as candidaturas.</p>
             </div>
             <a href="{% url 'profiles:document_add' %}" class="btn btn-outline-primary btn-sm">Adicionar</a>
           </div>
@@ -411,7 +411,7 @@
                   <span class="account-tag"><i class="bi bi-send-check"></i>{{ company_stats.applications|default:0 }} candidatura{{ company_stats.applications|default:0|pluralize }}</span>
                   <span class="account-tag"><i class="bi bi-chat-left-text"></i>{{ company_stats.contact_requests|default:0 }} pedido{{ company_stats.contact_requests|default:0|pluralize }}</span>
                 </div>
-                <p class="account-copy mt-3 mb-0">Mantem o perfil institucional e as vagas atualizados para aumentar a confiança e a aderência dos jovens.</p>
+                <p class="account-copy mt-3 mb-0">Mantém o perfil institucional e as vagas atualizados para aumentar a confiança e a aderência dos jovens.</p>
               </div>
             </section>
           </div>
@@ -477,7 +477,7 @@
           <div class="account-panel-head">
             <div>
               <h5>Resumo da conta</h5>
-              <p class="account-panel-subtitle">Base minima para seguir com seguranca.</p>
+              <p class="account-panel-subtitle">Base mínima para seguir com segurança.</p>
             </div>
           </div>
           <div class="row g-3">

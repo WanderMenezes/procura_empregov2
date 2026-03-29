@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load humanize %}
 
-{% block title %}Painel de Administracao - CNJ - Conselho Nacional da Juventude{% endblock %}
+{% block title %}Painel de Administração - CNJ - Conselho Nacional da Juventude{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -121,7 +121,7 @@
                             <div class="admin-section-head">
                                 <div>
                                     <div class="admin-section-kicker">Impacto</div>
-                                    <h5 class="mb-1">Colocacoes em emprego</h5>
+                                    <h5 class="mb-1">Colocações em emprego</h5>
                                     <p class="text-muted mb-0">Leitura baseada nas candidaturas do tipo emprego com estado aceite.</p>
                                 </div>
                                 <a href="{% url 'dashboard:employment_placements' %}" class="btn btn-outline-primary btn-sm">Ver lista completa</a>
@@ -136,7 +136,7 @@
                                     <strong>{{ stats.jovens_colocados|intcomma }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
-                                    <span class="admin-inline-stat-label">Colocacoes aceites</span>
+                                    <span class="admin-inline-stat-label">Colocações aceites</span>
                                     <strong>{{ stats.colocacoes_emprego|intcomma }}</strong>
                                 </div>
                                 <div class="admin-inline-stat">
@@ -154,7 +154,7 @@
                             <div class="admin-section-head">
                                 <div>
                                     <div class="admin-section-kicker">Lista rapida</div>
-                                    <h5 class="mb-1">Colocacoes recentes</h5>
+                                    <h5 class="mb-1">Colocações recentes</h5>
                                     <p class="text-muted mb-0">Quem conseguiu emprego e em que empresa aparece aqui para leitura imediata.</p>
                                 </div>
                                 <a href="{% url 'dashboard:employment_placements' %}" class="btn btn-outline-primary btn-sm">Abrir colocacoes</a>
@@ -175,7 +175,7 @@
                             {% else %}
                                 <div class="admin-empty-state small">
                                     <i class="bi bi-briefcase"></i>
-                                    <p class="mb-0">Ainda nao existem colocacoes em emprego registadas.</p>
+                                    <p class="mb-0">Ainda não existem colocações em emprego registadas.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -350,7 +350,7 @@
                             <div class="admin-section-head compact">
                                 <div>
                                     <div class="admin-section-kicker">Formação</div>
-                                    <h5 class="mb-1">Nivel de educação</h5>
+                                    <h5 class="mb-1">Nível de educação</h5>
                                 </div>
                             </div>
                             {% if educacao_stats %}

@@ -42,6 +42,8 @@
   .candidate-progress-box .progress { height: 12px; background: rgba(255,255,255,.18); border-radius: 999px; }
   .candidate-progress-box .progress-bar { border-radius: 999px; background: linear-gradient(90deg, #8de4ff, #ffffff); }
   .candidate-progress-note { margin: .65rem 0 0; color: rgba(255,255,255,.82); font-size: .92rem; }
+  .candidate-auto-dismiss { transition: opacity .4s ease, transform .4s ease; }
+  .candidate-auto-dismiss.is-hiding { opacity: 0; transform: translateY(-8px); }
   .candidate-actions .btn { border-radius: 14px; padding-inline: 1rem; }
   .candidate-actions .btn-outline-light { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
   .candidate-actions .btn-outline-light:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.38); }
@@ -147,7 +149,7 @@
               <span class="candidate-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
               <span class="candidate-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
               <span class="candidate-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
-              <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.is_visible_to_companies %}Visivel para empresas{% elif profile.validado %}Ativa aos 80%{% elif progress >= profile.MINIMUM_APPROVAL_PROGRESS %}Aguardar aprovacao{% else %}Ainda nao visivel{% endif %}</span>
+              <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.is_visible_to_companies %}Visível para empresas{% elif profile.validado %}Ativa aos 80%{% elif progress >= profile.MINIMUM_APPROVAL_PROGRESS %}Aguardar aprovação{% else %}Ainda não visível{% endif %}</span>
             </div>
             <div class="candidate-progress-box">
               <div class="d-flex justify-content-between align-items-center gap-3">
@@ -157,7 +159,7 @@
               <div class="progress mt-2">
                 <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
-              <p class="candidate-progress-note">
+              <p class="candidate-progress-note{% if profile.is_visible_to_companies %} candidate-auto-dismiss{% endif %}"{% if profile.is_visible_to_companies %} data-auto-dismiss="5000"{% endif %}>
                 {% if profile.is_underage_for_validation %}
                   {{ profile.validation_age_message }}
                 {% else %}
@@ -188,7 +190,7 @@
           <div class="candidate-stat">
             <span class="candidate-stat-label">Skills</span>
             <span class="candidate-stat-value">{{ skills|length }}</span>
-            <span class="candidate-stat-meta">competencia{{ skills|length|pluralize }}</span>
+            <span class="candidate-stat-meta">competência{{ skills|length|pluralize }}</span>
           </div>
           <div class="candidate-stat">
             <span class="candidate-stat-label">Documentos</span>
@@ -205,7 +207,7 @@
       <strong>Atencao:</strong> {{ profile.validation_age_message }}
     </div>
   {% elif profile.is_visible_to_companies %}
-    <div class="alert alert-success mb-4" role="alert">
+    <div class="alert alert-success mb-4 candidate-auto-dismiss" role="alert" data-auto-dismiss="5000">
       <strong>Perfil ativo:</strong> {{ profile.company_visibility_status_message }}
     </div>
   {% elif profile.validado or progress >= profile.MINIMUM_APPROVAL_PROGRESS %}
@@ -295,10 +297,10 @@
         <div class="candidate-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"N/A" }}</span></div>
         <div class="candidate-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="candidate-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
-        <div class="candidate-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
+        <div class="candidate-summary-row"><span>Preferência</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
         <div class="candidate-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="candidate-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
-        <div class="candidate-summary-row"><span>Empresas</span><span>{% if profile.is_visible_to_companies %}Ja visivel{% elif profile.validado and progress >= profile.MINIMUM_COMPANY_VISIBILITY_PROGRESS %}Temporariamente oculto{% else %}Ativa automaticamente aos 80%{% endif %}</span></div>
+        <div class="candidate-summary-row"><span>Empresas</span><span>{% if profile.is_visible_to_companies %}Já visível{% elif profile.validado and progress >= profile.MINIMUM_COMPANY_VISIBILITY_PROGRESS %}Temporariamente oculto{% else %}Ativa automaticamente aos 80%{% endif %}</span></div>
         {% if profile.interesse_setorial %}
           <div class="candidate-tag-list mt-3">
             {% for interest in profile.interesses_setoriais_labels %}
@@ -441,7 +443,7 @@
         <div class="candidate-panel-head">
           <div>
             <h5>Documentos</h5>
-            <p class="candidate-panel-subtitle">Arquivos prontos para validação e candidatura.</p>
+            <p class="candidate-panel-subtitle">Documentos prontos para validação e candidatura.</p>
           </div>
           <a href="{% url 'profiles:document_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Adicionar</a>
         </div>
@@ -581,4 +583,22 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-auto-dismiss]').forEach(function (el) {
+      const delay = parseInt(el.getAttribute('data-auto-dismiss') || '0', 10);
+      if (!delay) return;
+
+      window.setTimeout(function () {
+        el.classList.add('is-hiding');
+        window.setTimeout(function () {
+          el.remove();
+        }, 420);
+      }, delay);
+    });
+  });
+</script>
 {% endblock %}

@@ -176,7 +176,7 @@ class YouthProfile(models.Model):
         disabled_count = 0
         responded_at = timezone.now()
         admin_reason = _(
-            'O acesso direto ao contacto foi desativado automaticamente porque o perfil ficou abaixo da idade minima de %(minimum_age)s anos.'
+            'O acesso direto ao contacto foi desativado automaticamente porque o perfil ficou abaixo da idade mínima de %(minimum_age)s anos.'
         ) % {
             'minimum_age': self.MINIMUM_VALIDATION_AGE,
         }
@@ -192,7 +192,7 @@ class YouthProfile(models.Model):
                 user=contact.company.user,
                 titulo=_('Pedido de contacto desativado'),
                 mensagem=_(
-                    'O acesso ao contacto de %(youth_name)s foi desativado automaticamente porque o perfil ficou abaixo da idade minima.'
+                    'O acesso ao contacto de %(youth_name)s foi desativado automaticamente porque o perfil ficou abaixo da idade mínima.'
                 ) % {
                     'youth_name': self.user.nome,
                 },
@@ -273,8 +273,8 @@ class YouthProfile(models.Model):
         if not self.is_underage_for_validation:
             return ''
         return _(
-            'O teu perfil nao pode ser aprovado porque tens %(age)s anos. '
-            'A idade minima para aprovacao e %(minimum_age)s anos.'
+            'O teu perfil não pode ser aprovado porque tens %(age)s anos. '
+            'A idade mínima para aprovação é %(minimum_age)s anos.'
         ) % {
             'age': self.idade,
             'minimum_age': self.MINIMUM_VALIDATION_AGE,
@@ -305,7 +305,7 @@ class YouthProfile(models.Model):
             parts.append(self.localidade)
         if parts:
             return ' - '.join(parts)
-        return _('Localizacao nao indicada')
+        return _('Localização não indicada')
 
     @property
     def can_apply_to_jobs(self):
@@ -356,8 +356,8 @@ class YouthProfile(models.Model):
     @property
     def approval_progress_message(self):
         return _(
-            'O perfil precisa de atingir pelo menos %(minimum_progress)s%% para entrar na fila de aprovacao. '
-            'Neste momento esta com %(current_progress)s%%.'
+            'O perfil precisa de atingir pelo menos %(minimum_progress)s%% para entrar na fila de aprovação. '
+            'Neste momento está com %(current_progress)s%%.'
         ) % {
             'minimum_progress': self.MINIMUM_APPROVAL_PROGRESS,
             'current_progress': self.approval_progress,
@@ -369,14 +369,14 @@ class YouthProfile(models.Model):
 
         if self.is_visible_to_companies:
             return _(
-                'O teu perfil ja foi aprovado pelo admin e esta visivel para empresas.'
+                'O teu perfil já foi aprovado pelo admin e está visível para empresas.'
             )
 
         if not self.is_ready_for_approval:
             return _(
-                'O teu perfil precisa de pelo menos %(approval_progress)s%% para entrar na fila de aprovacao do admin. '
-                'Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%. '
-                'Neste momento esta com %(current_progress)s%%.'
+                'O teu perfil precisa de pelo menos %(approval_progress)s%% para entrar na fila de aprovação do admin. '
+                'Depois da aprovação, fica visível automaticamente para empresas ao atingir %(company_progress)s%%. '
+                'Neste momento está com %(current_progress)s%%.'
             ) % {
                 'approval_progress': self.MINIMUM_APPROVAL_PROGRESS,
                 'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
@@ -385,9 +385,9 @@ class YouthProfile(models.Model):
 
         if not self.validado:
             return _(
-                'O teu perfil ja atingiu os %(approval_progress)s%% minimos para poder ser aprovado pelo admin. '
-                'Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%. '
-                'Neste momento esta com %(current_progress)s%%.'
+                'O teu perfil já atingiu os %(approval_progress)s%% mínimos para poder ser aprovado pelo admin. '
+                'Depois da aprovação, fica visível automaticamente para empresas ao atingir %(company_progress)s%%. '
+                'Neste momento está com %(current_progress)s%%.'
             ) % {
                 'approval_progress': self.MINIMUM_APPROVAL_PROGRESS,
                 'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
@@ -396,9 +396,9 @@ class YouthProfile(models.Model):
 
         if not self.completo:
             return _(
-                'O teu perfil ja foi aprovado pelo admin, mas ainda precisas concluir o preenchimento. '
-                'Assim que atingir %(company_progress)s%%, fica visivel automaticamente para empresas. '
-                'Neste momento esta com %(current_progress)s%%.'
+                'O teu perfil já foi aprovado pelo admin, mas ainda precisas de concluir o preenchimento. '
+                'Assim que atingir %(company_progress)s%%, fica visível automaticamente para empresas. '
+                'Neste momento está com %(current_progress)s%%.'
             ) % {
                 'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
                 'current_progress': current_progress,
@@ -406,13 +406,13 @@ class YouthProfile(models.Model):
 
         if self.company_visibility_is_manually_hidden:
             return _(
-                'O teu perfil ja cumpre os requisitos, mas esta temporariamente oculto para empresas. '
+                'O teu perfil já cumpre os requisitos, mas está temporariamente oculto para empresas. '
                 'Revê a visibilidade no teu perfil para voltares a aparecer nas pesquisas.'
             )
 
         return _(
-            'O teu perfil ja foi aprovado pelo admin. Assim que atingir %(company_progress)s%%, fica visivel automaticamente para empresas. '
-            'Neste momento esta com %(current_progress)s%%.'
+            'O teu perfil já foi aprovado pelo admin. Assim que atingir %(company_progress)s%%, fica visível automaticamente para empresas. '
+            'Neste momento está com %(current_progress)s%%.'
         ) % {
             'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
             'current_progress': current_progress,

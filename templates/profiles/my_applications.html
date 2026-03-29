@@ -159,7 +159,7 @@
         <form method="get" class="apps-filter-grid">
           <div class="apps-field">
             <label for="applications-query">Palavra-chave</label>
-            <input id="applications-query" type="text" name="q" class="form-control" placeholder="Titulo da vaga ou empresa" value="{{ selected_query }}">
+            <input id="applications-query" type="text" name="q" class="form-control" placeholder="Título da vaga ou empresa" value="{{ selected_query }}">
           </div>
           <div class="apps-field">
             <label for="applications-status">Estado</label>
@@ -318,7 +318,7 @@
         </div>
 
         {% if applications_page.paginator.num_pages > 1 %}
-          <nav class="mt-4" aria-label="Páginação de candidaturas">
+          <nav class="mt-4" aria-label="Paginação de candidaturas">
             <ul class="pagination justify-content-center mb-0">
               <li class="page-item {% if not applications_page.has_previous %}disabled{% endif %}">
                 {% if applications_page.has_previous %}

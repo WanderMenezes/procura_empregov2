@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load humanize %}
 
-{% block title %}Registos Incompletos - Painel de Administracao{% endblock %}
+{% block title %}Registos Incompletos - Painel de Administração{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -14,10 +14,10 @@
             <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
-                        <div class="admin-kicker">Acompanhamento antes da validacao</div>
+                        <div class="admin-kicker">Acompanhamento antes da validação</div>
                         <h1 class="admin-page-title">Registos incompletos</h1>
                         <p class="admin-subtitle mb-0">
-                            Esta fila mostra perfis que ainda nao atingiram {{ incomplete_summary.minimum_progress }}% de preenchimento. Aqui o admin percebe quem esta quase pronto para ir para aprovacao, o que ainda falta e quais registos continuam parados.
+                            Esta fila mostra perfis que ainda não atingiram {{ incomplete_summary.minimum_progress }}% de preenchimento. Aqui o admin percebe quem está quase pronto para ir para aprovação, o que ainda falta e quais registos continuam parados.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -41,7 +41,7 @@
 
                     <div class="admin-hero-actions">
                         <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light btn-sm">
-                            <i class="bi bi-check-circle me-1"></i>Ver fila de validacao
+                            <i class="bi bi-check-circle me-1"></i>Ver fila de validação
                         </a>
                         <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
@@ -56,7 +56,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Fila incompleta</div>
                             <div class="admin-summary-value">{{ incomplete_summary.total_incomplete|intcomma }}</div>
-                            <small class="text-muted">Jovens ainda abaixo do limiar minimo para aprovacao</small>
+                            <small class="text-muted">Jovens ainda abaixo do limiar mínimo para aprovação</small>
                         </div>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Quase prontos</div>
                             <div class="admin-summary-value">{{ incomplete_summary.near_ready|intcomma }}</div>
-                            <small class="text-muted">Perfis perto dos {{ incomplete_summary.minimum_progress }}% para entrar na fila de validacao</small>
+                            <small class="text-muted">Perfis perto dos {{ incomplete_summary.minimum_progress }}% para entrar na fila de validação</small>
                         </div>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                                         <div class="admin-progress-fill{% if profile.progress_stage_tone == 'success' %} admin-progress-fill-success{% elif profile.progress_stage_tone == 'info' %} admin-progress-fill-info{% endif %}" style="width: {{ profile.progress_percent }}%;"></div>
                                     </div>
                                     <small class="text-muted d-block mt-2">
-                                        {{ profile.completed_steps }}/{{ profile.total_steps }} bloco{{ profile.total_steps|pluralize }} completos e {{ profile.total_missing }} campo{{ profile.total_missing|pluralize }} ainda por preencher. O limiar de aprovacao e {{ incomplete_summary.minimum_progress }}%.
+                                        {{ profile.completed_steps }}/{{ profile.total_steps }} bloco{{ profile.total_steps|pluralize }} completos e {{ profile.total_missing }} campo{{ profile.total_missing|pluralize }} ainda por preencher. O limiar de aprovação é {{ incomplete_summary.minimum_progress }}%.
                                     </small>
                                 </div>
 
@@ -156,7 +156,7 @@
                                         <strong>{{ profile.created_at|date:"d/m/Y" }}</strong>
                                     </div>
                                     <div class="admin-inline-stat">
-                                        <span class="admin-inline-stat-label">Ultima atividade</span>
+                                        <span class="admin-inline-stat-label">Última atividade</span>
                                         <strong>{{ profile.updated_at|date:"d/m/Y H:i" }}</strong>
                                     </div>
                                     <div class="admin-inline-stat">
@@ -167,7 +167,7 @@
 
                                 <div class="admin-review-footer">
                                     <small class="text-muted">
-                                        Este registo ainda nao aparece para validacao porque continua abaixo de {{ incomplete_summary.minimum_progress }}%.
+                                        Este registo ainda não aparece para validação porque continua abaixo de {{ incomplete_summary.minimum_progress }}%.
                                     </small>
                                     <div class="admin-queue-actions">
                                         <a href="{% url 'dashboard:user_detail' profile.user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-dark">
@@ -191,13 +191,13 @@
                                 {% endif %}
                             </li>
                             <li class="page-item disabled">
-                                <span class="page-link">Pagina {{ profiles_page.number }} de {{ profiles_page.paginator.num_pages }}</span>
+                                <span class="page-link">Página {{ profiles_page.number }} de {{ profiles_page.paginator.num_pages }}</span>
                             </li>
                             <li class="page-item{% if not profiles_page.has_next %} disabled{% endif %}">
                                 {% if profiles_page.has_next %}
-                                    <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ profiles_page.next_page_number }}">Proxima</a>
+                                    <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ profiles_page.next_page_number }}">Próxima</a>
                                 {% else %}
-                                    <span class="page-link">Proxima</span>
+                                    <span class="page-link">Próxima</span>
                                 {% endif %}
                             </li>
                         </ul>
@@ -208,9 +208,9 @@
                     <div class="card-body">
                         <div class="admin-empty-state">
                             <i class="bi bi-check2-all"></i>
-                            <p class="mb-0">Nao existem registos incompletos com os filtros atuais.</p>
+                            <p class="mb-0">Não existem registos incompletos com os filtros atuais.</p>
                             <p class="mt-2 mb-0 text-muted">
-                                Quando um jovem criar a conta mas ainda nao atingir {{ incomplete_summary.minimum_progress }}% de preenchimento, ele passa a aparecer aqui.
+                                Quando um jovem criar a conta, mas ainda não atingir {{ incomplete_summary.minimum_progress }}% de preenchimento, ele passa a aparecer aqui.
                             </p>
                         </div>
                     </div>

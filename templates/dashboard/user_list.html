@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load humanize querystring %}
 
-{% block title %}Utilizadores - Painel de Administracao{% endblock %}
+{% block title %}Utilizadores - Painel de Administração{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 admin-dashboard">
@@ -421,7 +421,7 @@
                     </div>
                 </div>
                 {% if users_page.paginator.num_pages > 1 %}
-                    <nav class="p-3 border-top" aria-label="PÃ¡ginaÃ§Ã£o da lista de utilizadores">
+                    <nav class="p-3 border-top" aria-label="Paginação da lista de utilizadores">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item {% if not users_page.has_previous %}disabled{% endif %}">
                                 {% if users_page.has_previous %}
@@ -431,13 +431,13 @@
                                 {% endif %}
                             </li>
                             <li class="page-item disabled">
-                                <span class="page-link">PÃ¡gina {{ users_page.number }} de {{ users_page.paginator.num_pages }}</span>
+                                <span class="page-link">Página {{ users_page.number }} de {{ users_page.paginator.num_pages }}</span>
                             </li>
                             <li class="page-item {% if not users_page.has_next %}disabled{% endif %}">
                                 {% if users_page.has_next %}
-                                    <a class="page-link" href="{% query_string users_page.next_page_number %}#lista-utilizadores">PrÃ³xima</a>
+                                    <a class="page-link" href="{% query_string users_page.next_page_number %}#lista-utilizadores">Próxima</a>
                                 {% else %}
-                                    <span class="page-link">PrÃ³xima</span>
+                                    <span class="page-link">Próxima</span>
                                 {% endif %}
                             </li>
                         </ul>
