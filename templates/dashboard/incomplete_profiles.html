@@ -1,0 +1,222 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block title %}Registos Incompletos - Painel de Administracao{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 admin-dashboard">
+    <div class="admin-shell">
+        <aside class="admin-shell-sidebar">
+            {% include 'dashboard/_admin_sidebar.html' with active_page='incomplete_profiles' %}
+        </aside>
+
+        <div class="admin-shell-main">
+            <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
+                <div class="card-body">
+                    <div class="admin-hero-copy">
+                        <div class="admin-kicker">Acompanhamento antes da validacao</div>
+                        <h1 class="admin-page-title">Registos incompletos</h1>
+                        <p class="admin-subtitle mb-0">
+                            Esta fila mostra perfis que ainda nao atingiram {{ incomplete_summary.minimum_progress }}% de preenchimento. Aqui o admin percebe quem esta quase pronto para ir para aprovacao, o que ainda falta e quais registos continuam parados.
+                        </p>
+                        <div class="admin-hero-chips">
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-hourglass-split"></i>
+                                {{ incomplete_summary.total_incomplete|intcomma }} registo{{ incomplete_summary.total_incomplete|pluralize }} incompleto{{ incomplete_summary.total_incomplete|pluralize }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-funnel"></i>
+                                {{ incomplete_summary.filtered_total|intcomma }} no filtro atual
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-rocket-takeoff"></i>
+                                {{ incomplete_summary.near_ready|intcomma }} quase pronto{{ incomplete_summary.near_ready|pluralize:"s," }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-arrow-repeat"></i>
+                                {{ incomplete_summary.updated_today|intcomma }} atualizado{{ incomplete_summary.updated_today|pluralize }} hoje
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="admin-hero-actions">
+                        <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-check-circle me-1"></i>Ver fila de validacao
+                        </a>
+                        <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Fila incompleta</div>
+                            <div class="admin-summary-value">{{ incomplete_summary.total_incomplete|intcomma }}</div>
+                            <small class="text-muted">Jovens ainda abaixo do limiar minimo para aprovacao</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Quase prontos</div>
+                            <div class="admin-summary-value">{{ incomplete_summary.near_ready|intcomma }}</div>
+                            <small class="text-muted">Perfis perto dos {{ incomplete_summary.minimum_progress }}% para entrar na fila de validacao</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Primeiros passos</div>
+                            <div class="admin-summary-value">{{ incomplete_summary.early_stage|intcomma }}</div>
+                            <small class="text-muted">Registos com pouco preenchimento guardado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Distritos no filtro</div>
+                            <div class="admin-summary-value">{{ incomplete_summary.districts|intcomma }}</div>
+                            <small class="text-muted">Cobertura geografica atual desta lista</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="get" class="card admin-panel admin-filter-panel mb-4" data-tour-id="incomplete-filter">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-7">
+                            <label class="form-label">Pesquisar</label>
+                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Nome, telefone, email ou BI">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Distrito</label>
+                            <select name="distrito" class="form-select">
+                                <option value="">Todos</option>
+                                {% for district in districts %}
+                                    <option value="{{ district.pk }}" {% if filtro_distrito == district.pk|stringformat:"s" %}selected{% endif %}>{{ district.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-grid gap-2">
+                            <button class="btn btn-primary">Aplicar</button>
+                            <a href="{% url 'dashboard:incomplete_profiles' %}" class="btn btn-outline-secondary">Limpar</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% if profiles_page.object_list %}
+                <div class="admin-review-grid" data-tour-id="incomplete-list">
+                    {% for profile in profiles_page.object_list %}
+                        <div class="card admin-review-card">
+                            <div class="card-body">
+                                <div class="admin-review-top">
+                                    <div>
+                                        <h5 class="mb-1">{{ profile.nome_completo }}</h5>
+                                        <div class="admin-table-meta">
+                                            {{ profile.telefone }}{% if profile.email %} - {{ profile.email }}{% endif %}
+                                        </div>
+                                    </div>
+                                    <span class="admin-status-pill {{ profile.progress_stage_tone }}">{{ profile.progress_stage }}</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center gap-3">
+                                        <strong>Progresso guardado</strong>
+                                        <span>{{ profile.progress_percent }}%</span>
+                                    </div>
+                                    <div class="admin-progress-track mt-2">
+                                        <div class="admin-progress-fill{% if profile.progress_stage_tone == 'success' %} admin-progress-fill-success{% elif profile.progress_stage_tone == 'info' %} admin-progress-fill-info{% endif %}" style="width: {{ profile.progress_percent }}%;"></div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        {{ profile.completed_steps }}/{{ profile.total_steps }} bloco{{ profile.total_steps|pluralize }} completos e {{ profile.total_missing }} campo{{ profile.total_missing|pluralize }} ainda por preencher. O limiar de aprovacao e {{ incomplete_summary.minimum_progress }}%.
+                                    </small>
+                                </div>
+
+                                <div class="admin-review-tags">
+                                    <span class="admin-review-tag">{{ profile.location_display }}</span>
+                                    <span class="admin-review-tag">A seguir: {{ profile.next_step.short_title }}</span>
+                                    <span class="admin-review-tag">{{ profile.next_step.filled }}/{{ profile.next_step.total }} nesta etapa</span>
+                                    {% if profile.is_recently_updated %}
+                                        <span class="admin-review-tag">Atualizado hoje</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="admin-inline-stat-list mt-3">
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Criado em</span>
+                                        <strong>{{ profile.created_at|date:"d/m/Y" }}</strong>
+                                    </div>
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Ultima atividade</span>
+                                        <strong>{{ profile.updated_at|date:"d/m/Y H:i" }}</strong>
+                                    </div>
+                                    <div class="admin-inline-stat">
+                                        <span class="admin-inline-stat-label">Prioridade</span>
+                                        <strong>{{ profile.next_step.title }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="admin-review-footer">
+                                    <small class="text-muted">
+                                        Este registo ainda nao aparece para validacao porque continua abaixo de {{ incomplete_summary.minimum_progress }}%.
+                                    </small>
+                                    <div class="admin-queue-actions">
+                                        <a href="{% url 'dashboard:user_detail' profile.user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-dark">
+                                            <i class="bi bi-eye me-1"></i>Ver conta
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if profiles_page.has_other_pages %}
+                    <nav class="mt-4" aria-label="Paginas dos registos incompletos">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item{% if not profiles_page.has_previous %} disabled{% endif %}">
+                                {% if profiles_page.has_previous %}
+                                    <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ profiles_page.previous_page_number }}">Anterior</a>
+                                {% else %}
+                                    <span class="page-link">Anterior</span>
+                                {% endif %}
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Pagina {{ profiles_page.number }} de {{ profiles_page.paginator.num_pages }}</span>
+                            </li>
+                            <li class="page-item{% if not profiles_page.has_next %} disabled{% endif %}">
+                                {% if profiles_page.has_next %}
+                                    <a class="page-link" href="?{% if filters_qs %}{{ filters_qs }}&{% endif %}page={{ profiles_page.next_page_number }}">Proxima</a>
+                                {% else %}
+                                    <span class="page-link">Proxima</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="card admin-panel">
+                    <div class="card-body">
+                        <div class="admin-empty-state">
+                            <i class="bi bi-check2-all"></i>
+                            <p class="mb-0">Nao existem registos incompletos com os filtros atuais.</p>
+                            <p class="mt-2 mb-0 text-muted">
+                                Quando um jovem criar a conta mas ainda nao atingir {{ incomplete_summary.minimum_progress }}% de preenchimento, ele passa a aparecer aqui.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

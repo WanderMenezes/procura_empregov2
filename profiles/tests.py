@@ -22,9 +22,101 @@ def _years_ago(years):
         return today.replace(month=2, day=28, year=today.year - years)
 
 
+def _approval_ready_wizard_data(district_id=None, birth_date=None):
+    birth_date = birth_date or _years_ago(20)
+    return {
+        '1': {
+            'nome': 'Perfil pronto',
+            'telefone': '+2399000999',
+            'email': 'pronto@example.com',
+            'contacto_alternativo': 'Mae',
+            'distrito': district_id or '',
+            'data_nascimento': birth_date.isoformat(),
+            'sexo': 'M',
+            'localidade': 'Riboque',
+        },
+        '2': {
+            'nivel': 'SEC',
+            'area_formacao': 'TIC',
+            'instituicao': 'Liceu Nacional',
+            'ano': '2024',
+            'curso': 'Informatica',
+            'skills': [],
+            'idiomas_data': '[]',
+        },
+        '3': {
+            'situacao_atual': 'DES',
+            'disponibilidade': 'SIM',
+            'interesse_setorial': ['TIC'],
+            'preferencia_oportunidade': 'EMP',
+            'sobre': 'Quero uma oportunidade.',
+        },
+        '4': {},
+    }
+
+
+def _create_company_visible_profile(user, **overrides):
+    profile_defaults = {
+        'visivel': True,
+        'completo': True,
+        'validado': True,
+        'data_nascimento': _years_ago(20),
+        'sexo': 'M',
+        'localidade': 'Riboque',
+        'contacto_alternativo': 'Mae',
+        'situacao_atual': 'DES',
+        'disponibilidade': 'SIM',
+        'interesse_setorial': ['TIC'],
+        'preferencia_oportunidade': 'EMP',
+        'sobre': 'Quero uma oportunidade.',
+        'consentimento_sms': True,
+        'consentimento_whatsapp': True,
+        'consentimento_email': True,
+        'idiomas': [{'idioma': 'Ingles', 'dominio': 'AMBOS'}],
+    }
+    profile_defaults.update(overrides)
+    profile = YouthProfile.objects.create(user=user, **profile_defaults)
+    Education.objects.create(
+        profile=profile,
+        nivel='SEC',
+        area_formacao='TIC',
+        instituicao='Liceu Nacional',
+        ano=2024,
+        curso='Informatica',
+    )
+    return profile
+
+
+def _create_admin_approved_but_hidden_profile(user, **overrides):
+    profile_defaults = {
+        'visivel': True,
+        'completo': True,
+        'validado': True,
+        'data_nascimento': _years_ago(20),
+        'sexo': 'M',
+        'localidade': 'Riboque',
+        'contacto_alternativo': 'Mae',
+        'situacao_atual': 'DES',
+        'disponibilidade': 'SIM',
+        'interesse_setorial': ['TIC'],
+        'preferencia_oportunidade': 'EMP',
+        'sobre': 'Quero uma oportunidade.',
+        'consentimento_sms': True,
+        'consentimento_whatsapp': True,
+        'consentimento_email': True,
+    }
+    profile_defaults.update(overrides)
+    return YouthProfile.objects.create(user=user, **profile_defaults)
+
+
 class AssistedRegisterTests(TestCase):
     def setUp(self):
         self.district, _ = District.objects.get_or_create(codigo='AGU', defaults={'nome': 'Agua Grande'})
+        self.admin = User.objects.create_user(
+            telefone='+2399000099',
+            nome='Admin Perfis',
+            perfil=User.ProfileType.ADMIN,
+        )
         self.operator = User.objects.create_user(
             telefone='+2399000100',
             nome='Operador Teste',
@@ -79,6 +171,20 @@ class AssistedRegisterTests(TestCase):
         self.assertEqual(
             created_log.payload['observacoes'],
             'Atendimento presencial com apoio documental.',
+        )
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.admin,
+                titulo='Novo utilizador registado',
+                mensagem__icontains='Maria Silva',
+            ).exists()
+        )
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.admin,
+                titulo='Perfil pronto para validacao',
+                mensagem__icontains='Maria Silva',
+            ).exists()
         )
 
     def test_operator_can_create_assisted_registration_without_district(self):
@@ -287,10 +393,8 @@ class YouthJobApplicationPermissionsTests(TestCase):
             perfil=User.ProfileType.JOVEM,
             distrito=self.district,
         )
-        self.unvalidated_profile = YouthProfile.objects.create(
-            user=self.unvalidated_user,
-            visivel=True,
-            completo=True,
+        self.unvalidated_profile = _create_company_visible_profile(
+            self.unvalidated_user,
             validado=False,
         )
         self.validated_user = User.objects.create_user(
@@ -299,23 +403,54 @@ class YouthJobApplicationPermissionsTests(TestCase):
             perfil=User.ProfileType.JOVEM,
             distrito=self.district,
         )
-        self.validated_profile = YouthProfile.objects.create(
-            user=self.validated_user,
-            visivel=True,
-            completo=True,
-            validado=True,
-        )
+        self.validated_profile = _create_company_visible_profile(self.validated_user)
         self.external_user = User.objects.create_user(
             telefone='+351912300003',
             nome='Jovem Exterior',
             perfil=User.ProfileType.JOVEM,
+            email='exterior@example.com',
         )
-        self.external_profile = YouthProfile.objects.create(
-            user=self.external_user,
-            visivel=True,
-            completo=True,
-            validado=True,
+        self.external_profile = _create_company_visible_profile(
+            self.external_user,
             localidade='Lisboa, Portugal',
+        )
+        self.auto_unlock_user = User.objects.create_user(
+            telefone='+2399220006',
+            nome='Jovem Auto Visivel',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+        )
+        self.auto_unlock_profile = _create_company_visible_profile(
+            self.auto_unlock_user,
+            visivel=False,
+        )
+        self.low_progress_user = User.objects.create_user(
+            telefone='+2399220005',
+            nome='Jovem Parcial',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='parcial@example.com',
+        )
+        self.low_progress_profile = _create_admin_approved_but_hidden_profile(
+            self.low_progress_user,
+        )
+        self.preapproved_user = User.objects.create_user(
+            telefone='+2399220004',
+            nome='Jovem Preaprovado',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+        )
+        self.preapproved_profile = YouthProfile.objects.create(
+            user=self.preapproved_user,
+            visivel=True,
+            completo=False,
+            validado=True,
+            data_nascimento=_years_ago(20),
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            preferencia_oportunidade='EMP',
+            wizard_step=3,
+            wizard_data=_approval_ready_wizard_data(self.district.id),
         )
 
     def test_unvalidated_youth_can_view_jobs_but_sees_waiting_state(self):
@@ -356,6 +491,37 @@ class YouthJobApplicationPermissionsTests(TestCase):
         self.assertRedirects(response, reverse('profiles:detail'))
         self.assertTrue(
             Application.objects.filter(job=self.job, youth=self.external_profile).exists()
+        )
+
+    def test_validated_youth_reaches_80_percent_and_can_apply_even_if_visibility_was_off(self):
+        self.client.force_login(self.auto_unlock_user)
+
+        response = self.client.post(reverse('companies:job_apply', args=[self.job.pk]))
+
+        self.assertRedirects(response, reverse('profiles:detail'))
+        self.assertTrue(
+            Application.objects.filter(job=self.job, youth=self.auto_unlock_profile).exists()
+        )
+
+    def test_admin_approved_youth_below_80_percent_cannot_apply_to_job(self):
+        self.client.force_login(self.low_progress_user)
+
+        response = self.client.post(reverse('companies:job_apply', args=[self.job.pk]), follow=True)
+
+        self.assertRedirects(response, reverse('profiles:available_jobs'))
+        self.assertFalse(
+            Application.objects.filter(job=self.job, youth=self.low_progress_profile).exists()
+        )
+        self.assertContains(response, '80%')
+
+    def test_preapproved_incomplete_youth_cannot_apply_until_profile_is_complete(self):
+        self.client.force_login(self.preapproved_user)
+
+        response = self.client.post(reverse('companies:job_apply', args=[self.job.pk]))
+
+        self.assertRedirects(response, reverse('profiles:available_jobs'))
+        self.assertFalse(
+            Application.objects.filter(job=self.job, youth=self.preapproved_profile).exists()
         )
 
 
@@ -473,9 +639,8 @@ class YouthProfileAgeWarningTests(TestCase):
         self.assertEqual(contact_request.estado, 'DESATIVADO')
         self.assertIsNotNone(contact_request.responded_at)
         self.assertIn('idade minima', contact_request.resposta_admin)
-        self.assertContains(response, 'a validacao anterior foi removida automaticamente')
+        self.assertContains(response, 'O teu perfil foi atualizado.')
         self.assertContains(response, 'A idade minima para aprovacao e 18 anos.')
-        self.assertContains(response, 'Tambem desativamos 1 acesso de empresa ao teu contacto.')
         self.assertTrue(
             Notification.objects.filter(
                 user=youth_user,
@@ -559,4 +724,4 @@ class ProfileWizardEditingTests(TestCase):
         self.assertEqual(profile.situacao_atual, 'DES')
         self.assertEqual(profile.preferencia_oportunidade, 'EMP')
         self.assertEqual(education.area_formacao, 'TIC')
-        self.assertContains(response, 'Perfil atualizado com sucesso!')
+        self.assertContains(response, 'ja entrou na fila de validacao do administrador')

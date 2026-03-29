@@ -39,6 +39,9 @@
                         <a href="{% url 'dashboard:validate_profiles' %}" class="btn btn-light btn-sm">
                             <i class="bi bi-check-circle me-1"></i>Ver fila de validação
                         </a>
+                        <a href="{% url 'dashboard:incomplete_profiles' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-hourglass-split me-1"></i>Ver incompletos
+                        </a>
                         <a href="{% url 'dashboard:user_list' %}" class="btn btn-light btn-sm">
                             <i class="bi bi-people me-1"></i>Gerir utilizadores
                         </a>
@@ -213,15 +216,15 @@
                                     </div>
                                     <div class="admin-priority-value">{{ stats.pedidos_contacto_pendentes|intcomma }}</div>
                                 </a>
-                                <a href="{% url 'dashboard:user_list' %}" class="admin-priority-item">
+                                <a href="{% url 'dashboard:incomplete_profiles' %}" class="admin-priority-item">
                                     <div class="admin-priority-icon bg-success-subtle text-success">
-                                        <i class="bi bi-people"></i>
+                                        <i class="bi bi-hourglass-split"></i>
                                     </div>
                                     <div class="admin-priority-copy">
-                                        <div class="admin-priority-title">Utilizadores ativos</div>
-                                        <div class="admin-priority-text">Contas geridas centralmente no sistema.</div>
+                                        <div class="admin-priority-title">Registos incompletos</div>
+                                        <div class="admin-priority-text">Contas de jovens criadas mas ainda abaixo de 50% de preenchimento.</div>
                                     </div>
-                                    <div class="admin-priority-value">{{ stats.total_utilizadores|intcomma }}</div>
+                                    <div class="admin-priority-value">{{ stats.jovens_nao_completos|intcomma }}</div>
                                 </a>
                                 <a href="{% url 'dashboard:reports' %}" class="admin-priority-item">
                                     <div class="admin-priority-icon bg-info-subtle text-info-emphasis">

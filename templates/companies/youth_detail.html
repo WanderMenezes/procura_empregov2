@@ -160,7 +160,7 @@
             <h1 class="talent-detail-title">{{ profile.nome_completo }}</h1>
             <p class="talent-detail-subtitle">
               {{ profile.location_display }}
-              <span class="mx-1">&middot;</span>Perfil pronto para avaliação, contacto e enquadramento em oportunidades.
+              <span class="mx-1">&middot;</span>Perfil aprovado pelo admin e com pelo menos 80% do perfil preenchido.
             </p>
             <div class="talent-detail-chips">
               <span class="talent-detail-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -217,7 +217,7 @@
 
         {% if not profile_available_to_companies %}
           <div class="alert alert-warning mb-3" role="alert">
-            Este perfil deixou de estar disponÃ­vel para novas consultas da empresa. Os contactos diretos ficam bloqueados.
+            Este perfil deixou de estar disponivel para novas consultas da empresa. Os contactos diretos ficam bloqueados quando o perfil deixa de cumprir a aprovacao do admin ou o minimo de 80%.
           </div>
         {% endif %}
 
@@ -307,6 +307,7 @@
         <div class="talent-detail-summary-row"><span>Preferencia</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="talent-detail-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
+        <div class="talent-detail-summary-row"><span>Visibilidade</span><span>{% if profile.is_visible_to_companies %}Aprovado + 80%{% else %}Indisponivel{% endif %}</span></div>
       </section>
 
       <section class="talent-detail-panel">

@@ -34,8 +34,10 @@ from accounts.models import User
 from accounts.forms import UserRegistrationForm, AdminUserUpdateForm
 from dashboard.forms import OfflineRegistrationExportForm, OfflineRegistrationImportForm
 from profiles.models import YouthProfile, Education
+from profiles.progress import build_profile_progress_snapshot
 from companies.models import Company, JobPost, Application, ContactRequest
 from core.models import AuditLog, District, Notification
+from core.notifications import notify_admins
 
 
 def _get_date_range(request):
@@ -107,6 +109,63 @@ def _employment_placements_summary(queryset):
         'companies': queryset.order_by().values('job__company_id').distinct().count(),
         'jobs': queryset.order_by().values('job_id').distinct().count(),
         'latest_update': latest_item.updated_at if latest_item else None,
+    }
+
+
+def _profile_progress_queryset():
+    return YouthProfile.objects.select_related(
+        'user',
+        'user__distrito',
+    ).prefetch_related(
+        'education',
+        'documents',
+        'youth_skills',
+    )
+
+
+def _decorate_profile_progress(profile):
+    snapshot = build_profile_progress_snapshot(profile)
+    next_step = snapshot['next_step'] or {
+        'step': 'final',
+        'title': 'Submissao final',
+        'short_title': 'Submissao final',
+        'filled': snapshot['total_steps'],
+        'total': snapshot['total_steps'],
+        'missing': 0,
+    }
+
+    profile.progress_snapshot = snapshot
+    profile.progress_percent = snapshot['progress']
+    profile.step_stats = snapshot['step_stats']
+    profile.completed_steps = snapshot['completed_steps']
+    profile.total_steps = snapshot['total_steps']
+    profile.total_missing = snapshot['total_missing']
+    profile.next_step = next_step
+    profile.approval_threshold = profile.MINIMUM_APPROVAL_PROGRESS
+    return profile
+
+
+def _split_validation_profiles(queryset):
+    ready_profiles = []
+    draft_profiles = []
+
+    for profile in queryset:
+        decorated = _decorate_profile_progress(profile)
+        if decorated.is_ready_for_approval:
+            ready_profiles.append(decorated)
+        else:
+            draft_profiles.append(decorated)
+
+    return ready_profiles, draft_profiles
+
+
+def _validation_bucket_counts():
+    ready_profiles, draft_profiles = _split_validation_profiles(
+        _profile_progress_queryset().filter(validado=False)
+    )
+    return {
+        'pending_profiles': len(ready_profiles),
+        'incomplete_profiles': len(draft_profiles),
     }
 
 
@@ -615,9 +674,11 @@ def _build_report_data(range_data):
 
 def _with_admin_context(request, context=None):
     """Attach shared navigation stats to admin dashboard pages."""
+    queue_counts = _validation_bucket_counts()
     nav_context = {
         'admin_nav': {
-            'pending_profiles': YouthProfile.objects.filter(completo=True, validado=False).count(),
+            'pending_profiles': queue_counts['pending_profiles'],
+            'incomplete_profiles': queue_counts['incomplete_profiles'],
             'pending_contacts': 0,
             'total_users': 0,
             'active_jobs': 0,
@@ -1031,6 +1092,40 @@ def _import_offline_registration_payload(payload, admin_user, file_name, ip_addr
             tipo='SUCESSO',
         )
 
+        notify_admins(
+            _('Novo utilizador registado'),
+            _('Novo utilizador importado offline: %(nome)s (%(perfil)s).') % {
+                'nome': user.nome,
+                'perfil': user.get_perfil_display(),
+            },
+            tipo='INFO',
+        )
+
+        if user.is_jovem and user.has_youth_profile():
+            profile = user.youth_profile
+            if profile.is_ready_for_approval and not profile.validado:
+                if profile.is_underage_for_validation:
+                    validation_message = _(
+                        'O perfil offline de %(nome)s atingiu %(progress)s%%, mas o candidato tem menos de %(minimum_age)s anos e nao pode ser aprovado.'
+                    ) % {
+                        'nome': user.nome,
+                        'progress': profile.approval_progress,
+                        'minimum_age': profile.MINIMUM_VALIDATION_AGE,
+                    }
+                else:
+                    validation_message = _(
+                        'O perfil offline de %(nome)s atingiu %(progress)s%% e aguarda validacao administrativa.'
+                    ) % {
+                        'nome': user.nome,
+                        'progress': profile.approval_progress,
+                    }
+
+                notify_admins(
+                    _('Perfil pronto para validacao'),
+                    validation_message,
+                    tipo='INFO',
+                )
+
         AuditLog.objects.create(
             user=admin_user,
             acao='Registo offline importado',
@@ -1089,6 +1184,8 @@ def admin_dashboard(request):
     thirty_days_ago = timezone.now() - timedelta(days=30)
     employment_placements = _employment_placements_queryset()
     employment_summary = _employment_placements_summary(employment_placements)
+    queue_base = _profile_progress_queryset().filter(validado=False).order_by('-updated_at', '-created_at')
+    perfis_pendentes, perfis_incompletos = _split_validation_profiles(queue_base)
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -1105,8 +1202,8 @@ def admin_dashboard(request):
         'colocacoes_emprego': employment_summary['placements'],
         'empresas_com_colocacoes': employment_summary['companies'],
     }
-    stats['validacoes_pendentes'] = max(0, stats['jovens_completos'] - stats['jovens_validados'])
-    stats['jovens_nao_completos'] = max(0, stats['total_jovens'] - stats['jovens_completos'])
+    stats['validacoes_pendentes'] = len(perfis_pendentes)
+    stats['jovens_nao_completos'] = len(perfis_incompletos)
     stats['taxa_validacao'] = int((stats['jovens_validados'] / stats['jovens_completos']) * 100) if stats['jovens_completos'] else 0
     stats['taxa_empresas_ativas'] = int((stats['empresas_ativas'] / stats['total_empresas']) * 100) if stats['total_empresas'] else 0
     stats['taxa_vagas_ativas'] = int((stats['vagas_ativas'] / stats['total_vagas']) * 100) if stats['total_vagas'] else 0
@@ -1163,9 +1260,6 @@ def admin_dashboard(request):
     ).filter(estado='PENDENTE').order_by('-created_at')[:10]
     
     # Perfis pendentes de validação
-    perfis_pendentes = YouthProfile.objects.select_related('user').filter(
-        completo=True, validado=False
-    ).order_by('-created_at')[:10]
     colocacoes_recentes = employment_placements.order_by('-updated_at', '-id')[:10]
     
     context = _with_admin_context(request, {
@@ -1177,11 +1271,90 @@ def admin_dashboard(request):
         'empresas_recentes': empresas_recentes,
         'vagas_recentes': vagas_recentes,
         'pedidos_pendentes': pedidos_pendentes,
-        'perfis_pendentes': perfis_pendentes,
+        'perfis_pendentes': perfis_pendentes[:10],
         'colocacoes_recentes': colocacoes_recentes,
     })
     
     return render(request, 'dashboard/admin.html', context)
+
+
+@admin_required
+def incomplete_profiles(request):
+    """Admin queue for profiles still below the approval threshold."""
+    all_profiles = _profile_progress_queryset().filter(validado=False)
+
+    query = (request.GET.get('q') or '').strip()
+    distrito_id = (request.GET.get('distrito') or '').strip()
+
+    filtered_profiles = all_profiles
+    if query:
+        filtered_profiles = filtered_profiles.filter(
+            Q(user__nome__icontains=query) |
+            Q(user__telefone__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(user__bi_numero__icontains=query)
+        )
+    if distrito_id:
+        filtered_profiles = filtered_profiles.filter(user__distrito_id=distrito_id)
+
+    today = timezone.localdate()
+    _, all_draft_profiles = _split_validation_profiles(all_profiles.order_by('-updated_at', '-created_at'))
+    _, filtered_draft_profiles = _split_validation_profiles(filtered_profiles.order_by('-updated_at', '-created_at'))
+    profile_cards = []
+    near_ready_count = 0
+    early_stage_count = 0
+
+    for profile in filtered_draft_profiles:
+        profile.is_recently_updated = profile.updated_at.date() == today
+
+        if profile.progress_percent >= max(35, profile.MINIMUM_APPROVAL_PROGRESS - 10):
+            profile.progress_stage = 'Quase pronto'
+            profile.progress_stage_tone = 'success'
+            near_ready_count += 1
+        elif profile.progress_percent < 20 or profile.completed_steps == 0:
+            profile.progress_stage = 'Primeiros passos'
+            profile.progress_stage_tone = 'pending'
+            early_stage_count += 1
+        else:
+            profile.progress_stage = 'Em preenchimento'
+            profile.progress_stage_tone = 'info'
+
+        profile_cards.append(profile)
+
+    profile_cards.sort(
+        key=lambda item: (item.completed_steps, item.progress_percent, item.updated_at, item.created_at),
+        reverse=True,
+    )
+
+    paginator = Paginator(profile_cards, 12)
+    page_number = request.GET.get('page') or 1
+    profiles_page = paginator.get_page(page_number)
+
+    filters = request.GET.copy()
+    if 'page' in filters:
+        del filters['page']
+    filters_qs = filters.urlencode()
+
+    summary = {
+        'total_incomplete': len(all_draft_profiles),
+        'filtered_total': len(profile_cards),
+        'districts': len({profile.user.distrito_id for profile in filtered_draft_profiles if profile.user.distrito_id}),
+        'updated_today': sum(1 for profile in filtered_draft_profiles if profile.updated_at.date() == today),
+        'near_ready': near_ready_count,
+        'early_stage': early_stage_count,
+        'minimum_progress': YouthProfile.MINIMUM_APPROVAL_PROGRESS,
+    }
+
+    context = _with_admin_context(request, {
+        'profiles_page': profiles_page,
+        'districts': District.objects.all().order_by('nome'),
+        'filtro_q': query,
+        'filtro_distrito': distrito_id,
+        'filters_qs': filters_qs,
+        'incomplete_summary': summary,
+    })
+
+    return render(request, 'dashboard/incomplete_profiles.html', context)
 
 
 @admin_required
@@ -1229,8 +1402,8 @@ def tecnico_dashboard(request):
         'vagas_ativas': JobPost.objects.filter(estado='ATIVA').count(),
         'total_candidaturas': Application.objects.count(),
     }
-    stats['validacoes_pendentes'] = YouthProfile.objects.filter(completo=True, validado=False).count()
-    stats['jovens_nao_completos'] = max(stats['total_jovens'] - stats['jovens_completos'], 0)
+    stats['validacoes_pendentes'] = _validation_bucket_counts()['pending_profiles']
+    stats['jovens_nao_completos'] = _validation_bucket_counts()['incomplete_profiles']
     stats['taxa_validacao'] = int((stats['jovens_validados'] / stats['jovens_completos']) * 100) if stats['jovens_completos'] else 0
     stats['taxa_empresas_ativas'] = int((stats['empresas_ativas'] / stats['total_empresas']) * 100) if stats['total_empresas'] else 0
     stats['taxa_vagas_ativas'] = int((stats['vagas_ativas'] / stats['total_vagas']) * 100) if stats['total_vagas'] else 0
@@ -1333,6 +1506,15 @@ def user_list(request):
                         )
             except Exception:
                 pass
+
+            notify_admins(
+                _('Novo utilizador registado'),
+                _('Novo utilizador criado no painel administrativo: %(nome)s (%(perfil)s).') % {
+                    'nome': user.nome,
+                    'perfil': user.get_perfil_display(),
+                },
+                tipo='INFO',
+            )
 
             messages.success(request, _('Utilizador criado com sucesso.'))
             return redirect('dashboard:user_list')
@@ -1463,7 +1645,7 @@ def user_detail(request, pk):
                     _make_field('Setores de interesse', youth_profile.interesses_setoriais_display),
                     _make_field('Perfil completo', youth_profile.completo, keep_empty=True),
                     _make_field('Perfil validado', youth_profile.validado, keep_empty=True),
-                    _make_field('Visivel para empresas', youth_profile.visivel, keep_empty=True),
+                    _make_field('Disponivel para empresas', youth_profile.is_visible_to_companies, keep_empty=True),
                     _make_field('Consentimento SMS', youth_profile.consentimento_sms, keep_empty=True),
                     _make_field('Consentimento WhatsApp', youth_profile.consentimento_whatsapp, keep_empty=True),
                     _make_field('Consentimento email', youth_profile.consentimento_email, keep_empty=True),
@@ -1600,29 +1782,38 @@ def user_toggle_active(request, pk):
 @admin_or_operador_required
 def validate_profiles(request):
     """Lista de perfis pendentes de validação"""
-    pending_profiles = YouthProfile.objects.filter(
-        completo=True, validado=False
-    ).select_related('user', 'user__distrito').order_by('-created_at')
+    base_profiles = _profile_progress_queryset().filter(validado=False)
 
     query = (request.GET.get('q') or '').strip()
     distrito_id = (request.GET.get('distrito') or '').strip()
 
-    perfis = pending_profiles
+    filtered_profiles = base_profiles
     if query:
-        perfis = perfis.filter(
+        filtered_profiles = filtered_profiles.filter(
             Q(user__nome__icontains=query) |
             Q(user__telefone__icontains=query) |
             Q(user__email__icontains=query) |
             Q(user__bi_numero__icontains=query)
         )
     if distrito_id:
-        perfis = perfis.filter(user__distrito_id=distrito_id)
+        filtered_profiles = filtered_profiles.filter(user__distrito_id=distrito_id)
+
+    pending_profiles, incomplete_profiles = _split_validation_profiles(
+        base_profiles.order_by('-updated_at', '-created_at')
+    )
+    perfis, filtered_incomplete_profiles = _split_validation_profiles(
+        filtered_profiles.order_by('-updated_at', '-created_at')
+    )
+    today = timezone.localdate()
 
     validation_summary = {
-        'total_pending': pending_profiles.count(),
-        'pending_today': pending_profiles.filter(created_at__date=timezone.localdate()).count(),
-        'districts': pending_profiles.exclude(user__distrito__isnull=True).values('user__distrito').distinct().count(),
-        'filtered_total': perfis.count(),
+        'total_pending': len(pending_profiles),
+        'pending_today': sum(1 for profile in pending_profiles if profile.updated_at.date() == today),
+        'districts': len({profile.user.distrito_id for profile in pending_profiles if profile.user.distrito_id}),
+        'filtered_total': len(perfis),
+        'incomplete_profiles': len(incomplete_profiles),
+        'incomplete_today': sum(1 for profile in filtered_incomplete_profiles if profile.updated_at.date() == today),
+        'minimum_progress': YouthProfile.MINIMUM_APPROVAL_PROGRESS,
     }
 
     context = _with_admin_context(request, {
@@ -1642,6 +1833,12 @@ def validate_profile(request, pk, action):
     profile = get_object_or_404(YouthProfile, pk=pk)
     
     if action == 'aprovar':
+        if not profile.is_ready_for_approval:
+            messages.error(request, profile.approval_progress_message)
+
+            next_url = request.GET.get('next')
+            return redirect(next_url or 'dashboard:validate_profiles')
+
         if profile.is_underage_for_validation:
             Notification.objects.create(
                 user=profile.user,
@@ -1665,14 +1862,25 @@ def validate_profile(request, pk, action):
         profile.save()
         
         # Notificar jovem
+        if profile.is_visible_to_companies:
+            youth_title = _('Perfil validado!')
+            youth_message = _('O teu perfil foi validado e esta agora visivel para empresas.')
+            admin_message = _('Perfil validado com sucesso!')
+        else:
+            youth_title = _('Perfil aprovado pelo admin!')
+            youth_message = profile.company_visibility_status_message
+            admin_message = _(
+                'Perfil aprovado com sucesso. O candidato ainda precisa cumprir os requisitos para ficar visivel para empresas.'
+            )
+
         Notification.objects.create(
             user=profile.user,
-            titulo=_('Perfil validado!'),
-            mensagem=_('O teu perfil foi validado e está agora visível para empresas.'),
+            titulo=youth_title,
+            mensagem=youth_message,
             tipo='SUCESSO'
         )
         
-        messages.success(request, _('Perfil validado com sucesso!'))
+        messages.success(request, admin_message)
     
     elif action == 'rejeitar':
         # Marcar como não validado

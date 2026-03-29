@@ -555,7 +555,7 @@
         <div class="talent-search-kicker">Pesquisa de talentos</div>
         <h1 class="talent-search-title">Pesquisar jovens</h1>
         <p class="talent-search-subtitle">
-          Cruze filtros, encontre perfis com melhor aderência ao que a empresa procura e avance para pedidos de contacto com mais contexto.
+          Cruze filtros e encontre apenas perfis aprovados pelo admin e com pelo menos 80% do perfil preenchido, prontos para analise e pedidos de contacto.
         </p>
         <div class="talent-search-chips">
           <span class="talent-search-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -580,7 +580,7 @@
       <div class="talent-search-stat">
         <span class="talent-search-stat-label">Base visível</span>
         <span class="talent-search-stat-value">{{ search_summary.base_total|default:0 }}</span>
-        <span class="talent-search-stat-meta">Perfis completos e disponíveis para pesquisa</span>
+        <span class="talent-search-stat-meta">Perfis aprovados pelo admin e com pelo menos 80% de preenchimento</span>
       </div>
       <div class="talent-search-stat">
         <span class="talent-search-stat-label">Resultados</span>
@@ -669,7 +669,7 @@
       </form>
 
       <div class="talent-filter-note">
-        Os pedidos de contacto continuam a passar por aprovação administrativa antes do acesso direto ao jovem.
+        A pesquisa mostra apenas perfis aprovados pelo admin e com pelo menos 80% do perfil preenchido. Os pedidos de contacto continuam a passar por aprovacao administrativa.
       </div>
     </aside>
 
@@ -683,7 +683,7 @@
           </div>
         </div>
         <div class="talent-results-toolbar">
-          <span class="talent-results-pill"><i class="bi bi-lightning-charge"></i>Ajax na paginação</span>
+          <span class="talent-results-pill"><i class="bi bi-lightning-charge"></i>Perfis com 80%+</span>
           <span class="talent-results-pill"><i class="bi bi-shield-check"></i>Contacto mediante aprovação</span>
         </div>
       </div>

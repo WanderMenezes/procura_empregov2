@@ -23,6 +23,39 @@ def _years_ago(years):
         return today.replace(month=2, day=28, year=today.year - years)
 
 
+def _approval_ready_wizard_data(district_id, birth_date=None):
+    birth_date = birth_date or _years_ago(20)
+    return {
+        '1': {
+            'nome': 'Perfil pronto',
+            'telefone': '+2399000999',
+            'email': 'pronto@example.com',
+            'contacto_alternativo': 'Mae',
+            'distrito': district_id,
+            'data_nascimento': birth_date.isoformat(),
+            'sexo': 'M',
+            'localidade': 'Riboque',
+        },
+        '2': {
+            'nivel': 'SEC',
+            'area_formacao': 'TIC',
+            'instituicao': 'Liceu Nacional',
+            'ano': '2024',
+            'curso': 'Informatica',
+            'skills': [],
+            'idiomas_data': '[]',
+        },
+        '3': {
+            'situacao_atual': 'DES',
+            'disponibilidade': 'SIM',
+            'interesse_setorial': ['TIC'],
+            'preferencia_oportunidade': 'EMP',
+            'sobre': 'Quero uma oportunidade.',
+        },
+        '4': {},
+    }
+
+
 class ContactRequestAdminActionTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
@@ -209,8 +242,44 @@ class ProfileValidationQueueTests(TestCase):
         )
         self.profile = YouthProfile.objects.create(
             user=self.youth_user,
-            completo=True,
+            completo=False,
             validado=False,
+            data_nascimento=_years_ago(20),
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            preferencia_oportunidade='EMP',
+            wizard_step=3,
+            wizard_data=_approval_ready_wizard_data(self.district.id),
+        )
+        self.incomplete_user = User.objects.create_user(
+            telefone='+2399000017',
+            nome='Jovem Incompleto',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='incompleto@example.com',
+        )
+        self.incomplete_profile = YouthProfile.objects.create(
+            user=self.incomplete_user,
+            completo=False,
+            validado=False,
+        )
+        self.ready_user = User.objects.create_user(
+            telefone='+2399000018',
+            nome='Jovem Quase Pronto',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            email='quase.pronto@example.com',
+        )
+        self.ready_profile = YouthProfile.objects.create(
+            user=self.ready_user,
+            completo=False,
+            validado=False,
+            data_nascimento=_years_ago(20),
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            preferencia_oportunidade='EMP',
+            wizard_step=3,
+            wizard_data=_approval_ready_wizard_data(self.district.id),
         )
 
     def test_validation_queue_shows_admin_link_to_profile_detail(self):
@@ -253,6 +322,68 @@ class ProfileValidationQueueTests(TestCase):
 
         self.assertContains(response, 'Menor de 18 anos')
         self.assertContains(response, 'A idade minima para aprovacao e 18 anos.')
+
+    def test_validation_queue_explains_incomplete_registrations_are_not_ready(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:validate_profiles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['validation_summary']['incomplete_profiles'], 1)
+        self.assertContains(response, 'Registos incompletos')
+        self.assertContains(response, 'abaixo de 50%')
+        self.assertNotContains(response, 'Jovem Incompleto')
+
+    def test_validation_queue_includes_profiles_that_reach_minimum_progress(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:validate_profiles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Jovem Quase Pronto')
+        self.assertContains(response, '66% preenchido')
+
+    def test_admin_cannot_approve_profile_below_minimum_progress(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse('dashboard:validate_profile', args=[self.incomplete_profile.pk, 'aprovar']),
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('dashboard:validate_profiles'))
+        self.incomplete_profile.refresh_from_db()
+        self.assertFalse(self.incomplete_profile.validado)
+        self.assertContains(response, 'atingir pelo menos 50%')
+
+    def test_admin_can_open_incomplete_profiles_page(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:incomplete_profiles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Registos incompletos')
+        self.assertContains(response, 'Jovem Incompleto')
+        self.assertContains(response, 'A seguir: Dados pessoais')
+        self.assertNotContains(response, 'Jovem Pendente')
+        self.assertNotContains(response, 'Jovem Quase Pronto')
+        self.assertEqual(response.context['incomplete_summary']['filtered_total'], 1)
+
+    def test_non_admin_cannot_open_incomplete_profiles_page(self):
+        self.client.force_login(self.youth_user)
+
+        response = self.client.get(reverse('dashboard:incomplete_profiles'))
+
+        self.assertRedirects(response, reverse('home'))
+
+    def test_admin_dashboard_links_to_incomplete_profiles_page(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:admin'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse('dashboard:incomplete_profiles'))
+        self.assertContains(response, 'Registos incompletos')
 
 
 class ReportsExportTests(TestCase):

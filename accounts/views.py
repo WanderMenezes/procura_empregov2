@@ -25,6 +25,7 @@ from .forms import (
 )
 from .models import User, PasswordResetCode
 from core.models import Notification
+from core.notifications import build_notification_groups, notify_admins
 from profiles.models import YouthProfile
 from django.shortcuts import HttpResponse
 from django.utils import timezone
@@ -63,8 +64,28 @@ class RegisterView(CreateView):
         Notification.objects.create(
             user=user,
             titulo=_('Bem-vindo à plataforma do CNJ!'),
-            mensagem=_('O seu registo foi realizado com sucesso. Complete o seu perfil para começar a receber oportunidades.'),
+            mensagem=_('O seu registo foi realizado com sucesso. Complete o seu perfil: com 50% ele pode entrar na fila de aprovacao do admin e, com 80% e aprovacao, fica visivel automaticamente para empresas.'),
             tipo='SUCESSO'
+        )
+
+        if user.is_jovem:
+            admin_message = _(
+                'Novo candidato registado na plataforma: %(nome)s. Esta conta ainda nao entra na fila de validacao; so aparece quando o perfil atingir pelo menos 50%%.'
+            ) % {
+                'nome': user.nome,
+            }
+        else:
+            admin_message = _(
+                'Novo utilizador registado na plataforma: %(nome)s (%(perfil)s).'
+            ) % {
+                'nome': user.nome,
+                'perfil': user.get_perfil_display(),
+            }
+
+        notify_admins(
+            _('Novo utilizador registado'),
+            admin_message,
+            tipo='INFO',
         )
         
         messages.success(
@@ -371,17 +392,24 @@ def profile_edit(request):
 @login_required
 def notifications_view(request):
     """View para listar notificações do usuário"""
-    notifications = request.user.notifications.all()
+    notifications = list(request.user.notifications.all()[:50])
+    notification_groups = build_notification_groups(notifications)
+    notification_category_summary = {
+        group['key']: group['count']
+        for group in notification_groups
+    }
     
     context = {
-        'notifications': notifications[:50],
-        'unread_count': notifications.filter(lida=False).count(),
+        'notifications': notifications,
+        'notification_groups': notification_groups,
+        'notification_category_summary': notification_category_summary,
+        'unread_count': request.user.notifications.filter(lida=False).count(),
         'notification_summary': {
-            'total': notifications.count(),
-            'info': notifications.filter(tipo='INFO').count(),
-            'success': notifications.filter(tipo='SUCESSO').count(),
-            'alert': notifications.filter(tipo='ALERTA').count(),
-            'error': notifications.filter(tipo='ERRO').count(),
+            'total': request.user.notifications.count(),
+            'info': request.user.notifications.filter(tipo='INFO').count(),
+            'success': request.user.notifications.filter(tipo='SUCESSO').count(),
+            'alert': request.user.notifications.filter(tipo='ALERTA').count(),
+            'error': request.user.notifications.filter(tipo='ERRO').count(),
         }
     }
     

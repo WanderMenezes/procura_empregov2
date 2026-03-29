@@ -105,7 +105,11 @@
       </div>
       <div class="app-messages-actions">
         <a href="{% url 'companies:job_applications' application.job.id %}" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Voltar as candidaturas</a>
-        <a href="{% url 'companies:youth_detail' application.youth.id %}" class="btn btn-outline-light"><i class="bi bi-person-vcard me-2"></i>Ver perfil</a>
+        {% if application.youth.is_visible_to_companies %}
+          <a href="{% url 'companies:youth_detail' application.youth.id %}" class="btn btn-outline-light"><i class="bi bi-person-vcard me-2"></i>Ver perfil</a>
+        {% else %}
+          <button type="button" class="btn btn-outline-light" disabled><i class="bi bi-person-slash me-2"></i>Perfil indisponivel</button>
+        {% endif %}
       </div>
     </div>
 

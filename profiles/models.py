@@ -14,6 +14,8 @@ class YouthProfile(models.Model):
     """Perfil completo do jovem"""
 
     MINIMUM_VALIDATION_AGE = 18
+    MINIMUM_APPROVAL_PROGRESS = 50
+    MINIMUM_COMPANY_VISIBILITY_PROGRESS = 80
     
     SEXO_CHOICES = [
         ('M', _('Masculino')),
@@ -307,7 +309,114 @@ class YouthProfile(models.Model):
 
     @property
     def can_apply_to_jobs(self):
-        return self.validado and not self.is_underage_for_validation
+        return self.is_visible_to_companies
+
+    @property
+    def approval_progress(self):
+        from .progress import build_profile_progress_snapshot
+
+        return build_profile_progress_snapshot(self)['progress']
+
+    @property
+    def is_ready_for_approval(self):
+        return self.approval_progress >= self.MINIMUM_APPROVAL_PROGRESS
+
+    @property
+    def is_ready_for_company_visibility(self):
+        return self.approval_progress >= self.MINIMUM_COMPANY_VISIBILITY_PROGRESS
+
+    @property
+    def company_visibility_is_enabled(self):
+        if self.visivel:
+            return True
+        return (
+            not getattr(self.user, 'consentimento_dados', False) and
+            self.is_ready_for_company_visibility and
+            not self.is_underage_for_validation
+        )
+
+    @property
+    def company_visibility_is_manually_hidden(self):
+        return (
+            not self.visivel and
+            getattr(self.user, 'consentimento_dados', False) and
+            not self.is_underage_for_validation
+        )
+
+    @property
+    def is_visible_to_companies(self):
+        return (
+            self.validado and
+            self.completo and
+            self.company_visibility_is_enabled and
+            not self.is_underage_for_validation and
+            self.is_ready_for_company_visibility
+        )
+
+    @property
+    def approval_progress_message(self):
+        return _(
+            'O perfil precisa de atingir pelo menos %(minimum_progress)s%% para entrar na fila de aprovacao. '
+            'Neste momento esta com %(current_progress)s%%.'
+        ) % {
+            'minimum_progress': self.MINIMUM_APPROVAL_PROGRESS,
+            'current_progress': self.approval_progress,
+        }
+
+    @property
+    def company_visibility_status_message(self):
+        current_progress = self.approval_progress
+
+        if self.is_visible_to_companies:
+            return _(
+                'O teu perfil ja foi aprovado pelo admin e esta visivel para empresas.'
+            )
+
+        if not self.is_ready_for_approval:
+            return _(
+                'O teu perfil precisa de pelo menos %(approval_progress)s%% para entrar na fila de aprovacao do admin. '
+                'Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%. '
+                'Neste momento esta com %(current_progress)s%%.'
+            ) % {
+                'approval_progress': self.MINIMUM_APPROVAL_PROGRESS,
+                'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+                'current_progress': current_progress,
+            }
+
+        if not self.validado:
+            return _(
+                'O teu perfil ja atingiu os %(approval_progress)s%% minimos para poder ser aprovado pelo admin. '
+                'Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%. '
+                'Neste momento esta com %(current_progress)s%%.'
+            ) % {
+                'approval_progress': self.MINIMUM_APPROVAL_PROGRESS,
+                'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+                'current_progress': current_progress,
+            }
+
+        if not self.completo:
+            return _(
+                'O teu perfil ja foi aprovado pelo admin, mas ainda precisas concluir o preenchimento. '
+                'Assim que atingir %(company_progress)s%%, fica visivel automaticamente para empresas. '
+                'Neste momento esta com %(current_progress)s%%.'
+            ) % {
+                'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+                'current_progress': current_progress,
+            }
+
+        if self.company_visibility_is_manually_hidden:
+            return _(
+                'O teu perfil ja cumpre os requisitos, mas esta temporariamente oculto para empresas. '
+                'Revê a visibilidade no teu perfil para voltares a aparecer nas pesquisas.'
+            )
+
+        return _(
+            'O teu perfil ja foi aprovado pelo admin. Assim que atingir %(company_progress)s%%, fica visivel automaticamente para empresas. '
+            'Neste momento esta com %(current_progress)s%%.'
+        ) % {
+            'company_progress': self.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+            'current_progress': current_progress,
+        }
 
     @property
     def interesses_setoriais_labels(self):

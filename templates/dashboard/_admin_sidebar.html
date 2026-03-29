@@ -44,6 +44,13 @@
                         <span class="admin-nav-count">{{ admin_nav.pending_contacts }}</span>
                     {% endif %}
                 </a>
+                <a href="{% url 'dashboard:incomplete_profiles' %}" class="admin-nav-link{% if active_page == 'incomplete_profiles' %} active{% endif %}">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span>Registos incompletos</span>
+                    {% if admin_nav.incomplete_profiles %}
+                        <span class="admin-nav-count">{{ admin_nav.incomplete_profiles }}</span>
+                    {% endif %}
+                </a>
                 <a href="{% url 'dashboard:employment_placements' %}" class="admin-nav-link{% if active_page == 'placements' %} active{% endif %}">
                     <i class="bi bi-person-workspace"></i>
                     <span>Colocacoes</span>
@@ -68,6 +75,7 @@
                 {{ admin_nav.pending_profiles }} perfil{{ admin_nav.pending_profiles|pluralize }} aguardam validação.
                 {% if request.user.is_admin %}
                     {{ admin_nav.pending_contacts }} pedido{{ admin_nav.pending_contacts|pluralize }} de contacto ainda precisam de resposta.
+                    {{ admin_nav.incomplete_profiles }} registo{{ admin_nav.incomplete_profiles|pluralize }} ainda precisam de concluir o perfil.
                 {% endif %}
             </p>
         </div>

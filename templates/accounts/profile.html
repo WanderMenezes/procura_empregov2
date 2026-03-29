@@ -153,7 +153,7 @@
         <div class="account-tags mt-3">
           {% if user.consentimento_dados %}<span class="account-tag"><i class="bi bi-shield-check"></i>Uso de dados</span>{% else %}<span class="account-tag muted"><i class="bi bi-shield-exclamation"></i>Dados pendentes</span>{% endif %}
           {% if user.consentimento_contacto %}<span class="account-tag"><i class="bi bi-chat-dots"></i>Contacto permitido</span>{% else %}<span class="account-tag muted"><i class="bi bi-chat-square-text"></i>Contacto pendente</span>{% endif %}
-          {% if youth_profile and youth_profile.visivel %}<span class="account-tag"><i class="bi bi-eye"></i>Perfil visível</span>{% elif youth_profile %}<span class="account-tag muted"><i class="bi bi-eye-slash"></i>Perfil oculto</span>{% endif %}
+          {% if youth_profile and youth_profile.is_visible_to_companies %}<span class="account-tag"><i class="bi bi-eye"></i>Perfil visível</span>{% elif youth_profile and youth_profile.validado %}<span class="account-tag muted"><i class="bi bi-hourglass-split"></i>Ativa aos 80%</span>{% elif youth_profile %}<span class="account-tag muted"><i class="bi bi-eye-slash"></i>Perfil em preparação</span>{% endif %}
           {% if company_profile and company_profile.verificada %}<span class="account-tag"><i class="bi bi-patch-check"></i>Empresa verificada</span>{% elif company_profile %}<span class="account-tag muted"><i class="bi bi-patch-exclamation"></i>Empresa por verificar</span>{% endif %}
         </div>
       </section>

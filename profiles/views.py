@@ -19,6 +19,12 @@ from django import forms as django_forms
 from accounts.sms import send_sms
 
 from .models import YouthProfile, Education, Experience, Document, YouthSkill
+from .progress import (
+    build_profile_progress_snapshot,
+    build_wizard_progress_snapshot,
+    compute_profile_step_progress as compute_saved_profile_step_progress,
+    compute_wizard_step_progress,
+)
 from companies.models import JobPost, Application, ContactRequest
 from .forms import (
     YouthProfileStep1Form, YouthProfileStep2Form,
@@ -28,6 +34,7 @@ from .forms import (
     build_idioma_initial_data, parse_idioma_payload
 )
 from core.models import District, Skill, Notification, AuditLog
+from core.notifications import notify_admins
 from accounts.models import User
 import random
 from accounts.models import PhoneChange
@@ -50,106 +57,8 @@ def get_or_create_skill_by_name(nome, tipo):
 
 
 def compute_profile_step_progress(profile: YouthProfile) -> dict:
-    """Compute per-step filled/total counts for an existing profile instance.
-
-    Returns dict like {'1': {'filled': int, 'total': int}, ...}
-    """
-    # expected fields per step (mirror wizard)
-    expected = {
-        '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
-        '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'idiomas'],
-        '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
-        '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
-    }
-
-    result = {}
-
-    # helper to fetch education fields
-    edu = Education.objects.filter(profile=profile).first()
-    docs = Document.objects.filter(profile=profile)
-    skills_qs = YouthSkill.objects.filter(profile=profile)
-
-    always_count_bool = {
-        'visivel',
-        'consentimento_sms',
-        'consentimento_whatsapp',
-        'consentimento_email',
-    }
-
-    for step, fields in expected.items():
-        total = len(fields)
-        filled = 0
-        for f in fields:
-            val = None
-            if step == '1':
-                if f == 'nome':
-                    val = getattr(profile.user, 'nome', '')
-                elif f == 'telefone':
-                    val = getattr(profile.user, 'telefone', '')
-                elif f == 'email':
-                    val = getattr(profile.user, 'email', '')
-                elif f == 'distrito':
-                    val = getattr(profile.user, 'distrito', None)
-                elif f == 'data_nascimento':
-                    val = getattr(profile, 'data_nascimento', None)
-                elif f == 'sexo':
-                    val = getattr(profile, 'sexo', '')
-                elif f == 'localidade':
-                    val = getattr(profile, 'localidade', '')
-                elif f == 'contacto_alternativo':
-                    val = getattr(profile, 'contacto_alternativo', '')
-            elif step == '2':
-                if f == 'skills':
-                    val = skills_qs.exists()
-                elif f == 'idiomas':
-                    val = bool(profile.idiomas_detalhados)
-                elif f == 'area_formacao':
-                    if edu and edu.area_formacao == 'OUT':
-                        val = edu.outra_area_formacao or ''
-                    else:
-                        val = getattr(edu, f, None) if edu else None
-                else:
-                    if edu:
-                        val = getattr(edu, f, None)
-                    else:
-                        val = None
-            elif step == '3':
-                val = getattr(profile, f, None)
-            elif step == '4':
-                if f == 'cv':
-                    val = docs.filter(tipo='CV').exists()
-                elif f == 'certificado':
-                    val = docs.filter(tipo='CERT').exists()
-                elif f == 'bi':
-                    val = docs.filter(tipo='BI').exists()
-                elif f == 'visivel':
-                    val = getattr(profile, 'visivel', False)
-                elif f == 'consentimento_sms':
-                    val = getattr(profile, 'consentimento_sms', False)
-                elif f == 'consentimento_whatsapp':
-                    val = getattr(profile, 'consentimento_whatsapp', False)
-                elif f == 'consentimento_email':
-                    val = getattr(profile, 'consentimento_email', False)
-
-            if isinstance(val, bool):
-                if f in always_count_bool:
-                    # For consent/visibility toggles, any choice counts as answered.
-                    filled += 1
-                elif val:
-                    filled += 1
-            elif isinstance(val, (list, tuple)):
-                if len(val) > 0:
-                    filled += 1
-            elif val not in (None, '', False):
-                filled += 1
-
-        missing = total - filled
-        if missing < 0:
-            missing = 0
-
-        result[step] = {'filled': filled, 'total': total, 'missing': missing}
-
-    return result
+    """Backward-compatible wrapper for saved-profile progress helpers."""
+    return compute_saved_profile_step_progress(profile)
 
 
 class ProfileWizardView(View):
@@ -197,6 +106,94 @@ class ProfileWizardView(View):
         wizard_data = self._profile_to_wizard_data(profile)
         wizard_data[str(step)] = step_data
         return wizard_data
+
+    def _get_persisted_wizard_data(self, profile: YouthProfile) -> dict:
+        if isinstance(profile.wizard_data, dict) and profile.wizard_data:
+            return profile.wizard_data
+        return self._profile_to_wizard_data(profile)
+
+    def _persist_wizard_draft(self, user, wizard_data: dict, step: int):
+        if not (user.is_authenticated and user.is_jovem and user.has_youth_profile()):
+            return
+
+        profile = user.youth_profile
+        step1 = wizard_data.get('1', {}) if isinstance(wizard_data.get('1', {}), dict) else {}
+        step3 = wizard_data.get('3', {}) if isinstance(wizard_data.get('3', {}), dict) else {}
+        previous_progress = build_profile_progress_snapshot(profile)['progress']
+
+        user_update_fields = []
+        if 'nome' in step1 and step1.get('nome') and user.nome != step1.get('nome'):
+            user.nome = step1.get('nome')
+            user_update_fields.append('nome')
+        if 'distrito' in step1:
+            draft_distrito_id = step1.get('distrito') or None
+            if user.distrito_id != draft_distrito_id:
+                user.distrito_id = draft_distrito_id
+                user_update_fields.append('distrito')
+        if user_update_fields:
+            user.save(update_fields=user_update_fields)
+
+        if 'data_nascimento' in step1:
+            profile.data_nascimento = step1.get('data_nascimento') or None
+        if 'sexo' in step1:
+            profile.sexo = step1.get('sexo') or ''
+        if 'localidade' in step1:
+            profile.localidade = step1.get('localidade') or ''
+        if 'contacto_alternativo' in step1:
+            profile.contacto_alternativo = step1.get('contacto_alternativo') or ''
+        if 'situacao_atual' in step3 and step3.get('situacao_atual'):
+            profile.situacao_atual = step3.get('situacao_atual')
+        if 'disponibilidade' in step3 and step3.get('disponibilidade'):
+            profile.disponibilidade = step3.get('disponibilidade')
+        if 'interesse_setorial' in step3:
+            profile.interesse_setorial = step3.get('interesse_setorial') or []
+        if 'preferencia_oportunidade' in step3 and step3.get('preferencia_oportunidade'):
+            profile.preferencia_oportunidade = step3.get('preferencia_oportunidade')
+        if 'sobre' in step3:
+            profile.sobre = step3.get('sobre') or ''
+
+        profile.wizard_data = wizard_data
+        profile.wizard_step = step
+        profile.save(update_fields=[
+            'data_nascimento',
+            'sexo',
+            'localidade',
+            'contacto_alternativo',
+            'situacao_atual',
+            'disponibilidade',
+            'interesse_setorial',
+            'preferencia_oportunidade',
+            'sobre',
+            'wizard_data',
+            'wizard_step',
+        ])
+        current_progress = build_profile_progress_snapshot(profile)['progress']
+
+        if (
+            not profile.validado and
+            previous_progress < profile.MINIMUM_APPROVAL_PROGRESS <= current_progress
+        ):
+            if profile.is_underage_for_validation:
+                admin_message = _(
+                    'O perfil de %(nome)s atingiu %(progress)s%%, mas o candidato tem menos de %(minimum_age)s anos e nao pode ser aprovado.'
+                ) % {
+                    'nome': profile.user.nome,
+                    'progress': current_progress,
+                    'minimum_age': profile.MINIMUM_VALIDATION_AGE,
+                }
+            else:
+                admin_message = _(
+                    'O perfil de %(nome)s atingiu %(progress)s%% e entrou na fila de validacao administrativa.'
+                ) % {
+                    'nome': profile.user.nome,
+                    'progress': current_progress,
+                }
+
+            notify_admins(
+                _('Perfil pronto para validacao'),
+                admin_message,
+                tipo='INFO',
+            )
 
     def _profile_to_wizard_data(self, profile: YouthProfile) -> dict:
         user = profile.user
@@ -254,7 +251,7 @@ class ProfileWizardView(View):
         }
 
         step4 = {
-            'visivel': profile.visivel,
+            'visivel': profile.company_visibility_is_enabled,
             'consentimento_sms': profile.consentimento_sms,
             'consentimento_whatsapp': profile.consentimento_whatsapp,
             'consentimento_email': profile.consentimento_email,
@@ -279,7 +276,11 @@ class ProfileWizardView(View):
         profile = request.user.youth_profile if request.user.has_youth_profile() else None
         wizard_data = request.session.get('wizard_data', {})
         if profile and (not wizard_data or request.GET.get('reset') == '1'):
-            wizard_data = self._profile_to_wizard_data(profile)
+            if request.GET.get('reset') == '1':
+                wizard_data = self._profile_to_wizard_data(profile)
+                self._persist_wizard_draft(request.user, wizard_data, step)
+            else:
+                wizard_data = self._get_persisted_wizard_data(profile)
             request.session['wizard_data'] = wizard_data
         
         step = int(step)
@@ -297,7 +298,7 @@ class ProfileWizardView(View):
             }
         elif step == 4:
             initial = {
-                'visivel': request.user.consentimento_dados,
+                'visivel': profile.company_visibility_is_enabled if profile else request.user.consentimento_dados,
                 'consentimento_sms': request.user.consentimento_contacto,
                 'consentimento_whatsapp': request.user.consentimento_contacto,
                 'consentimento_email': request.user.consentimento_contacto,
@@ -323,6 +324,7 @@ class ProfileWizardView(View):
         
         step = int(step)
         form = self.get_form_for_step(step, data=request.POST, files=request.FILES)
+        is_final_submit = 'submit' in request.POST and step == 4
 
         is_autosave = 'autosave' in request.POST
         if is_autosave:
@@ -332,6 +334,8 @@ class ProfileWizardView(View):
             else:
                 wizard_data[str(step)] = self.get_raw_form_data(form, request)
             request.session['wizard_data'] = wizard_data
+            if not is_final_submit:
+                self._persist_wizard_draft(request.user, wizard_data, step)
             progress = self.compute_progress(wizard_data)
             step_stats = self.compute_step_progress(wizard_data).get(str(step), {'filled': 0, 'total': 0})
             return JsonResponse({
@@ -347,6 +351,7 @@ class ProfileWizardView(View):
             current_step_data = self.get_form_data(form)
             wizard_data[str(step)] = current_step_data
             request.session['wizard_data'] = wizard_data
+            self._persist_wizard_draft(request.user, wizard_data, step)
             
             if 'next' in request.POST and step < 4:
                 return redirect('profiles:wizard_step', step=step + 1)
@@ -363,7 +368,7 @@ class ProfileWizardView(View):
                 # Salvar rascunho
                 messages.success(request, _('Progresso guardado! Podes continuar depois.'))
                 return redirect('home')
-            elif 'submit' in request.POST and step == 4:
+            elif is_final_submit:
                 # Submeter perfil completo
                 return self.submit_profile(request)
         
@@ -437,67 +442,11 @@ class ProfileWizardView(View):
 
     def compute_progress(self, wizard_data: dict) -> int:
         """Calcular percentagem de conclusão com base nos campos preenchidos no wizard."""
-        step_map = self.compute_step_progress(wizard_data)
-        total = sum(s.get('total', 0) for s in step_map.values())
-        filled = sum(s.get('filled', 0) for s in step_map.values())
-
-        if total == 0:
-            return 0
-        return int((filled / total) * 100)
+        return build_wizard_progress_snapshot(wizard_data)['progress']
 
     def compute_step_progress(self, wizard_data: dict) -> dict:
         """Return a dict mapping step -> {'filled': int, 'total': int} based on expected fields."""
-        expected = {
-            '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
-            '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'idiomas'],
-            '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
-            '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email']
-        }
-
-        always_count_bool = {
-            'visivel',
-            'consentimento_sms',
-            'consentimento_whatsapp',
-            'consentimento_email',
-        }
-
-        result = {}
-        for step, fields in expected.items():
-            total = len(fields)
-            filled = 0
-            step_data = wizard_data.get(step, {})
-            for f in fields:
-                if f == 'idiomas':
-                    payload = parse_idioma_payload(step_data.get('idiomas_data'))
-                    if payload:
-                        filled += 1
-                        continue
-                    has_partial_idioma = any(
-                        step_data.get(f'idioma_{index}_nome') or step_data.get(f'idioma_{index}_dominio')
-                        for index in range(1, 5)
-                    )
-                    if has_partial_idioma:
-                        filled += 1
-                    continue
-                if f == 'area_formacao':
-                    val = step_data.get(f)
-                    if val == 'OUT':
-                        if step_data.get('outra_area_formacao'):
-                            filled += 1
-                        continue
-                val = step_data.get(f)
-                if isinstance(val, bool):
-                    if f in always_count_bool:
-                        filled += 1
-                    elif val:
-                        filled += 1
-                elif isinstance(val, list):
-                    if len(val) > 0:
-                        filled += 1
-                elif val not in (None, '', False):
-                    filled += 1
-            result[step] = {'filled': filled, 'total': total}
-        return result
+        return compute_wizard_step_progress(wizard_data)
     
     def submit_profile(self, request):
         """Cria o perfil completo do jovem"""
@@ -533,11 +482,17 @@ class ProfileWizardView(View):
             editing = profile is not None
             validation_revoked_for_age = False
             disabled_company_contacts = 0
+            was_complete = bool(profile.completo) if editing else False
+            was_validated = bool(profile.validado) if editing else False
+            had_active_profile = False
+            was_ready_for_validation = (
+                build_profile_progress_snapshot(profile)['progress'] >= profile.MINIMUM_APPROVAL_PROGRESS
+                if editing else False
+            )
 
             if editing:
-                was_validated = profile.validado
-                if was_validated:
-                    disabled_company_contacts = profile.contact_requests.filter(estado='APROVADO').count()
+                disabled_company_contacts = profile.contact_requests.filter(estado='APROVADO').count()
+                had_active_profile = bool(profile.validado or profile.visivel or disabled_company_contacts)
                 profile.data_nascimento = step1.get('data_nascimento')
                 profile.sexo = step1.get('sexo') or ''
                 profile.localidade = step1.get('localidade') or ''
@@ -554,6 +509,7 @@ class ProfileWizardView(View):
                 profile.consentimento_email = consentimento_email
                 profile.completo = True
                 profile.wizard_step = 4
+                profile.wizard_data = {}
                 profile.save()
 
                 if was_validated:
@@ -578,7 +534,8 @@ class ProfileWizardView(View):
                     consentimento_whatsapp=consentimento_whatsapp,
                     consentimento_email=consentimento_email,
                     completo=True,
-                    wizard_step=4
+                    wizard_step=4,
+                    wizard_data={}
                 )
 
             # Educação (atualiza ou cria)
@@ -690,6 +647,15 @@ class ProfileWizardView(View):
             # Limpar sessão
             if 'wizard_data' in request.session:
                 del request.session['wizard_data']
+            profile.refresh_from_db()
+            validation_revoked_for_age = (
+                editing and
+                had_active_profile and
+                not profile.validado and
+                profile.is_underage_for_validation
+            )
+            current_snapshot = build_profile_progress_snapshot(profile)
+            is_ready_for_validation = current_snapshot['progress'] >= profile.MINIMUM_APPROVAL_PROGRESS
             
             # Notificação
             if profile.is_underage_for_validation:
@@ -709,29 +675,109 @@ class ProfileWizardView(View):
                     title = _('Perfil criado com restricao de idade')
                     message = str(_('O teu perfil foi criado. ')) + profile.validation_age_message
 
+                if not validation_revoked_for_age:
+                    Notification.objects.create(
+                        user=request.user,
+                        titulo=title,
+                        mensagem=message,
+                        tipo='ALERTA'
+                    )
+                messages.warning(request, message)
+            elif profile.is_visible_to_companies and not was_complete:
+                message = _(
+                    'O teu perfil ficou completo e, como ja tinha aprovacao administrativa e pelo menos 80% de preenchimento, esta agora visivel para empresas e pronto para candidaturas.'
+                )
                 Notification.objects.create(
                     user=request.user,
-                    titulo=title,
+                    titulo=_('Perfil completo e aprovado!'),
                     mensagem=message,
-                    tipo='ALERTA'
+                    tipo='SUCESSO'
                 )
-                messages.warning(request, message)
+                messages.success(request, message)
             elif editing:
+                if profile.is_visible_to_companies:
+                    message = _(
+                        'O teu perfil foi atualizado com sucesso e continua visivel para empresas.'
+                    )
+                elif profile.validado:
+                    message = _(
+                        'O teu perfil foi atualizado com sucesso. %(status)s'
+                    ) % {
+                        'status': profile.company_visibility_status_message,
+                    }
+                elif is_ready_for_validation:
+                    message = _(
+                        'O teu perfil foi atualizado e ja entrou na fila de validacao do administrador. Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%.'
+                    )
+                    message = message % {
+                        'company_progress': profile.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+                    }
+                else:
+                    message = _(
+                        'O teu perfil foi atualizado. %(status)s'
+                    ) % {
+                        'status': profile.company_visibility_status_message,
+                    }
                 Notification.objects.create(
                     user=request.user,
                     titulo=_('Perfil atualizado com sucesso!'),
-                    mensagem=_('O teu perfil foi atualizado e está pronto para novas oportunidades.'),
+                    mensagem=message,
                     tipo='SUCESSO'
                 )
-                messages.success(request, _('Perfil atualizado com sucesso!'))
+                messages.success(request, message)
             else:
+                if profile.is_visible_to_companies:
+                    message = _(
+                        'O teu perfil foi criado e ja esta visivel para empresas.'
+                    )
+                elif is_ready_for_validation and not profile.validado:
+                    message = _(
+                        'O teu perfil foi criado e ja entrou na fila de validacao do administrador. Depois da aprovacao, fica visivel automaticamente para empresas ao atingir %(company_progress)s%%.'
+                    )
+                    message = message % {
+                        'company_progress': profile.MINIMUM_COMPANY_VISIBILITY_PROGRESS,
+                    }
+                else:
+                    message = _(
+                        'O teu perfil foi criado. %(status)s'
+                    ) % {
+                        'status': profile.company_visibility_status_message,
+                    }
                 Notification.objects.create(
                     user=request.user,
                     titulo=_('Perfil criado com sucesso!'),
-                    mensagem=_('O teu perfil está completo e visível para empresas. Boa sorte nas oportunidades!'),
+                    mensagem=message,
                     tipo='SUCESSO'
                 )
-                messages.success(request, _('Perfil criado com sucesso!'))
+                messages.success(request, message)
+
+            entered_validation_queue = (
+                is_ready_for_validation and
+                not profile.validado and
+                not was_ready_for_validation
+            )
+            if entered_validation_queue:
+                if profile.is_underage_for_validation:
+                    admin_message = _(
+                        'O perfil de %(nome)s atingiu %(progress)s%%, mas o candidato tem menos de %(minimum_age)s anos e nao pode ser aprovado.'
+                    ) % {
+                        'nome': profile.user.nome,
+                        'progress': current_snapshot['progress'],
+                        'minimum_age': profile.MINIMUM_VALIDATION_AGE,
+                    }
+                else:
+                    admin_message = _(
+                        'O perfil de %(nome)s atingiu %(progress)s%% e aguarda validacao administrativa.'
+                    ) % {
+                        'nome': profile.user.nome,
+                        'progress': current_snapshot['progress'],
+                    }
+
+                notify_admins(
+                    _('Perfil pronto para validacao'),
+                    admin_message,
+                    tipo='INFO',
+                )
             return redirect('profiles:detail')
             
         except Exception as e:
@@ -752,10 +798,9 @@ def profile_detail(request):
     profile = request.user.youth_profile
     
     # compute progress and per-step stats
-    step_stats = compute_profile_step_progress(profile)
-    total_filled = sum(s['filled'] for s in step_stats.values())
-    total_slots = sum(s['total'] for s in step_stats.values())
-    progress = int((total_filled / total_slots) * 100) if total_slots else 0
+    progress_snapshot = build_profile_progress_snapshot(profile)
+    step_stats = progress_snapshot['step_stats']
+    progress = progress_snapshot['progress']
 
     # document-only stats for sidebar display
     docs_qs = Document.objects.filter(profile=profile)
@@ -1216,13 +1261,7 @@ def _user_can_access_document(user, document):
     if user.is_jovem and user.has_youth_profile():
         return document.profile_id == user.youth_profile.id
     if user.is_empresa and user.has_company_profile():
-        company = user.company_profile
-        if Application.objects.filter(job__company=company, youth=document.profile).exists():
-            return True
-        if ContactRequest.objects.filter(company=company, youth=document.profile, estado='APROVADO').exists():
-            return True
-        if document.profile.visivel and document.profile.completo:
-            return True
+        return document.profile.is_visible_to_companies
     return False
 
 
@@ -1461,6 +1500,38 @@ def assisted_register(request):
                 ip_address=request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
             )
 
+            notify_admins(
+                _('Novo utilizador registado'),
+                _('Novo utilizador criado via registo assistido: %(nome)s (%(perfil)s).') % {
+                    'nome': user.nome,
+                    'perfil': user.get_perfil_display(),
+                },
+                tipo='INFO',
+            )
+
+            if profile.is_ready_for_approval and not profile.validado:
+                if profile.is_underage_for_validation:
+                    validation_message = _(
+                        'O perfil de %(nome)s foi criado em registo assistido, atingiu %(progress)s%%, mas o candidato tem menos de %(minimum_age)s anos e nao pode ser aprovado.'
+                    ) % {
+                        'nome': user.nome,
+                        'progress': profile.approval_progress,
+                        'minimum_age': profile.MINIMUM_VALIDATION_AGE,
+                    }
+                else:
+                    validation_message = _(
+                        'O perfil de %(nome)s foi criado em registo assistido, atingiu %(progress)s%% e aguarda validacao administrativa.'
+                    ) % {
+                        'nome': user.nome,
+                        'progress': profile.approval_progress,
+                    }
+
+                notify_admins(
+                    _('Perfil pronto para validacao'),
+                    validation_message,
+                    tipo='INFO',
+                )
+
             messages.success(
                 request,
                 _('Jovem registado com sucesso! O perfil aguarda validação do administrador.')
@@ -1484,7 +1555,14 @@ def search_youth(request):
     nivel = request.GET.get('nivel', '')
     area = request.GET.get('area', '')
     
-    profiles = YouthProfile.objects.filter(visivel=True, completo=True)
+    profiles = YouthProfile.objects.filter(
+        completo=True,
+        validado=True,
+    ).select_related('user', 'user__distrito').prefetch_related(
+        'education',
+        'documents',
+        'youth_skills',
+    )
     
     if query:
         profiles = profiles.filter(
@@ -1504,6 +1582,8 @@ def search_youth(request):
     
     results = []
     for profile in profiles.distinct()[:50]:
+        if not profile.is_visible_to_companies:
+            continue
         results.append({
             'id': profile.id,
             'nome': profile.nome_completo,

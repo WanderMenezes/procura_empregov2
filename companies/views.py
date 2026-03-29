@@ -9,7 +9,6 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 from django.urls import reverse_lazy
 from django.db.models import Q, Sum
-from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponse
 import csv
 
@@ -17,6 +16,7 @@ from .models import Company, JobPost, Application, ContactRequest, ApplicationMe
 from .forms import CompanyProfileForm, JobPostForm, ContactRequestForm, YouthSearchForm
 from profiles.models import YouthProfile, Education
 from core.models import District, Notification
+from core.notifications import notify_admins
 from django.core.paginator import Paginator
 
 
@@ -24,6 +24,21 @@ def _close_job_if_full(job):
     if not job.tem_vagas_disponiveis and job.estado != 'FECHADA':
         job.estado = 'FECHADA'
         job.save(update_fields=['estado'])
+
+
+def _notify_admins_about_placement(application):
+    if application.estado != 'ACEITE' or application.job.tipo != 'EMP':
+        return
+
+    notify_admins(
+        _('Nova colocacao em emprego'),
+        _('A candidatura de %(jovem)s para a vaga "%(vaga)s" da empresa "%(empresa)s" foi aceite e conta como colocacao.') % {
+            'jovem': application.youth.user.nome,
+            'vaga': application.job.titulo,
+            'empresa': application.job.company.nome,
+        },
+        tipo='SUCESSO',
+    )
 
 
 def _sync_company_identity(user, company):
@@ -51,6 +66,14 @@ def _sync_company_identity(user, company):
 
     if update_fields:
         user.save(update_fields=update_fields)
+
+
+def _company_visible_profiles(profiles):
+    visible_profiles = []
+    for profile in profiles:
+        if profile.is_visible_to_companies:
+            visible_profiles.append(profile)
+    return visible_profiles
 
 
 @login_required
@@ -324,7 +347,7 @@ def job_apply(request, pk):
     if not profile.can_apply_to_jobs:
         messages.warning(
             request,
-            _('Podes ver as vagas, mas so podes candidatar-te depois da validacao do administrador.')
+            profile.company_visibility_status_message
         )
         return redirect('profiles:available_jobs')
 
@@ -364,6 +387,7 @@ def application_update(request, pk, estado):
     )
     
     if estado in ['PENDENTE', 'EM_ANALISE', 'ACEITE', 'REJEITADA']:
+        was_accepted = application.estado == 'ACEITE'
         if estado == 'ACEITE' and application.estado != 'ACEITE' and not application.job.tem_vagas_disponiveis:
             messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
             return redirect('companies:job_applications', pk=application.job.pk)
@@ -373,6 +397,8 @@ def application_update(request, pk, estado):
 
         if estado == 'ACEITE':
             _close_job_if_full(application.job)
+            if not was_accepted:
+                _notify_admins_about_placement(application)
         
         # Notificar jovem
         Notification.objects.create(
@@ -400,6 +426,7 @@ def application_manage(request, pk):
         mensagem = (request.POST.get('resposta_empresa') or '').strip()
 
         if estado in ['PENDENTE', 'EM_ANALISE', 'ACEITE', 'REJEITADA']:
+            was_accepted = application.estado == 'ACEITE'
             if estado == 'ACEITE' and application.estado != 'ACEITE' and not application.job.tem_vagas_disponiveis:
                 messages.error(request, _('Esta vaga já não tem vagas disponíveis.'))
                 return redirect('companies:job_applications', pk=application.job.pk)
@@ -414,6 +441,8 @@ def application_manage(request, pk):
         application.save()
         if estado == 'ACEITE':
             _close_job_if_full(application.job)
+            if not was_accepted:
+                _notify_admins_about_placement(application)
 
         # Notificar jovem
         notif_msg = _('A tua candidatura para "{}" foi atualizada para: {}.').format(
@@ -439,7 +468,7 @@ def application_manage(request, pk):
 def application_messages(request, pk):
     """Histórico de mensagens de uma candidatura (empresa)"""
     application = get_object_or_404(Application, pk=pk, job__company__user=request.user)
-    if not application.youth.can_apply_to_jobs or not application.youth.visivel:
+    if not application.youth.is_visible_to_companies:
         application.youth.user.telefone = ''
         application.youth.user.email = ''
     messages_qs = application.messages.all().order_by('-created_at')
@@ -477,20 +506,20 @@ def search_youth(request):
     base_qs = (
         YouthProfile.objects
         .filter(
-            visivel=True,
             completo=True,
             validado=True,
             data_nascimento__isnull=False,
             data_nascimento__lte=minimum_birth_date,
         )
-        .select_related('user')
-        .prefetch_related('youth_skills__skill', 'education', 'experiences')
+        .select_related('user', 'user__distrito')
+        .prefetch_related('youth_skills__skill', 'education', 'experiences', 'documents')
         .order_by('-created_at')
     )
 
-    total_pool = base_qs.count()
-    available_now = base_qs.filter(disponibilidade='SIM').count()
-    with_experience = base_qs.filter(experiences__isnull=False).distinct().count()
+    base_profiles = _company_visible_profiles(base_qs)
+    total_pool = len(base_profiles)
+    available_now = sum(1 for profile in base_profiles if profile.disponibilidade == 'SIM')
+    with_experience = sum(1 for profile in base_profiles if profile.experiences.all())
 
     results_qs = base_qs
     active_filters = 0
@@ -536,7 +565,8 @@ def search_youth(request):
         results_qs = results_qs.distinct()
 
     # Paginação
-    paginator = Paginator(results_qs, 10)
+    filtered_profiles = _company_visible_profiles(results_qs)
+    paginator = Paginator(filtered_profiles, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -590,14 +620,13 @@ def youth_detail(request, pk):
         youth=profile
     ).first()
     is_profile_available = bool(
-        profile.visivel and
-        profile.validado and
         profile.data_nascimento and
-        profile.data_nascimento <= minimum_birth_date
+        profile.data_nascimento <= minimum_birth_date and
+        profile.is_visible_to_companies
     )
 
     if not is_profile_available and not existing_request:
-        messages.warning(request, _('Este perfil jÃ¡ nÃ£o estÃ¡ disponÃ­vel para empresas.'))
+        messages.warning(request, _('Este perfil ja nao esta disponivel para empresas. As empresas so podem ver perfis aprovados pelo admin e com pelo menos 80% do perfil preenchido.'))
         return redirect('companies:search_youth')
     
     context = {
@@ -637,13 +666,12 @@ def contact_request_create(request, youth_pk):
     )
 
     is_profile_available = bool(
-        youth.visivel and
-        youth.validado and
         youth.data_nascimento and
-        youth.data_nascimento <= minimum_birth_date
+        youth.data_nascimento <= minimum_birth_date and
+        youth.is_visible_to_companies
     )
     if not is_profile_available:
-        messages.warning(request, _('Este perfil jÃ¡ nÃ£o estÃ¡ disponÃ­vel para novos pedidos de contacto.'))
+        messages.warning(request, _('Este perfil ja nao esta disponivel para novos pedidos de contacto. As empresas so podem ver perfis aprovados pelo admin e com pelo menos 80% do perfil preenchido.'))
         return redirect('companies:search_youth')
     
     # Verificar se já existe pedido
@@ -672,19 +700,14 @@ def contact_request_create(request, youth_pk):
                 tipo='INFO'
             )
 
-            # Notificar administradores
-            User = get_user_model()
-            admins = User.objects.filter(perfil=User.ProfileType.ADMIN, is_active=True)
-            for admin in admins:
-                Notification.objects.create(
-                    user=admin,
-                    titulo=_('Novo pedido de contacto'),
-                    mensagem=_('A empresa "%(empresa)s" solicitou contacto com %(jovem)s.') % {
-                        'empresa': company.nome,
-                        'jovem': youth.user.nome
-                    },
-                    tipo='INFO'
-                )
+            notify_admins(
+                _('Novo pedido de contacto'),
+                _('A empresa "%(empresa)s" solicitou contacto com %(jovem)s.') % {
+                    'empresa': company.nome,
+                    'jovem': youth.user.nome,
+                },
+                tipo='INFO',
+            )
             
             messages.success(request, _('Pedido de contacto enviado! Aguarda aprovação do administrador.'))
             return redirect('companies:youth_detail', pk=youth_pk)
@@ -725,13 +748,16 @@ def contact_request_bulk_create(request):
         try:
             youth = YouthProfile.objects.get(
                 pk=int(yid),
-                visivel=True,
                 completo=True,
                 validado=True,
                 data_nascimento__isnull=False,
                 data_nascimento__lte=minimum_birth_date,
             )
         except (YouthProfile.DoesNotExist, ValueError):
+            skipped += 1
+            continue
+
+        if not youth.is_visible_to_companies:
             skipped += 1
             continue
 
@@ -763,18 +789,14 @@ def contact_request_bulk_create(request):
         messages.warning(request, _('%(n)d jovem(s) ignorado(s) (já tinha pedido ou inválido).') % {'n': skipped})
 
     if created:
-        User = get_user_model()
-        admins = User.objects.filter(perfil=User.ProfileType.ADMIN, is_active=True)
-        for admin in admins:
-            Notification.objects.create(
-                user=admin,
-                titulo=_('Novos pedidos de contacto'),
-                mensagem=_('A empresa "%(empresa)s" criou %(n)d pedido(s) de contacto.') % {
-                    'empresa': company.nome,
-                    'n': created
-                },
-                tipo='INFO'
-            )
+        notify_admins(
+            _('Novos pedidos de contacto'),
+            _('A empresa "%(empresa)s" criou %(n)d pedido(s) de contacto.') % {
+                'empresa': company.nome,
+                'n': created,
+            },
+            tipo='INFO',
+        )
 
     return redirect('companies:search_youth')
 

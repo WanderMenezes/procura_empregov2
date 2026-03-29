@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from core.models import Notification
+
 
 User = get_user_model()
 
@@ -85,6 +87,13 @@ class LoginViewTests(TestCase):
 
 
 class RegisterViewTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000199',
+            nome='Admin Notificacoes',
+            perfil=User.ProfileType.ADMIN,
+        )
+
     def _company_payload(self, **overrides):
         payload = {
             'perfil': User.ProfileType.EMPRESA,
@@ -97,6 +106,21 @@ class RegisterViewTests(TestCase):
             'consentimento_dados': 'on',
             'consentimento_contacto': 'on',
             'confirmacao_empresa': 'on',
+        }
+        payload.update(overrides)
+        return payload
+
+    def _youth_payload(self, **overrides):
+        payload = {
+            'perfil': User.ProfileType.JOVEM,
+            'nome': 'Ana Candidata',
+            'telefone': '+2399000112',
+            'email': 'ana.candidata@example.com',
+            'bi_numero': 'BI-ANA-112',
+            'password1': 'SenhaSegura123',
+            'password2': 'SenhaSegura123',
+            'consentimento_dados': 'on',
+            'consentimento_contacto': 'on',
         }
         payload.update(overrides)
         return payload
@@ -129,3 +153,75 @@ class RegisterViewTests(TestCase):
         self.assertEqual(user.perfil, User.ProfileType.EMPRESA)
         self.assertEqual(user.nome_empresa, 'Empresa Horizonte')
         self.assertEqual(user.nif, '123456789')
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.admin,
+                titulo='Novo utilizador registado',
+                mensagem__icontains='Empresa Horizonte',
+            ).exists()
+        )
+
+    def test_youth_registration_notifies_admin_that_validation_waits_for_minimum_progress(self):
+        response = self.client.post(
+            reverse('accounts:register'),
+            self._youth_payload(),
+        )
+
+        self.assertRedirects(response, reverse('accounts:login'), fetch_redirect_response=False)
+        notification = Notification.objects.filter(
+            user=self.admin,
+            titulo='Novo utilizador registado',
+            mensagem__icontains='ainda nao entra na fila de validacao',
+        ).first()
+        self.assertIsNotNone(notification)
+        self.assertIn('Ana Candidata', notification.mensagem)
+        self.assertIn('50%', notification.mensagem)
+
+
+class NotificationViewTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            telefone='+2399000301',
+            nome='Admin Centro',
+            perfil=User.ProfileType.ADMIN,
+        )
+
+    def test_admin_notifications_are_grouped_by_operational_topic(self):
+        Notification.objects.create(
+            user=self.admin,
+            titulo='Novo utilizador registado',
+            mensagem='Novo utilizador registado na plataforma: Ana (Jovem).',
+            tipo='INFO',
+        )
+        Notification.objects.create(
+            user=self.admin,
+            titulo='Perfil pronto para validacao',
+            mensagem='O perfil de Ana atingiu 66% e aguarda validacao administrativa.',
+            tipo='INFO',
+        )
+        Notification.objects.create(
+            user=self.admin,
+            titulo='Novo pedido de contacto',
+            mensagem='A empresa "Empresa Centro" solicitou contacto com Ana.',
+            tipo='INFO',
+        )
+        Notification.objects.create(
+            user=self.admin,
+            titulo='Nova colocacao em emprego',
+            mensagem='A candidatura de Ana foi aceite e conta como colocacao.',
+            tipo='SUCESSO',
+        )
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse('accounts:notifications'))
+
+        self.assertEqual(response.status_code, 200)
+        groups = response.context['notification_groups']
+        self.assertEqual(
+            [group['key'] for group in groups],
+            ['utilizadores', 'validacao', 'contactos', 'colocacoes'],
+        )
+        self.assertContains(response, 'Utilizadores')
+        self.assertContains(response, 'Validacao')
+        self.assertContains(response, 'Contactos')
+        self.assertContains(response, 'Colocacoes')

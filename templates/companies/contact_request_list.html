@@ -39,7 +39,7 @@
             <div class="contact-request-copy">{{ r.motivo|truncatewords:32 }}</div>
           </div>
 
-          {% if r.estado == 'APROVADO' and r.youth.validado and r.youth.visivel and not r.youth.is_underage_for_validation %}
+          {% if r.estado == 'APROVADO' and r.youth.is_visible_to_companies %}
             <div class="contact-request-block">
               <span class="contact-request-label">Contacto liberado</span>
               <div class="contact-request-status-copy">O pedido foi aprovado. Ja pode seguir com a abordagem direta ao jovem.</div>

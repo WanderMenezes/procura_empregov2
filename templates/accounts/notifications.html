@@ -18,9 +18,11 @@
   .notifications-kicker { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .82; margin-bottom: .4rem; }
   .notifications-title { font-size: clamp(1.95rem, 2.5vw, 2.8rem); line-height: 1.04; font-weight: 700; margin-bottom: .35rem; }
   .notifications-subtitle { max-width: 64ch; margin: 0; color: rgba(255,255,255,.86); }
-  .notifications-chips, .notifications-actions, .notifications-tags, .notification-card-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+  .notifications-chips, .notifications-actions, .notifications-tags, .notification-card-actions, .notifications-group-meta {
+    display: flex; flex-wrap: wrap; gap: .65rem;
+  }
   .notifications-chips { margin-top: 1rem; }
-  .notifications-chip, .notifications-tag {
+  .notifications-chip, .notifications-tag, .notifications-group-pill {
     display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .84rem; font-weight: 600;
   }
   .notifications-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; }
@@ -39,7 +41,18 @@
   .notifications-panel-head h5 { margin-bottom: .2rem; }
   .notifications-panel-subtitle { margin: 0; color: #66768c; font-size: .92rem; }
   .notifications-toolbar { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .65rem; }
-  .notifications-tag { background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86; }
+  .notifications-tag, .notifications-group-pill {
+    background: #f7fafc; border: 1px solid rgba(18,32,51,.08); color: #5b6e86;
+  }
+  .notifications-groups { display: grid; gap: 1.25rem; }
+  .notifications-group {
+    border-radius: 24px; padding: 1.1rem; background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid rgba(18,32,51,.08);
+  }
+  .notifications-group-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;
+  }
+  .notifications-group-title { margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 700; color: #132133; }
+  .notifications-group-copy { margin: 0; color: #66768c; font-size: .92rem; }
   .notifications-list { display: grid; gap: 1rem; }
   .notification-card {
     border-radius: 24px; padding: 1.15rem; background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid rgba(18,32,51,.08);
@@ -70,7 +83,9 @@
   }
   .notifications-empty i { display: block; font-size: 1.8rem; color: var(--primary-color); margin-bottom: .55rem; }
   @media (max-width: 991.98px) {
-    .notifications-hero-head, .notifications-panel-head, .notification-card-top, .notification-card-footer { flex-direction: column; align-items: stretch; }
+    .notifications-hero-head, .notifications-panel-head, .notification-card-top, .notification-card-footer, .notifications-group-head {
+      flex-direction: column; align-items: stretch;
+    }
     .notifications-actions .btn { width: 100%; }
     .notifications-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
   }
@@ -88,14 +103,14 @@
     <div class="notifications-hero-head">
       <div>
         <div class="notifications-kicker">Centro de alertas</div>
-        <h1 class="notifications-title">Notificações</h1>
+        <h1 class="notifications-title">Notificacoes</h1>
         <p class="notifications-subtitle">
-          Acompanhe mensagens do sistema, respostas importantes e atualizações da plataforma num único painel mais claro.
+          Acompanhe mensagens do sistema, respostas importantes e atualizacoes da plataforma num unico painel mais claro.
         </p>
         <div class="notifications-chips">
           <span class="notifications-chip"><i class="bi bi-person-badge"></i>{{ request.user.get_perfil_display }}</span>
           <span class="notifications-chip"><i class="bi bi-bell"></i>{{ unread_count|default:0 }} por ler</span>
-          <span class="notifications-chip"><i class="bi bi-clock-history"></i>Últimas {{ notifications|length }} notificações</span>
+          <span class="notifications-chip"><i class="bi bi-clock-history"></i>Ultimas {{ notifications|length }} notificacoes</span>
         </div>
       </div>
       <div class="notifications-actions">
@@ -115,22 +130,22 @@
       <div class="notifications-stat">
         <span class="notifications-stat-label">Total</span>
         <span class="notifications-stat-value">{{ notification_summary.total|default:0 }}</span>
-        <span class="notifications-stat-meta">notificações disponíveis</span>
+        <span class="notifications-stat-meta">notificacoes disponiveis</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Por ler</span>
         <span class="notifications-stat-value">{{ unread_count|default:0 }}</span>
-        <span class="notifications-stat-meta">itens que ainda pedem atenção</span>
+        <span class="notifications-stat-meta">itens que ainda pedem atencao</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Sucesso</span>
         <span class="notifications-stat-value">{{ notification_summary.success|default:0 }}</span>
-        <span class="notifications-stat-meta">confirmações e progresso</span>
+        <span class="notifications-stat-meta">confirmacoes e progresso</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Alertas</span>
         <span class="notifications-stat-value">{{ notification_summary.alert|default:0 }}</span>
-        <span class="notifications-stat-meta">pedidos de atenção</span>
+        <span class="notifications-stat-meta">pedidos de atencao</span>
       </div>
       <div class="notifications-stat">
         <span class="notifications-stat-label">Erros</span>
@@ -143,12 +158,24 @@
   <section class="notifications-panel">
     <div class="notifications-panel-head">
       <div>
-        <h5>Histórico recente</h5>
-        <p class="notifications-panel-subtitle">A lista abaixo mostra as notificações mais recentes da tua conta, com tipo, estado e ações por item.</p>
+        <h5>Historico recente</h5>
+        <p class="notifications-panel-subtitle">
+          {% if request.user.is_admin %}
+            O painel agrupa as notificacoes do admin por Utilizadores, Validacao, Contactos e Colocacoes.
+          {% else %}
+            A lista abaixo mostra as notificacoes mais recentes da tua conta, com tipo, estado e acoes por item.
+          {% endif %}
+        </p>
       </div>
     </div>
+
     <div class="notifications-toolbar">
-      <span class="notifications-tag"><i class="bi bi-info-circle"></i>Informação</span>
+      {% for group in notification_groups %}
+        <span class="notifications-tag">
+          <i class="bi {{ group.icon }}"></i>{{ group.label }}: {{ group.count }}
+        </span>
+      {% endfor %}
+      <span class="notifications-tag"><i class="bi bi-info-circle"></i>Informacao</span>
       <span class="notifications-tag"><i class="bi bi-check2-circle"></i>Sucesso</span>
       <span class="notifications-tag"><i class="bi bi-exclamation-triangle"></i>Alerta</span>
       <span class="notifications-tag"><i class="bi bi-x-circle"></i>Erro</span>
@@ -156,64 +183,82 @@
 
     <div class="mt-4">
       {% if notifications %}
-        <div class="notifications-list">
-          {% for n in notifications %}
-            <article class="notification-card">
-              <div class="notification-card-top">
-                <div class="notification-card-head">
-                  <span class="notification-card-icon {% if n.tipo == 'SUCESSO' %}success{% elif n.tipo == 'ALERTA' %}alert{% elif n.tipo == 'ERRO' %}error{% else %}info{% endif %}">
-                    <i class="bi {% if n.tipo == 'SUCESSO' %}bi-check2-circle{% elif n.tipo == 'ALERTA' %}bi-exclamation-triangle{% elif n.tipo == 'ERRO' %}bi-x-circle{% else %}bi-info-circle{% endif %}"></i>
-                  </span>
-                  <div>
-                    <div class="notification-card-title">{{ n.titulo }}</div>
-                    <div class="notification-card-subline">{{ n.created_at|date:"d/m/Y H:i" }}</div>
-                  </div>
+        <div class="notifications-groups">
+          {% for group in notification_groups %}
+            <section class="notifications-group">
+              <div class="notifications-group-head">
+                <div>
+                  <h6 class="notifications-group-title"><i class="bi {{ group.icon }} me-2"></i>{{ group.label }}</h6>
+                  <p class="notifications-group-copy">{{ group.description }}</p>
                 </div>
-                <div class="notifications-tags">
-                  <span class="notification-type"><i class="bi bi-tag"></i>{{ n.get_tipo_display }}</span>
-                  <span class="notification-status {% if n.lida %}read{% else %}unread{% endif %}">
-                    <i class="bi {% if n.lida %}bi-check2{% else %}bi-dot{% endif %}"></i>
-                    {% if n.lida %}Lida{% else %}Nova{% endif %}
-                  </span>
+                <div class="notifications-group-meta">
+                  <span class="notifications-group-pill"><i class="bi bi-collection"></i>{{ group.count }} total</span>
+                  <span class="notifications-group-pill"><i class="bi bi-bell"></i>{{ group.unread_count }} por ler</span>
                 </div>
               </div>
 
-              <div class="notification-card-copy">{{ n.mensagem|linebreaksbr }}</div>
+              <div class="notifications-list">
+                {% for n in group.notifications %}
+                  <article class="notification-card">
+                    <div class="notification-card-top">
+                      <div class="notification-card-head">
+                        <span class="notification-card-icon {% if n.tipo == 'SUCESSO' %}success{% elif n.tipo == 'ALERTA' %}alert{% elif n.tipo == 'ERRO' %}error{% else %}info{% endif %}">
+                          <i class="bi {% if n.tipo == 'SUCESSO' %}bi-check2-circle{% elif n.tipo == 'ALERTA' %}bi-exclamation-triangle{% elif n.tipo == 'ERRO' %}bi-x-circle{% else %}bi-info-circle{% endif %}"></i>
+                        </span>
+                        <div>
+                          <div class="notification-card-title">{{ n.titulo }}</div>
+                          <div class="notification-card-subline">{{ n.created_at|date:"d/m/Y H:i" }}</div>
+                        </div>
+                      </div>
+                      <div class="notifications-tags">
+                        <span class="notification-type"><i class="bi {{ n.topic_icon }}"></i>{{ n.topic_label }}</span>
+                        <span class="notification-type"><i class="bi bi-tag"></i>{{ n.get_tipo_display }}</span>
+                        <span class="notification-status {% if n.lida %}read{% else %}unread{% endif %}">
+                          <i class="bi {% if n.lida %}bi-check2{% else %}bi-dot{% endif %}"></i>
+                          {% if n.lida %}Lida{% else %}Nova{% endif %}
+                        </span>
+                      </div>
+                    </div>
 
-              <div class="notification-card-footer mt-3">
-                <div class="notifications-tags">
-                  {% if not n.lida %}
-                    <span class="notifications-tag"><i class="bi bi-bell-fill"></i>Por ler</span>
-                  {% else %}
-                    <span class="notifications-tag"><i class="bi bi-check2-all"></i>Já revista</span>
-                  {% endif %}
-                </div>
-                <div class="notification-card-actions">
-                  {% if not n.lida %}
-                    <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-check2 me-1"></i>Marcar como lida
-                      </button>
-                    </form>
-                  {% endif %}
-                  <form method="post" action="{% url 'accounts:delete_notification' n.id %}">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="btn btn-outline-danger btn-sm"
-                            onclick="return confirm('Eliminar esta notifica??o?');">
-                      <i class="bi bi-trash me-1"></i>Eliminar
-                    </button>
-                  </form>
-                </div>
+                    <div class="notification-card-copy">{{ n.mensagem|linebreaksbr }}</div>
+
+                    <div class="notification-card-footer mt-3">
+                      <div class="notifications-tags">
+                        {% if not n.lida %}
+                          <span class="notifications-tag"><i class="bi bi-bell-fill"></i>Por ler</span>
+                        {% else %}
+                          <span class="notifications-tag"><i class="bi bi-check2-all"></i>Ja revista</span>
+                        {% endif %}
+                      </div>
+                      <div class="notification-card-actions">
+                        {% if not n.lida %}
+                          <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                              <i class="bi bi-check2 me-1"></i>Marcar como lida
+                            </button>
+                          </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'accounts:delete_notification' n.id %}">
+                          {% csrf_token %}
+                          <button type="submit"
+                                  class="btn btn-outline-danger btn-sm"
+                                  onclick="return confirm('Eliminar esta notificacao?');">
+                            <i class="bi bi-trash me-1"></i>Eliminar
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </article>
+                {% endfor %}
               </div>
-            </article>
+            </section>
           {% endfor %}
         </div>
       {% else %}
         <div class="notifications-empty">
           <i class="bi bi-bell-slash"></i>
-          Não há notificações neste momento.
+          Nao ha notificacoes neste momento.
         </div>
       {% endif %}
     </div>

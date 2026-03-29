@@ -13,10 +13,10 @@
             <div class="card admin-hero admin-hero-split mb-4" data-tour-id="admin-hero">
                 <div class="card-body">
                     <div class="admin-hero-copy">
-                        <div class="admin-kicker">{% if request.user.is_admin %}Validação central{% else %}Fila do operador{% endif %}</div>
+                        <div class="admin-kicker">{% if request.user.is_admin %}Validacao central{% else %}Fila do operador{% endif %}</div>
                         <h1 class="admin-page-title">Perfis pendentes</h1>
                         <p class="admin-subtitle mb-0">
-                            Reveja rápidamente os perfis completos e decida quem fica pronto para ficar visível para as empresas.
+                            Reveja rapidamente os perfis que ja atingiram pelo menos {{ validation_summary.minimum_progress }}% de preenchimento. Registos abaixo desse limiar continuam na lista de incompletos.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
@@ -31,11 +31,18 @@
                                 <i class="bi bi-geo-alt"></i>
                                 {{ validation_summary.districts }} distrito{{ validation_summary.districts|pluralize }} com fila
                             </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-hourglass-split"></i>
+                                {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} ainda incompleto{{ validation_summary.incomplete_profiles|pluralize }}
+                            </span>
                         </div>
                     </div>
 
                     <div class="admin-hero-actions">
                         {% if request.user.is_admin %}
+                            <a href="{% url 'dashboard:incomplete_profiles' %}" class="btn btn-light btn-sm">
+                                <i class="bi bi-hourglass-split me-1"></i>Ver registos incompletos
+                            </a>
                             <a href="{% url 'dashboard:admin' %}" class="btn btn-outline-light btn-sm">
                                 <i class="bi bi-arrow-left me-1"></i>Voltar ao dashboard
                             </a>
@@ -45,16 +52,16 @@
             </div>
 
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
+                <div class="col-md-6 col-xl-3">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Fila total</div>
                             <div class="admin-summary-value">{{ validation_summary.total_pending }}</div>
-                            <small class="text-muted">Perfis prontos para avaliação</small>
+                            <small class="text-muted">Perfis com pelo menos {{ validation_summary.minimum_progress }}% prontos para avaliacao</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6 col-xl-3">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Entradas de hoje</div>
@@ -63,12 +70,26 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6 col-xl-3">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
                             <div class="admin-summary-label">Distritos</div>
                             <div class="admin-summary-value">{{ validation_summary.districts }}</div>
                             <small class="text-muted">Cobertura geografica da fila</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card admin-summary-card h-100">
+                        <div class="card-body">
+                            <div class="admin-summary-label">Registos incompletos</div>
+                            <div class="admin-summary-value">{{ validation_summary.incomplete_profiles }}</div>
+                            <small class="text-muted">{{ validation_summary.incomplete_today }} atualizado{{ validation_summary.incomplete_today|pluralize }} hoje e ainda abaixo de {{ validation_summary.minimum_progress }}%</small>
+                            {% if request.user.is_admin %}
+                                <div class="mt-3">
+                                    <a href="{% url 'dashboard:incomplete_profiles' %}" class="btn btn-outline-primary btn-sm">Abrir lista dedicada</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -115,18 +136,22 @@
 
                                 <div class="admin-review-tags">
                                     <span class="admin-review-tag">{{ perfil.distrito.nome|default:"Sem distrito" }}</span>
+                                    <span class="admin-review-tag">{{ perfil.progress_percent }}% preenchido</span>
                                     {% if perfil.user.bi_numero %}
                                         <span class="admin-review-tag">BI {{ perfil.user.bi_numero }}</span>
                                     {% endif %}
                                     {% if perfil.idade %}
                                         <span class="admin-review-tag">{{ perfil.idade }} anos</span>
                                     {% endif %}
+                                    {% if not perfil.completo %}
+                                        <span class="admin-review-tag">Ainda em progresso</span>
+                                    {% endif %}
                                     <span class="admin-review-tag">{{ perfil.get_situacao_atual_display }}</span>
                                     <span class="admin-review-tag">{{ perfil.get_preferencia_oportunidade_display }}</span>
                                 </div>
 
                                 <div class="admin-review-footer">
-                                    <small class="text-muted">Submetido em {{ perfil.created_at|date:"d/m/Y" }} - {{ perfil.created_at|timesince }} atrás</small>
+                                    <small class="text-muted">Ultima atividade em {{ perfil.updated_at|date:"d/m/Y H:i" }} - {{ perfil.updated_at|timesince }} atras</small>
                                     <div class="admin-queue-actions">
                                         {% if request.user.is_admin %}
                                             <a href="{% url 'dashboard:user_detail' perfil.user.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-dark">
@@ -161,7 +186,12 @@
                     <div class="card-body">
                         <div class="admin-empty-state">
                             <i class="bi bi-check2-all"></i>
-                            <p class="mb-0">Não existem perfis pendentes com os filtros atuais.</p>
+                            <p class="mb-0">Nao existem perfis pendentes com os filtros atuais.</p>
+                            {% if validation_summary.incomplete_profiles %}
+                                <p class="mt-2 mb-0 text-muted">
+                                    Existem {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} ainda abaixo de {{ validation_summary.minimum_progress }}%, por isso esses candidatos ainda nao aparecem nesta fila.
+                                </p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

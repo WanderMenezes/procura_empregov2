@@ -323,9 +323,15 @@
     ],
     validate_profiles: [
       { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Esta lateral ajuda a alternar entre a fila de validacao e os outros modulos.\n\nOs contadores permitem perceber rapidamente se ha mais pressao em perfis, contactos ou gestao geral.' },
-      { id: 'admin-hero', title: 'Fila de validacao', copy: 'Este topo resume o tamanho da fila atual.\n\nMostra quantos perfis estao pendentes, quantos ficaram no filtro aplicado e quantos distritos estao representados.' },
+      { id: 'admin-hero', title: 'Fila de validacao', copy: 'Este topo resume os perfis que ja atingiram o limiar minimo para aprovacao.\n\nMostra quantos estao pendentes, quantos ficaram no filtro aplicado e quantos distritos estao representados.' },
       { id: 'validate-filter', title: 'Filtros da fila', copy: 'Usa estes filtros para reduzir a fila antes de decidir.\n\nA pesquisa aceita nome, telefone, email ou BI, e o filtro por distrito ajuda a repartir a analise por zona.' },
-      { id: 'validate-queue', title: 'Cartoes pendentes', copy: 'Cada cartao mostra o essencial para validar um candidato.\n\nAqui ves contacto, distrito, documento, situacao atual, preferencia de oportunidade e a data de submissao, com botoes para aprovar ou rejeitar de imediato.' }
+      { id: 'validate-queue', title: 'Cartoes pendentes', copy: 'Cada cartao mostra o essencial para validar um candidato que ja chegou ao minimo operacional.\n\nAqui ves contacto, progresso, distrito, documento, situacao atual, preferencia de oportunidade e a ultima atividade, com botoes para aprovar ou rejeitar de imediato.' }
+    ],
+    incomplete_profiles: [
+      { id: 'admin-sidebar', title: 'Menu lateral', copy: 'Esta lateral mantem a fila de incompletos ligada ao resto da operacao.\n\nA partir daqui comparas rapidamente o que esta pendente de validacao com o que ainda nem chegou ao fim do wizard.' },
+      { id: 'admin-hero', title: 'Fila de registos incompletos', copy: 'Este topo resume os perfis que continuam abaixo dos 50 por cento.\n\nOs chips mostram volume total, filtro atual, perfis quase prontos e atividade do dia para ajudar a priorizar acompanhamento.' },
+      { id: 'incomplete-filter', title: 'Filtros da lista', copy: 'Este filtro ajuda a localizar rapidamente registos incompletos por nome, telefone, email, BI ou distrito.\n\nServe para separar jovens de uma zona especifica ou procurar contas que precisem de apoio imediato.' },
+      { id: 'incomplete-list', title: 'Cartoes de progresso', copy: 'Cada cartao mostra o estado de preenchimento do perfil guardado.\n\nAqui ves percentagem, blocos completos, a proxima etapa em falta e a ultima atividade antes de abrir a conta do jovem ou acompanha-lo ate aos 50 por cento.' }
     ],
     manage_contact_requests: [
       { id: 'admin-sidebar', title: 'Menu lateral', copy: 'A lateral mantem o resto do painel acessivel enquanto trabalhas os pedidos.\n\nTambem ajuda a comparar esta fila com validacoes pendentes e outras tarefas do dia.' },
@@ -352,6 +358,7 @@
     { key: 'admin', label: 'Dashboard', url: '{% url "dashboard:admin" %}' },
     { key: 'user_list', label: 'Utilizadores', url: '{% url "dashboard:user_list" %}' },
     { key: 'validate_profiles', label: 'Validar perfis', url: '{% url "dashboard:validate_profiles" %}' },
+    { key: 'incomplete_profiles', label: 'Registos incompletos', url: '{% url "dashboard:incomplete_profiles" %}' },
     { key: 'manage_contact_requests', label: 'Pedidos de contacto', url: '{% url "dashboard:manage_contact_requests" %}' },
     { key: 'reports', label: 'Relatorios', url: '{% url "dashboard:reports" %}' },
     { key: 'offline_registrations', label: 'Registos offline', url: '{% url "dashboard:offline_registrations" %}' }

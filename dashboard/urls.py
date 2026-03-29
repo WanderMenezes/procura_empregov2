@@ -21,6 +21,7 @@ urlpatterns = [
     # Validação de perfis
     path('validar-perfis/', views.validate_profiles, name='validate_profiles'),
     path('validar-perfis/<int:pk>/<str:action>/', views.validate_profile, name='validate_profile'),
+    path('registos-incompletos/', views.incomplete_profiles, name='incomplete_profiles'),
     
     # Gestão de pedidos de contacto
     path('pedidos-contacto/', views.manage_contact_requests, name='manage_contact_requests'),

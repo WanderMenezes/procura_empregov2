@@ -190,7 +190,7 @@
             <div class="job-app-grid">
               <div class="job-app-grid-item">
                 <span class="job-app-label">Telefone</span>
-                {% if app.youth.can_apply_to_jobs and app.youth.visivel %}
+                {% if app.youth.is_visible_to_companies %}
                   {{ app.youth.user.telefone|default:"-" }}
                 {% else %}
                   Contacto indisponivel
@@ -198,7 +198,7 @@
               </div>
               <div class="job-app-grid-item">
                 <span class="job-app-label">Email</span>
-                {% if app.youth.can_apply_to_jobs and app.youth.visivel %}
+                {% if app.youth.is_visible_to_companies %}
                   {{ app.youth.user.email|default:"-" }}
                 {% else %}
                   Contacto indisponivel
@@ -277,7 +277,11 @@
                   <span class="job-app-tag"><i class="bi bi-clock-history"></i>{{ app.messages.all|length }} mensagem{{ app.messages.all|length|pluralize }} no histórico</span>
                 </div>
                 <div class="job-app-actions">
-                  <a href="{% url 'companies:youth_detail' app.youth.id %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-vcard me-1"></i>Ver perfil</a>
+                  {% if app.youth.is_visible_to_companies %}
+                    <a href="{% url 'companies:youth_detail' app.youth.id %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-vcard me-1"></i>Ver perfil</a>
+                  {% else %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled><i class="bi bi-person-slash me-1"></i>Perfil indisponivel</button>
+                  {% endif %}
                   <a href="{% url 'companies:application_messages' app.id %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chat-left-text me-1"></i>Histórico completo</a>
                   <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i>Guardar</button>
                 </div>
