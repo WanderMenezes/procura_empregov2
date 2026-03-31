@@ -76,6 +76,14 @@ def _company_visible_profiles(profiles):
     return visible_profiles
 
 
+def _ensure_company_candidate_access(request, company):
+    if company.can_access_candidate_directory:
+        return None
+
+    messages.warning(request, company.candidate_directory_status_message)
+    return redirect('companies:dashboard')
+
+
 @login_required
 def complete_company_profile(request):
     """View para completar perfil da empresa"""
@@ -108,11 +116,14 @@ def complete_company_profile(request):
             Notification.objects.create(
                 user=request.user,
                 titulo=_('Perfil da empresa criado!'),
-                mensagem=_('O perfil da empresa foi criado com sucesso. Já pode publicar vagas e pesquisar jovens.'),
+                mensagem=_('O perfil da empresa foi criado com sucesso. Aguarde a aprovação do administrador para pesquisar jovens e solicitar contacto.'),
                 tipo='SUCESSO'
             )
             
-            messages.success(request, _('Perfil da empresa criado com sucesso!'))
+            messages.success(
+                request,
+                _('Perfil da empresa criado com sucesso! Aguarda aprovacao do administrador para pesquisar jovens e solicitar contacto.'),
+            )
             return redirect('companies:dashboard')
     else:
         form = CompanyProfileForm(initial={
@@ -157,6 +168,7 @@ def company_dashboard(request):
         'vagas': company.job_posts.all()[:5],
         'pedidos': pedidos_recentes,
         'company_profile_complete': company_profile_complete,
+        'candidate_directory_enabled': company.can_access_candidate_directory,
         'stats': {
             'vagas_ativas': company.vagas_ativas,
             'total_vagas': company.total_vagas,
@@ -202,7 +214,8 @@ def company_profile_edit(request):
     return render(request, 'companies/profile_edit.html', {
         'form': form,
         'company': company,
-        'company_profile_complete': company_profile_complete
+        'company_profile_complete': company_profile_complete,
+        'candidate_directory_enabled': company.can_access_candidate_directory,
     })
 
 
@@ -499,6 +512,9 @@ def search_youth(request):
         return redirect('home')
 
     company = request.user.company_profile
+    access_block = _ensure_company_candidate_access(request, company)
+    if access_block:
+        return access_block
     form = YouthSearchForm(request.GET or None)
     minimum_birth_date = YouthProfile.minimum_validation_birth_date()
 
@@ -600,6 +616,9 @@ def youth_detail(request, pk):
         return redirect('home')
     
     company = request.user.company_profile
+    access_block = _ensure_company_candidate_access(request, company)
+    if access_block:
+        return access_block
     minimum_birth_date = YouthProfile.minimum_validation_birth_date()
     profile = get_object_or_404(
         YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
@@ -653,6 +672,9 @@ def contact_request_create(request, youth_pk):
         return redirect('home')
     
     company = request.user.company_profile
+    access_block = _ensure_company_candidate_access(request, company)
+    if access_block:
+        return access_block
     minimum_birth_date = YouthProfile.minimum_validation_birth_date()
     youth = get_object_or_404(
         YouthProfile.objects.select_related('user', 'user__distrito').prefetch_related(
@@ -740,6 +762,9 @@ def contact_request_bulk_create(request):
     youth_ids = request.POST.getlist('youth_ids')
     motivo = request.POST.get('motivo', '').strip() or _('A empresa demonstrou interesse. Por favor verifique o seu perfil.')
     company = request.user.company_profile
+    access_block = _ensure_company_candidate_access(request, company)
+    if access_block:
+        return access_block
     minimum_birth_date = YouthProfile.minimum_validation_birth_date()
 
     created = 0

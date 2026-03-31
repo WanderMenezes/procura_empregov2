@@ -16,12 +16,20 @@
                         <div class="admin-kicker">{% if request.user.is_admin %}Validacao central{% else %}Fila do operador{% endif %}</div>
                         <h1 class="admin-page-title">Perfis pendentes</h1>
                         <p class="admin-subtitle mb-0">
-                            Reveja rapidamente os perfis que ja atingiram pelo menos {{ validation_summary.minimum_progress }}% de preenchimento. Registos abaixo desse limiar continuam na lista de incompletos.
+                            Reveja rapidamente os jovens que ja atingiram pelo menos {{ validation_summary.minimum_progress }}% de preenchimento e as empresas com perfil completo que ainda aguardam aprovacao.
                         </p>
                         <div class="admin-hero-chips">
                             <span class="admin-hero-chip">
                                 <i class="bi bi-check-circle"></i>
                                 {{ validation_summary.total_pending }} pendente{{ validation_summary.total_pending|pluralize }}
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-person-badge"></i>
+                                {{ validation_summary.pending_youth_profiles }} perfil{{ validation_summary.pending_youth_profiles|pluralize }} de jovem
+                            </span>
+                            <span class="admin-hero-chip">
+                                <i class="bi bi-building"></i>
+                                {{ validation_summary.pending_company_profiles }} empresa{{ validation_summary.pending_company_profiles|pluralize }} pendente{{ validation_summary.pending_company_profiles|pluralize }}
                             </span>
                             <span class="admin-hero-chip">
                                 <i class="bi bi-funnel"></i>
@@ -57,7 +65,7 @@
                         <div class="card-body">
                             <div class="admin-summary-label">Fila total</div>
                             <div class="admin-summary-value">{{ validation_summary.total_pending }}</div>
-                            <small class="text-muted">Perfis com pelo menos {{ validation_summary.minimum_progress }}% prontos para avaliação</small>
+                            <small class="text-muted">Jovens prontos para aprovacao e empresas com perfil completo pendentes de validacao</small>
                         </div>
                     </div>
                 </div>
@@ -82,7 +90,7 @@
                 <div class="col-md-6 col-xl-3">
                     <div class="card admin-summary-card h-100">
                         <div class="card-body">
-                            <div class="admin-summary-label">Registos incompletos</div>
+                            <div class="admin-summary-label">Jovens incompletos</div>
                             <div class="admin-summary-value">{{ validation_summary.incomplete_profiles }}</div>
                             <small class="text-muted">{{ validation_summary.incomplete_today }} atualizado{{ validation_summary.incomplete_today|pluralize }} hoje e ainda abaixo de {{ validation_summary.minimum_progress }}%</small>
                             {% if request.user.is_admin %}
@@ -100,7 +108,7 @@
                     <div class="row g-3 align-items-end">
                         <div class="col-md-7">
                             <label class="form-label">Pesquisar</label>
-                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Nome, telefone, email ou BI">
+                            <input type="text" name="q" class="form-control" value="{{ filtro_q }}" placeholder="Nome, telefone, email, BI ou NIF">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Distrito</label>
@@ -128,26 +136,40 @@
                                     <div>
                                         <h5 class="mb-1">{{ perfil.nome_completo }}</h5>
                                         <div class="admin-table-meta">
-                                            {{ perfil.telefone }}{% if perfil.email %} - {{ perfil.email }}{% endif %}
+                                            {{ perfil.queue_phone|default:"Sem telefone" }}{% if perfil.queue_email %} - {{ perfil.queue_email }}{% endif %}
                                         </div>
                                     </div>
                                     <span class="admin-status-pill pending">Pendente</span>
                                 </div>
 
                                 <div class="admin-review-tags">
-                                    <span class="admin-review-tag">{{ perfil.distrito.nome|default:"Sem distrito" }}</span>
-                                    <span class="admin-review-tag">{{ perfil.progress_percent }}% preenchido</span>
-                                    {% if perfil.user.bi_numero %}
-                                        <span class="admin-review-tag">BI {{ perfil.user.bi_numero }}</span>
+                                    <span class="admin-review-tag">{{ perfil.queue_district.nome|default:"Sem distrito" }}</span>
+                                    <span class="admin-review-tag">{{ perfil.validation_kind_label }}</span>
+                                    {% if perfil.validation_kind == 'company' %}
+                                        <span class="admin-review-tag">Perfil completo</span>
+                                        {% if perfil.nif %}
+                                            <span class="admin-review-tag">NIF {{ perfil.nif }}</span>
+                                        {% endif %}
+                                        {% if perfil.setores_display %}
+                                            <span class="admin-review-tag">{{ perfil.setores_display }}</span>
+                                        {% endif %}
+                                        {% if not perfil.ativa %}
+                                            <span class="admin-review-tag">Inativa</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="admin-review-tag">{{ perfil.progress_percent }}% preenchido</span>
+                                        {% if perfil.user.bi_numero %}
+                                            <span class="admin-review-tag">BI {{ perfil.user.bi_numero }}</span>
+                                        {% endif %}
+                                        {% if perfil.idade %}
+                                            <span class="admin-review-tag">{{ perfil.idade }} anos</span>
+                                        {% endif %}
+                                        {% if not perfil.completo %}
+                                            <span class="admin-review-tag">Ainda em progresso</span>
+                                        {% endif %}
+                                        <span class="admin-review-tag">{{ perfil.get_situacao_atual_display }}</span>
+                                        <span class="admin-review-tag">{{ perfil.get_preferencia_oportunidade_display }}</span>
                                     {% endif %}
-                                    {% if perfil.idade %}
-                                        <span class="admin-review-tag">{{ perfil.idade }} anos</span>
-                                    {% endif %}
-                                    {% if not perfil.completo %}
-                                        <span class="admin-review-tag">Ainda em progresso</span>
-                                    {% endif %}
-                                    <span class="admin-review-tag">{{ perfil.get_situacao_atual_display }}</span>
-                                    <span class="admin-review-tag">{{ perfil.get_preferencia_oportunidade_display }}</span>
                                 </div>
 
                                 <div class="admin-review-footer">
@@ -158,21 +180,21 @@
                                                 <i class="bi bi-eye me-1"></i>Ver perfil
                                             </a>
                                         {% endif %}
-                                        {% if perfil.is_underage_for_validation %}
+                                        {% if perfil.validation_kind == 'youth' and perfil.is_underage_for_validation %}
                                             <button type="button" class="btn btn-sm btn-secondary" disabled title="{{ perfil.validation_age_message }}">
                                                 <i class="bi bi-ban me-1"></i>Menor de 18 anos
                                             </button>
                                         {% else %}
-                                            <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
+                                            <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?{% if perfil.validation_kind == 'company' %}kind=company&{% endif %}next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
                                                 <i class="bi bi-check2 me-1"></i>Aprovar
                                             </a>
                                         {% endif %}
-                                        <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger">
+                                        <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}?{% if perfil.validation_kind == 'company' %}kind=company&{% endif %}next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-x-lg me-1"></i>Rejeitar
                                         </a>
                                     </div>
                                 </div>
-                                {% if perfil.is_underage_for_validation %}
+                                {% if perfil.validation_kind == 'youth' and perfil.is_underage_for_validation %}
                                     <div class="alert alert-warning mt-3 mb-0" role="alert">
                                         {{ perfil.validation_age_message }}
                                     </div>
@@ -189,7 +211,7 @@
                             <p class="mb-0">Não existem perfis pendentes com os filtros atuais.</p>
                             {% if validation_summary.incomplete_profiles %}
                                 <p class="mt-2 mb-0 text-muted">
-                                    Existem {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} ainda abaixo de {{ validation_summary.minimum_progress }}%, por isso esses candidatos ainda não aparecem nesta fila.
+                                    Existem {{ validation_summary.incomplete_profiles }} registo{{ validation_summary.incomplete_profiles|pluralize }} de jovem ainda abaixo de {{ validation_summary.minimum_progress }}%, por isso esses candidatos ainda nao aparecem nesta fila.
                                 </p>
                             {% endif %}
                         </div>

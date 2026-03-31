@@ -83,7 +83,7 @@
             {% if youth_profile %}
               Aqui tens uma leitura clara da tua conta, do estado do perfil e dos principais dados usados nas candidaturas.
             {% elif company_profile %}
-              Este espaço junta identidade da empresa, estado do perfil e atalhos para recrutamento.
+              Este espaço junta identidade da empresa, estado do perfil e o acompanhamento da aprovação administrativa para acesso a candidatos.
             {% else %}
               A conta já está criada. Falta agora ligar um perfil completo ao teu papel dentro da plataforma.
             {% endif %}
@@ -458,7 +458,7 @@
               {% if user.is_jovem %}
                 Termina o perfil de jovem para aparecer em pesquisas, responder a vagas e apresentar melhor o teu percurso.
               {% elif user.is_empresa %}
-                Completa o perfil da empresa para publicar vagas, pesquisar jovens e gerir pedidos de contacto.
+                Completa o perfil da empresa para publicar vagas e, depois da aprovação do admin, pesquisar jovens e gerir pedidos de contacto.
               {% else %}
                 Atualiza os dados da conta e usa os atalhos apropriados ao teu papel na plataforma.
               {% endif %}

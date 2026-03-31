@@ -72,7 +72,7 @@
         <div class="admin-sidebar-note">
             <div class="admin-sidebar-note-title">Fila atual</div>
             <p class="mb-0">
-                {{ admin_nav.pending_profiles }} perfil{{ admin_nav.pending_profiles|pluralize }} aguardam validação.
+                {{ admin_nav.pending_profiles }} registo{{ admin_nav.pending_profiles|pluralize }} aguardam validação.
                 {% if request.user.is_admin %}
                     {{ admin_nav.pending_contacts }} pedido{{ admin_nav.pending_contacts|pluralize }} de contacto ainda precisam de resposta.
                     {{ admin_nav.incomplete_profiles }} registo{{ admin_nav.incomplete_profiles|pluralize }} ainda precisam de concluir o perfil.

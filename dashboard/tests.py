@@ -78,6 +78,7 @@ class ContactRequestAdminActionTests(TestCase):
         self.company = Company.objects.create(
             user=self.company_user,
             nome='Empresa Teste',
+            verificada=True,
         )
         self.youth = YouthProfile.objects.create(
             user=self.youth_user,
@@ -281,6 +282,25 @@ class ProfileValidationQueueTests(TestCase):
             wizard_step=3,
             wizard_data=_approval_ready_wizard_data(self.district.id),
         )
+        self.company_user = User.objects.create_user(
+            telefone='+2399000019',
+            nome='Empresa Pendente',
+            perfil=User.ProfileType.EMPRESA,
+            distrito=self.district,
+            email='empresa.pendente@example.com',
+        )
+        self.company_profile = Company.objects.create(
+            user=self.company_user,
+            nome='Empresa Pendente',
+            nif='123456789',
+            setor=['TIC'],
+            descricao='Empresa pronta para validacao.',
+            telefone='+2399000019',
+            email='empresa.pendente@example.com',
+            distrito=self.district,
+            endereco='Centro de Negocios',
+            verificada=False,
+        )
 
     def test_validation_queue_shows_admin_link_to_profile_detail(self):
         self.client.force_login(self.admin)
@@ -321,7 +341,7 @@ class ProfileValidationQueueTests(TestCase):
         response = self.client.get(reverse('dashboard:validate_profiles'))
 
         self.assertContains(response, 'Menor de 18 anos')
-        self.assertContains(response, 'A idade minima para aprovacao e 18 anos.')
+        self.assertContains(response, 'A idade mínima para aprovação é 18 anos.')
 
     def test_validation_queue_explains_incomplete_registrations_are_not_ready(self):
         self.client.force_login(self.admin)
@@ -342,6 +362,34 @@ class ProfileValidationQueueTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Jovem Quase Pronto')
         self.assertContains(response, '66% preenchido')
+
+    def test_validation_queue_includes_unverified_company_with_complete_profile(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('dashboard:validate_profiles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Empresa Pendente')
+        self.assertContains(response, 'Empresa')
+        self.assertContains(response, 'NIF 123456789')
+
+    def test_admin_can_approve_company_profile_from_validation_queue(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse('dashboard:validate_profile', args=[self.company_profile.pk, 'aprovar']),
+            {'kind': 'company'},
+        )
+
+        self.assertRedirects(response, reverse('dashboard:validate_profiles'))
+        self.company_profile.refresh_from_db()
+        self.assertTrue(self.company_profile.verificada)
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.company_user,
+                titulo='Perfil da empresa validado!',
+            ).exists()
+        )
 
     def test_admin_cannot_approve_profile_below_minimum_progress(self):
         self.client.force_login(self.admin)
@@ -633,7 +681,7 @@ class EmploymentPlacementsAdminTests(TestCase):
         response = self.client.get(reverse('dashboard:employment_placements'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Colocacoes em emprego')
+        self.assertContains(response, 'Colocações em emprego')
         self.assertContains(response, 'Jovem Colocado')
         self.assertContains(response, 'Empresa Coloca')
         self.assertContains(response, 'Assistente Administrativo')
@@ -645,7 +693,7 @@ class EmploymentPlacementsAdminTests(TestCase):
         response = self.client.get(reverse('dashboard:admin'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Colocacoes em emprego')
+        self.assertContains(response, 'Colocações em emprego')
         self.assertContains(response, 'Jovem Colocado')
         self.assertContains(response, 'Empresa Coloca')
 

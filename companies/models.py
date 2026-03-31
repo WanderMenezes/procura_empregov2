@@ -113,6 +113,20 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
         self.setor = self.setor_codes
         super().save(*args, **kwargs)
+
+    @property
+    def can_access_candidate_directory(self):
+        return self.verificada
+
+    @property
+    def candidate_directory_status_message(self):
+        if self.can_access_candidate_directory:
+            return _(
+                'A empresa ja foi aprovada pelo administrador e pode ver candidatos e solicitar contacto.'
+            )
+        return _(
+            'Depois de completar o perfil, a empresa precisa da aprovacao do administrador para ver candidatos e solicitar contacto.'
+        )
     
     @property
     def total_vagas(self):

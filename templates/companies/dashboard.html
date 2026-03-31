@@ -460,7 +460,9 @@
               </span>
             </div>
             <p class="company-hero-copy">
-              {% if company_profile_complete %}
+              {% if not candidate_directory_enabled %}
+                O perfil da empresa esta criado, mas ainda aguarda aprovacao do administrador para ver candidatos e solicitar contacto.
+              {% elif company_profile_complete %}
                 O painel centraliza vagas, candidaturas e pedidos de contacto para a equipa agir mais rápido.
               {% else %}
                 Complete os dados principais da empresa para ganhar mais confiança no perfil e publicar oportunidades com melhor contexto.
@@ -476,13 +478,24 @@
               <i class="bi bi-magic me-2"></i>Completar perfil
             </a>
           {% endif %}
-          <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
-            <i class="bi bi-search me-2"></i>Pesquisar jovens
-          </a>
+          {% if candidate_directory_enabled %}
+            <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
+              <i class="bi bi-search me-2"></i>Pesquisar jovens
+            </a>
+          {% else %}
+            <span class="btn btn-outline-light disabled" aria-disabled="true">
+              <i class="bi bi-hourglass-split me-2"></i>Aguardar aprovação
+            </span>
+          {% endif %}
           <a href="{% url 'companies:job_create' %}" class="btn btn-dark">
             <i class="bi bi-plus-circle me-2"></i>Publicar vaga
           </a>
         </div>
+        {% if not candidate_directory_enabled %}
+          <div class="alert alert-warning rounded-4 mb-0">
+            Depois de completar o perfil, a empresa precisa da aprovacao do administrador para ver candidatos e solicitar contacto.
+          </div>
+        {% endif %}
         <div class="company-stat-grid">
           <div class="company-stat-card">
             <span class="company-stat-label">Vagas ativas</span>
@@ -640,9 +653,11 @@
           <div class="company-step">
             <span class="company-step-index">3</span>
             <div>
-              <strong>{% if stats.pedidos_pendentes %}Responder pedidos pendentes{% else %}Acompanhar contactos{% endif %}</strong>
+              <strong>{% if not candidate_directory_enabled %}Aguardar verificacao do admin{% elif stats.pedidos_pendentes %}Responder pedidos pendentes{% else %}Acompanhar contactos{% endif %}</strong>
               <p>
-                {% if stats.pedidos_pendentes %}
+                {% if not candidate_directory_enabled %}
+                  Depois da aprovacao administrativa, a empresa passa a poder pesquisar jovens e solicitar contacto na plataforma.
+                {% elif stats.pedidos_pendentes %}
                   Existem pedidos a aguardar resposta e vale acompanhar esse fluxo hoje.
                 {% else %}
                   Continue a pesquisar jovens e a abrir conversas com perfis interessantes.

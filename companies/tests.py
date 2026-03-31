@@ -142,6 +142,7 @@ class CompanyYouthVisibilityTests(TestCase):
             user=self.company_user,
             nome='Empresa Visibilidade',
             ativa=True,
+            verificada=True,
         )
         self.validated_user = User.objects.create_user(
             telefone='+2399110002',
@@ -219,6 +220,46 @@ class CompanyYouthVisibilityTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Jovem Aprovado Parcial')
+
+    def test_unverified_company_cannot_search_youth(self):
+        self.company.verificada = False
+        self.company.save(update_fields=['verificada'])
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('companies:search_youth'), follow=True)
+
+        self.assertRedirects(response, reverse('companies:dashboard'))
+        self.assertContains(response, 'aprov')
+
+    def test_unverified_company_cannot_open_valid_youth_detail(self):
+        self.company.verificada = False
+        self.company.save(update_fields=['verificada'])
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(
+            reverse('companies:youth_detail', args=[self.validated_profile.pk]),
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('companies:dashboard'))
+        self.assertContains(response, 'aprov')
+
+    def test_unverified_company_cannot_create_contact_request_even_for_valid_profile(self):
+        self.company.verificada = False
+        self.company.save(update_fields=['verificada'])
+        self.client.force_login(self.company_user)
+
+        response = self.client.post(
+            reverse('companies:contact_request_create', args=[self.validated_profile.pk]),
+            {'motivo': 'Queremos falar sobre uma oportunidade.'},
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('companies:dashboard'))
+        self.assertContains(response, 'aprov')
+        self.assertFalse(
+            ContactRequest.objects.filter(company=self.company, youth=self.validated_profile).exists()
+        )
 
     def test_auto_unlocked_profile_is_visible_to_companies_after_reaching_80_percent(self):
         self.assertTrue(self.auto_unlock_profile.is_visible_to_companies)
@@ -313,6 +354,7 @@ class AdminWorkflowNotificationTests(TestCase):
             user=self.company_user,
             nome='Empresa Fluxos',
             ativa=True,
+            verificada=True,
         )
         self.youth_user = User.objects.create_user(
             telefone='+2399110102',

@@ -142,6 +142,11 @@ def _decorate_profile_progress(profile):
     profile.total_missing = snapshot['total_missing']
     profile.next_step = next_step
     profile.approval_threshold = profile.MINIMUM_APPROVAL_PROGRESS
+    profile.validation_kind = 'youth'
+    profile.validation_kind_label = 'Jovem'
+    profile.queue_district = profile.user.distrito
+    profile.queue_phone = profile.telefone
+    profile.queue_email = profile.email
     return profile
 
 
@@ -159,12 +164,93 @@ def _split_validation_profiles(queryset):
     return ready_profiles, draft_profiles
 
 
+def _company_validation_queryset():
+    return Company.objects.select_related(
+        'user',
+        'distrito',
+        'user__distrito',
+    )
+
+
+def _company_required_completion_fields(company):
+    fields = []
+    if not company.nome:
+        fields.append('nome')
+    if not company.setor_codes:
+        fields.append('setor')
+    if not company.telefone:
+        fields.append('telefone')
+    if not company.email:
+        fields.append('email')
+    if not company.distrito_id:
+        fields.append('distrito')
+    if not company.endereco:
+        fields.append('endereco')
+    if not company.descricao:
+        fields.append('descricao')
+    return fields
+
+
+def _decorate_company_validation(company):
+    missing_fields = _company_required_completion_fields(company)
+
+    company.validation_kind = 'company'
+    company.validation_kind_label = 'Empresa'
+    company.nome_completo = company.nome or company.user.nome_empresa or company.user.nome
+    company.queue_district = company.distrito or company.user.distrito
+    company.queue_phone = company.telefone or company.user.telefone
+    company.queue_email = company.email or company.user.email
+    company.is_ready_for_approval = not company.verificada and not missing_fields
+    company.missing_validation_fields = missing_fields
+    if missing_fields:
+        company.approval_progress_message = _(
+            'A empresa precisa completar os seguintes campos antes da validacao: %(fields)s.'
+        ) % {
+            'fields': ', '.join(missing_fields),
+        }
+    else:
+        company.approval_progress_message = _(
+            'A empresa esta pronta para validacao administrativa.'
+        )
+    return company
+
+
+def _split_validation_companies(queryset):
+    ready_companies = []
+    draft_companies = []
+
+    for company in queryset:
+        decorated = _decorate_company_validation(company)
+        if decorated.is_ready_for_approval:
+            ready_companies.append(decorated)
+        else:
+            draft_companies.append(decorated)
+
+    return ready_companies, draft_companies
+
+
+def _merge_validation_items(*groups):
+    items = []
+    for group in groups:
+        items.extend(group)
+    return sorted(
+        items,
+        key=lambda item: (item.updated_at, item.created_at, item.pk),
+        reverse=True,
+    )
+
+
 def _validation_bucket_counts():
     ready_profiles, draft_profiles = _split_validation_profiles(
         _profile_progress_queryset().filter(validado=False)
     )
+    ready_companies, _ = _split_validation_companies(
+        _company_validation_queryset().filter(verificada=False)
+    )
     return {
-        'pending_profiles': len(ready_profiles),
+        'pending_profiles': len(ready_profiles) + len(ready_companies),
+        'pending_youth_profiles': len(ready_profiles),
+        'pending_company_profiles': len(ready_companies),
         'incomplete_profiles': len(draft_profiles),
     }
 
@@ -1185,7 +1271,10 @@ def admin_dashboard(request):
     employment_placements = _employment_placements_queryset()
     employment_summary = _employment_placements_summary(employment_placements)
     queue_base = _profile_progress_queryset().filter(validado=False).order_by('-updated_at', '-created_at')
-    perfis_pendentes, perfis_incompletos = _split_validation_profiles(queue_base)
+    company_queue_base = _company_validation_queryset().filter(verificada=False).order_by('-updated_at', '-created_at')
+    perfis_pendentes_jovens, perfis_incompletos = _split_validation_profiles(queue_base)
+    perfis_pendentes_empresas, _ = _split_validation_companies(company_queue_base)
+    perfis_pendentes = _merge_validation_items(perfis_pendentes_jovens, perfis_pendentes_empresas)
     # Estatísticas gerais
     stats = {
         'total_jovens': YouthProfile.objects.count(),
@@ -1783,11 +1872,13 @@ def user_toggle_active(request, pk):
 def validate_profiles(request):
     """Lista de perfis pendentes de validação"""
     base_profiles = _profile_progress_queryset().filter(validado=False)
+    base_companies = _company_validation_queryset().filter(verificada=False)
 
     query = (request.GET.get('q') or '').strip()
     distrito_id = (request.GET.get('distrito') or '').strip()
 
     filtered_profiles = base_profiles
+    filtered_companies = base_companies
     if query:
         filtered_profiles = filtered_profiles.filter(
             Q(user__nome__icontains=query) |
@@ -1795,22 +1886,46 @@ def validate_profiles(request):
             Q(user__email__icontains=query) |
             Q(user__bi_numero__icontains=query)
         )
+        filtered_companies = filtered_companies.filter(
+            Q(nome__icontains=query) |
+            Q(nif__icontains=query) |
+            Q(user__nome__icontains=query) |
+            Q(user__telefone__icontains=query) |
+            Q(email__icontains=query) |
+            Q(user__email__icontains=query)
+        )
     if distrito_id:
         filtered_profiles = filtered_profiles.filter(user__distrito_id=distrito_id)
+        filtered_companies = filtered_companies.filter(
+            Q(distrito_id=distrito_id) |
+            Q(user__distrito_id=distrito_id)
+        )
 
     pending_profiles, incomplete_profiles = _split_validation_profiles(
         base_profiles.order_by('-updated_at', '-created_at')
     )
-    perfis, filtered_incomplete_profiles = _split_validation_profiles(
+    pending_companies, _ = _split_validation_companies(
+        base_companies.order_by('-updated_at', '-created_at')
+    )
+    filtered_pending_profiles, filtered_incomplete_profiles = _split_validation_profiles(
         filtered_profiles.order_by('-updated_at', '-created_at')
     )
+    filtered_pending_companies, _ = _split_validation_companies(
+        filtered_companies.order_by('-updated_at', '-created_at')
+    )
+    perfis = _merge_validation_items(filtered_pending_profiles, filtered_pending_companies)
+    pending_items = _merge_validation_items(pending_profiles, pending_companies)
     today = timezone.localdate()
 
     validation_summary = {
-        'total_pending': len(pending_profiles),
-        'pending_today': sum(1 for profile in pending_profiles if profile.updated_at.date() == today),
-        'districts': len({profile.user.distrito_id for profile in pending_profiles if profile.user.distrito_id}),
+        'total_pending': len(pending_items),
+        'pending_today': sum(1 for profile in pending_items if profile.updated_at.date() == today),
+        'districts': len({profile.queue_district.id for profile in pending_items if profile.queue_district}),
         'filtered_total': len(perfis),
+        'pending_youth_profiles': len(pending_profiles),
+        'pending_company_profiles': len(pending_companies),
+        'filtered_youth_profiles': len(filtered_pending_profiles),
+        'filtered_company_profiles': len(filtered_pending_companies),
         'incomplete_profiles': len(incomplete_profiles),
         'incomplete_today': sum(1 for profile in filtered_incomplete_profiles if profile.updated_at.date() == today),
         'minimum_progress': YouthProfile.MINIMUM_APPROVAL_PROGRESS,
@@ -1830,13 +1945,52 @@ def validate_profiles(request):
 @admin_or_operador_required
 def validate_profile(request, pk, action):
     """Validar ou rejeitar perfil"""
+    profile_kind = (request.GET.get('kind') or 'youth').strip().lower()
+    next_url = request.GET.get('next')
+
+    if profile_kind == 'company':
+        company = get_object_or_404(_company_validation_queryset(), pk=pk)
+        company = _decorate_company_validation(company)
+
+        if action == 'aprovar':
+            if not company.is_ready_for_approval:
+                messages.error(request, company.approval_progress_message)
+                return redirect(next_url or 'dashboard:validate_profiles')
+
+            company.verificada = True
+            company.save(update_fields=['verificada'])
+
+            Notification.objects.create(
+                user=company.user,
+                titulo=_('Perfil da empresa validado!'),
+                mensagem=_('O perfil da empresa foi validado e ja pode pesquisar jovens e solicitar contacto.'),
+                tipo='SUCESSO'
+            )
+
+            messages.success(request, _('Perfil da empresa validado com sucesso!'))
+
+        elif action == 'rejeitar':
+            if company.verificada:
+                company.verificada = False
+                company.save(update_fields=['verificada'])
+
+            Notification.objects.create(
+                user=company.user,
+                titulo=_('Perfil da empresa nao validado'),
+                mensagem=_('O perfil da empresa ainda nao foi validado. Revise os dados e atualize-o para nova analise.'),
+                tipo='ALERTA'
+            )
+
+            messages.warning(request, _('Perfil da empresa marcado como pendente.'))
+
+        return redirect(next_url or 'dashboard:validate_profiles')
+
     profile = get_object_or_404(YouthProfile, pk=pk)
     
     if action == 'aprovar':
         if not profile.is_ready_for_approval:
             messages.error(request, profile.approval_progress_message)
 
-            next_url = request.GET.get('next')
             return redirect(next_url or 'dashboard:validate_profiles')
 
         if profile.is_underage_for_validation:
@@ -1855,7 +2009,6 @@ def validate_profile(request, pk, action):
                 }
             )
 
-            next_url = request.GET.get('next')
             return redirect(next_url or 'dashboard:validate_profiles')
 
         profile.validado = True
@@ -1897,7 +2050,6 @@ def validate_profile(request, pk, action):
         
         messages.warning(request, _('Perfil rejeitado.'))
     
-    next_url = request.GET.get('next')
     return redirect(next_url or 'dashboard:validate_profiles')
 
 

@@ -374,7 +374,7 @@
         <div class="company-edit-kicker">Perfil da empresa</div>
         <h1 class="company-edit-title">Editar perfil empresarial</h1>
         <p class="company-edit-subtitle">
-          Organize os dados públicos da empresa, mantenha os contactos atualizados e deixe o perfil pronto para vagas e pedidos de contacto.
+          Organize os dados públicos da empresa, mantenha os contactos atualizados e deixe o perfil pronto para vagas enquanto aguarda aprovação para ver candidatos.
         </p>
         <div class="company-edit-hero-badges">
           <span class="company-edit-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
@@ -386,9 +386,15 @@
         <a href="{% url 'companies:dashboard' %}" class="btn btn-light">
           <i class="bi bi-arrow-left me-2"></i>Voltar ao painel
         </a>
-        <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
-          <i class="bi bi-search me-2"></i>Pesquisar jovens
-        </a>
+        {% if candidate_directory_enabled %}
+          <a href="{% url 'companies:search_youth' %}" class="btn btn-outline-light">
+            <i class="bi bi-search me-2"></i>Pesquisar jovens
+          </a>
+        {% else %}
+          <span class="btn btn-outline-light disabled" aria-disabled="true">
+            <i class="bi bi-hourglass-split me-2"></i>Aguardar aprovação
+          </span>
+        {% endif %}
       </div>
     </div>
   </section>
@@ -453,8 +459,10 @@
       </div>
 
       <div class="company-edit-note">
-        {% if company_profile_complete %}
+        {% if company.verificada %}
           O perfil já tem a base essencial pronta. Vale manter descrição, website e logo sempre atuais.
+        {% elif company_profile_complete %}
+          O perfil está completo, mas a empresa ainda precisa de aprovação do administrador para ver candidatos e solicitar contacto.
         {% else %}
           Ainda faltam alguns dados importantes. Completar tudo aqui deixa a empresa pronta para publicar e receber melhor.
         {% endif %}

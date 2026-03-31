@@ -71,7 +71,11 @@
                                     {% if user_has_profile %}
                                         <li><a class="dropdown-item {% if current_name == 'dashboard' %}active{% endif %}" href="{% url 'companies:dashboard' %}"><i class="bi bi-grid me-2"></i>Painel</a></li>
                                         <li><a class="dropdown-item {% if current_name == 'job_list' %}active{% endif %}" href="{% url 'companies:job_list' %}"><i class="bi bi-briefcase me-2"></i>Vagas</a></li>
-                                        <li><a class="dropdown-item {% if current_name == 'search_youth' %}active{% endif %}" href="{% url 'companies:search_youth' %}"><i class="bi bi-search me-2"></i>Pesquisar jovens</a></li>
+                                        {% if user.company_profile.verificada %}
+                                            <li><a class="dropdown-item {% if current_name == 'search_youth' %}active{% endif %}" href="{% url 'companies:search_youth' %}"><i class="bi bi-search me-2"></i>Pesquisar jovens</a></li>
+                                        {% else %}
+                                            <li><span class="dropdown-item disabled"><i class="bi bi-hourglass-split me-2"></i>Pesquisar jovens (aguarda aprovação)</span></li>
+                                        {% endif %}
                                         <li><a class="dropdown-item {% if current_name == 'contact_request_list' %}active{% endif %}" href="{% url 'companies:contact_request_list' %}"><i class="bi bi-person-lines-fill me-2"></i>Pedidos de contacto</a></li>
                                     {% else %}
                                         <li><a class="dropdown-item {% if current_name == 'complete_profile' %}active{% endif %}" href="{% url 'companies:complete_profile' %}"><i class="bi bi-building-add me-2"></i>Completar empresa</a></li>

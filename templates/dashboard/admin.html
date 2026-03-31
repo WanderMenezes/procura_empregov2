@@ -202,7 +202,7 @@
                                     </div>
                                     <div class="admin-priority-copy">
                                         <div class="admin-priority-title">Perfis por validar</div>
-                                        <div class="admin-priority-text">Jovens completos a aguardar aprovação final.</div>
+                                        <div class="admin-priority-text">Jovens prontos e empresas com perfil completo a aguardar aprovacao final.</div>
                                     </div>
                                     <div class="admin-priority-value">{{ stats.validacoes_pendentes|intcomma }}</div>
                                 </a>
@@ -543,13 +543,13 @@
                                         <div class="admin-queue-item">
                                             <div>
                                                 <div class="admin-queue-title">{{ perfil.nome_completo }}</div>
-                                                <small class="text-muted">{{ perfil.distrito.nome|default:"Sem distrito" }} - {{ perfil.created_at|timesince }} atrás</small>
+                                                <small class="text-muted">{{ perfil.queue_district.nome|default:"Sem distrito" }} - {{ perfil.created_at|timesince }} atrás - {{ perfil.validation_kind_label }}</small>
                                             </div>
                                             <div class="admin-queue-actions">
-                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success" title="Aprovar">
+                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'aprovar' %}?{% if perfil.validation_kind == 'company' %}kind=company&{% endif %}next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success" title="Aprovar">
                                                     <i class="bi bi-check2"></i>
                                                 </a>
-                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger" title="Rejeitar">
+                                                <a href="{% url 'dashboard:validate_profile' perfil.pk 'rejeitar' %}?{% if perfil.validation_kind == 'company' %}kind=company&{% endif %}next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger" title="Rejeitar">
                                                     <i class="bi bi-x-lg"></i>
                                                 </a>
                                             </div>
