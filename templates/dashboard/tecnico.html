@@ -20,7 +20,9 @@
 <div class="container-fluid py-4 admin-dashboard tecnico-dashboard">
     <div class="admin-shell">
         <aside class="admin-shell-sidebar">
-            <div class="admin-sidebar card">
+            <div class="admin-sidebar card"
+                 data-admin-mobile-title="Dashboard técnico"
+                 data-admin-mobile-count="{{ unread_notifications_count|default:0 }}">
                 <div class="card-body">
                     <div class="admin-sidebar-head">
                         <div>

@@ -1,4 +1,7 @@
-<div class="admin-sidebar card" data-tour-id="admin-sidebar">
+<div class="admin-sidebar card"
+     data-tour-id="admin-sidebar"
+     data-admin-mobile-title="{% if request.user.is_admin %}Painel admin{% else %}Painel operador{% endif %}"
+     data-admin-mobile-count="{% if request.user.is_admin %}{{ admin_nav.pending_profiles|add:admin_nav.pending_contacts|add:admin_nav.incomplete_profiles }}{% else %}{{ admin_nav.pending_profiles|default:0 }}{% endif %}">
     <div class="card-body">
         <div class="admin-sidebar-head">
             <div>

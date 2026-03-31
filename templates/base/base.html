@@ -456,6 +456,129 @@
                 });
             }
 
+            const adminSidebarEl = document.querySelector('.admin-dashboard .admin-shell-sidebar');
+            const adminMainEl = document.querySelector('.admin-dashboard .admin-shell-main');
+            if (adminSidebarEl && adminMainEl) {
+                const sidebarId = adminSidebarEl.id || 'adminSidebarPanel';
+                const sidebarLabelId = `${sidebarId}Label`;
+                const sidebarCardEl = adminSidebarEl.querySelector('.admin-sidebar');
+                const titleText = sidebarCardEl?.dataset.adminMobileTitle || adminSidebarEl.querySelector('.admin-sidebar-title span')?.textContent.trim() || 'Menu do painel';
+                const kickerText = adminSidebarEl.querySelector('.admin-sidebar-kicker')?.textContent.trim() || 'Navegação';
+                const pendingCountRaw = sidebarCardEl?.dataset.adminMobileCount || '0';
+                const pendingCount = Number.parseInt(pendingCountRaw, 10) || 0;
+                const adminOffcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(adminSidebarEl);
+
+                adminSidebarEl.id = sidebarId;
+                adminSidebarEl.tabIndex = -1;
+                adminSidebarEl.classList.add('offcanvas-xl', 'offcanvas-start');
+                adminSidebarEl.setAttribute('aria-labelledby', sidebarLabelId);
+
+                if (!adminSidebarEl.querySelector('.admin-mobile-sidebar-head')) {
+                    const mobileHead = document.createElement('div');
+                    mobileHead.className = 'offcanvas-header admin-mobile-sidebar-head';
+
+                    const heading = document.createElement('div');
+                    heading.className = 'admin-mobile-sidebar-heading';
+
+                    const kicker = document.createElement('div');
+                    kicker.className = 'admin-mobile-sidebar-kicker';
+                    kicker.textContent = kickerText;
+
+                    const title = document.createElement('div');
+                    title.className = 'admin-mobile-sidebar-title';
+                    title.id = sidebarLabelId;
+                    title.textContent = titleText;
+
+                    const closeButton = document.createElement('button');
+                    closeButton.type = 'button';
+                    closeButton.className = 'btn-close admin-mobile-sidebar-close';
+                    closeButton.setAttribute('data-bs-dismiss', 'offcanvas');
+                    closeButton.setAttribute('aria-label', 'Fechar menu');
+
+                    heading.appendChild(kicker);
+                    heading.appendChild(title);
+                    mobileHead.appendChild(heading);
+                    mobileHead.appendChild(closeButton);
+                    adminSidebarEl.prepend(mobileHead);
+                }
+
+                if (!adminMainEl.querySelector('[data-admin-mobile-toggle]')) {
+                    const mobileBar = document.createElement('div');
+                    mobileBar.className = 'admin-mobile-sidebar-bar d-xl-none';
+
+                    const toggleButton = document.createElement('button');
+                    toggleButton.type = 'button';
+                    toggleButton.className = 'btn admin-mobile-sidebar-toggle';
+                    toggleButton.setAttribute('data-admin-mobile-toggle', '');
+                    toggleButton.setAttribute('data-bs-toggle', 'offcanvas');
+                    toggleButton.setAttribute('data-bs-target', `#${sidebarId}`);
+                    toggleButton.setAttribute('aria-controls', sidebarId);
+                    toggleButton.setAttribute('aria-label', pendingCount > 0 ? `Abrir menu lateral. ${pendingCount} item${pendingCount === 1 ? '' : 's'} pendente${pendingCount === 1 ? '' : 's'}.` : 'Abrir menu lateral');
+
+                    const mainWrap = document.createElement('span');
+                    mainWrap.className = 'admin-mobile-sidebar-toggle-main';
+
+                    const iconWrap = document.createElement('span');
+                    iconWrap.className = 'admin-mobile-sidebar-toggle-icon';
+                    iconWrap.setAttribute('aria-hidden', 'true');
+                    iconWrap.innerHTML = '<i class="bi bi-list"></i>';
+
+                    const copyWrap = document.createElement('span');
+                    copyWrap.className = 'admin-mobile-sidebar-toggle-copy';
+
+                    const label = document.createElement('span');
+                    label.className = 'admin-mobile-sidebar-toggle-label';
+                    label.textContent = 'Menu';
+
+                    const title = document.createElement('span');
+                    title.className = 'admin-mobile-sidebar-toggle-title';
+                    title.textContent = titleText;
+
+                    copyWrap.appendChild(label);
+                    copyWrap.appendChild(title);
+
+                    mainWrap.appendChild(iconWrap);
+                    mainWrap.appendChild(copyWrap);
+                    toggleButton.appendChild(mainWrap);
+
+                    if (pendingCount > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'admin-mobile-sidebar-toggle-badge';
+                        badge.textContent = pendingCount > 99 ? '99+' : String(pendingCount);
+                        badge.setAttribute('aria-hidden', 'true');
+                        toggleButton.appendChild(badge);
+                    }
+
+                    mobileBar.appendChild(toggleButton);
+                    adminMainEl.prepend(mobileBar);
+                }
+
+                adminSidebarEl.addEventListener('show.bs.offcanvas', function () {
+                    document.body.classList.add('admin-sidebar-open');
+                });
+
+                adminSidebarEl.addEventListener('hidden.bs.offcanvas', function () {
+                    document.body.classList.remove('admin-sidebar-open');
+                });
+
+                adminSidebarEl.querySelectorAll('a[href]:not([href="#"])').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        if (window.innerWidth < 1200 && adminSidebarEl.classList.contains('show')) {
+                            adminOffcanvasInstance.hide();
+                        }
+                    });
+                });
+
+                window.addEventListener('resize', function () {
+                    if (window.innerWidth >= 1200 && adminSidebarEl.classList.contains('show')) {
+                        adminOffcanvasInstance.hide();
+                    }
+                    if (window.innerWidth >= 1200) {
+                        document.body.classList.remove('admin-sidebar-open');
+                    }
+                });
+            }
+
             const modalEl = document.getElementById('docPreviewModal');
             if (!modalEl) return;
 
