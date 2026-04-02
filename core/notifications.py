@@ -70,9 +70,14 @@ def get_notification_topic(notification):
 
 
 def build_notification_groups(notifications):
+    ordered_notifications = sorted(
+        notifications,
+        key=lambda notification: (notification.created_at, notification.id),
+        reverse=True,
+    )
     groups = {}
 
-    for notification in notifications:
+    for notification in ordered_notifications:
         topic = get_notification_topic(notification)
         notification.topic_key = topic['key']
         notification.topic_label = topic['label']
@@ -88,19 +93,33 @@ def build_notification_groups(notifications):
                 'notifications': [],
                 'count': 0,
                 'unread_count': 0,
+                'latest_created_at': notification.created_at,
+                'latest_id': notification.id,
             }
 
         groups[topic['key']]['notifications'].append(notification)
         groups[topic['key']]['count'] += 1
         if not notification.lida:
             groups[topic['key']]['unread_count'] += 1
+        if (
+            notification.created_at,
+            notification.id,
+        ) > (
+            groups[topic['key']]['latest_created_at'],
+            groups[topic['key']]['latest_id'],
+        ):
+            groups[topic['key']]['latest_created_at'] = notification.created_at
+            groups[topic['key']]['latest_id'] = notification.id
 
-    ordered_keys = [topic['key'] for topic in ADMIN_NOTIFICATION_TOPICS] + [DEFAULT_NOTIFICATION_TOPIC['key']]
-    return [
-        groups[key]
-        for key in ordered_keys
-        if key in groups
-    ]
+    ordered_groups = sorted(
+        groups.values(),
+        key=lambda group: (group['latest_created_at'], group['latest_id']),
+        reverse=True,
+    )
+    for group in ordered_groups:
+        group.pop('latest_created_at', None)
+        group.pop('latest_id', None)
+    return ordered_groups
 
 
 def notify_admins(title, message, tipo='INFO', exclude_user_ids=None):

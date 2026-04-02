@@ -21,7 +21,11 @@ def _load_env_file():
         key, value = line.split('=', 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        os.environ.setdefault(key, value)
+        # Let `.env` fill missing or blank variables so local server/process
+        # restarts pick up credentials even if the parent environment exported
+        # empty placeholders.
+        if key not in os.environ or not os.environ.get(key):
+            os.environ[key] = value
 
 _load_env_file()
 
@@ -260,6 +264,9 @@ SMS_BACKEND = os.environ.get('SMS_BACKEND', 'console')  # 'console' or 'twilio'
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
+WHATSAPP_BACKEND = os.environ.get('WHATSAPP_BACKEND', SMS_BACKEND)
+TWILIO_WHATSAPP_FROM_NUMBER = os.environ.get('TWILIO_WHATSAPP_FROM_NUMBER', '')
+TWILIO_WHATSAPP_CONTENT_SID = os.environ.get('TWILIO_WHATSAPP_CONTENT_SID', '')
 
 # Email settings
 EMAIL_BACKEND = os.environ.get(

@@ -1,3 +1,4 @@
+import json
 import logging
 from django.conf import settings
 
@@ -38,12 +39,78 @@ def send_sms(to_number: str, message: str) -> bool:
             logger.exception('Failed to send SMS via Twilio')
             return False
 
-    return _send_console(to_number, message)
+    return _send_console(to_number, message, channel='SMS')
 
 
-def _send_console(to_number: str, message: str) -> bool:
+def send_whatsapp(
+    to_number: str,
+    message: str,
+    *,
+    content_variables: dict[str, str] | None = None,
+) -> bool:
+    """Send WhatsApp using configured backend."""
+    backend = getattr(
+        settings,
+        'WHATSAPP_BACKEND',
+        getattr(settings, 'SMS_BACKEND', 'console'),
+    )
+
+    if backend != 'twilio':
+        logger.warning(
+            'WhatsApp backend is set to %s; real delivery is unavailable.',
+            backend,
+        )
+        return False
+
+    account_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', '')
+    auth_token = getattr(settings, 'TWILIO_AUTH_TOKEN', '')
+    from_number = (
+        getattr(settings, 'TWILIO_WHATSAPP_FROM_NUMBER', '')
+        or getattr(settings, 'TWILIO_FROM_NUMBER', '')
+    )
+    content_sid = getattr(settings, 'TWILIO_WHATSAPP_CONTENT_SID', '').strip()
+    if not (account_sid and auth_token and from_number):
+        logger.warning('Twilio WhatsApp selected but credentials are incomplete.')
+        return False
+
+    try:
+        from twilio.rest import Client
+    except Exception:
+        logger.exception('Twilio library not installed; WhatsApp delivery is unavailable.')
+        return False
+
+    try:
+        client = Client(account_sid, auth_token)
+        payload = {
+            'from_': _as_whatsapp_address(from_number),
+            'to': _as_whatsapp_address(to_number),
+        }
+        if content_sid:
+            payload['content_sid'] = content_sid
+            if content_variables:
+                payload['content_variables'] = json.dumps(content_variables)
+        else:
+            payload['body'] = message
+        client.messages.create(**payload)
+        logger.info('Sent WhatsApp via Twilio to %s', to_number)
+        return True
+    except Exception:
+        logger.exception('Failed to send WhatsApp via Twilio')
+        return False
+
+
+def _as_whatsapp_address(number: str) -> str:
+    value = (number or '').strip()
+    if not value:
+        return value
+    if value.startswith('whatsapp:'):
+        return value
+    return f'whatsapp:{value}'
+
+
+def _send_console(to_number: str, message: str, channel: str = 'SMS') -> bool:
     # development fallback: log and return True
-    logger.info('SMS to %s: %s', to_number, message)
+    logger.info('%s to %s: %s', channel, to_number, message)
     # keep a print for devs who watch console
-    print(f"[SMS] to={to_number} message={message}")
+    print(f"[{channel}] to={to_number} message={message}")
     return True

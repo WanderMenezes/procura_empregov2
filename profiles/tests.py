@@ -270,6 +270,40 @@ class YouthProfileInterestSectorTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertIsNone(form.cleaned_data['distrito'])
 
+    def test_step1_form_requires_localidade_when_outside_country_is_checked(self):
+        form = YouthProfileStep1Form(data={
+            'nome': 'Jovem Exterior',
+            'telefone': '+351912345678',
+            'email': '',
+            'contacto_alternativo': '',
+            'distrito': '',
+            'fora_do_pais': 'on',
+            'data_nascimento': '2000-05-02',
+            'sexo': 'F',
+            'localidade': '',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('localidade', form.errors)
+
+    def test_step1_form_clears_district_when_outside_country_is_checked(self):
+        district = District.objects.create(codigo='LOB', nome='Lobata')
+        form = YouthProfileStep1Form(data={
+            'nome': 'Jovem Exterior',
+            'telefone': '+351912345678',
+            'email': '',
+            'contacto_alternativo': '',
+            'distrito': district.id,
+            'fora_do_pais': 'on',
+            'data_nascimento': '2000-05-02',
+            'sexo': 'F',
+            'localidade': 'Lisboa, Portugal',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(form.cleaned_data['fora_do_pais'])
+        self.assertIsNone(form.cleaned_data['distrito'])
+
     def test_step2_form_accepts_languages_with_domain_type(self):
         form = YouthProfileStep2Form(data={
             'nivel': 'SEC',
@@ -462,6 +496,40 @@ class YouthJobApplicationPermissionsTests(TestCase):
         self.assertContains(response, 'Assistente TIC')
         self.assertContains(response, 'Aguardar validacao')
         self.assertNotContains(response, 'data-form-id="apply-form-{}"'.format(self.job.id))
+
+    def test_available_jobs_page_shows_details_modal_and_apply_button(self):
+        self.client.force_login(self.validated_user)
+
+        response = self.client.get(reverse('profiles:available_jobs'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ver detalhes')
+        self.assertContains(response, 'id="jobDetailsModal"', html=False)
+        self.assertContains(response, 'id="jobDetailsApplyBtn"', html=False)
+
+    def test_available_jobs_direct_link_opens_the_page_where_the_target_job_is_listed(self):
+        for index in range(10):
+            JobPost.objects.create(
+                company=self.company,
+                titulo='Oportunidade Extra {}'.format(index),
+                descricao='Descricao {}'.format(index),
+                requisitos='Requisitos {}'.format(index),
+                tipo='EMP',
+                distrito=self.district,
+                estado='ATIVA',
+            )
+
+        self.client.force_login(self.validated_user)
+
+        response = self.client.get(
+            reverse('profiles:available_jobs'),
+            {'vaga': self.job.id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['vagas_page'].number, 2)
+        self.assertContains(response, 'id="job-card-{}"'.format(self.job.id), html=False)
+        self.assertContains(response, 'data-job-id="{}"'.format(self.job.id), html=False)
 
     def test_unvalidated_youth_cannot_apply_to_job(self):
         self.client.force_login(self.unvalidated_user)
@@ -725,3 +793,56 @@ class ProfileWizardEditingTests(TestCase):
         self.assertEqual(profile.preferencia_oportunidade, 'EMP')
         self.assertEqual(education.area_formacao, 'TIC')
         self.assertContains(response, 'ja entrou na fila de validacao do administrador')
+
+    def test_editing_step1_can_clear_district_when_outside_country_is_checked(self):
+        district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        youth_user = User.objects.create_user(
+            telefone='+2399220201',
+            nome='Perfil Exterior',
+            perfil=User.ProfileType.JOVEM,
+            distrito=district,
+        )
+        profile = YouthProfile.objects.create(
+            user=youth_user,
+            completo=True,
+            validado=False,
+            data_nascimento=_years_ago(20),
+            sexo='M',
+            localidade='Riboque',
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            preferencia_oportunidade='EMP',
+            visivel=True,
+        )
+
+        self.client.force_login(youth_user)
+        self.client.get(reverse('profiles:wizard_step', args=[1]) + '?reset=1')
+
+        response = self.client.post(
+            reverse('profiles:wizard_step', args=[1]),
+            {
+                'nome': 'Perfil Exterior',
+                'telefone': youth_user.telefone,
+                'email': 'exterior.atualizado@example.com',
+                'contacto_alternativo': '',
+                'distrito': '',
+                'fora_do_pais': 'on',
+                'data_nascimento': _years_ago(20).isoformat(),
+                'sexo': 'F',
+                'localidade': 'Lisboa, Portugal',
+                'save': '1',
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('profiles:detail'))
+        youth_user.refresh_from_db()
+        profile.refresh_from_db()
+
+        self.assertIsNone(youth_user.distrito)
+        self.assertEqual(youth_user.email, 'exterior.atualizado@example.com')
+        self.assertEqual(profile.localidade, 'Lisboa, Portugal')
+        self.assertEqual(profile.sexo, 'F')

@@ -93,6 +93,33 @@ def clean_other_area_formacao(form, cleaned_data, area_field='area_formacao', ot
     return cleaned_data
 
 
+def infer_outside_stp_initial(form, district_field='distrito', locality_field='localidade', outside_field='fora_do_pais'):
+    explicit_value = form.initial.get(outside_field)
+    if explicit_value is not None:
+        return bool(explicit_value)
+
+    district_value = form.initial.get(district_field)
+    if hasattr(district_value, 'pk'):
+        district_value = district_value.pk
+
+    locality_value = ' '.join(str(form.initial.get(locality_field) or '').split()).strip()
+    return bool(not district_value and locality_value)
+
+
+def clean_location_fields(form, cleaned_data, district_field='distrito', locality_field='localidade', outside_field='fora_do_pais'):
+    outside_value = bool(cleaned_data.get(outside_field))
+    locality_value = ' '.join(str(cleaned_data.get(locality_field) or '').split()).strip()
+
+    if outside_value:
+        cleaned_data[district_field] = None
+        if not locality_value:
+            form.add_error(locality_field, _('Indica o país, cidade ou região onde te encontras.'))
+
+    cleaned_data[locality_field] = locality_value
+    cleaned_data[outside_field] = outside_value
+    return cleaned_data
+
+
 IDIOMA_SLOT_COUNT = 4
 
 
@@ -238,10 +265,16 @@ class YouthProfileStep1Form(forms.ModelForm):
         label=_('Distrito em São Tomé e Príncipe'),
         queryset=District.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        empty_label=_('Fora de São Tomé e Príncipe / não definido'),
+        empty_label=_('Selecione o distrito'),
         required=False
     )
     
+    fora_do_pais = forms.BooleanField(
+        label=_('Estou fora de SÃ£o TomÃ© e PrÃ­ncipe'),
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     data_nascimento = forms.DateField(
         label=_('Data de nascimento'),
         widget=forms.DateInput(attrs={
@@ -270,6 +303,16 @@ class YouthProfileStep1Form(forms.ModelForm):
     class Meta:
         model = YouthProfile
         fields = ['data_nascimento', 'sexo', 'localidade', 'contacto_alternativo']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['distrito'].queryset = District.objects.order_by('nome')
+        if not self.is_bound:
+            self.initial.setdefault('fora_do_pais', infer_outside_stp_initial(self))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return clean_location_fields(self, cleaned_data)
 
 
 class YouthProfileStep2Form(forms.ModelForm):
@@ -666,10 +709,16 @@ class AssistedRegistrationForm(forms.Form):
         label=_('Distrito em São Tomé e Príncipe'),
         queryset=None,
         widget=forms.Select(attrs={'class': 'form-select'}),
-        empty_label=_('Fora de São Tomé e Príncipe / não definido'),
+        empty_label=_('Selecione o distrito'),
         required=False,
     )
     
+    fora_do_pais = forms.BooleanField(
+        label=_('O candidato estÃ¡ fora de SÃ£o TomÃ© e PrÃ­ncipe'),
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     localidade = forms.CharField(
         label=_('Localidade'),
         required=False,
@@ -736,9 +785,12 @@ class AssistedRegistrationForm(forms.Form):
         attach_idioma_fields(self)
         from core.models import District
         self.fields['distrito'].queryset = District.objects.order_by('nome')
+        if not self.is_bound:
+            self.initial.setdefault('fora_do_pais', infer_outside_stp_initial(self))
 
     def clean(self):
         cleaned_data = super().clean()
+        cleaned_data = clean_location_fields(self, cleaned_data)
         cleaned_data = clean_other_area_formacao(self, cleaned_data)
         return clean_idioma_entries(self, cleaned_data)
 

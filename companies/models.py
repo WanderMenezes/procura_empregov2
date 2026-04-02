@@ -5,7 +5,47 @@ Base Nacional de Jovens
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+from django.utils.html import escape
 from django.utils.translation import gettext_lazy as _
+from core.models import Notification
+
+
+def _notify_candidates_about_job_publication(job):
+    if job.estado != 'ATIVA':
+        return
+
+    user_model = get_user_model()
+    candidate_ids = list(
+        user_model.objects.filter(
+            perfil=user_model.ProfileType.JOVEM,
+            is_active=True,
+        ).values_list('id', flat=True)
+    )
+    if not candidate_ids:
+        return
+
+    titulo = _('Nova vaga publicada')
+    job_url = '{}?vaga={}'.format(reverse('profiles:available_jobs'), job.pk)
+    mensagem = _(
+        'A empresa %(empresa)s publicou a vaga %(vaga)s. '
+        'Veja os detalhes e candidata-te se for do teu interesse clicando '
+        '<a href="%(url)s">aqui</a>.'
+    ) % {
+        'empresa': escape(job.company.nome),
+        'vaga': escape(job.titulo),
+        'url': job_url,
+    }
+    Notification.objects.bulk_create([
+        Notification(
+            user_id=candidate_id,
+            titulo=titulo,
+            mensagem=mensagem,
+            tipo='INFO',
+        )
+        for candidate_id in candidate_ids
+    ])
 
 
 class Company(models.Model):
@@ -230,6 +270,22 @@ class JobPost(models.Model):
     
     def __str__(self):
         return f"{self.titulo} - {self.company.nome}"
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        previous_estado = None
+        if not is_new and self.pk:
+            previous_estado = type(self).objects.filter(pk=self.pk).values_list('estado', flat=True).first()
+
+        super().save(*args, **kwargs)
+
+        current_estado = type(self).objects.filter(pk=self.pk).values_list('estado', flat=True).first()
+        if current_estado != 'ATIVA':
+            return
+        if not is_new and previous_estado == 'ATIVA':
+            return
+
+        _notify_candidates_about_job_publication(self)
     
     @property
     def total_candidaturas(self):

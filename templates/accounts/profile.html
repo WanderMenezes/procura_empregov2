@@ -173,7 +173,7 @@
                 <span class="account-icon"><i class="bi {% if notification.tipo == 'SUCESSO' %}bi-check2-circle{% elif notification.tipo == 'ALERTA' %}bi-exclamation-triangle{% elif notification.tipo == 'ERRO' %}bi-x-circle{% else %}bi-info-circle{% endif %}"></i></span>
                 <div>
                   <span class="account-icon-label">{{ notification.titulo }}</span>
-                  {{ notification.mensagem|truncatewords:16 }}
+                  {{ notification.mensagem|striptags|truncatewords:16 }}
                   <div class="small text-muted mt-1">{{ notification.created_at|date:"d/m/Y H:i" }}{% if not notification.lida %} · por ler{% endif %}</div>
                 </div>
               </article>

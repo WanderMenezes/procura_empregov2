@@ -419,3 +419,135 @@ class AdminWorkflowNotificationTests(TestCase):
                 mensagem__icontains='Jovem Fluxos',
             ).exists()
         )
+
+
+class JobPublicationNotificationTests(TestCase):
+    def setUp(self):
+        self.district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        self.company_user = User.objects.create_user(
+            telefone='+2399110201',
+            nome='Empresa Publicadora',
+            perfil=User.ProfileType.EMPRESA,
+            distrito=self.district,
+        )
+        self.company = Company.objects.create(
+            user=self.company_user,
+            nome='Empresa Publicadora',
+            ativa=True,
+            verificada=True,
+        )
+        self.candidate_with_profile = User.objects.create_user(
+            telefone='+2399110202',
+            nome='Candidato Completo',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+        )
+        _create_company_visible_profile(self.candidate_with_profile)
+        self.candidate_without_profile = User.objects.create_user(
+            telefone='+2399110203',
+            nome='Candidato Sem Perfil',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+        )
+        self.inactive_candidate = User.objects.create_user(
+            telefone='+2399110204',
+            nome='Candidato Inativo',
+            perfil=User.ProfileType.JOVEM,
+            distrito=self.district,
+            is_active=False,
+        )
+        self.admin_user = User.objects.create_user(
+            telefone='+2399110205',
+            nome='Admin Publicacoes',
+            perfil=User.ProfileType.ADMIN,
+        )
+
+    def test_job_create_notifies_all_active_candidate_accounts(self):
+        self.client.force_login(self.company_user)
+
+        response = self.client.post(
+            reverse('companies:job_create'),
+            {
+                'titulo': 'Tecnico de Redes',
+                'descricao': 'Suporte e manutencao de redes.',
+                'requisitos': 'Experiencia em configuracao basica.',
+                'tipo': 'EMP',
+                'numero_vagas': 2,
+                'distrito': self.district.pk,
+                'local_trabalho': 'Sao Tome',
+                'nivel_educacao': 'TEC',
+                'area_formacao': 'INF',
+                'experiencia_minima': 1,
+                'salario': 'A combinar',
+                'beneficios': 'Formacao continua',
+                'data_fecho': '',
+            },
+        )
+
+        self.assertRedirects(response, reverse('companies:job_list'))
+        notification_qs = Notification.objects.filter(
+            titulo='Nova vaga publicada',
+            mensagem__icontains='Tecnico de Redes',
+        )
+
+        self.assertEqual(notification_qs.count(), 2)
+        self.assertCountEqual(
+            notification_qs.values_list('user_id', flat=True),
+            [self.candidate_with_profile.id, self.candidate_without_profile.id],
+        )
+        created_job = JobPost.objects.get(titulo='Tecnico de Redes')
+        self.assertIn(
+            '{}?vaga={}'.format(reverse('profiles:available_jobs'), created_job.id),
+            notification_qs.first().mensagem,
+        )
+        self.assertIn('clicando <a href="', notification_qs.first().mensagem)
+        self.assertFalse(
+            Notification.objects.filter(
+                user=self.inactive_candidate,
+                titulo='Nova vaga publicada',
+            ).exists()
+        )
+        self.assertFalse(
+            Notification.objects.filter(
+                user=self.company_user,
+                titulo='Nova vaga publicada',
+            ).exists()
+        )
+        self.assertFalse(
+            Notification.objects.filter(
+                user=self.admin_user,
+                titulo='Nova vaga publicada',
+            ).exists()
+        )
+
+    def test_reactivating_job_notifies_candidates_only_once(self):
+        job = JobPost.objects.create(
+            company=self.company,
+            titulo='Assistente Operacional',
+            descricao='Apoio a operacoes internas.',
+            requisitos='Boa organizacao.',
+            tipo='EMP',
+            estado='PAUSADA',
+        )
+
+        self.assertFalse(Notification.objects.filter(titulo='Nova vaga publicada').exists())
+
+        job.estado = 'ATIVA'
+        job.save(update_fields=['estado'])
+
+        first_batch = Notification.objects.filter(
+            titulo='Nova vaga publicada',
+            mensagem__icontains='Assistente Operacional',
+        )
+        self.assertEqual(first_batch.count(), 2)
+
+        job.titulo = 'Assistente Operacional Senior'
+        job.save(update_fields=['titulo'])
+
+        self.assertEqual(
+            Notification.objects.filter(titulo='Nova vaga publicada').count(),
+            2,
+        )

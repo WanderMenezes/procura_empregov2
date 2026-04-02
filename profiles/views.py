@@ -216,6 +216,7 @@ class ProfileWizardView(View):
             'telefone': user.telefone or '',
             'email': user.email or '',
             'distrito': user.distrito_id or '',
+            'fora_do_pais': bool(not user.distrito_id and profile.localidade),
             'data_nascimento': to_date(profile.data_nascimento),
             'sexo': profile.sexo or '',
             'localidade': profile.localidade or '',
@@ -399,22 +400,29 @@ class ProfileWizardView(View):
         return form_class()
     
     def get_form_data(self, form):
-        """Extrai dados limpos do formulário"""
+        """Extrai dados limpos do formulario."""
         data = {}
         for field_name, field in form.fields.items():
             value = form.cleaned_data.get(field_name)
-            if value is not None:
-                # Converter objetos para IDs serializáveis
-                if isinstance(value, bool):
-                    data[field_name] = value
-                elif isinstance(value, (list, tuple)):
-                    data[field_name] = list(value)
-                elif hasattr(value, 'pk'):
-                    data[field_name] = value.pk
-                elif hasattr(value, 'all'):  # ManyToMany
+
+            # Preserva valores vazios para permitir limpar campos opcionais no wizard.
+            if isinstance(field, (django_forms.ModelMultipleChoiceField, django_forms.MultipleChoiceField)):
+                if hasattr(value, 'all'):
                     data[field_name] = [item.pk for item in value.all()]
                 else:
-                    data[field_name] = str(value) if value else ''
+                    data[field_name] = list(value or [])
+                continue
+            if isinstance(field, django_forms.BooleanField):
+                data[field_name] = bool(value)
+                continue
+            if hasattr(value, 'pk'):
+                data[field_name] = value.pk
+                continue
+            if value is None:
+                data[field_name] = ''
+                continue
+            data[field_name] = str(value) if value else ''
+
         return data
 
     def get_raw_form_data(self, form, request):
@@ -944,6 +952,7 @@ def available_jobs(request):
     tipo = request.GET.get('tipo')
     distrito = request.GET.get('distrito')
     area = request.GET.get('area')
+    target_job_id = request.GET.get('vaga')
 
     if q:
         vagas_qs = vagas_qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
@@ -954,8 +963,16 @@ def available_jobs(request):
     if area in valid_areas:
         vagas_qs = vagas_qs.filter(area_formacao=area)
 
-    paginator = Paginator(vagas_qs, 9)
+    vagas_qs = vagas_qs.order_by('-data_publicacao', '-id')
+
+    paginator = Paginator(vagas_qs, 10)
     page_number = request.GET.get('page') or 1
+    if target_job_id and target_job_id.isdigit():
+        ordered_job_ids = list(vagas_qs.values_list('id', flat=True))
+        try:
+            page_number = (ordered_job_ids.index(int(target_job_id)) // paginator.per_page) + 1
+        except ValueError:
+            target_job_id = ''
     vagas_page = paginator.get_page(page_number)
 
     applications = Application.objects.filter(youth=profile).select_related('job', 'job__company')
@@ -966,6 +983,8 @@ def available_jobs(request):
     filters = request.GET.copy()
     if 'page' in filters:
         del filters['page']
+    if 'vaga' in filters:
+        del filters['vaga']
     filters_qs = filters.urlencode()
 
     recommended_query = Q()
@@ -1035,6 +1054,7 @@ def available_jobs(request):
         'selected_distrito': distrito or '',
         'selected_area': area or '',
         'selected_query': q,
+        'highlight_job_id': int(target_job_id) if target_job_id and target_job_id.isdigit() else None,
         'active_filter_count': active_filter_count,
         'has_active_filters': active_filter_count > 0,
         'total_available_jobs': total_available_jobs,

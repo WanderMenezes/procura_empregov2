@@ -68,6 +68,8 @@
   .notification-card-title { font-size: 1.04rem; font-weight: 700; color: #132133; margin-bottom: .25rem; }
   .notification-card-subline, .notification-card-copy { color: #66768c; }
   .notification-card-copy { margin-top: .9rem; line-height: 1.7; }
+  .notification-card-copy a { color: #0e7193; font-weight: 700; text-decoration: none; }
+  .notification-card-copy a:hover { text-decoration: underline; }
   .notification-status {
     display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .68rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
   }
@@ -220,7 +222,13 @@
                       </div>
                     </div>
 
-                    <div class="notification-card-copy">{{ n.mensagem|linebreaksbr }}</div>
+                    <div class="notification-card-copy">
+                      {% if n.titulo == 'Nova vaga publicada' %}
+                        {{ n.mensagem|safe }}
+                      {% else %}
+                        {{ n.mensagem|linebreaksbr }}
+                      {% endif %}
+                    </div>
 
                     <div class="notification-card-footer mt-3">
                       <div class="notifications-tags">

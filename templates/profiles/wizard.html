@@ -65,6 +65,7 @@
   .wizard-toggle-card { display: flex; gap: .85rem; align-items: flex-start; padding: 1rem; border-radius: 20px; background: #f7fafc; border: 1px solid rgba(18,32,51,.08); }
   .wizard-toggle-card.full { grid-column: 1 / -1; }
   .wizard-file-grid, .wizard-consent-grid { display: grid; gap: 1rem; }
+  .wizard-location-grid { align-items: start; }
   .wizard-file-card { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem; border-radius: 20px; background: linear-gradient(180deg, #fff, #fbfdff); border: 1px solid rgba(18,32,51,.08); }
   .wizard-file-card .form-control { min-width: 0; }
   .wizard-file-state { font-size: .86rem; color: #66768c; }
@@ -242,20 +243,32 @@
           <div class="wizard-section">
             <div class="wizard-section-label"><i class="bi bi-geo-alt"></i>Localização</div>
             <h2 class="wizard-section-title">Onde te encontras</h2>
-            <div class="wizard-grid mt-3">
-              <div class="wizard-field">
-                <label for="{{ form.distrito.id_for_label }}">{{ form.distrito.label }}</label>
+            <p class="wizard-panel-copy">Confirma se estas em Sao Tome e Principe para mostrarmos os campos certos.</p>
+            {% with is_outside_country=form.fora_do_pais.value %}
+            <div class="wizard-grid wizard-location-grid mt-3">
+              <label class="wizard-toggle-card full" for="{{ form.fora_do_pais.id_for_label }}">
+                {{ form.fora_do_pais }}
+                <div>
+                  <div class="wizard-toggle-title">Estou fora de Sao Tome e Principe</div>
+                  <p class="wizard-panel-copy">Ativa esta opcao quando estas no exterior. O formulario muda para pedir a tua localizacao atual fora do pais.</p>
+                </div>
+              </label>
+            </div>
+            <div class="wizard-grid wizard-location-grid mt-3">
+              <div id="wizardDistrictWrap" class="wizard-field" {% if is_outside_country %}style="display:none;"{% endif %}>
+                <label id="wizardDistrictLabel" for="{{ form.distrito.id_for_label }}">Distrito em Sao Tome e Principe</label>
                 {{ form.distrito }}
                 {% if form.distrito.errors %}<div class="wizard-error">{{ form.distrito.errors|striptags }}</div>{% endif %}
-                <div class="wizard-field-help">Opcional. Usa este campo apenas se estiveres em São Tomé e Príncipe.</div>
+                <div id="wizardDistrictHelp" class="wizard-field-help">Escolhe o distrito onde te encontras em Sao Tome e Principe.</div>
               </div>
-              <div class="wizard-field">
-                <label for="{{ form.localidade.id_for_label }}">{{ form.localidade.label }}</label>
+              <div id="wizardLocalidadeWrap" class="wizard-field {% if is_outside_country %}full{% endif %}">
+                <label id="wizardLocalidadeLabel" for="{{ form.localidade.id_for_label }}">{% if is_outside_country %}Pais, cidade ou regiao{% else %}Localidade em Sao Tome e Principe{% endif %}</label>
                 {{ form.localidade }}
                 {% if form.localidade.errors %}<div class="wizard-error">{{ form.localidade.errors|striptags }}</div>{% endif %}
-                <div class="wizard-field-help">Podes escrever bairro, cidade, região ou país onde estás.</div>
+                <div id="wizardLocalidadeHelp" class="wizard-field-help">{% if is_outside_country %}Obrigatorio quando estas fora do pais. Indica o pais, cidade ou regiao onde te encontras agora.{% else %}Opcional. Podes indicar bairro, vila, zona ou comunidade.{% endif %}</div>
               </div>
             </div>
+            {% endwith %}
           </div>
         {% elif step == 2 %}
           <div class="wizard-section">
@@ -570,6 +583,13 @@
     const areaFormacaoInput = document.getElementById('id_area_formacao');
     const outraAreaInput = document.getElementById('id_outra_area_formacao');
     const outraAreaWrap = document.getElementById('wizardOutraAreaWrap');
+    const outsideCountryInput = document.getElementById('id_fora_do_pais');
+    const districtInput = document.getElementById('id_distrito');
+    const districtWrap = document.getElementById('wizardDistrictWrap');
+    const localidadeInput = document.getElementById('id_localidade');
+    const localidadeWrap = document.getElementById('wizardLocalidadeWrap');
+    const localidadeLabel = document.getElementById('wizardLocalidadeLabel');
+    const localidadeHelp = document.getElementById('wizardLocalidadeHelp');
     const autosaveStatus = document.getElementById('wizard-autosave-status');
     const progressBar = document.getElementById('wizard-progress');
     const progressText = document.getElementById('wizard-progress-text');
@@ -624,6 +644,35 @@
       }
     }
 
+    function toggleLocationFields() {
+      if (!outsideCountryInput || !localidadeInput || !localidadeWrap) return;
+      const isOutside = outsideCountryInput.checked;
+
+      if (districtWrap) {
+        districtWrap.style.display = isOutside ? 'none' : 'grid';
+      }
+      if (districtInput) {
+        districtInput.disabled = isOutside;
+      }
+
+      localidadeWrap.classList.toggle('full', isOutside);
+      localidadeInput.required = isOutside;
+      localidadeInput.placeholder = isOutside
+        ? 'Ex: Lisboa, Portugal'
+        : 'Ex: Riboque, Trindade ou Pantufo';
+
+      if (localidadeLabel) {
+        localidadeLabel.textContent = isOutside
+          ? 'Pais, cidade ou regiao'
+          : 'Localidade em Sao Tome e Principe';
+      }
+      if (localidadeHelp) {
+        localidadeHelp.textContent = isOutside
+          ? 'Obrigatorio quando estas fora do pais. Indica o pais, cidade ou regiao onde te encontras agora.'
+          : 'Opcional. Podes indicar bairro, vila, zona ou comunidade.';
+      }
+    }
+
     async function runAutosave() {
       if (!form || submitting) return;
       setAutosaveState('is-saving', 'A guardar progresso');
@@ -661,6 +710,7 @@
     toggleExperiencia();
     toggleExpFim();
     toggleOutraAreaFormacao();
+    toggleLocationFields();
     if (birthDateInput) {
       birthDateInput.addEventListener('change', updateAge);
       birthDateInput.addEventListener('input', updateAge);
@@ -668,6 +718,7 @@
     if (temExperiencia) temExperiencia.addEventListener('change', toggleExperiencia);
     if (expAtual) expAtual.addEventListener('change', toggleExpFim);
     if (areaFormacaoInput) areaFormacaoInput.addEventListener('change', toggleOutraAreaFormacao);
+    if (outsideCountryInput) outsideCountryInput.addEventListener('change', toggleLocationFields);
     if (form) {
       form.addEventListener('input', scheduleAutosave);
       form.addEventListener('change', scheduleAutosave);

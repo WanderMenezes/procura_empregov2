@@ -274,6 +274,77 @@ class PasswordResetRequestForm(forms.Form):
         })
     )
 
+class PasswordResetRequestForm(forms.Form):
+    """FormulÃ¡rio para solicitar recuperaÃ§Ã£o de senha"""
+
+    CHANNEL_CHOICES = [
+        ('email', _('Email')),
+        ('whatsapp', _('WhatsApp')),
+    ]
+
+    channel = forms.ChoiceField(
+        label=_('Canal de recuperaÃ§Ã£o'),
+        choices=CHANNEL_CHOICES,
+        initial='email',
+        widget=forms.RadioSelect,
+    )
+
+    email = forms.EmailField(
+        label=_('Email'),
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Seu email registado')
+        })
+    )
+
+    telefone = forms.CharField(
+        label=_('TelemÃ³vel'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Seu telemÃ³vel registado')
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        channel = cleaned_data.get('channel') or 'email'
+        email = (cleaned_data.get('email') or '').strip()
+        telefone = (cleaned_data.get('telefone') or '').strip()
+
+        self.user = None
+
+        if channel == 'whatsapp':
+            if not telefone:
+                self.add_error('telefone', _('Indica o teu telemÃ³vel registado.'))
+                return cleaned_data
+
+            try:
+                self.user = User.objects.get(telefone=telefone)
+            except User.DoesNotExist:
+                self.add_error('telefone', _('NÃ£o existe conta com este telemÃ³vel.'))
+        else:
+            if not email:
+                self.add_error('email', _('Indica o teu email registado.'))
+                return cleaned_data
+
+            try:
+                self.user = User.objects.get(email__iexact=email)
+            except User.DoesNotExist:
+                self.add_error('email', _('NÃ£o existe conta com este email.'))
+
+        cleaned_data['email'] = email
+        cleaned_data['telefone'] = telefone
+        return cleaned_data
+
+    def get_user(self):
+        return self.user
+
 
 class PasswordResetConfirmForm(forms.Form):
     """Formulário para confirmar recuperação de senha"""

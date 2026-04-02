@@ -24,6 +24,7 @@ from .forms import (
     UserProfileForm
 )
 from .models import User, PasswordResetCode
+from .sms import send_whatsapp
 from core.models import Notification
 from core.notifications import build_notification_groups, notify_admins
 from profiles.models import YouthProfile
@@ -231,6 +232,84 @@ class PasswordResetRequestView(FormView):
             return self.form_invalid(form)
 
 
+    def form_valid(self, form):
+        user = form.get_user()
+        channel = form.cleaned_data.get('channel') or 'email'
+
+        code = str(random.randint(100000, 999999))
+        reset_code = PasswordResetCode.objects.create(user=user, code=code)
+
+        subject = _('CÃ³digo de recuperaÃ§Ã£o de senha')
+        message = _(
+            'O teu cÃ³digo de recuperaÃ§Ã£o Ã©: %(code)s. '
+            'Se nÃ£o foste tu, ignora esta mensagem.'
+        ) % {
+            'code': code,
+        }
+
+        if channel == 'whatsapp':
+            whatsapp_backend = getattr(
+                settings,
+                'WHATSAPP_BACKEND',
+                getattr(settings, 'SMS_BACKEND', 'console'),
+            )
+            whatsapp_from_number = (
+                getattr(settings, 'TWILIO_WHATSAPP_FROM_NUMBER', '')
+                or getattr(settings, 'TWILIO_FROM_NUMBER', '')
+            )
+            if whatsapp_backend != 'twilio' or not (
+                getattr(settings, 'TWILIO_ACCOUNT_SID', '')
+                and getattr(settings, 'TWILIO_AUTH_TOKEN', '')
+                and whatsapp_from_number
+            ):
+                reset_code.delete()
+                messages.error(
+                    self.request,
+                    _(
+                        'O envio por WhatsApp ainda nao esta configurado neste '
+                        'servidor. Preenche TWILIO_ACCOUNT_SID, '
+                        'TWILIO_AUTH_TOKEN e TWILIO_WHATSAPP_FROM_NUMBER no '
+                        'ficheiro .env.'
+                    ),
+                )
+                return self.form_invalid(form)
+
+            sent = send_whatsapp(
+                user.telefone,
+                message,
+                content_variables={'1': code},
+            )
+            if not sent:
+                reset_code.delete()
+                messages.error(self.request, _('NÃ£o foi possÃ­vel enviar o cÃ³digo por WhatsApp. Tenta novamente.'))
+                return self.form_invalid(form)
+
+            messages.success(self.request, _('EnviÃ¡mos um cÃ³digo de recuperaÃ§Ã£o por WhatsApp.'))
+        else:
+            try:
+                email_sent = send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False
+                )
+            except Exception:
+                email_sent = 0
+
+            if not email_sent:
+                reset_code.delete()
+                messages.error(self.request, _('NÃ£o foi possÃ­vel enviar o email. Tenta novamente.'))
+                return self.form_invalid(form)
+
+            messages.success(self.request, _('EnviÃ¡mos um cÃ³digo de recuperaÃ§Ã£o por email.'))
+
+        self.request.session['reset_user_id'] = user.id
+        self.request.session['reset_channel'] = channel
+        self.request.session.pop('reset_email', None)
+        return redirect('accounts:password_reset_confirm')
+
+
 class PasswordResetConfirmView(FormView):
     """View para confirmar recuperação de senha"""
     template_name = 'accounts/password_reset_confirm.html'
@@ -279,15 +358,67 @@ class PasswordResetConfirmView(FormView):
             messages.error(self.request, _('Código inválido.'))
             return self.form_invalid(form)
 
+    def form_valid(self, form):
+        user_id = self.request.session.get('reset_user_id')
+        email = self.request.session.get('reset_email')
+        code = form.cleaned_data['code']
+        new_password = form.cleaned_data['new_password']
+        
+        if not user_id and not email:
+            messages.error(self.request, _('SessÃ£o expirada. Solicite novo cÃ³digo.'))
+            return redirect('accounts:password_reset_request')
+        
+        try:
+            if user_id:
+                user = User.objects.get(pk=user_id)
+            else:
+                user = User.objects.get(email__iexact=email)
+            reset_code = PasswordResetCode.objects.filter(
+                user=user,
+                code=code,
+                used=False
+            ).latest('created_at')
+            
+            if reset_code.is_valid():
+                user.set_password(new_password)
+                user.save()
+                
+                reset_code.used = True
+                reset_code.save()
+                
+                self.request.session.pop('reset_email', None)
+                self.request.session.pop('reset_user_id', None)
+                self.request.session.pop('reset_channel', None)
+                
+                messages.success(
+                    self.request,
+                    _('Palavra-passe alterada com sucesso! FaÃ§a login com a nova senha.')
+                )
+                return super().form_valid(form)
+            else:
+                messages.error(self.request, _('CÃ³digo expirado. Solicite novo cÃ³digo.'))
+                return self.form_invalid(form)
+                
+        except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
+            messages.error(self.request, _('CÃ³digo invÃ¡lido.'))
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        channel = self.request.session.get('reset_channel') or 'email'
+        context['reset_channel_label'] = 'WhatsApp' if channel == 'whatsapp' else 'Email'
+        return context
+
 
 @login_required
 def profile_view(request):
     """View para visualizar perfil do usuário"""
     user = request.user
+    ordered_notifications = user.notifications.order_by('-created_at', '-id')
     
     context = {
         'user': user,
-        'recent_notifications': user.notifications.all()[:4],
+        'recent_notifications': ordered_notifications[:4],
         'unread_notifications': user.notifications.filter(lida=False).count(),
     }
     
@@ -392,7 +523,9 @@ def profile_edit(request):
 @login_required
 def notifications_view(request):
     """View para listar notificações do usuário"""
-    notifications = list(request.user.notifications.all()[:50])
+    notifications = list(
+        request.user.notifications.order_by('-created_at', '-id')[:50]
+    )
     notification_groups = build_notification_groups(notifications)
     notification_category_summary = {
         group['key']: group['count']

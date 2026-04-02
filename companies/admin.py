@@ -93,7 +93,9 @@ class JobPostAdmin(admin.ModelAdmin):
     actions = ['ativar_vagas', 'fechar_vagas', 'pausar_vagas', 'exportar_candidaturas']
     
     def ativar_vagas(self, request, queryset):
-        queryset.update(estado='ATIVA')
+        for vaga in queryset.exclude(estado='ATIVA').iterator():
+            vaga.estado = 'ATIVA'
+            vaga.save(update_fields=['estado'])
     ativar_vagas.short_description = _('Ativar vagas')
     
     def fechar_vagas(self, request, queryset):

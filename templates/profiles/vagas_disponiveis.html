@@ -26,6 +26,7 @@
   .jobs-shell { display: grid; grid-template-columns: minmax(290px, 330px) minmax(0,1fr); gap: 1.25rem; align-items: start; }
   .jobs-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
   .jobs-panel, .job-card { border-radius: 24px; padding: 1.35rem; background: #fff; border: 1px solid rgba(18,32,51,.07); box-shadow: 0 20px 38px rgba(18,32,51,.08); }
+  .job-card.is-highlighted { border-color: rgba(14,111,147,.28); box-shadow: 0 24px 52px rgba(14,111,147,.18); }
   .jobs-panel-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
   .jobs-panel-title { margin-bottom: .2rem; font-size: 1.05rem; font-weight: 700; }
   .jobs-panel-subtitle, .jobs-copy, .jobs-empty-copy, .job-card-copy, .job-meta, .job-footer-note { color: #66768c; }
@@ -65,15 +66,27 @@
   .job-fact { padding: .9rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
   .job-fact-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #708096; margin-bottom: .2rem; }
   .job-fact-value { color: #122033; font-weight: 700; }
-  .job-card-copy { line-height: 1.7; margin: 0; }
   .job-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(18,32,51,.08); }
   .job-footer-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; justify-content: space-between; }
   .job-footer-actions .btn { border-radius: 14px; }
+  .job-footer-buttons { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .7rem; width: min(100%, 26rem); }
+  .job-footer-buttons form { margin: 0; display: flex; }
+  .job-footer-buttons .btn, .job-footer-buttons form .btn { width: 100%; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: .36rem .58rem; font-size: .82rem; }
+  .job-details-meta { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem; }
+  .job-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .85rem; margin-bottom: 1rem; }
+  .job-details-card { padding: .95rem; border-radius: 18px; background: #f7fafc; border: 1px solid rgba(18,32,51,.06); }
+  .job-details-label { display: block; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #708096; margin-bottom: .2rem; }
+  .job-details-value { color: #122033; font-weight: 700; }
+  .job-details-section + .job-details-section { margin-top: 1rem; }
+  .job-details-section h6 { margin-bottom: .45rem; font-weight: 700; color: #122033; }
+  .job-details-copy { margin: 0; color: #445468; line-height: 1.7; white-space: pre-line; }
+  .job-details-company { color: #66768c; margin: .2rem 0 0; }
+  .job-modal-footer { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: flex-end; width: 100%; }
   .jobs-empty { border-radius: 24px; padding: 2.3rem 1.5rem; text-align: center; background: linear-gradient(180deg, #fff, #f7fafc); border: 1px dashed rgba(18,32,51,.14); box-shadow: 0 20px 38px rgba(18,32,51,.06); }
   .jobs-empty i { font-size: 2rem; color: #0e7193; display: block; margin-bottom: .8rem; }
   .pagination .page-link { border-radius: 12px; margin: 0 .18rem; border-color: rgba(18,32,51,.12); color: #0e7193; }
   @media (max-width: 991.98px) { .jobs-shell, .jobs-stats, .jobs-results-grid { grid-template-columns: 1fr; } .jobs-sidebar { position: static; } .jobs-hero-head, .jobs-results-head { flex-direction: column; align-items: stretch; } .jobs-actions .btn, .jobs-filter-actions .btn { width: 100%; } }
-  @media (max-width: 575.98px) { .jobs-hero { padding: 1.35rem; } .job-grid { grid-template-columns: 1fr; } .job-card-top, .job-footer-actions { flex-direction: column; align-items: stretch; } }
+  @media (max-width: 575.98px) { .jobs-hero { padding: 1.35rem; } .job-grid, .job-details-grid { grid-template-columns: 1fr; } .job-card-top, .job-footer-actions { flex-direction: column; align-items: stretch; } .job-footer-buttons { width: 100%; } .job-modal-footer .btn { width: 100%; } }
 </style>
 {% endblock %}
 
@@ -234,7 +247,7 @@
       {% if vagas_page.object_list %}
         <div class="jobs-results-grid">
           {% for vaga in vagas_page %}
-            <article class="job-card">
+            <article id="job-card-{{ vaga.id }}" class="job-card{% if highlight_job_id == vaga.id %} is-highlighted{% endif %}">
               <div class="job-card-top">
                 <div class="job-company">
                   <div class="job-company-logo" aria-hidden="true">
@@ -280,8 +293,6 @@
                 </div>
               </div>
 
-              <p class="job-card-copy">{{ vaga.descricao|truncatewords:26 }}</p>
-
               <div class="jobs-card-tags">
                 {% if vaga.match_reasons %}
                   {% for reason in vaga.match_reasons %}
@@ -311,31 +322,90 @@
                       <span class="job-pill {% if estado == 'ACEITE' %}highlight{% elif estado == 'REJEITADA' %}danger{% elif estado == 'EM_ANALISE' %}warning{% else %}muted{% endif %}">
                         <i class="bi bi-check2-circle"></i>{{ candidaturas_map|get_item:vaga.id }}
                       </span>
-                      <button class="btn btn-outline-secondary" disabled><i class="bi bi-send-check me-2"></i>Já candidatado</button>
+                      <div class="job-footer-buttons">
+                        <button type="button"
+                                class="btn btn-outline-primary job-details-trigger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#jobDetailsModal"
+                                data-job-id="{{ vaga.id }}"
+                                data-job-title="{{ vaga.titulo|escapejs }}"
+                                data-company="{{ vaga.company.nome|escapejs }}"
+                                data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}"
+                                data-job-location="{{ vaga.local_trabalho|default:'Local a definir'|escapejs }}"
+                                data-job-posted="{{ vaga.data_publicacao|date:'d/m/Y' }}"
+                                data-job-type="{{ vaga.get_tipo_display|escapejs }}"
+                                data-job-area="{% if vaga.area_label %}{{ vaga.area_label|escapejs }}{% else %}Sem area definida{% endif %}"
+                                data-job-vacancies="{{ vaga.numero_vagas }}"
+                                data-job-remaining="{{ vaga.vagas_restantes }}"
+                                data-job-salary="{% if vaga.salario %}{{ vaga.salario|escapejs }}{% else %}A combinar{% endif %}"
+                                data-job-closing="{% if vaga.data_fecho %}{{ vaga.data_fecho|date:'d/m/Y' }}{% else %}Sem prazo indicado{% endif %}"
+                                data-job-education="{% if vaga.nivel_educacao %}{{ vaga.get_nivel_educacao_display|escapejs }}{% else %}Não especificado{% endif %}"
+                                data-job-experience="{% if vaga.experiencia_minima %}{{ vaga.experiencia_minima }} ano{{ vaga.experiencia_minima|pluralize }}{% else %}Sem experiência mínima{% endif %}"
+                                data-job-description="{{ vaga.descricao|escapejs }}"
+                                data-job-requirements="{{ vaga.requisitos|escapejs }}"
+                                data-job-benefits="{% if vaga.beneficios %}{{ vaga.beneficios|escapejs }}{% else %}Benefícios não informados.{% endif %}"
+                                data-job-match-note="{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Analisa a descricao completa para perceber o teu encaixe nesta oportunidade.{% endif %}"
+                                data-applied="1"
+                                data-apply-enabled="0"
+                                data-apply-label="Já te candidataste">
+                          <i class="bi bi-eye me-2"></i>Ver detalhes
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" disabled><i class="bi bi-send-check me-2"></i>Já te candidataste</button>
+                      </div>
                     </div>
                   {% endwith %}
                 {% else %}
                   <div class="job-footer-actions">
                     <div class="job-footer-note">{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Ler a descrição ajuda a decidir se queres avançar com a candidatura.{% endif %}</div>
-                    {% if profile.can_apply_to_jobs %}
-                      <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
-                        {% csrf_token %}
-                        <button type="button"
-                                class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#confirmApplyModal"
-                                data-form-id="apply-form-{{ vaga.id }}"
-                                data-job-title="{{ vaga.titulo|escapejs }}"
-                                data-company="{{ vaga.company.nome|escapejs }}"
-                                data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}">
-                          <i class="bi bi-send me-2"></i>Candidatar-me
-                        </button>
-                      </form>
-                    {% else %}
-                      <button type="button" class="btn btn-outline-secondary" disabled>
-                        <i class="bi bi-hourglass-split me-2"></i>{% if profile.validado %}Atingir 80% do perfil{% else %}Aguardar validação{% endif %}
+                    <div class="job-footer-buttons">
+                      <button type="button"
+                              class="btn btn-outline-primary job-details-trigger"
+                              data-bs-toggle="modal"
+                              data-bs-target="#jobDetailsModal"
+                              data-job-id="{{ vaga.id }}"
+                              data-job-title="{{ vaga.titulo|escapejs }}"
+                              data-company="{{ vaga.company.nome|escapejs }}"
+                              data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}"
+                              data-job-location="{{ vaga.local_trabalho|default:'Local a definir'|escapejs }}"
+                              data-job-posted="{{ vaga.data_publicacao|date:'d/m/Y' }}"
+                              data-job-type="{{ vaga.get_tipo_display|escapejs }}"
+                              data-job-area="{% if vaga.area_label %}{{ vaga.area_label|escapejs }}{% else %}Sem area definida{% endif %}"
+                              data-job-vacancies="{{ vaga.numero_vagas }}"
+                              data-job-remaining="{{ vaga.vagas_restantes }}"
+                              data-job-salary="{% if vaga.salario %}{{ vaga.salario|escapejs }}{% else %}A combinar{% endif %}"
+                              data-job-closing="{% if vaga.data_fecho %}{{ vaga.data_fecho|date:'d/m/Y' }}{% else %}Sem prazo indicado{% endif %}"
+                              data-job-education="{% if vaga.nivel_educacao %}{{ vaga.get_nivel_educacao_display|escapejs }}{% else %}Não especificado{% endif %}"
+                              data-job-experience="{% if vaga.experiencia_minima %}{{ vaga.experiencia_minima }} ano{{ vaga.experiencia_minima|pluralize }}{% else %}Sem experiência mínima{% endif %}"
+                              data-job-description="{{ vaga.descricao|escapejs }}"
+                              data-job-requirements="{{ vaga.requisitos|escapejs }}"
+                              data-job-benefits="{% if vaga.beneficios %}{{ vaga.beneficios|escapejs }}{% else %}Benefícios não informados.{% endif %}"
+                              data-job-match-note="{% if vaga.match_score > 0 %}Esta vaga tem {{ vaga.match_score }} sinal{{ vaga.match_score|pluralize }} de afinidade com o teu perfil.{% else %}Analisa a descricao completa para perceber o teu encaixe nesta oportunidade.{% endif %}"
+                              data-applied="0"
+                              data-apply-enabled="{% if profile.can_apply_to_jobs %}1{% else %}0{% endif %}"
+                              data-apply-label="{% if profile.can_apply_to_jobs %}Candidatar-me{% else %}{% if profile.validado %}Atingir 80% do perfil{% else %}Aguardar validação{% endif %}{% endif %}"
+                              {% if profile.can_apply_to_jobs %}data-form-id="apply-form-{{ vaga.id }}"{% endif %}>
+                        <i class="bi bi-eye me-2"></i>Ver detalhes
                       </button>
-                    {% endif %}
+                      {% if profile.can_apply_to_jobs %}
+                        <form id="apply-form-{{ vaga.id }}" method="post" action="{% url 'companies:job_apply' vaga.id %}">
+                          {% csrf_token %}
+                          <button type="button"
+                                  class="btn btn-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#confirmApplyModal"
+                                  data-form-id="apply-form-{{ vaga.id }}"
+                                  data-job-title="{{ vaga.titulo|escapejs }}"
+                                  data-company="{{ vaga.company.nome|escapejs }}"
+                                  data-district="{{ vaga.distrito.nome|default:'Sem distrito'|escapejs }}">
+                            <i class="bi bi-send me-2"></i>Candidatar-me
+                          </button>
+                        </form>
+                      {% else %}
+                        <button type="button" class="btn btn-outline-secondary" disabled>
+                          <i class="bi bi-hourglass-split me-2"></i>{% if profile.validado %}Atingir 80% do perfil{% else %}Aguardar validação{% endif %}
+                        </button>
+                      {% endif %}
+                    </div>
                   </div>
                 {% endif %}
               </div>
@@ -364,6 +434,7 @@
             </ul>
           </nav>
         {% endif %}
+
       {% else %}
         <div class="jobs-empty">
           <i class="bi bi-search"></i>
@@ -373,6 +444,80 @@
         </div>
       {% endif %}
     </section>
+  </div>
+</div>
+
+<div class="modal fade" id="jobDetailsModal" tabindex="-1" aria-labelledby="jobDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="jobDetailsLabel">Detalhes da vaga</h5>
+          <p class="job-details-company" id="jobDetailsCompany">-</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="job-details-meta">
+          <span class="job-pill highlight"><i class="bi bi-briefcase"></i><span id="jobDetailsType">-</span></span>
+          <span class="job-pill muted"><i class="bi bi-geo-alt"></i><span id="jobDetailsDistrict">-</span></span>
+          <span class="job-pill muted"><i class="bi bi-stars"></i><span id="jobDetailsMatch">-</span></span>
+        </div>
+        <div class="job-details-grid">
+          <div class="job-details-card">
+            <span class="job-details-label">Área</span>
+            <span class="job-details-value" id="jobDetailsArea">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Local</span>
+            <span class="job-details-value" id="jobDetailsLocation">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Publicada em</span>
+            <span class="job-details-value" id="jobDetailsPosted">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Prazo</span>
+            <span class="job-details-value" id="jobDetailsClosing">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Vagas</span>
+            <span class="job-details-value" id="jobDetailsVacancies">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Remuneração</span>
+            <span class="job-details-value" id="jobDetailsSalary">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Nível de educação</span>
+            <span class="job-details-value" id="jobDetailsEducation">-</span>
+          </div>
+          <div class="job-details-card">
+            <span class="job-details-label">Experiência mínima</span>
+            <span class="job-details-value" id="jobDetailsExperience">-</span>
+          </div>
+        </div>
+        <div class="job-details-section">
+          <h6>Descrição</h6>
+          <p class="job-details-copy" id="jobDetailsDescription">-</p>
+        </div>
+        <div class="job-details-section">
+          <h6>Requisitos</h6>
+          <p class="job-details-copy" id="jobDetailsRequirements">-</p>
+        </div>
+        <div class="job-details-section">
+          <h6>Benefícios</h6>
+          <p class="job-details-copy" id="jobDetailsBenefits">-</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="job-modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-outline-secondary d-none" id="jobDetailsStatusBtn" disabled></button>
+          <button type="button" class="btn btn-primary d-none" id="jobDetailsApplyBtn"><i class="bi bi-send me-2"></i>Candidatar-me</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -406,24 +551,138 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    const detailsModalEl = document.getElementById('jobDetailsModal');
+    const detailsTitleEl = document.getElementById('jobDetailsLabel');
+    const detailsCompanyEl = document.getElementById('jobDetailsCompany');
+    const detailsTypeEl = document.getElementById('jobDetailsType');
+    const detailsDistrictEl = document.getElementById('jobDetailsDistrict');
+    const detailsMatchEl = document.getElementById('jobDetailsMatch');
+    const detailsAreaEl = document.getElementById('jobDetailsArea');
+    const detailsLocationEl = document.getElementById('jobDetailsLocation');
+    const detailsPostedEl = document.getElementById('jobDetailsPosted');
+    const detailsClosingEl = document.getElementById('jobDetailsClosing');
+    const detailsVacanciesEl = document.getElementById('jobDetailsVacancies');
+    const detailsSalaryEl = document.getElementById('jobDetailsSalary');
+    const detailsEducationEl = document.getElementById('jobDetailsEducation');
+    const detailsExperienceEl = document.getElementById('jobDetailsExperience');
+    const detailsDescriptionEl = document.getElementById('jobDetailsDescription');
+    const detailsRequirementsEl = document.getElementById('jobDetailsRequirements');
+    const detailsBenefitsEl = document.getElementById('jobDetailsBenefits');
+    const detailsApplyBtn = document.getElementById('jobDetailsApplyBtn');
+    const detailsStatusBtn = document.getElementById('jobDetailsStatusBtn');
     const modalEl = document.getElementById('confirmApplyModal');
     const confirmBtn = document.getElementById('confirmApplyBtn');
     const titleEl = document.getElementById('confirmApplyTitle');
     const companyEl = document.getElementById('confirmApplyCompany');
     const districtEl = document.getElementById('confirmApplyDistrict');
     const checkEl = document.getElementById('confirmApplyCheck');
+    const queryParams = new URLSearchParams(window.location.search);
+    const targetJobId = queryParams.get('vaga');
     let targetFormId = null;
+    let queuedConfirmPayload = null;
+
+    function extractConfirmPayload(source) {
+      return {
+        formId: source ? source.getAttribute('data-form-id') : '',
+        title: source ? (source.getAttribute('data-job-title') || 'esta vaga') : 'esta vaga',
+        company: source ? (source.getAttribute('data-company') || '-') : '-',
+        district: source ? (source.getAttribute('data-district') || '-') : '-'
+      };
+    }
+
+    function populateConfirmModal(payload) {
+      targetFormId = payload && payload.formId ? payload.formId : null;
+      titleEl.textContent = payload && payload.title ? payload.title : 'esta vaga';
+      companyEl.textContent = payload && payload.company ? payload.company : '-';
+      districtEl.textContent = payload && payload.district ? payload.district : '-';
+      checkEl.checked = false;
+      confirmBtn.disabled = true;
+    }
+
+    function toggleDetailsActionButtons(canApply, applied, label, payload) {
+      if (!detailsApplyBtn || !detailsStatusBtn) return;
+
+      detailsApplyBtn.classList.add('d-none');
+      detailsStatusBtn.classList.add('d-none');
+      detailsStatusBtn.textContent = label || '';
+
+      if (applied || !canApply) {
+        detailsStatusBtn.classList.remove('d-none');
+        return;
+      }
+
+      detailsApplyBtn.classList.remove('d-none');
+      detailsApplyBtn.dataset.formId = payload.formId || '';
+      detailsApplyBtn.dataset.jobTitle = payload.title || '';
+      detailsApplyBtn.dataset.company = payload.company || '';
+      detailsApplyBtn.dataset.district = payload.district || '';
+    }
+
+    function openConfirmModalFromPayload(payload) {
+      if (!modalEl || !payload || !payload.formId) return;
+      queuedConfirmPayload = payload;
+      if (detailsModalEl) {
+        const detailsInstance = bootstrap.Modal.getInstance(detailsModalEl);
+        if (detailsInstance) detailsInstance.hide();
+      }
+      window.setTimeout(function () {
+        populateConfirmModal(queuedConfirmPayload);
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        queuedConfirmPayload = null;
+      }, 180);
+    }
+
+    if (detailsModalEl) {
+      detailsModalEl.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        const payload = extractConfirmPayload(button);
+        const applied = button.getAttribute('data-applied') === '1';
+        const canApply = button.getAttribute('data-apply-enabled') === '1';
+        const label = button.getAttribute('data-apply-label') || '';
+
+        detailsTitleEl.textContent = button.getAttribute('data-job-title') || 'Detalhes da vaga';
+        detailsCompanyEl.textContent = button.getAttribute('data-company') || '-';
+        detailsTypeEl.textContent = button.getAttribute('data-job-type') || '-';
+        detailsDistrictEl.textContent = button.getAttribute('data-district') || '-';
+        detailsMatchEl.textContent = button.getAttribute('data-job-match-note') || '-';
+        detailsAreaEl.textContent = button.getAttribute('data-job-area') || '-';
+        detailsLocationEl.textContent = button.getAttribute('data-job-location') || '-';
+        detailsPostedEl.textContent = button.getAttribute('data-job-posted') || '-';
+        detailsClosingEl.textContent = button.getAttribute('data-job-closing') || '-';
+        detailsVacanciesEl.textContent = (button.getAttribute('data-job-remaining') || '-') + ' de ' + (button.getAttribute('data-job-vacancies') || '-');
+        detailsSalaryEl.textContent = button.getAttribute('data-job-salary') || '-';
+        detailsEducationEl.textContent = button.getAttribute('data-job-education') || '-';
+        detailsExperienceEl.textContent = button.getAttribute('data-job-experience') || '-';
+        detailsDescriptionEl.textContent = button.getAttribute('data-job-description') || '-';
+        detailsRequirementsEl.textContent = button.getAttribute('data-job-requirements') || '-';
+        detailsBenefitsEl.textContent = button.getAttribute('data-job-benefits') || '-';
+
+        toggleDetailsActionButtons(canApply, applied, label, payload);
+      });
+    }
 
     if (modalEl) {
       modalEl.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        if (!button) return;
-        targetFormId = button.getAttribute('data-form-id');
-        titleEl.textContent = button.getAttribute('data-job-title') || 'esta vaga';
-        companyEl.textContent = button.getAttribute('data-company') || '-';
-        districtEl.textContent = button.getAttribute('data-district') || '-';
-        checkEl.checked = false;
-        confirmBtn.disabled = true;
+        if (button) {
+          populateConfirmModal(extractConfirmPayload(button));
+        } else if (queuedConfirmPayload) {
+          populateConfirmModal(queuedConfirmPayload);
+          queuedConfirmPayload = null;
+        }
+      });
+    }
+
+    if (detailsApplyBtn) {
+      detailsApplyBtn.addEventListener('click', function () {
+        openConfirmModalFromPayload({
+          formId: detailsApplyBtn.dataset.formId || '',
+          title: detailsApplyBtn.dataset.jobTitle || 'esta vaga',
+          company: detailsApplyBtn.dataset.company || '-',
+          district: detailsApplyBtn.dataset.district || '-'
+        });
       });
     }
 
@@ -439,6 +698,22 @@
         const form = document.getElementById(targetFormId);
         if (form) form.submit();
       });
+    }
+
+    if (targetJobId) {
+      const targetCard = document.getElementById('job-card-' + targetJobId);
+      const targetTrigger = document.querySelector('.job-details-trigger[data-job-id="' + targetJobId + '"]');
+
+      if (targetCard) {
+        targetCard.classList.add('is-highlighted');
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      if (targetTrigger) {
+        window.setTimeout(function () {
+          targetTrigger.click();
+        }, 250);
+      }
     }
   });
 </script>
