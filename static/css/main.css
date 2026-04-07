@@ -334,6 +334,54 @@ body.navbar-menu-open .navbar-mobile-backdrop {
     pointer-events: auto;
 }
 
+.scroll-shortcuts {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    gap: 0.65rem;
+    z-index: 1030;
+}
+
+.scroll-shortcut-btn {
+    width: 3.15rem;
+    height: 3.15rem;
+    border: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.24), transparent 34%),
+        linear-gradient(135deg, rgba(7,34,74,0.98), rgba(0,102,204,0.94) 56%, rgba(0,168,107,0.9));
+    box-shadow: 0 16px 30px rgba(7, 26, 52, 0.24);
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, visibility 0.2s ease;
+}
+
+.scroll-shortcut-btn:hover,
+.scroll-shortcut-btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 36px rgba(7, 26, 52, 0.3);
+}
+
+.scroll-shortcut-btn i {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.scroll-shortcut-btn.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(0.4rem);
+}
+
+body.navbar-menu-open .scroll-shortcuts {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color) 0%, #0052a3 100%);
     border: none;
@@ -2184,6 +2232,15 @@ body.navbar-menu-open {
 @media (max-width: 420px) {
     .btn { font-size: 0.9rem; }
     .navbar-brand { font-size: 1rem; }
+    .scroll-shortcuts {
+        right: 0.8rem;
+        bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .scroll-shortcut-btn {
+        width: 2.9rem;
+        height: 2.9rem;
+    }
 }
 
 /* Global responsive hardening */

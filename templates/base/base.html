@@ -360,6 +360,15 @@
         </div>
     </footer>
 
+    <div class="scroll-shortcuts" aria-label="Atalhos de navegacao da pagina">
+        <button type="button" class="scroll-shortcut-btn is-hidden" id="scrollToTopBtn" aria-label="Ir para o inicio da pagina" title="Ir para o inicio">
+            <i class="bi bi-arrow-up"></i>
+        </button>
+        <button type="button" class="scroll-shortcut-btn" id="scrollToBottomBtn" aria-label="Ir para o fim da pagina" title="Ir para o fim">
+            <i class="bi bi-arrow-down"></i>
+        </button>
+    </div>
+
     <div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content doc-modal">
@@ -502,6 +511,38 @@
                         hideMobileNavbar();
                     }
                 });
+            }
+
+            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+            if (scrollToTopBtn && scrollToBottomBtn) {
+                const updateScrollShortcutState = function () {
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+                    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+                    const fullHeight = Math.max(
+                        document.body.scrollHeight,
+                        document.documentElement.scrollHeight,
+                        document.body.offsetHeight,
+                        document.documentElement.offsetHeight
+                    );
+                    const nearTop = scrollTop < 180;
+                    const nearBottom = scrollTop + viewportHeight >= fullHeight - 180;
+
+                    scrollToTopBtn.classList.toggle('is-hidden', nearTop);
+                    scrollToBottomBtn.classList.toggle('is-hidden', nearBottom);
+                };
+
+                scrollToTopBtn.addEventListener('click', function () {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                scrollToBottomBtn.addEventListener('click', function () {
+                    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+                });
+
+                window.addEventListener('scroll', updateScrollShortcutState, { passive: true });
+                window.addEventListener('resize', updateScrollShortcutState);
+                updateScrollShortcutState();
             }
 
             const adminSidebarEl = document.querySelector('.admin-dashboard .admin-shell-sidebar');
