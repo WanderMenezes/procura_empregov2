@@ -193,6 +193,16 @@ class JobPost(models.Model):
         ('FOR', _('Formação')),
     ]
     
+    REGIME_TRABALHO_CHOICES = [
+        ('PRE', _('Presencial')),
+        ('REM', _('Remoto (home office)')),
+        ('HIB', _('Hibrido')),
+        ('INT', _('Tempo integral (full-time)')),
+        ('PAR', _('Tempo parcial (part-time)')),
+        ('TEM', _('Temporario')),
+        ('INF', _('Informal')),
+    ]
+
     ESTADO_CHOICES = [
         ('ATIVA', _('Ativa')),
         ('FECHADA', _('Fechada')),
@@ -210,6 +220,13 @@ class JobPost(models.Model):
     descricao = models.TextField(_('descrição'))
     requisitos = models.TextField(_('requisitos'))
     tipo = models.CharField(_('tipo'), max_length=3, choices=TIPO_CHOICES)
+
+    regime_trabalho = models.CharField(
+        _('regime da oportunidade'),
+        max_length=3,
+        choices=REGIME_TRABALHO_CHOICES,
+        default='PRE'
+    )
 
     numero_vagas = models.PositiveIntegerField(
         _('número de vagas'),

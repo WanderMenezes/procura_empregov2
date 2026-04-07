@@ -8,7 +8,7 @@ from .models import YouthProfile
 PROFILE_STEP_FIELDS = {
     '1': ['nome', 'telefone', 'email', 'contacto_alternativo', 'distrito', 'data_nascimento', 'sexo', 'localidade'],
     '2': ['nivel', 'area_formacao', 'instituicao', 'ano', 'curso', 'skills', 'idiomas'],
-    '3': ['situacao_atual', 'disponibilidade', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
+    '3': ['situacao_atual', 'disponibilidade', 'regime_trabalho', 'interesse_setorial', 'preferencia_oportunidade', 'sobre'],
     '4': ['cv', 'certificado', 'bi', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email'],
 }
 

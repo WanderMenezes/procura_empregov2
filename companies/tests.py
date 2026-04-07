@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from companies.forms import CompanyProfileForm
+from companies.forms import CompanyProfileForm, JobPostForm
 from companies.models import Application, Company, ContactRequest, JobPost
 from core.models import District, Notification
 from profiles.models import Education, YouthProfile
@@ -123,6 +123,24 @@ class CompanySectorTests(TestCase):
                 Company.get_setor_mapping()['TIC'],
                 Company.get_setor_mapping()['COM'],
             ),
+        )
+
+
+class JobPostFormTests(TestCase):
+    def test_job_post_form_exposes_work_regime_choices(self):
+        form = JobPostForm()
+
+        self.assertEqual(
+            list(form.fields['regime_trabalho'].choices),
+            [
+                ('PRE', 'Presencial'),
+                ('REM', 'Remoto (home office)'),
+                ('HIB', 'Hibrido'),
+                ('INT', 'Tempo integral (full-time)'),
+                ('PAR', 'Tempo parcial (part-time)'),
+                ('TEM', 'Temporario'),
+                ('INF', 'Informal'),
+            ],
         )
 
 
@@ -475,6 +493,7 @@ class JobPublicationNotificationTests(TestCase):
                 'descricao': 'Suporte e manutencao de redes.',
                 'requisitos': 'Experiencia em configuracao basica.',
                 'tipo': 'EMP',
+                'regime_trabalho': 'REM',
                 'numero_vagas': 2,
                 'distrito': self.district.pk,
                 'local_trabalho': 'Sao Tome',
@@ -499,6 +518,7 @@ class JobPublicationNotificationTests(TestCase):
             [self.candidate_with_profile.id, self.candidate_without_profile.id],
         )
         created_job = JobPost.objects.get(titulo='Tecnico de Redes')
+        self.assertEqual(created_job.regime_trabalho, 'REM')
         self.assertIn(
             '{}?vaga={}'.format(reverse('profiles:available_jobs'), created_job.id),
             notification_qs.first().mensagem,

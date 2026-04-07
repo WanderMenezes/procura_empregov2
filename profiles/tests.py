@@ -47,6 +47,7 @@ def _approval_ready_wizard_data(district_id=None, birth_date=None):
         '3': {
             'situacao_atual': 'DES',
             'disponibilidade': 'SIM',
+            'regime_trabalho': 'PRE',
             'interesse_setorial': ['TIC'],
             'preferencia_oportunidade': 'EMP',
             'sobre': 'Quero uma oportunidade.',
@@ -66,6 +67,7 @@ def _create_company_visible_profile(user, **overrides):
         'contacto_alternativo': 'Mae',
         'situacao_atual': 'DES',
         'disponibilidade': 'SIM',
+        'regime_trabalho': 'PRE',
         'interesse_setorial': ['TIC'],
         'preferencia_oportunidade': 'EMP',
         'sobre': 'Quero uma oportunidade.',
@@ -98,6 +100,7 @@ def _create_admin_approved_but_hidden_profile(user, **overrides):
         'contacto_alternativo': 'Mae',
         'situacao_atual': 'DES',
         'disponibilidade': 'SIM',
+        'regime_trabalho': 'PRE',
         'interesse_setorial': ['TIC'],
         'preferencia_oportunidade': 'EMP',
         'sobre': 'Quero uma oportunidade.',
@@ -361,6 +364,7 @@ class YouthProfileInterestSectorTests(TestCase):
         form = YouthProfileStep3Form(data={
             'situacao_atual': 'DES',
             'disponibilidade': 'SIM',
+            'regime_trabalho': 'HIB',
             'interesse_setorial': ['AGR', 'OUT'],
             'outros_setores_interesse': 'Turismo, Robotica',
             'preferencia_oportunidade': 'EMP',
@@ -369,6 +373,22 @@ class YouthProfileInterestSectorTests(TestCase):
 
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data['interesse_setorial'], ['AGR', 'TUR', 'Robotica'])
+
+    def test_step3_form_exposes_updated_work_regime_options(self):
+        form = YouthProfileStep3Form()
+
+        self.assertEqual(
+            list(form.fields['regime_trabalho'].choices),
+            [
+                ('PRE', 'Presencial'),
+                ('REM', 'Remoto (home office)'),
+                ('HIB', 'Hibrido'),
+                ('INT', 'Tempo integral (full-time)'),
+                ('PAR', 'Tempo parcial (part-time)'),
+                ('TEM', 'Temporario'),
+                ('INF', 'Informal'),
+            ],
+        )
 
     def test_step3_form_prefills_custom_interest_sector(self):
         form = YouthProfileStep3Form(initial={
@@ -745,6 +765,7 @@ class ProfileWizardEditingTests(TestCase):
             contacto_alternativo='Vizinho',
             situacao_atual='DES',
             disponibilidade='SIM',
+            regime_trabalho='REM',
             preferencia_oportunidade='EMP',
             sobre='Texto inicial',
             idiomas=[{'idioma': 'Ingles', 'dominio': 'AMBOS'}],
@@ -790,6 +811,7 @@ class ProfileWizardEditingTests(TestCase):
         self.assertEqual(profile.localidade, 'Neves')
         self.assertEqual(profile.sexo, 'F')
         self.assertEqual(profile.situacao_atual, 'DES')
+        self.assertEqual(profile.regime_trabalho, 'REM')
         self.assertEqual(profile.preferencia_oportunidade, 'EMP')
         self.assertEqual(education.area_formacao, 'TIC')
         self.assertContains(response, 'ja entrou na fila de validacao do administrador')
@@ -814,6 +836,7 @@ class ProfileWizardEditingTests(TestCase):
             localidade='Riboque',
             situacao_atual='DES',
             disponibilidade='SIM',
+            regime_trabalho='PRE',
             preferencia_oportunidade='EMP',
             visivel=True,
         )
@@ -846,3 +869,53 @@ class ProfileWizardEditingTests(TestCase):
         self.assertEqual(youth_user.email, 'exterior.atualizado@example.com')
         self.assertEqual(profile.localidade, 'Lisboa, Portugal')
         self.assertEqual(profile.sexo, 'F')
+
+    def test_editing_step3_updates_work_regime(self):
+        district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        youth_user = User.objects.create_user(
+            telefone='+2399220202',
+            nome='Perfil Regime',
+            perfil=User.ProfileType.JOVEM,
+            distrito=district,
+        )
+        profile = YouthProfile.objects.create(
+            user=youth_user,
+            completo=True,
+            validado=False,
+            data_nascimento=_years_ago(21),
+            sexo='F',
+            localidade='Riboque',
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            regime_trabalho='PRE',
+            preferencia_oportunidade='EMP',
+            visivel=True,
+        )
+
+        self.client.force_login(youth_user)
+        self.client.get(reverse('profiles:wizard_step', args=[3]) + '?reset=1')
+
+        response = self.client.post(
+            reverse('profiles:wizard_step', args=[3]),
+            {
+                'situacao_atual': 'DES',
+                'disponibilidade': 'EM_BREVE',
+                'regime_trabalho': 'REM',
+                'interesse_setorial': ['TIC'],
+                'preferencia_oportunidade': 'EMP',
+                'sobre': 'Procuro oportunidades remotas.',
+                'save': '1',
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('profiles:detail'))
+        profile.refresh_from_db()
+
+        self.assertEqual(profile.disponibilidade, 'EM_BREVE')
+        self.assertEqual(profile.regime_trabalho, 'REM')
+        self.assertEqual(profile.interesse_setorial, ['TIC'])
+        self.assertEqual(profile.sobre, 'Procuro oportunidades remotas.')

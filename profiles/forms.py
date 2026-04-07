@@ -426,6 +426,12 @@ class YouthProfileStep3Form(forms.ModelForm):
         label=_('Disponibilidade imediata'),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    regime_trabalho = forms.ChoiceField(
+        choices=YouthProfile.REGIME_TRABALHO_CHOICES,
+        label=_('Regime da oportunidade pretendida'),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     
     interesse_setorial = forms.MultipleChoiceField(
         choices=getattr(settings, 'AREAS_FORMACAO', []),
@@ -522,7 +528,7 @@ class YouthProfileStep3Form(forms.ModelForm):
     class Meta:
         model = YouthProfile
         fields = [
-            'situacao_atual', 'disponibilidade', 'interesse_setorial',
+            'situacao_atual', 'disponibilidade', 'regime_trabalho', 'interesse_setorial',
             'preferencia_oportunidade', 'sobre'
         ]
 
@@ -820,7 +826,7 @@ class YouthProfileEditForm(forms.ModelForm):
         fields = [
             'data_nascimento', 'sexo', 'localidade', 'contacto_alternativo',
             'photo',
-            'situacao_atual', 'disponibilidade',
+            'situacao_atual', 'disponibilidade', 'regime_trabalho',
             'interesse_setorial', 'preferencia_oportunidade',
             'sobre', 'visivel', 'consentimento_sms', 'consentimento_whatsapp', 'consentimento_email'
         ]
@@ -831,6 +837,7 @@ class YouthProfileEditForm(forms.ModelForm):
             'contacto_alternativo': forms.TextInput(attrs={'class': 'form-control'}),
             'situacao_atual': forms.Select(attrs={'class': 'form-select'}),
             'disponibilidade': forms.Select(attrs={'class': 'form-select'}),
+            'regime_trabalho': forms.Select(attrs={'class': 'form-select'}),
             'interesse_setorial': forms.CheckboxSelectMultiple,
             'preferencia_oportunidade': forms.Select(attrs={'class': 'form-select'}),
             'sobre': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),

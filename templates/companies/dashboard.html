@@ -708,6 +708,7 @@
                     <div class="company-item-title">{{ vaga.titulo }}</div>
                     <div class="company-item-meta">
                       <span class="badge bg-light text-dark border">{{ vaga.get_tipo_display }}</span>
+                      <span class="badge bg-light text-dark border">{{ vaga.get_regime_trabalho_display }}</span>
                       <span class="badge {% if vaga.estado == 'ATIVA' %}bg-success{% elif vaga.estado == 'PAUSADA' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                         {{ vaga.get_estado_display }}
                       </span>

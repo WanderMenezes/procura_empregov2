@@ -184,6 +184,7 @@
             </div>
         </div>
     </nav>
+    <div class="navbar-mobile-backdrop" id="navbarMobileBackdrop" aria-hidden="true"></div>
     {% endwith %}
 
     <!-- Messages (Toast) -->
@@ -426,16 +427,41 @@
                 toast.show();
             });
 
+            const navbarHostEl = document.querySelector('.site-navbar');
             const navbarCollapseEl = document.getElementById('navbarNav');
             if (navbarCollapseEl) {
+                const navbarTogglerEl = navbarHostEl ? navbarHostEl.querySelector('.navbar-toggler') : null;
+                const navbarBackdropEl = document.getElementById('navbarMobileBackdrop');
                 const collapseInstance = bootstrap.Collapse.getOrCreateInstance(navbarCollapseEl, { toggle: false });
-                const syncNavbarBodyLock = function (isOpen) {
-                    if (window.innerWidth < 1200) {
-                        document.body.classList.toggle('navbar-menu-open', isOpen);
-                    } else {
-                        document.body.classList.remove('navbar-menu-open');
+                const isMobileNavbar = function () {
+                    return window.innerWidth < 1200;
+                };
+                const syncNavbarOffset = function () {
+                    if (navbarHostEl) {
+                        document.documentElement.style.setProperty('--mobile-navbar-offset', `${Math.ceil(navbarHostEl.offsetHeight)}px`);
                     }
                 };
+                const syncNavbarBodyLock = function (isOpen) {
+                    syncNavbarOffset();
+                    if (isMobileNavbar()) {
+                        document.body.classList.toggle('navbar-menu-open', isOpen);
+                        if (navbarBackdropEl) {
+                            navbarBackdropEl.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                        }
+                    } else {
+                        document.body.classList.remove('navbar-menu-open');
+                        if (navbarBackdropEl) {
+                            navbarBackdropEl.setAttribute('aria-hidden', 'true');
+                        }
+                    }
+                };
+                const hideMobileNavbar = function () {
+                    if (isMobileNavbar() && navbarCollapseEl.classList.contains('show')) {
+                        collapseInstance.hide();
+                    }
+                };
+
+                syncNavbarOffset();
 
                 navbarCollapseEl.addEventListener('show.bs.collapse', function () {
                     syncNavbarBodyLock(true);
@@ -451,10 +477,30 @@
 
                 navbarCollapseEl.querySelectorAll('a[href]:not([href="#"])').forEach(function (link) {
                     link.addEventListener('click', function () {
-                        if (window.innerWidth < 1200 && navbarCollapseEl.classList.contains('show')) {
-                            collapseInstance.hide();
-                        }
+                        hideMobileNavbar();
                     });
+                });
+
+                if (navbarBackdropEl) {
+                    navbarBackdropEl.addEventListener('click', hideMobileNavbar);
+                }
+
+                document.addEventListener('click', function (event) {
+                    if (!isMobileNavbar() || !navbarCollapseEl.classList.contains('show')) {
+                        return;
+                    }
+
+                    const clickedInsideMenu = navbarCollapseEl.contains(event.target);
+                    const clickedOnToggler = navbarTogglerEl && navbarTogglerEl.contains(event.target);
+                    if (!clickedInsideMenu && !clickedOnToggler) {
+                        collapseInstance.hide();
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        hideMobileNavbar();
+                    }
                 });
             }
 

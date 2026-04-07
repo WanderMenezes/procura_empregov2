@@ -61,6 +61,13 @@ def compute_profile_step_progress(profile: YouthProfile) -> dict:
     return compute_saved_profile_step_progress(profile)
 
 
+def normalize_regime_trabalho(value):
+    """Map legacy regime values to the current choices."""
+    if value == 'IND':
+        return 'PRE'
+    return value or ''
+
+
 class ProfileWizardView(View):
     """Wizard de 4 passos para criar perfil do jovem"""
     
@@ -145,6 +152,8 @@ class ProfileWizardView(View):
             profile.situacao_atual = step3.get('situacao_atual')
         if 'disponibilidade' in step3 and step3.get('disponibilidade'):
             profile.disponibilidade = step3.get('disponibilidade')
+        if 'regime_trabalho' in step3 and step3.get('regime_trabalho'):
+            profile.regime_trabalho = normalize_regime_trabalho(step3.get('regime_trabalho'))
         if 'interesse_setorial' in step3:
             profile.interesse_setorial = step3.get('interesse_setorial') or []
         if 'preferencia_oportunidade' in step3 and step3.get('preferencia_oportunidade'):
@@ -161,6 +170,7 @@ class ProfileWizardView(View):
             'contacto_alternativo',
             'situacao_atual',
             'disponibilidade',
+            'regime_trabalho',
             'interesse_setorial',
             'preferencia_oportunidade',
             'sobre',
@@ -239,6 +249,7 @@ class ProfileWizardView(View):
         step3 = {
             'situacao_atual': profile.situacao_atual or '',
             'disponibilidade': profile.disponibilidade or '',
+            'regime_trabalho': normalize_regime_trabalho(profile.regime_trabalho),
             'interesse_setorial': interesse,
             'preferencia_oportunidade': profile.preferencia_oportunidade or '',
             'sobre': profile.sobre or '',
@@ -507,6 +518,9 @@ class ProfileWizardView(View):
                 profile.contacto_alternativo = step1.get('contacto_alternativo', '') or ''
                 profile.situacao_atual = step3.get('situacao_atual', profile.situacao_atual)
                 profile.disponibilidade = step3.get('disponibilidade', profile.disponibilidade)
+                profile.regime_trabalho = normalize_regime_trabalho(
+                    step3.get('regime_trabalho') or profile.regime_trabalho or 'PRE'
+                )
                 profile.interesse_setorial = step3.get('interesse_setorial')
                 profile.preferencia_oportunidade = step3.get('preferencia_oportunidade', profile.preferencia_oportunidade)
                 profile.sobre = step3.get('sobre', '') or ''
@@ -533,6 +547,7 @@ class ProfileWizardView(View):
                     contacto_alternativo=step1.get('contacto_alternativo', ''),
                     situacao_atual=step3.get('situacao_atual', 'DES'),
                     disponibilidade=step3.get('disponibilidade', 'SIM'),
+                    regime_trabalho=normalize_regime_trabalho(step3.get('regime_trabalho') or 'PRE'),
                     interesse_setorial=step3.get('interesse_setorial'),
                     preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
                     sobre=step3.get('sobre', ''),

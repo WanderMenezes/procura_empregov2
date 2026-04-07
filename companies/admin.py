@@ -81,11 +81,11 @@ class ApplicationInline(admin.TabularInline):
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
     list_display = [
-        'titulo', 'company', 'tipo', 'distrito', 'estado',
+        'titulo', 'company', 'tipo', 'regime_trabalho', 'distrito', 'estado',
         'numero_vagas',
         'total_candidaturas', 'visualizacoes', 'data_publicacao'
     ]
-    list_filter = ['tipo', 'estado', 'nivel_educacao', 'data_publicacao']
+    list_filter = ['tipo', 'regime_trabalho', 'estado', 'nivel_educacao', 'data_publicacao']
     search_fields = ['titulo', 'company__nome', 'descricao']
     readonly_fields = ['data_publicacao', 'visualizacoes']
     inlines = [ApplicationInline]

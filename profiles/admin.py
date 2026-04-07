@@ -50,7 +50,7 @@ class YouthProfileAdmin(admin.ModelAdmin):
             'fields': ('data_nascimento', 'sexo', 'localidade', 'contacto_alternativo')
         }),
         (_('Situação Atual'), {
-            'fields': ('situacao_atual', 'disponibilidade')
+            'fields': ('situacao_atual', 'disponibilidade', 'regime_trabalho')
         }),
         (_('Interesses'), {
             'fields': ('interesse_setorial', 'preferencia_oportunidade', 'sobre')

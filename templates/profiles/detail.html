@@ -148,6 +148,7 @@
             <div class="candidate-chip-list mt-3">
               <span class="candidate-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
               <span class="candidate-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
+              <span class="candidate-chip"><i class="bi bi-laptop"></i>{{ profile.get_regime_trabalho_display }}</span>
               <span class="candidate-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
               <span class="candidate-chip"><i class="bi bi-eye"></i>{% if profile.is_visible_to_companies %}Visível para empresas{% elif profile.validado %}Ativa aos 80%{% elif progress >= profile.MINIMUM_APPROVAL_PROGRESS %}Aguardar aprovação{% else %}Ainda não visível{% endif %}</span>
             </div>
@@ -297,6 +298,7 @@
         <div class="candidate-summary-row"><span>Sexo</span><span>{{ profile.get_sexo_display|default:"N/A" }}</span></div>
         <div class="candidate-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="candidate-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
+        <div class="candidate-summary-row"><span>Regime</span><span>{{ profile.get_regime_trabalho_display }}</span></div>
         <div class="candidate-summary-row"><span>Preferência</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
         <div class="candidate-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="candidate-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>
