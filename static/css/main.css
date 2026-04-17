@@ -72,6 +72,7 @@ main {
         linear-gradient(135deg, rgba(7,34,74,0.98), rgba(0,102,204,0.94) 54%, rgba(0,168,107,0.9));
     border-bottom: 1px solid rgba(255,255,255,0.12);
     backdrop-filter: blur(14px);
+    z-index: 1045;
 }
 
 .site-navbar-shell {
@@ -313,6 +314,72 @@ main {
 .site-navbar .dropdown-item.active {
     background: rgba(0,102,204,0.08);
     color: #0b5cb8;
+}
+
+.navbar-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 22, 46, 0.42);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1040;
+}
+
+body.navbar-menu-open .navbar-mobile-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.scroll-shortcuts {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    gap: 0.65rem;
+    z-index: 1030;
+}
+
+.scroll-shortcut-btn {
+    width: 3.15rem;
+    height: 3.15rem;
+    border: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.24), transparent 34%),
+        linear-gradient(135deg, rgba(7,34,74,0.98), rgba(0,102,204,0.94) 56%, rgba(0,168,107,0.9));
+    box-shadow: 0 16px 30px rgba(7, 26, 52, 0.24);
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, visibility 0.2s ease;
+}
+
+.scroll-shortcut-btn:hover,
+.scroll-shortcut-btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 36px rgba(7, 26, 52, 0.3);
+}
+
+.scroll-shortcut-btn i {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.scroll-shortcut-btn.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(0.4rem);
+}
+
+body.navbar-menu-open .scroll-shortcuts {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .btn-primary {
@@ -2078,23 +2145,38 @@ body.admin-sidebar-open .admin-dashboard .admin-mobile-sidebar-bar {
 
 @media (max-width: 1199px) {
     .site-navbar .navbar-collapse {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(255,255,255,0.12);
-        max-height: calc(100vh - 88px);
+        position: fixed;
+        top: calc(var(--mobile-navbar-offset, 88px) + 0.5rem);
+        left: 0.9rem;
+        right: 0.9rem;
+        width: auto;
+        margin-top: 0;
+        padding: 1rem;
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 24px;
+        background:
+            radial-gradient(circle at top right, rgba(255,255,255,0.14), transparent 30%),
+            linear-gradient(145deg, rgba(6,30,66,0.98), rgba(0,93,188,0.96) 54%, rgba(0,146,93,0.92));
+        box-shadow: 0 24px 56px rgba(4, 14, 31, 0.34);
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         scrollbar-gutter: stable;
+        z-index: 1046;
+        max-height: calc(100dvh - var(--mobile-navbar-offset, 88px) - 1.4rem);
     }
 
     .site-navbar .navbar-nav {
         gap: 0.15rem;
     }
 
+    .site-navbar .navbar-collapse.collapsing {
+        overflow: hidden;
+    }
+
     .site-navbar .navbar-collapse.show,
     .site-navbar .navbar-collapse.collapsing {
-        padding-bottom: 0.35rem;
+        padding-bottom: 1rem;
     }
 
     .navbar-utility,
@@ -2150,6 +2232,15 @@ body.navbar-menu-open {
 @media (max-width: 420px) {
     .btn { font-size: 0.9rem; }
     .navbar-brand { font-size: 1rem; }
+    .scroll-shortcuts {
+        right: 0.8rem;
+        bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .scroll-shortcut-btn {
+        width: 2.9rem;
+        height: 2.9rem;
+    }
 }
 
 /* Global responsive hardening */

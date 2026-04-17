@@ -166,6 +166,7 @@
               <span class="talent-detail-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
               <span class="talent-detail-chip"><i class="bi bi-briefcase"></i>{{ profile.get_situacao_atual_display }}</span>
               <span class="talent-detail-chip"><i class="bi bi-lightning-charge"></i>{{ profile.get_disponibilidade_display }}</span>
+              <span class="talent-detail-chip"><i class="bi bi-laptop"></i>{{ profile.get_regime_trabalho_display }}</span>
               <span class="talent-detail-chip"><i class="bi bi-stars"></i>{{ profile.get_preferencia_oportunidade_display }}</span>
               {% if profile.idade %}<span class="talent-detail-chip"><i class="bi bi-person"></i>{{ profile.idade }} anos</span>{% endif %}
             </div>
@@ -304,6 +305,7 @@
         <div class="talent-detail-summary-row"><span>Localização</span><span>{{ profile.location_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Situação</span><span>{{ profile.get_situacao_atual_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Disponibilidade</span><span>{{ profile.get_disponibilidade_display }}</span></div>
+        <div class="talent-detail-summary-row"><span>Regime</span><span>{{ profile.get_regime_trabalho_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Preferência</span><span>{{ profile.get_preferencia_oportunidade_display }}</span></div>
         <div class="talent-detail-summary-row"><span>Idiomas</span><span>{{ profile.idiomas_detalhados|length }}</span></div>
         <div class="talent-detail-summary-row"><span>Validação</span><span>{% if profile.validado %}Validado{% else %}Pendente{% endif %}</span></div>

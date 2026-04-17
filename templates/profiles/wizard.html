@@ -373,6 +373,12 @@
                 {% if form.disponibilidade.errors %}<div class="wizard-error">{{ form.disponibilidade.errors|striptags }}</div>{% endif %}
               </div>
               <div class="wizard-field full">
+                <label for="{{ form.regime_trabalho.id_for_label }}">{{ form.regime_trabalho.label }}</label>
+                {{ form.regime_trabalho }}
+                <div class="wizard-field-help">Escolhe o regime da oportunidade que procuras com mais frequencia.</div>
+                {% if form.regime_trabalho.errors %}<div class="wizard-error">{{ form.regime_trabalho.errors|striptags }}</div>{% endif %}
+              </div>
+              <div class="wizard-field full">
                 <label for="{{ form.preferencia_oportunidade.id_for_label }}">{{ form.preferencia_oportunidade.label }}</label>
                 {{ form.preferencia_oportunidade }}
                 {% if form.preferencia_oportunidade.errors %}<div class="wizard-error">{{ form.preferencia_oportunidade.errors|striptags }}</div>{% endif %}

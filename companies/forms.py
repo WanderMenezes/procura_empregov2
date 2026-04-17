@@ -278,6 +278,12 @@ class JobPostForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
+    regime_trabalho = forms.ChoiceField(
+        label=_('Regime da oportunidade'),
+        choices=JobPost.REGIME_TRABALHO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     numero_vagas = forms.IntegerField(
         label=_('Número de vagas'),
         initial=1,
@@ -359,7 +365,7 @@ class JobPostForm(forms.ModelForm):
     class Meta:
         model = JobPost
         fields = [
-            'titulo', 'descricao', 'requisitos', 'tipo', 'numero_vagas',
+            'titulo', 'descricao', 'requisitos', 'tipo', 'regime_trabalho', 'numero_vagas',
             'distrito', 'local_trabalho', 'nivel_educacao',
             'area_formacao', 'experiencia_minima',
             'salario', 'beneficios', 'data_fecho'

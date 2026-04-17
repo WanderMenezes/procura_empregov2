@@ -269,6 +269,7 @@
                 </div>
                 <div class="jobs-card-tags">
                   <span class="job-pill highlight"><i class="bi bi-briefcase"></i>{{ vaga.get_tipo_display }}</span>
+                  <span class="job-pill muted"><i class="bi bi-laptop"></i>{{ vaga.get_regime_trabalho_display }}</span>
                   {% if vaga.is_new %}<span class="job-pill"><i class="bi bi-lightning-charge"></i>Nova</span>{% endif %}
                   {% if vaga.is_closing_soon %}<span class="job-pill warning"><i class="bi bi-hourglass-split"></i>Fecha em breve</span>{% endif %}
                 </div>
@@ -334,6 +335,7 @@
                                 data-job-location="{{ vaga.local_trabalho|default:'Local a definir'|escapejs }}"
                                 data-job-posted="{{ vaga.data_publicacao|date:'d/m/Y' }}"
                                 data-job-type="{{ vaga.get_tipo_display|escapejs }}"
+                                data-job-regime="{{ vaga.get_regime_trabalho_display|escapejs }}"
                                 data-job-area="{% if vaga.area_label %}{{ vaga.area_label|escapejs }}{% else %}Sem area definida{% endif %}"
                                 data-job-vacancies="{{ vaga.numero_vagas }}"
                                 data-job-remaining="{{ vaga.vagas_restantes }}"
@@ -369,6 +371,7 @@
                               data-job-location="{{ vaga.local_trabalho|default:'Local a definir'|escapejs }}"
                               data-job-posted="{{ vaga.data_publicacao|date:'d/m/Y' }}"
                               data-job-type="{{ vaga.get_tipo_display|escapejs }}"
+                              data-job-regime="{{ vaga.get_regime_trabalho_display|escapejs }}"
                               data-job-area="{% if vaga.area_label %}{{ vaga.area_label|escapejs }}{% else %}Sem area definida{% endif %}"
                               data-job-vacancies="{{ vaga.numero_vagas }}"
                               data-job-remaining="{{ vaga.vagas_restantes }}"
@@ -460,6 +463,7 @@
       <div class="modal-body">
         <div class="job-details-meta">
           <span class="job-pill highlight"><i class="bi bi-briefcase"></i><span id="jobDetailsType">-</span></span>
+          <span class="job-pill muted"><i class="bi bi-laptop"></i><span id="jobDetailsRegime">-</span></span>
           <span class="job-pill muted"><i class="bi bi-geo-alt"></i><span id="jobDetailsDistrict">-</span></span>
           <span class="job-pill muted"><i class="bi bi-stars"></i><span id="jobDetailsMatch">-</span></span>
         </div>
@@ -555,6 +559,7 @@
     const detailsTitleEl = document.getElementById('jobDetailsLabel');
     const detailsCompanyEl = document.getElementById('jobDetailsCompany');
     const detailsTypeEl = document.getElementById('jobDetailsType');
+    const detailsRegimeEl = document.getElementById('jobDetailsRegime');
     const detailsDistrictEl = document.getElementById('jobDetailsDistrict');
     const detailsMatchEl = document.getElementById('jobDetailsMatch');
     const detailsAreaEl = document.getElementById('jobDetailsArea');
@@ -645,6 +650,7 @@
         detailsTitleEl.textContent = button.getAttribute('data-job-title') || 'Detalhes da vaga';
         detailsCompanyEl.textContent = button.getAttribute('data-company') || '-';
         detailsTypeEl.textContent = button.getAttribute('data-job-type') || '-';
+        detailsRegimeEl.textContent = button.getAttribute('data-job-regime') || '-';
         detailsDistrictEl.textContent = button.getAttribute('data-district') || '-';
         detailsMatchEl.textContent = button.getAttribute('data-job-match-note') || '-';
         detailsAreaEl.textContent = button.getAttribute('data-job-area') || '-';

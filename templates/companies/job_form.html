@@ -420,6 +420,7 @@
         <div class="job-preview-title" id="jobPreviewTitle">{{ form.titulo.value|default:"Nova oportunidade pronta a publicar" }}</div>
         <p class="job-preview-type" id="jobPreviewType">{% if job %}{{ job.get_tipo_display }}{% else %}Tipo por definir{% endif %}</p>
         <div class="job-preview-pills">
+          <span class="job-preview-pill"><i class="bi bi-laptop"></i><span id="jobPreviewRegime">{% if job %}{{ job.get_regime_trabalho_display }}{% else %}Regime por definir{% endif %}</span></span>
           <span class="job-preview-pill"><i class="bi bi-people"></i><span id="jobPreviewSlots">{{ form.numero_vagas.value|default:"1 vaga" }}</span></span>
           <span class="job-preview-pill"><i class="bi bi-geo-alt"></i><span id="jobPreviewLocation">{% if job and job.local_trabalho %}{{ job.local_trabalho }}{% elif job and job.distrito %}{{ job.distrito.nome }}{% else %}Local a definir{% endif %}</span></span>
           <span class="job-preview-pill"><i class="bi bi-calendar-event"></i><span id="jobPreviewDeadline">{% if job and job.data_fecho %}{{ job.data_fecho|date:"d/m/Y" }}{% else %}Sem data de fecho{% endif %}</span></span>
@@ -455,11 +456,11 @@
                 <p>Responsabilidades e requisitos reduzem candidaturas fora do perfil.</p>
               </div>
             </div>
-            <div class="job-check {% if form.tipo.value and form.numero_vagas.value %}is-done{% else %}is-pending{% endif %}">
-              <span class="job-check-icon"><i class="bi {% if form.tipo.value and form.numero_vagas.value %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
+            <div class="job-check {% if form.tipo.value and form.regime_trabalho.value and form.numero_vagas.value %}is-done{% else %}is-pending{% endif %}">
+              <span class="job-check-icon"><i class="bi {% if form.tipo.value and form.regime_trabalho.value and form.numero_vagas.value %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
               <div>
                 <strong>Formato da oportunidade</strong>
-                <p>Tipo e quantidade de vagas deixam a proposta mais concreta.</p>
+                <p>Tipo, regime e quantidade de vagas deixam a proposta mais concreta.</p>
               </div>
             </div>
           </div>
@@ -498,14 +499,21 @@
                 {% if form.titulo.errors %}<div class="job-field-error">{{ form.titulo.errors|striptags }}</div>{% endif %}
               </div>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <div class="job-field">
                 <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
                 {{ form.tipo }}
                 {% if form.tipo.errors %}<div class="job-field-error">{{ form.tipo.errors|striptags }}</div>{% endif %}
               </div>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
+              <div class="job-field">
+                <label for="{{ form.regime_trabalho.id_for_label }}">{{ form.regime_trabalho.label }}</label>
+                {{ form.regime_trabalho }}
+                {% if form.regime_trabalho.errors %}<div class="job-field-error">{{ form.regime_trabalho.errors|striptags }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
               <div class="job-field">
                 <label for="{{ form.numero_vagas.id_for_label }}">{{ form.numero_vagas.label }}</label>
                 {{ form.numero_vagas }}
@@ -640,6 +648,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   const titleInput = document.getElementById('{{ form.titulo.id_for_label }}');
   const typeSelect = document.getElementById('{{ form.tipo.id_for_label }}');
+  const regimeSelect = document.getElementById('{{ form.regime_trabalho.id_for_label }}');
   const slotsInput = document.getElementById('{{ form.numero_vagas.id_for_label }}');
   const districtSelect = document.getElementById('{{ form.distrito.id_for_label }}');
   const locationInput = document.getElementById('{{ form.local_trabalho.id_for_label }}');
@@ -647,6 +656,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const titleTarget = document.getElementById('jobPreviewTitle');
   const typeTarget = document.getElementById('jobPreviewType');
+  const regimeTarget = document.getElementById('jobPreviewRegime');
   const slotsTarget = document.getElementById('jobPreviewSlots');
   const locationTarget = document.getElementById('jobPreviewLocation');
   const deadlineTarget = document.getElementById('jobPreviewDeadline');
@@ -682,6 +692,10 @@ document.addEventListener('DOMContentLoaded', function () {
       typeTarget.textContent = getSelectText(typeSelect, 'Tipo por definir');
     }
 
+    if (regimeTarget) {
+      regimeTarget.textContent = getSelectText(regimeSelect, 'Regime por definir');
+    }
+
     if (slotsTarget) {
       slotsTarget.textContent = formatSlots(slotsInput ? slotsInput.value : '1');
     }
@@ -698,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  [titleInput, typeSelect, slotsInput, districtSelect, locationInput, deadlineInput].forEach(function (field) {
+  [titleInput, typeSelect, regimeSelect, slotsInput, districtSelect, locationInput, deadlineInput].forEach(function (field) {
     if (!field) return;
     field.addEventListener('input', renderPreview);
     field.addEventListener('change', renderPreview);

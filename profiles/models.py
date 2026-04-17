@@ -43,6 +43,16 @@ class YouthProfile(models.Model):
         ('EMPRE', _('Empreendedorismo')),
     ]
     
+    REGIME_TRABALHO_CHOICES = [
+        ('PRE', _('Presencial')),
+        ('REM', _('Remoto (home office)')),
+        ('HIB', _('Hibrido')),
+        ('INT', _('Tempo integral (full-time)')),
+        ('PAR', _('Tempo parcial (part-time)')),
+        ('TEM', _('Temporario')),
+        ('INF', _('Informal')),
+    ]
+
     IDIOMA_DOMINIO_CHOICES = [
         ('ORAL', _('Bom na oralidade')),
         ('ESCRITA', _('Bom na escrita')),
@@ -75,6 +85,12 @@ class YouthProfile(models.Model):
         max_length=10,
         choices=DISPONIBILIDADE_CHOICES,
         default='SIM'
+    )
+    regime_trabalho = models.CharField(
+        _('regime da oportunidade'),
+        max_length=3,
+        choices=REGIME_TRABALHO_CHOICES,
+        default='PRE'
     )
     
     # Interesses

@@ -106,6 +106,7 @@
         <div class="job-app-chips">
           <span class="job-app-chip"><i class="bi bi-building"></i>{{ company.nome|default:"Empresa" }}</span>
           <span class="job-app-chip"><i class="bi bi-briefcase"></i>{{ job.get_tipo_display }}</span>
+          <span class="job-app-chip"><i class="bi bi-laptop"></i>{{ job.get_regime_trabalho_display }}</span>
           <span class="job-app-chip"><i class="bi bi-geo-alt"></i>{{ job.distrito.nome|default:"Distrito por definir" }}</span>
           <span class="job-app-chip"><i class="bi bi-calendar-event"></i>{{ job.data_publicacao|date:"d/m/Y" }}</span>
         </div>
