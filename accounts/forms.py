@@ -7,6 +7,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
 
+from .models import SecurityQuestion
+
 User = get_user_model()
 
 
@@ -23,6 +25,14 @@ class UserRegistrationForm(UserCreationForm):
         ('EMP', _('Empresa (Quero publicar vagas)')),
         ('OP', _('Operador Distrital')),
         ('TEC', _('Técnico PNUD')),
+    ]
+
+    SECURITY_QUESTION_CHOICES = [
+        ('mother_second_name', _('Qual é o segundo nome da tua mãe?')),
+        ('father_second_name', _('Qual é o segundo nome do teu pai?')),
+        ('favorite_pet_name', _('Qual é o nome do teu animal preferido?')),
+        ('grandparent_name', _('Qual é o nome do teu avô ou avó?')),
+        ('favorite_dish', _('Qual é o teu prato favorito?')),
     ]
     
     perfil = forms.ChoiceField(
@@ -117,6 +127,45 @@ class UserRegistrationForm(UserCreationForm):
             'placeholder': _('Repita a palavra-passe')
         })
     )
+
+    question_1 = forms.ChoiceField(
+        label=_('Pergunta de segurança 1'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_1 = forms.CharField(
+        label=_('Resposta 1'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+    
+    question_2 = forms.ChoiceField(
+        label=_('Pergunta de segurança 2'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_2 = forms.CharField(
+        label=_('Resposta 2'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+    
+    question_3 = forms.ChoiceField(
+        label=_('Pergunta de segurança 3'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_3 = forms.CharField(
+        label=_('Resposta 3'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
     
     class Meta:
         model = User
@@ -171,6 +220,31 @@ class UserRegistrationForm(UserCreationForm):
         nif = (cleaned_data.get('nif') or '').strip()
         bi_numero = (cleaned_data.get('bi_numero') or '').strip()
 
+        questions = [
+            cleaned_data.get('question_1'),
+            cleaned_data.get('question_2'),
+            cleaned_data.get('question_3'),
+        ]
+        answers = [
+            cleaned_data.get('answer_1'),
+            cleaned_data.get('answer_2'),
+            cleaned_data.get('answer_3'),
+        ]
+
+        if None in questions or '' in questions:
+            self.add_error('question_1', _('Escolhe três perguntas de segurança.'))
+            self.add_error('question_2', _('Escolhe três perguntas de segurança.'))
+            self.add_error('question_3', _('Escolhe três perguntas de segurança.'))
+
+        if len({q for q in questions if q}) < 3:
+            self.add_error('question_1', _('Escolhe três perguntas diferentes.'))
+            self.add_error('question_2', _('Escolhe três perguntas diferentes.'))
+            self.add_error('question_3', _('Escolhe três perguntas diferentes.'))
+
+        for idx, answer in enumerate(answers, start=1):
+            if not answer or not answer.strip():
+                self.add_error(f'answer_{idx}', _('Responde a todas as perguntas de segurança.'))
+
         if perfil == 'EMP' and not nif:
             self.add_error('nif', _('O NIF é obrigatório para empresas.'))
 
@@ -203,6 +277,17 @@ class UserRegistrationForm(UserCreationForm):
         
         if commit:
             user.save()
+
+            security_questions = [
+                (self.cleaned_data.get('question_1'), self.cleaned_data.get('answer_1')),
+                (self.cleaned_data.get('question_2'), self.cleaned_data.get('answer_2')),
+                (self.cleaned_data.get('question_3'), self.cleaned_data.get('answer_3')),
+            ]
+            for position, (question_key, answer) in enumerate(security_questions, start=1):
+                if question_key and answer:
+                    question = SecurityQuestion(user=user, question_key=question_key, order=position)
+                    question.set_answer(answer)
+                    question.save()
         return user
 
 
@@ -264,30 +349,7 @@ class UserLoginForm(AuthenticationForm):
 
 
 class PasswordResetRequestForm(forms.Form):
-    """Formulário para solicitar recuperação de senha"""
-    
-    email = forms.EmailField(
-        label=_('Email'),
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': _('Seu email registado')
-        })
-    )
-
-class PasswordResetRequestForm(forms.Form):
-    """FormulÃ¡rio para solicitar recuperaÃ§Ã£o de senha"""
-
-    CHANNEL_CHOICES = [
-        ('email', _('Email')),
-        ('whatsapp', _('WhatsApp')),
-    ]
-
-    channel = forms.ChoiceField(
-        label=_('Canal de recuperaÃ§Ã£o'),
-        choices=CHANNEL_CHOICES,
-        initial='email',
-        widget=forms.RadioSelect,
-    )
+    """Formulário para solicitar recuperação de senha por perguntas de segurança"""
 
     email = forms.EmailField(
         label=_('Email'),
@@ -299,11 +361,11 @@ class PasswordResetRequestForm(forms.Form):
     )
 
     telefone = forms.CharField(
-        label=_('TelemÃ³vel'),
+        label=_('Telemóvel'),
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('Seu telemÃ³vel registado')
+            'placeholder': _('Seu telemóvel registado')
         })
     )
 
@@ -313,30 +375,27 @@ class PasswordResetRequestForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        channel = cleaned_data.get('channel') or 'email'
         email = (cleaned_data.get('email') or '').strip()
         telefone = (cleaned_data.get('telefone') or '').strip()
 
         self.user = None
 
-        if channel == 'whatsapp':
-            if not telefone:
-                self.add_error('telefone', _('Indica o teu telemÃ³vel registado.'))
-                return cleaned_data
+        if not email and not telefone:
+            self.add_error('email', _('Indica o teu email ou telemóvel registado.'))
+            self.add_error('telefone', _('Indica o teu email ou telemóvel registado.'))
+            return cleaned_data
 
-            try:
-                self.user = User.objects.get(telefone=telefone)
-            except User.DoesNotExist:
-                self.add_error('telefone', _('NÃ£o existe conta com este telemÃ³vel.'))
-        else:
-            if not email:
-                self.add_error('email', _('Indica o teu email registado.'))
-                return cleaned_data
-
+        if email:
             try:
                 self.user = User.objects.get(email__iexact=email)
             except User.DoesNotExist:
-                self.add_error('email', _('NÃ£o existe conta com este email.'))
+                self.add_error('email', _('Não existe conta com este email.'))
+
+        if self.user is None and telefone:
+            try:
+                self.user = User.objects.get(telefone=telefone)
+            except User.DoesNotExist:
+                self.add_error('telefone', _('Não existe conta com este telemóvel.'))
 
         cleaned_data['email'] = email
         cleaned_data['telefone'] = telefone
@@ -346,18 +405,30 @@ class PasswordResetRequestForm(forms.Form):
         return self.user
 
 
-class PasswordResetConfirmForm(forms.Form):
-    """Formulário para confirmar recuperação de senha"""
-    
-    code = forms.CharField(
-        max_length=6,
-        label=_('Código de verificação'),
+class PasswordResetSecurityQuestionsForm(forms.Form):
+    """Formulário para confirmar recuperação de senha através de perguntas de segurança"""
+
+    answer_1 = forms.CharField(
+        label=_('Resposta à pergunta 1'),
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': _('6 dígitos')
+            'placeholder': _('Resposta')
         })
     )
-    
+    answer_2 = forms.CharField(
+        label=_('Resposta à pergunta 2'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+    answer_3 = forms.CharField(
+        label=_('Resposta à pergunta 3'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
     new_password = forms.CharField(
         label=_('Nova palavra-passe'),
         widget=forms.PasswordInput(attrs={
@@ -365,7 +436,6 @@ class PasswordResetConfirmForm(forms.Form):
             'placeholder': _('Mínimo 8 caracteres')
         })
     )
-    
     confirm_password = forms.CharField(
         label=_('Confirmar palavra-passe'),
         widget=forms.PasswordInput(attrs={
@@ -373,15 +443,15 @@ class PasswordResetConfirmForm(forms.Form):
             'placeholder': _('Repita a palavra-passe')
         })
     )
-    
+
     def clean(self):
         cleaned_data = super().clean()
         new_password = cleaned_data.get('new_password')
         confirm_password = cleaned_data.get('confirm_password')
-        
+
         if new_password and confirm_password and new_password != confirm_password:
             raise forms.ValidationError(_('As palavras-passe não coincidem.'))
-        
+
         return cleaned_data
 
 

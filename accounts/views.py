@@ -8,23 +8,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from django.core.mail import send_mail
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import CreateView, FormView, View
 from django.urls import reverse_lazy
 from django.http import JsonResponse
-import random
 
 from .forms import (
     UserRegistrationForm, UserLoginForm,
-    PasswordResetRequestForm, PasswordResetConfirmForm,
-    UserProfileForm
+    PasswordResetRequestForm,
+    PasswordResetSecurityQuestionsForm, UserProfileForm
 )
-from .models import User, PasswordResetCode
-from .sms import send_whatsapp
+from .models import User, SecurityQuestionAttempt
 from core.models import Notification
 from core.notifications import build_notification_groups, notify_admins
 from profiles.models import YouthProfile
@@ -93,7 +89,8 @@ class RegisterView(CreateView):
             self.request,
             _('Registo realizado com sucesso! Faça login para continuar.')
         )
-        return super().form_valid(form)
+        self.object = user
+        return redirect(self.get_success_url())
 
 
 class LoginView(FormView):
@@ -187,122 +184,20 @@ def phone_confirm(request):
 
 
 class PasswordResetRequestView(FormView):
-    """View para solicitar código de recuperação de senha"""
+    """View para solicitar recuperação de senha"""
     template_name = 'accounts/password_reset_request.html'
     form_class = PasswordResetRequestForm
-    
-    def form_valid(self, form):
-        email = form.cleaned_data['email']
-        
-        try:
-            user = User.objects.get(email__iexact=email)
-            
-            # Gerar código de 6 dígitos
-            code = str(random.randint(100000, 999999))
-            
-            # Salvar código
-            reset_code = PasswordResetCode.objects.create(user=user, code=code)
-
-            subject = _('Código de recuperação de senha')
-            message = _('O teu código de recuperação é: {}').format(code)
-            try:
-                email_sent = send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=False
-                )
-            except Exception:
-                email_sent = 0
-
-            if not email_sent:
-                reset_code.delete()
-                messages.error(self.request, _('Não foi possível enviar o email. Tenta novamente.'))
-                return self.form_invalid(form)
-
-            messages.success(self.request, _('Enviámos um código de recuperação por email.'))
-            
-            # Redirecionar para confirmação
-            self.request.session['reset_email'] = user.email
-            return redirect('accounts:password_reset_confirm')
-            
-        except User.DoesNotExist:
-            messages.error(self.request, _('Não existe conta com este email.'))
-            return self.form_invalid(form)
-
 
     def form_valid(self, form):
         user = form.get_user()
-        channel = form.cleaned_data.get('channel') or 'email'
+        channel = 'security_questions'
 
-        code = str(random.randint(100000, 999999))
-        reset_code = PasswordResetCode.objects.create(user=user, code=code)
-
-        subject = _('CÃ³digo de recuperaÃ§Ã£o de senha')
-        message = _(
-            'O teu cÃ³digo de recuperaÃ§Ã£o Ã©: %(code)s. '
-            'Se nÃ£o foste tu, ignora esta mensagem.'
-        ) % {
-            'code': code,
-        }
-
-        if channel == 'whatsapp':
-            whatsapp_backend = getattr(
-                settings,
-                'WHATSAPP_BACKEND',
-                getattr(settings, 'SMS_BACKEND', 'console'),
+        if not user.has_security_questions():
+            messages.error(
+                self.request,
+                _('Não existem perguntas de segurança configuradas nesta conta. Contacta o suporte.')
             )
-            whatsapp_from_number = (
-                getattr(settings, 'TWILIO_WHATSAPP_FROM_NUMBER', '')
-                or getattr(settings, 'TWILIO_FROM_NUMBER', '')
-            )
-            if whatsapp_backend != 'twilio' or not (
-                getattr(settings, 'TWILIO_ACCOUNT_SID', '')
-                and getattr(settings, 'TWILIO_AUTH_TOKEN', '')
-                and whatsapp_from_number
-            ):
-                reset_code.delete()
-                messages.error(
-                    self.request,
-                    _(
-                        'O envio por WhatsApp ainda nao esta configurado neste '
-                        'servidor. Preenche TWILIO_ACCOUNT_SID, '
-                        'TWILIO_AUTH_TOKEN e TWILIO_WHATSAPP_FROM_NUMBER no '
-                        'ficheiro .env.'
-                    ),
-                )
-                return self.form_invalid(form)
-
-            sent = send_whatsapp(
-                user.telefone,
-                message,
-                content_variables={'1': code},
-            )
-            if not sent:
-                reset_code.delete()
-                messages.error(self.request, _('NÃ£o foi possÃ­vel enviar o cÃ³digo por WhatsApp. Tenta novamente.'))
-                return self.form_invalid(form)
-
-            messages.success(self.request, _('EnviÃ¡mos um cÃ³digo de recuperaÃ§Ã£o por WhatsApp.'))
-        else:
-            try:
-                email_sent = send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=False
-                )
-            except Exception:
-                email_sent = 0
-
-            if not email_sent:
-                reset_code.delete()
-                messages.error(self.request, _('NÃ£o foi possÃ­vel enviar o email. Tenta novamente.'))
-                return self.form_invalid(form)
-
-            messages.success(self.request, _('EnviÃ¡mos um cÃ³digo de recuperaÃ§Ã£o por email.'))
+            return self.form_invalid(form)
 
         self.request.session['reset_user_id'] = user.id
         self.request.session['reset_channel'] = channel
@@ -313,100 +208,90 @@ class PasswordResetRequestView(FormView):
 class PasswordResetConfirmView(FormView):
     """View para confirmar recuperação de senha"""
     template_name = 'accounts/password_reset_confirm.html'
-    form_class = PasswordResetConfirmForm
+    form_class = PasswordResetSecurityQuestionsForm
     success_url = reverse_lazy('accounts:login')
-    
-    def form_valid(self, form):
-        email = self.request.session.get('reset_email')
-        code = form.cleaned_data['code']
-        new_password = form.cleaned_data['new_password']
-        
-        if not email:
-            messages.error(self.request, _('Sessão expirada. Solicite novo código.'))
-            return redirect('accounts:password_reset_request')
-        
-        try:
-            user = User.objects.get(email__iexact=email)
-            reset_code = PasswordResetCode.objects.filter(
-                user=user,
-                code=code,
-                used=False
-            ).latest('created_at')
-            
-            if reset_code.is_valid():
-                # Atualizar senha
-                user.set_password(new_password)
-                user.save()
-                
-                # Marcar código como usado
-                reset_code.used = True
-                reset_code.save()
-                
-                # Limpar sessão
-                del self.request.session['reset_email']
-                
-                messages.success(
-                    self.request,
-                    _('Palavra-passe alterada com sucesso! Faça login com a nova senha.')
-                )
-                return super().form_valid(form)
-            else:
-                messages.error(self.request, _('Código expirado. Solicite novo código.'))
-                return self.form_invalid(form)
-                
-        except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
-            messages.error(self.request, _('Código inválido.'))
-            return self.form_invalid(form)
 
     def form_valid(self, form):
         user_id = self.request.session.get('reset_user_id')
-        email = self.request.session.get('reset_email')
-        code = form.cleaned_data['code']
-        new_password = form.cleaned_data['new_password']
-        
-        if not user_id and not email:
-            messages.error(self.request, _('SessÃ£o expirada. Solicite novo cÃ³digo.'))
+
+        if not user_id:
+            messages.error(self.request, _('Sessão expirada. Solicite novo código.'))
             return redirect('accounts:password_reset_request')
-        
+
         try:
-            if user_id:
-                user = User.objects.get(pk=user_id)
-            else:
-                user = User.objects.get(email__iexact=email)
-            reset_code = PasswordResetCode.objects.filter(
-                user=user,
-                code=code,
-                used=False
-            ).latest('created_at')
-            
-            if reset_code.is_valid():
-                user.set_password(new_password)
-                user.save()
-                
-                reset_code.used = True
-                reset_code.save()
-                
-                self.request.session.pop('reset_email', None)
-                self.request.session.pop('reset_user_id', None)
-                self.request.session.pop('reset_channel', None)
-                
-                messages.success(
-                    self.request,
-                    _('Palavra-passe alterada com sucesso! FaÃ§a login com a nova senha.')
-                )
-                return super().form_valid(form)
-            else:
-                messages.error(self.request, _('CÃ³digo expirado. Solicite novo cÃ³digo.'))
-                return self.form_invalid(form)
-                
-        except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
-            messages.error(self.request, _('CÃ³digo invÃ¡lido.'))
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            messages.error(self.request, _('Sessão expirada. Solicite novo código.'))
+            return redirect('accounts:password_reset_request')
+
+        attempt, created = SecurityQuestionAttempt.objects.get_or_create(user=user)
+        if attempt.is_blocked():
+            messages.error(
+                self.request,
+                _('Tentativas excedidas. Tenta novamente daqui a 10 minutos.')
+            )
             return self.form_invalid(form)
+
+        answers = [
+            form.cleaned_data.get('answer_1'),
+            form.cleaned_data.get('answer_2'),
+            form.cleaned_data.get('answer_3'),
+        ]
+        questions = list(user.get_security_questions())
+
+        if len(questions) < 3:
+            messages.error(
+                self.request,
+                _('Esta conta não tem perguntas de segurança suficientes configuradas.')
+            )
+            return redirect('accounts:password_reset_request')
+
+        valid_answers = all(
+            question.check_answer(answer)
+            for question, answer in zip(questions, answers)
+        )
+
+        if not valid_answers:
+            attempt.record_failure()
+            if attempt.is_blocked():
+                messages.error(
+                    self.request,
+                    _('Tentativas excedidas. Tenta novamente daqui a 10 minutos.')
+                )
+            else:
+                remaining = 3 - attempt.failed_attempts
+                messages.error(
+                    self.request,
+                    _('Resposta incorreta. Restam %(remaining)d tentativas.') % {
+                        'remaining': remaining,
+                    }
+                )
+            return self.form_invalid(form)
+
+        attempt.reset()
+        user.set_password(form.cleaned_data['new_password'])
+        user.save()
+        self.request.session.pop('reset_user_id', None)
+        self.request.session.pop('reset_channel', None)
+
+        messages.success(
+            self.request,
+            _('Palavra-passe alterada com sucesso! Faça login com a nova senha.')
+        )
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        channel = self.request.session.get('reset_channel') or 'email'
-        context['reset_channel_label'] = 'WhatsApp' if channel == 'whatsapp' else 'Email'
+        questions = []
+        user_id = self.request.session.get('reset_user_id')
+        if user_id:
+            try:
+                user = User.objects.get(pk=user_id)
+                questions = list(user.get_security_questions())
+            except User.DoesNotExist:
+                questions = []
+        context['security_questions'] = questions
+        context['reset_channel_label'] = _('Perguntas de segurança')
         return context
 
 

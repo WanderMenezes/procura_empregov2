@@ -3,6 +3,9 @@ Models para autenticação e gestão de usuários
 Base Nacional de Jovens
 """
 
+from datetime import timedelta
+
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
@@ -124,6 +127,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Verifica se o usuário tem perfil de empresa"""
         return hasattr(self, 'company_profile')
 
+    def has_security_questions(self):
+        return self.security_questions.count() >= 3
+
+    def get_security_questions(self):
+        return self.security_questions.order_by('order')[:3]
+
 
 class PasswordResetCode(models.Model):
     """Códigos de recuperação de senha"""
@@ -143,6 +152,72 @@ class PasswordResetCode(models.Model):
         """Verifica se o código ainda é válido (15 minutos)"""
         from datetime import timedelta
         return not self.used and (timezone.now() - self.created_at) < timedelta(minutes=15)
+
+
+class SecurityQuestion(models.Model):
+    """Perguntas de segurança do usuário"""
+
+    QUESTION_CHOICES = [
+        ('mother_second_name', _('Qual é o segundo nome da tua mãe?')),
+        ('father_second_name', _('Qual é o segundo nome do teu pai?')),
+        ('favorite_pet_name', _('Qual é o nome do teu animal preferido?')),
+        ('grandparent_name', _('Qual é o nome do teu avô ou avó?')),
+        ('favorite_dish', _('Qual é o teu prato favorito?')),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_questions')
+    question_key = models.CharField(_('pergunta'), max_length=50, choices=QUESTION_CHOICES)
+    answer_hash = models.CharField(_('resposta criptografada'), max_length=128)
+    order = models.PositiveSmallIntegerField(_('ordem'), default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('pergunta de segurança')
+        verbose_name_plural = _('perguntas de segurança')
+        unique_together = [('user', 'question_key')]
+        ordering = ['user', 'order']
+
+    def __str__(self):
+        return f"Pergunta de segurança para {self.user.telefone}: {self.get_question_key_display()}"
+
+    def set_answer(self, raw_answer):
+        normalized = (raw_answer or '').strip().lower()
+        self.answer_hash = make_password(normalized)
+
+    def check_answer(self, raw_answer):
+        normalized = (raw_answer or '').strip().lower()
+        return check_password(normalized, self.answer_hash)
+
+    @property
+    def question_text(self):
+        return dict(self.QUESTION_CHOICES).get(self.question_key, '')
+
+
+class SecurityQuestionAttempt(models.Model):
+    """Tentativas de responder às perguntas de segurança"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='security_question_attempt')
+    failed_attempts = models.PositiveSmallIntegerField(_('tentativas falhadas'), default=0)
+    blocked_until = models.DateTimeField(_('bloqueado até'), null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('tentativa de perguntas de segurança')
+        verbose_name_plural = _('tentativas de perguntas de segurança')
+
+    def is_blocked(self):
+        return self.blocked_until and timezone.now() < self.blocked_until
+
+    def record_failure(self):
+        self.failed_attempts += 1
+        if self.failed_attempts >= 3:
+            self.failed_attempts = 0
+            self.blocked_until = timezone.now() + timedelta(minutes=10)
+        self.save()
+
+    def reset(self):
+        self.failed_attempts = 0
+        self.blocked_until = None
+        self.save()
 
 
 class PhoneChange(models.Model):

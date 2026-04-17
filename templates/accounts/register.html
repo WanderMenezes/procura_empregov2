@@ -826,7 +826,62 @@
                     <div class="register-section">
                         <div class="register-section-head">
                             <div>
-                                <h3>5. Consentimentos</h3>
+                                <h3>5. Perguntas de segurança</h3>
+                                <p>Escolhe três perguntas diferentes e responde a cada uma. Estas respostas servem para recuperar a conta se precisares.</p>
+                            </div>
+                            <span class="register-section-badge">Segurança</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="id_question_1" class="register-input-label">Pergunta 1 *</label>
+                                {{ form.question_1 }}
+                                {% if form.question_1.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.question_1.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_answer_1" class="register-input-label">Resposta 1 *</label>
+                                {{ form.answer_1 }}
+                                {% if form.answer_1.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.answer_1.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_question_2" class="register-input-label">Pergunta 2 *</label>
+                                {{ form.question_2 }}
+                                {% if form.question_2.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.question_2.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_answer_2" class="register-input-label">Resposta 2 *</label>
+                                {{ form.answer_2 }}
+                                {% if form.answer_2.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.answer_2.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_question_3" class="register-input-label">Pergunta 3 *</label>
+                                {{ form.question_3 }}
+                                {% if form.question_3.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.question_3.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_answer_3" class="register-input-label">Resposta 3 *</label>
+                                {{ form.answer_3 }}
+                                {% if form.answer_3.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.answer_3.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="register-section">
+                        <div class="register-section-head">
+                            <div>
+                                <h3>6. Consentimentos</h3>
                                 <p>Usados para operação da conta, contacto e fins de empregabilidade.</p>
                             </div>
                             <span class="register-section-badge" id="consentBadge">Obrigatório</span>

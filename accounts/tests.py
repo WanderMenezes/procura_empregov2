@@ -1,12 +1,11 @@
 import json
-from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from accounts.models import PasswordResetCode
-from accounts.sms import send_whatsapp
+from accounts.models import PasswordResetCode, SecurityQuestion
 from core.models import Notification
 
 
@@ -28,7 +27,7 @@ class LoginViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Entrar na plataforma sem perder o fio ao trabalho.')
-        self.assertContains(response, 'Entrar com seguranca')
+        self.assertContains(response, 'Entrar com segurança')
         self.assertContains(response, reverse('accounts:password_reset_request'))
 
     def test_login_respects_safe_next_url(self):
@@ -111,6 +110,12 @@ class RegisterViewTests(TestCase):
             'consentimento_dados': 'on',
             'consentimento_contacto': 'on',
             'confirmacao_empresa': 'on',
+            'question_1': 'mother_second_name',
+            'answer_1': 'Maria',
+            'question_2': 'father_second_name',
+            'answer_2': 'João',
+            'question_3': 'favorite_pet_name',
+            'answer_3': 'Rex',
         }
         payload.update(overrides)
         return payload
@@ -126,6 +131,12 @@ class RegisterViewTests(TestCase):
             'password2': 'SenhaSegura123',
             'consentimento_dados': 'on',
             'consentimento_contacto': 'on',
+            'question_1': 'mother_second_name',
+            'answer_1': 'Maria',
+            'question_2': 'father_second_name',
+            'answer_2': 'João',
+            'question_3': 'favorite_pet_name',
+            'answer_3': 'Rex',
         }
         payload.update(overrides)
         return payload
@@ -158,6 +169,7 @@ class RegisterViewTests(TestCase):
         self.assertEqual(user.perfil, User.ProfileType.EMPRESA)
         self.assertEqual(user.nome_empresa, 'Empresa Horizonte')
         self.assertEqual(user.nif, '123456789')
+        self.assertEqual(user.security_questions.count(), 3)
         self.assertTrue(
             Notification.objects.filter(
                 user=self.admin,
@@ -193,119 +205,109 @@ class PasswordResetRequestTests(TestCase):
             email='recuperacao@example.com',
         )
 
-    def test_request_page_offers_email_and_whatsapp_channels(self):
+    def test_request_page_shows_security_question_recovery_prompt(self):
         response = self.client.get(reverse('accounts:password_reset_request'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'WhatsApp')
-        self.assertContains(response, 'name="channel"', html=False)
+        self.assertContains(response, 'Responde às tuas perguntas de segurança')
         self.assertContains(response, 'id="id_telefone"', html=False)
+        self.assertContains(response, 'id="id_email"', html=False)
 
-    @patch('accounts.views.send_mail', return_value=1)
-    def test_password_reset_request_can_send_code_by_email(self, mocked_send_mail):
+    def test_password_reset_request_requires_email_or_phone(self):
         response = self.client.post(
             reverse('accounts:password_reset_request'),
             {
-                'channel': 'email',
+                'email': '',
+                'telefone': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Indica o teu email ou telemóvel registado.')
+        self.assertFalse(PasswordResetCode.objects.exists())
+
+    def test_password_reset_request_can_start_security_questions_flow(self):
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='mother_second_name',
+            order=1,
+        )
+        question.set_answer('Maria')
+        question.save()
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='father_second_name',
+            order=2,
+        )
+        question.set_answer('João')
+        question.save()
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='favorite_pet_name',
+            order=3,
+        )
+        question.set_answer('Rex')
+        question.save()
+
+        response = self.client.post(
+            reverse('accounts:password_reset_request'),
+            {
                 'email': self.user.email,
                 'telefone': '',
             },
         )
 
         self.assertRedirects(response, reverse('accounts:password_reset_confirm'), fetch_redirect_response=False)
-        reset_code = PasswordResetCode.objects.get(user=self.user, used=False)
+        self.assertEqual(self.client.session['reset_channel'], 'security_questions')
         self.assertEqual(self.client.session['reset_user_id'], self.user.id)
-        self.assertEqual(self.client.session['reset_channel'], 'email')
-        mocked_send_mail.assert_called_once()
-        self.assertIn(reset_code.code, mocked_send_mail.call_args.args[1])
 
-    @override_settings(
-        WHATSAPP_BACKEND='twilio',
-        TWILIO_ACCOUNT_SID='AC_TEST',
-        TWILIO_AUTH_TOKEN='token-test',
-        TWILIO_WHATSAPP_FROM_NUMBER='whatsapp:+14155238886',
-    )
-    @patch('accounts.views.send_whatsapp', return_value=True)
-    def test_password_reset_request_can_send_code_by_whatsapp(self, mocked_send_whatsapp):
-        response = self.client.post(
-            reverse('accounts:password_reset_request'),
-            {
-                'channel': 'whatsapp',
-                'email': '',
-                'telefone': self.user.telefone,
-            },
+    def test_password_reset_confirm_with_security_questions_changes_password(self):
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='mother_second_name',
+            order=1,
         )
-
-        self.assertRedirects(response, reverse('accounts:password_reset_confirm'), fetch_redirect_response=False)
-        reset_code = PasswordResetCode.objects.get(user=self.user, used=False)
-        self.assertEqual(self.client.session['reset_user_id'], self.user.id)
-        self.assertEqual(self.client.session['reset_channel'], 'whatsapp')
-        mocked_send_whatsapp.assert_called_once()
-        self.assertEqual(mocked_send_whatsapp.call_args.args[0], self.user.telefone)
-        self.assertIn(reset_code.code, mocked_send_whatsapp.call_args.args[1])
-
-    @override_settings(
-        WHATSAPP_BACKEND='twilio',
-        TWILIO_ACCOUNT_SID='AC_TEST',
-        TWILIO_AUTH_TOKEN='token-test',
-        TWILIO_WHATSAPP_FROM_NUMBER='whatsapp:+14155238886',
-    )
-    @patch('accounts.views.send_whatsapp', return_value=False)
-    def test_password_reset_request_shows_error_when_whatsapp_delivery_fails(self, mocked_send_whatsapp):
-        response = self.client.post(
-            reverse('accounts:password_reset_request'),
-            {
-                'channel': 'whatsapp',
-                'email': '',
-                'telefone': self.user.telefone,
-            },
-            follow=True,
+        question.set_answer('Maria')
+        question.save()
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='father_second_name',
+            order=2,
         )
+        question.set_answer('João')
+        question.save()
+        question = SecurityQuestion(
+            user=self.user,
+            question_key='favorite_pet_name',
+            order=3,
+        )
+        question.set_answer('Rex')
+        question.save()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'WhatsApp')
-        self.assertFalse(PasswordResetCode.objects.filter(user=self.user).exists())
-        mocked_send_whatsapp.assert_called_once()
-
-    def test_password_reset_request_requires_registered_phone_for_whatsapp(self):
-        response = self.client.post(
+        self.client.post(
             reverse('accounts:password_reset_request'),
             {
-                'channel': 'whatsapp',
-                'email': '',
+                'email': self.user.email,
                 'telefone': '',
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'telem')
-        self.assertFalse(PasswordResetCode.objects.exists())
-
-
-class WhatsAppDeliveryTests(TestCase):
-    @override_settings(
-        WHATSAPP_BACKEND='twilio',
-        TWILIO_ACCOUNT_SID='AC_TEST',
-        TWILIO_AUTH_TOKEN='token-test',
-        TWILIO_WHATSAPP_FROM_NUMBER='whatsapp:+14155238886',
-        TWILIO_WHATSAPP_CONTENT_SID='HX229f5a04fd0510ce1b071852155d3e75',
-    )
-    @patch('twilio.rest.Client')
-    def test_send_whatsapp_uses_content_template_when_configured(self, mocked_client):
-        sent = send_whatsapp(
-            '+2399940219',
-            'O teu cÃ³digo de recuperaÃ§Ã£o Ã©: 409173',
-            content_variables={'1': '409173'},
+        response = self.client.post(
+            reverse('accounts:password_reset_confirm'),
+            {
+                'answer_1': 'Maria',
+                'answer_2': 'João',
+                'answer_3': 'Rex',
+                'new_password': 'NovaSenha123',
+                'confirm_password': 'NovaSenha123',
+            },
         )
 
-        self.assertTrue(sent)
-        mocked_client.assert_called_once_with('AC_TEST', 'token-test')
-        kwargs = mocked_client.return_value.messages.create.call_args.kwargs
-        self.assertEqual(kwargs['from_'], 'whatsapp:+14155238886')
-        self.assertEqual(kwargs['to'], 'whatsapp:+2399940219')
-        self.assertEqual(kwargs['content_sid'], 'HX229f5a04fd0510ce1b071852155d3e75')
-        self.assertEqual(json.loads(kwargs['content_variables']), {'1': '409173'})
-        self.assertNotIn('body', kwargs)
+        self.assertRedirects(response, reverse('accounts:login'), fetch_redirect_response=False)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('NovaSenha123'))
+
+
 
 
 class NotificationViewTests(TestCase):
