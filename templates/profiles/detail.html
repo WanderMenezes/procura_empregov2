@@ -290,6 +290,45 @@
       <div class="candidate-panel mt-4">
         <div class="candidate-panel-head">
           <div>
+            <h6>Recuperação da conta</h6>
+            <p class="candidate-panel-subtitle">Perguntas usadas para redefinir a palavra-passe.</p>
+          </div>
+          <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm">Gerir</a>
+        </div>
+        <div class="candidate-icon-list">
+          <div class="candidate-icon-item">
+            <span class="candidate-icon"><i class="bi {% if security_questions_configured %}bi-shield-check{% else %}bi-shield-exclamation{% endif %}"></i></span>
+            <div>
+              <span class="candidate-icon-label">Estado</span>
+              {% if security_questions_configured %}
+                {{ security_questions_count }}/3 perguntas configuradas para recuperação.
+              {% else %}
+                Ainda faltam configurar as 3 perguntas de segurança.
+              {% endif %}
+            </div>
+          </div>
+          {% if security_questions %}
+            {% for question in security_questions %}
+              <div class="candidate-icon-item">
+                <span class="candidate-icon"><i class="bi bi-question-circle"></i></span>
+                <div>
+                  <span class="candidate-icon-label">Pergunta {{ forloop.counter }}</span>
+                  {{ question.question_text }}
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="candidate-empty">
+              <i class="bi bi-shield-lock"></i>
+              As perguntas de segurança ainda não foram adicionadas nesta conta.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="candidate-panel mt-4">
+        <div class="candidate-panel-head">
+          <div>
             <h6>Resumo rápido</h6>
             <p class="candidate-panel-subtitle">Leitura compacta do teu perfil.</p>
           </div>

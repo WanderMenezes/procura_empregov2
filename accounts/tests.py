@@ -308,6 +308,88 @@ class PasswordResetRequestTests(TestCase):
         self.assertTrue(self.user.check_password('NovaSenha123'))
 
 
+class SecurityQuestionsProfileEditTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            telefone='+2399000210',
+            nome='Conta Segura',
+            perfil=User.ProfileType.JOVEM,
+            password='SenhaSegura123',
+            email='seguranca@example.com',
+        )
+
+    def test_profile_edit_can_add_security_questions_for_existing_user(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('accounts:profile_edit'),
+            {
+                'question_1': 'mother_second_name',
+                'answer_1': 'Maria',
+                'question_2': 'father_second_name',
+                'answer_2': 'Joao',
+                'question_3': 'favorite_pet_name',
+                'answer_3': 'Rex',
+                'save_security_questions': '1',
+            },
+        )
+
+        self.assertRedirects(response, reverse('accounts:profile_edit'), fetch_redirect_response=False)
+        self.assertEqual(self.user.security_questions.count(), 3)
+
+        questions = list(self.user.security_questions.order_by('order'))
+        self.assertEqual(
+            [question.question_key for question in questions],
+            ['mother_second_name', 'father_second_name', 'favorite_pet_name'],
+        )
+        self.assertTrue(questions[0].check_answer('Maria'))
+        self.assertTrue(questions[1].check_answer('Joao'))
+        self.assertTrue(questions[2].check_answer('Rex'))
+
+    def test_profile_edit_can_update_questions_and_keep_existing_answers(self):
+        question = SecurityQuestion(user=self.user, question_key='mother_second_name', order=1)
+        question.set_answer('Maria')
+        question.save()
+
+        question = SecurityQuestion(user=self.user, question_key='father_second_name', order=2)
+        question.set_answer('Joao')
+        question.save()
+
+        question = SecurityQuestion(user=self.user, question_key='favorite_pet_name', order=3)
+        question.set_answer('Rex')
+        question.save()
+
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('accounts:profile_edit'),
+            {
+                'question_1': 'father_second_name',
+                'answer_1': '',
+                'question_2': 'mother_second_name',
+                'answer_2': 'Maria Nova',
+                'question_3': 'favorite_dish',
+                'answer_3': 'Calulu',
+                'save_security_questions': '1',
+            },
+        )
+
+        self.assertRedirects(response, reverse('accounts:profile_edit'), fetch_redirect_response=False)
+
+        questions = list(self.user.security_questions.order_by('order'))
+        self.assertEqual(
+            [question.question_key for question in questions],
+            ['father_second_name', 'mother_second_name', 'favorite_dish'],
+        )
+        self.assertTrue(questions[0].check_answer('Joao'))
+        self.assertTrue(questions[1].check_answer('Maria Nova'))
+        self.assertFalse(questions[1].check_answer('Maria'))
+        self.assertTrue(questions[2].check_answer('Calulu'))
+        self.assertFalse(
+            self.user.security_questions.filter(question_key='favorite_pet_name').exists()
+        )
+
+
 
 
 class NotificationViewTests(TestCase):

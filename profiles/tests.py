@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.models import SecurityQuestion
 from companies.models import Application, Company, ContactRequest, JobPost
 from core.models import AuditLog, District, Notification, Skill
 from profiles.forms import YouthProfileStep1Form, YouthProfileStep2Form, YouthProfileStep3Form
@@ -110,6 +111,18 @@ def _create_admin_approved_but_hidden_profile(user, **overrides):
     }
     profile_defaults.update(overrides)
     return YouthProfile.objects.create(user=user, **profile_defaults)
+
+
+def _create_security_questions(user):
+    questions = [
+        ('mother_second_name', 'Maria'),
+        ('father_second_name', 'Joao'),
+        ('favorite_pet_name', 'Rex'),
+    ]
+    for order, (question_key, answer) in enumerate(questions, start=1):
+        question = SecurityQuestion(user=user, question_key=question_key, order=order)
+        question.set_answer(answer)
+        question.save()
 
 
 class AssistedRegisterTests(TestCase):
@@ -741,6 +754,51 @@ class YouthProfileAgeWarningTests(TestCase):
                 titulo='Pedido de contacto desativado',
             ).exists()
         )
+
+
+class YouthProfileSecurityQuestionsTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            telefone='+2399220200',
+            nome='Jovem Seguro',
+            perfil=User.ProfileType.JOVEM,
+            password='SenhaSegura123',
+        )
+        YouthProfile.objects.create(
+            user=self.user,
+            completo=True,
+            validado=False,
+            data_nascimento=_years_ago(20),
+            sexo='M',
+            localidade='Riboque',
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            regime_trabalho='PRE',
+            preferencia_oportunidade='EMP',
+        )
+
+    def test_profile_detail_shows_security_questions_when_configured(self):
+        _create_security_questions(self.user)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('profiles:detail'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Recuperação da conta')
+        self.assertContains(response, '3/3 perguntas configuradas para recuperação.')
+        self.assertContains(response, 'Qual é o segundo nome da tua mãe?')
+        self.assertContains(response, 'Qual é o segundo nome do teu pai?')
+        self.assertContains(response, 'Qual é o nome do teu animal preferido?')
+        self.assertNotContains(response, 'Maria')
+
+    def test_profile_detail_shows_empty_state_without_security_questions(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('profiles:detail'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ainda faltam configurar as 3 perguntas de segurança.')
+        self.assertContains(response, 'As perguntas de segurança ainda não foram adicionadas nesta conta.')
 
 
 class ProfileWizardEditingTests(TestCase):

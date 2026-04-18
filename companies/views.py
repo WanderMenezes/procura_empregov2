@@ -169,6 +169,9 @@ def company_dashboard(request):
         'pedidos': pedidos_recentes,
         'company_profile_complete': company_profile_complete,
         'candidate_directory_enabled': company.can_access_candidate_directory,
+        'security_questions': list(request.user.get_security_questions()),
+        'security_questions_count': request.user.security_questions.count(),
+        'security_questions_configured': request.user.has_security_questions(),
         'stats': {
             'vagas_ativas': company.vagas_ativas,
             'total_vagas': company.total_vagas,

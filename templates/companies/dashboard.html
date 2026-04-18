@@ -619,6 +619,47 @@
       <div class="company-panel">
         <div class="company-panel-head">
           <div>
+            <h6>Recuperação da conta</h6>
+            <p class="company-panel-subtitle">Perguntas usadas para redefinir a palavra-passe.</p>
+          </div>
+          <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm">Gerir</a>
+        </div>
+        <div class="company-detail-list">
+          <div class="company-detail-item">
+            <span class="company-detail-icon"><i class="bi {% if security_questions_configured %}bi-shield-check{% else %}bi-shield-exclamation{% endif %}"></i></span>
+            <div>
+              <span class="company-detail-label">Estado</span>
+              <p class="company-detail-value">
+                {% if security_questions_configured %}
+                  {{ security_questions_count }}/3 perguntas configuradas para recuperação.
+                {% else %}
+                  Ainda faltam configurar as 3 perguntas de segurança.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          {% if security_questions %}
+            {% for question in security_questions %}
+              <div class="company-detail-item">
+                <span class="company-detail-icon"><i class="bi bi-question-circle"></i></span>
+                <div>
+                  <span class="company-detail-label">Pergunta {{ forloop.counter }}</span>
+                  <p class="company-detail-value">{{ question.question_text }}</p>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="company-empty">
+              <i class="bi bi-shield-lock"></i>
+              As perguntas de segurança ainda não foram adicionadas nesta conta.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="company-panel">
+        <div class="company-panel-head">
+          <div>
             <h6>Próximos passos</h6>
             <p class="company-panel-subtitle">Ações simples para manter o painel vivo.</p>
           </div>

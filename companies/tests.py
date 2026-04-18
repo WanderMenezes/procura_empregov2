@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.models import SecurityQuestion
 from companies.forms import CompanyProfileForm, JobPostForm
 from companies.models import Application, Company, ContactRequest, JobPost
 from core.models import District, Notification
@@ -72,6 +73,18 @@ def _create_admin_approved_but_hidden_profile(user, **overrides):
     }
     profile_defaults.update(overrides)
     return YouthProfile.objects.create(user=user, **profile_defaults)
+
+
+def _create_security_questions(user):
+    questions = [
+        ('mother_second_name', 'Maria'),
+        ('father_second_name', 'Joao'),
+        ('favorite_pet_name', 'Rex'),
+    ]
+    for order, (question_key, answer) in enumerate(questions, start=1):
+        question = SecurityQuestion(user=user, question_key=question_key, order=order)
+        question.set_answer(answer)
+        question.save()
 
 
 class CompanySectorTests(TestCase):
@@ -349,6 +362,44 @@ class CompanyYouthVisibilityTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.validated_user.telefone)
         self.assertContains(response, 'dados diretos do jovem ja nao estao disponiveis')
+
+
+class CompanyDashboardSecurityQuestionsTests(TestCase):
+    def setUp(self):
+        self.company_user = User.objects.create_user(
+            telefone='+2399110301',
+            nome='Empresa Segura',
+            perfil=User.ProfileType.EMPRESA,
+            password='SenhaSegura123',
+        )
+        Company.objects.create(
+            user=self.company_user,
+            nome='Empresa Segura',
+            ativa=True,
+        )
+
+    def test_company_dashboard_shows_security_questions_when_configured(self):
+        _create_security_questions(self.company_user)
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('companies:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Recuperação da conta')
+        self.assertContains(response, '3/3 perguntas configuradas para recuperação.')
+        self.assertContains(response, 'Qual é o segundo nome da tua mãe?')
+        self.assertContains(response, 'Qual é o segundo nome do teu pai?')
+        self.assertContains(response, 'Qual é o nome do teu animal preferido?')
+        self.assertNotContains(response, 'Maria')
+
+    def test_company_dashboard_shows_empty_state_without_security_questions(self):
+        self.client.force_login(self.company_user)
+
+        response = self.client.get(reverse('companies:dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ainda faltam configurar as 3 perguntas de segurança.')
+        self.assertContains(response, 'As perguntas de segurança ainda não foram adicionadas nesta conta.')
 
 
 class AdminWorkflowNotificationTests(TestCase):

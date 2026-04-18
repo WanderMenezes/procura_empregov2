@@ -183,6 +183,44 @@
           <div class="account-empty"><i class="bi bi-bell-slash"></i>Ainda não existem notificações para mostrar.</div>
         {% endif %}
       </section>
+
+      <section class="account-panel">
+        <div class="account-panel-head">
+          <div>
+            <h6>Recuperação da conta</h6>
+            <p class="account-panel-subtitle">Perguntas usadas para redefinir a palavra-passe.</p>
+          </div>
+          <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm">Gerir</a>
+        </div>
+        <div class="account-notes">
+          <article class="account-note">
+            <span class="account-icon"><i class="bi {% if security_questions_configured %}bi-shield-check{% else %}bi-shield-exclamation{% endif %}"></i></span>
+            <div>
+              <span class="account-icon-label">Estado</span>
+              {% if security_questions_configured %}
+                {{ security_questions_count }}/3 perguntas configuradas para recuperação.
+              {% else %}
+                Ainda faltam configurar as 3 perguntas de segurança.
+              {% endif %}
+            </div>
+          </article>
+
+          {% if security_questions %}
+            {% for question in security_questions %}
+              <article class="account-note">
+                <span class="account-icon"><i class="bi bi-question-circle"></i></span>
+                <div>
+                  <span class="account-icon-label">Pergunta {{ forloop.counter }}</span>
+                  {{ question.question_text }}
+                </div>
+              </article>
+            {% endfor %}
+          {% else %}
+            <div class="account-empty"><i class="bi bi-shield-lock"></i>As perguntas de segurança ainda não foram adicionadas nesta conta.</div>
+          {% endif %}
+        </div>
+        <p class="account-panel-subtitle mt-3 mb-0">As respostas não são mostradas por segurança. Podes alterar perguntas e respostas em "Editar conta".</p>
+      </section>
     </aside>
 
     <section>

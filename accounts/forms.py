@@ -5,6 +5,7 @@ Forms para autenticação e gestão de usuários
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import get_user_model, authenticate
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from .models import SecurityQuestion
@@ -453,6 +454,137 @@ class PasswordResetSecurityQuestionsForm(forms.Form):
             raise forms.ValidationError(_('As palavras-passe não coincidem.'))
 
         return cleaned_data
+
+
+class SecurityQuestionsForm(forms.Form):
+    """Formulario para criar ou atualizar perguntas de seguranca da conta."""
+
+    SECURITY_QUESTION_CHOICES = SecurityQuestion.QUESTION_CHOICES
+
+    question_1 = forms.ChoiceField(
+        label=_('Pergunta de seguranca 1'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_1 = forms.CharField(
+        label=_('Resposta 1'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+
+    question_2 = forms.ChoiceField(
+        label=_('Pergunta de seguranca 2'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_2 = forms.CharField(
+        label=_('Resposta 2'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+
+    question_3 = forms.ChoiceField(
+        label=_('Pergunta de seguranca 3'),
+        choices=SECURITY_QUESTION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    answer_3 = forms.CharField(
+        label=_('Resposta 3'),
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Resposta')
+        })
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+        self.existing_questions = []
+        self.existing_answers_by_key = {}
+
+        if self.user and getattr(self.user, 'pk', None):
+            self.existing_questions = list(
+                self.user.security_questions.order_by('order', 'pk')
+            )
+            self.existing_answers_by_key = {
+                question.question_key: question.answer_hash
+                for question in self.existing_questions
+            }
+
+        for index, question in enumerate(self.existing_questions[:3], start=1):
+            self.fields[f'question_{index}'].initial = question.question_key
+            self.fields[f'answer_{index}'].widget.attrs['placeholder'] = _(
+                'Deixa em branco para manter a resposta atual'
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        questions = [
+            cleaned_data.get('question_1'),
+            cleaned_data.get('question_2'),
+            cleaned_data.get('question_3'),
+        ]
+
+        if None in questions or '' in questions:
+            self.add_error('question_1', _('Escolhe tres perguntas de seguranca.'))
+            self.add_error('question_2', _('Escolhe tres perguntas de seguranca.'))
+            self.add_error('question_3', _('Escolhe tres perguntas de seguranca.'))
+
+        if len({question for question in questions if question}) < 3:
+            self.add_error('question_1', _('Escolhe tres perguntas diferentes.'))
+            self.add_error('question_2', _('Escolhe tres perguntas diferentes.'))
+            self.add_error('question_3', _('Escolhe tres perguntas diferentes.'))
+
+        for index, question_key in enumerate(questions, start=1):
+            answer_field = f'answer_{index}'
+            answer = (cleaned_data.get(answer_field) or '').strip()
+            cleaned_data[answer_field] = answer
+
+            if not question_key:
+                continue
+
+            if not answer and question_key not in self.existing_answers_by_key:
+                self.add_error(
+                    answer_field,
+                    _('Escreve a resposta desta pergunta.')
+                )
+
+        return cleaned_data
+
+    def save(self):
+        if not self.user:
+            raise ValueError('SecurityQuestionsForm requires a user instance.')
+
+        questions_to_create = []
+        for index in range(1, 4):
+            question_key = self.cleaned_data[f'question_{index}']
+            answer = self.cleaned_data[f'answer_{index}']
+            question = SecurityQuestion(
+                user=self.user,
+                question_key=question_key,
+                order=index,
+            )
+
+            if answer:
+                question.set_answer(answer)
+            else:
+                question.answer_hash = self.existing_answers_by_key[question_key]
+
+            questions_to_create.append(question)
+
+        with transaction.atomic():
+            self.user.security_questions.all().delete()
+            SecurityQuestion.objects.bulk_create(questions_to_create)
+
+        return questions_to_create
 
 
 class UserProfileForm(forms.ModelForm):

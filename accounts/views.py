@@ -18,7 +18,7 @@ from django.http import JsonResponse
 from .forms import (
     UserRegistrationForm, UserLoginForm,
     PasswordResetRequestForm,
-    PasswordResetSecurityQuestionsForm, UserProfileForm
+    PasswordResetSecurityQuestionsForm, UserProfileForm, SecurityQuestionsForm
 )
 from .models import User, SecurityQuestionAttempt
 from core.models import Notification
@@ -300,11 +300,15 @@ def profile_view(request):
     """View para visualizar perfil do usuário"""
     user = request.user
     ordered_notifications = user.notifications.order_by('-created_at', '-id')
+    security_questions = list(user.get_security_questions())
     
     context = {
         'user': user,
         'recent_notifications': ordered_notifications[:4],
         'unread_notifications': user.notifications.filter(lida=False).count(),
+        'security_questions': security_questions,
+        'security_questions_count': len(security_questions),
+        'security_questions_configured': user.has_security_questions(),
     }
     
     if user.is_jovem and user.has_youth_profile():
@@ -381,6 +385,7 @@ def profile_edit(request):
     user = request.user
     profile_form = UserProfileForm(instance=user)
     password_form = PasswordChangeForm(user=user)
+    security_questions_form = SecurityQuestionsForm(user=user)
 
     if request.method == 'POST':
         if 'save_profile' in request.POST:
@@ -396,10 +401,22 @@ def profile_edit(request):
                 update_session_auth_hash(request, updated_user)
                 messages.success(request, _('Palavra-passe alterada com sucesso.'))
                 return redirect('accounts:profile_edit')
+        elif 'save_security_questions' in request.POST:
+            security_questions_form = SecurityQuestionsForm(request.POST, user=user)
+            had_security_questions = user.has_security_questions()
+            if security_questions_form.is_valid():
+                security_questions_form.save()
+                if had_security_questions:
+                    messages.success(request, _('Perguntas de seguranca atualizadas com sucesso.'))
+                else:
+                    messages.success(request, _('Perguntas de seguranca adicionadas com sucesso.'))
+                return redirect('accounts:profile_edit')
 
     context = {
         'profile_form': profile_form,
         'password_form': password_form,
+        'security_questions_form': security_questions_form,
+        'security_questions_configured': user.has_security_questions(),
     }
 
     return render(request, 'accounts/profile_edit.html', context)
