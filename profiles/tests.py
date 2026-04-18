@@ -6,9 +6,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from companies.models import Application, Company, ContactRequest, JobPost
-from core.models import AuditLog, District, Notification
+from core.models import AuditLog, District, Notification, Skill
 from profiles.forms import YouthProfileStep1Form, YouthProfileStep2Form, YouthProfileStep3Form
-from profiles.models import Education, YouthProfile
+from profiles.models import Education, YouthProfile, YouthSkill
 
 
 User = get_user_model()
@@ -744,6 +744,16 @@ class YouthProfileAgeWarningTests(TestCase):
 
 
 class ProfileWizardEditingTests(TestCase):
+    def test_step2_form_keeps_existing_unapproved_skills_available(self):
+        approved_skill = Skill.objects.create(nome='Excel', tipo='TEC', aprovada=True)
+        custom_skill = Skill.objects.create(nome='Planeamento Comunitario', tipo='TRA', aprovada=False)
+
+        form = YouthProfileStep2Form(initial={'skills': [approved_skill.id, custom_skill.id]})
+
+        queryset_ids = set(form.fields['skills'].queryset.values_list('id', flat=True))
+        self.assertIn(approved_skill.id, queryset_ids)
+        self.assertIn(custom_skill.id, queryset_ids)
+
     def test_editing_step1_can_be_saved_without_finishing_all_steps(self):
         district, _ = District.objects.get_or_create(
             codigo='AGU',
@@ -869,6 +879,79 @@ class ProfileWizardEditingTests(TestCase):
         self.assertEqual(youth_user.email, 'exterior.atualizado@example.com')
         self.assertEqual(profile.localidade, 'Lisboa, Portugal')
         self.assertEqual(profile.sexo, 'F')
+
+    def test_editing_step2_updates_data_when_moving_to_next_step(self):
+        district, _ = District.objects.get_or_create(
+            codigo='AGU',
+            defaults={'nome': 'Agua Grande'},
+        )
+        old_skill = Skill.objects.create(nome='Atendimento', tipo='TRA', aprovada=True)
+        new_skill = Skill.objects.create(nome='Analise de Dados', tipo='TEC', aprovada=True)
+        youth_user = User.objects.create_user(
+            telefone='+2399220205',
+            nome='Perfil Academico',
+            perfil=User.ProfileType.JOVEM,
+            distrito=district,
+        )
+        profile = YouthProfile.objects.create(
+            user=youth_user,
+            completo=True,
+            validado=False,
+            data_nascimento=_years_ago(20),
+            sexo='F',
+            localidade='Riboque',
+            situacao_atual='DES',
+            disponibilidade='SIM',
+            regime_trabalho='PRE',
+            preferencia_oportunidade='EMP',
+            idiomas=[{'idioma': 'Ingles', 'dominio': 'AMBOS'}],
+            visivel=True,
+        )
+        Education.objects.create(
+            profile=profile,
+            nivel='SEC',
+            area_formacao='TIC',
+            instituicao='Liceu Nacional',
+            ano=2024,
+            curso='Informatica',
+        )
+        YouthSkill.objects.create(profile=profile, skill=old_skill, nivel=1)
+
+        self.client.force_login(youth_user)
+        self.client.get(reverse('profiles:wizard_step', args=[2]) + '?reset=1')
+
+        response = self.client.post(
+            reverse('profiles:wizard_step', args=[2]),
+            {
+                'nivel': 'SUP',
+                'area_formacao': 'OUT',
+                'outra_area_formacao': 'Robotica Industrial',
+                'instituicao': 'Instituto Tecnico',
+                'ano': '2025',
+                'curso': 'Automacao',
+                'skills': [str(new_skill.id)],
+                'idioma_1_nome': 'Frances',
+                'idioma_1_dominio': 'ORAL',
+                'next': '1',
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('profiles:wizard_step', args=[3]))
+        profile.refresh_from_db()
+        education = Education.objects.get(profile=profile)
+
+        self.assertEqual(education.nivel, 'SUP')
+        self.assertEqual(education.area_formacao, 'OUT')
+        self.assertEqual(education.outra_area_formacao, 'Robotica Industrial')
+        self.assertEqual(education.instituicao, 'Instituto Tecnico')
+        self.assertEqual(education.ano, 2025)
+        self.assertEqual(education.curso, 'Automacao')
+        self.assertEqual(profile.idiomas, [{'idioma': 'Frances', 'dominio': 'ORAL'}])
+        self.assertEqual(
+            set(YouthSkill.objects.filter(profile=profile).values_list('skill_id', flat=True)),
+            {new_skill.id},
+        )
 
     def test_editing_step3_updates_work_regime(self):
         district, _ = District.objects.get_or_create(

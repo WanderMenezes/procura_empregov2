@@ -404,7 +404,31 @@ class YouthProfileStep2Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         attach_idioma_fields(self)
-        self.fields['skills'].queryset = Skill.objects.filter(aprovada=True).order_by('nome')
+        selected_skill_ids = []
+        if self.is_bound and hasattr(self.data, 'getlist'):
+            selected_skill_ids = [
+                int(value) for value in self.data.getlist(self.add_prefix('skills'))
+                if str(value).isdigit()
+            ]
+        else:
+            initial_skills = self.initial.get('skills', [])
+            if hasattr(initial_skills, 'values_list'):
+                initial_skills = list(initial_skills.values_list('pk', flat=True))
+            elif hasattr(initial_skills, 'all'):
+                initial_skills = list(initial_skills.all().values_list('pk', flat=True))
+            elif isinstance(initial_skills, str):
+                initial_skills = [initial_skills]
+
+            for value in initial_skills or []:
+                try:
+                    selected_skill_ids.append(int(getattr(value, 'pk', value)))
+                except (TypeError, ValueError):
+                    continue
+
+        skills_qs = Skill.objects.filter(aprovada=True)
+        if selected_skill_ids:
+            skills_qs = (skills_qs | Skill.objects.filter(id__in=selected_skill_ids)).distinct()
+        self.fields['skills'].queryset = skills_qs.order_by('nome')
 
     def clean(self):
         cleaned_data = super().clean()

@@ -119,12 +119,80 @@ class ProfileWizardView(View):
             return profile.wizard_data
         return self._profile_to_wizard_data(profile)
 
-    def _persist_wizard_draft(self, user, wizard_data: dict, step: int):
+    def _parse_optional_int(self, value):
+        if value in (None, ''):
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    def _sync_step2_entities(self, profile: YouthProfile, step2: dict):
+        if not profile or not isinstance(step2, dict):
+            return
+
+        idiomas = parse_idioma_payload(step2.get('idiomas_data'))
+        if profile.idiomas != idiomas:
+            profile.idiomas = idiomas
+            profile.save(update_fields=['idiomas'])
+
+        edu = Education.objects.filter(profile=profile).order_by('-ano', '-id').first()
+        edu_payload = {
+            'nivel': step2.get('nivel') or '',
+            'area_formacao': step2.get('area_formacao') or '',
+            'outra_area_formacao': step2.get('outra_area_formacao') or '',
+            'instituicao': step2.get('instituicao') or '',
+            'ano': self._parse_optional_int(step2.get('ano')),
+            'curso': step2.get('curso') or '',
+        }
+        has_education_data = any(
+            value not in (None, '', [])
+            for value in edu_payload.values()
+        )
+
+        if edu:
+            for field_name, value in edu_payload.items():
+                setattr(edu, field_name, value)
+            edu.save()
+        elif has_education_data:
+            Education.objects.create(profile=profile, **edu_payload)
+
+        skills_ids = step2.get('skills', []) or []
+        if isinstance(skills_ids, str):
+            skills_ids = [skills_ids]
+        selected_ids = set()
+        for sid in skills_ids:
+            try:
+                selected_ids.add(int(sid))
+            except (TypeError, ValueError):
+                continue
+
+        existing_skills = YouthSkill.objects.filter(profile=profile)
+        existing_ids = set(existing_skills.values_list('skill_id', flat=True))
+        to_remove = existing_ids - selected_ids
+        if to_remove:
+            existing_skills.filter(skill_id__in=to_remove).delete()
+        to_add = selected_ids - existing_ids
+        for skill_id in to_add:
+            try:
+                skill = Skill.objects.get(pk=skill_id)
+                YouthSkill.objects.create(profile=profile, skill=skill, nivel=1)
+            except Skill.DoesNotExist:
+                pass
+
+        outra_skill_nome = step2.get('outra_skill_nome', '')
+        outra_skill_tipo = step2.get('outra_skill_tipo')
+        nova_skill = get_or_create_skill_by_name(outra_skill_nome, outra_skill_tipo)
+        if nova_skill:
+            YouthSkill.objects.get_or_create(profile=profile, skill=nova_skill, defaults={'nivel': 1})
+
+    def _persist_wizard_draft(self, user, wizard_data: dict, step: int, sync_step_models: bool = False):
         if not (user.is_authenticated and user.is_jovem and user.has_youth_profile()):
             return
 
         profile = user.youth_profile
         step1 = wizard_data.get('1', {}) if isinstance(wizard_data.get('1', {}), dict) else {}
+        step2 = wizard_data.get('2', {}) if isinstance(wizard_data.get('2', {}), dict) else {}
         step3 = wizard_data.get('3', {}) if isinstance(wizard_data.get('3', {}), dict) else {}
         previous_progress = build_profile_progress_snapshot(profile)['progress']
 
@@ -160,6 +228,9 @@ class ProfileWizardView(View):
             profile.preferencia_oportunidade = step3.get('preferencia_oportunidade')
         if 'sobre' in step3:
             profile.sobre = step3.get('sobre') or ''
+
+        if sync_step_models and step == 2:
+            self._sync_step2_entities(profile, step2)
 
         profile.wizard_data = wizard_data
         profile.wizard_step = step
@@ -341,13 +412,19 @@ class ProfileWizardView(View):
         is_autosave = 'autosave' in request.POST
         if is_autosave:
             wizard_data = request.session.get('wizard_data', {})
-            if form.is_valid():
+            form_is_valid = form.is_valid()
+            if form_is_valid:
                 wizard_data[str(step)] = self.get_form_data(form)
             else:
                 wizard_data[str(step)] = self.get_raw_form_data(form, request)
             request.session['wizard_data'] = wizard_data
             if not is_final_submit:
-                self._persist_wizard_draft(request.user, wizard_data, step)
+                self._persist_wizard_draft(
+                    request.user,
+                    wizard_data,
+                    step,
+                    sync_step_models=form_is_valid and step == 2,
+                )
             progress = self.compute_progress(wizard_data)
             step_stats = self.compute_step_progress(wizard_data).get(str(step), {'filled': 0, 'total': 0})
             return JsonResponse({
@@ -363,7 +440,12 @@ class ProfileWizardView(View):
             current_step_data = self.get_form_data(form)
             wizard_data[str(step)] = current_step_data
             request.session['wizard_data'] = wizard_data
-            self._persist_wizard_draft(request.user, wizard_data, step)
+            self._persist_wizard_draft(
+                request.user,
+                wizard_data,
+                step,
+                sync_step_models=step == 2,
+            )
             
             if 'next' in request.POST and step < 4:
                 return redirect('profiles:wizard_step', step=step + 1)
@@ -476,7 +558,6 @@ class ProfileWizardView(View):
             step2 = wizard_data.get('2', {})
             step3 = wizard_data.get('3', {})
             step4 = wizard_data.get('4', {})
-            idiomas = parse_idioma_payload(step2.get('idiomas_data'))
 
             visivel = self._to_bool(step4.get('visivel', True))
             consentimento_sms = self._to_bool(step4.get('consentimento_sms'))
@@ -524,7 +605,6 @@ class ProfileWizardView(View):
                 profile.interesse_setorial = step3.get('interesse_setorial')
                 profile.preferencia_oportunidade = step3.get('preferencia_oportunidade', profile.preferencia_oportunidade)
                 profile.sobre = step3.get('sobre', '') or ''
-                profile.idiomas = idiomas
                 profile.visivel = visivel
                 profile.consentimento_sms = consentimento_sms
                 profile.consentimento_whatsapp = consentimento_whatsapp
@@ -551,7 +631,6 @@ class ProfileWizardView(View):
                     interesse_setorial=step3.get('interesse_setorial'),
                     preferencia_oportunidade=step3.get('preferencia_oportunidade', 'EMP'),
                     sobre=step3.get('sobre', ''),
-                    idiomas=idiomas,
                     visivel=visivel,
                     consentimento_sms=consentimento_sms,
                     consentimento_whatsapp=consentimento_whatsapp,
@@ -562,64 +641,7 @@ class ProfileWizardView(View):
                 )
 
             # Educação (atualiza ou cria)
-            edu_fields = ['nivel', 'area_formacao', 'outra_area_formacao', 'instituicao', 'ano', 'curso']
-            edu_data_present = any(step2.get(f) for f in edu_fields)
-            edu = Education.objects.filter(profile=profile).order_by('-ano').first()
-            if edu_data_present:
-                if edu:
-                    if step2.get('nivel'):
-                        edu.nivel = step2.get('nivel')
-                    if 'area_formacao' in step2:
-                        edu.area_formacao = step2.get('area_formacao') or edu.area_formacao
-                    if 'outra_area_formacao' in step2:
-                        edu.outra_area_formacao = step2.get('outra_area_formacao') or ''
-                    if step2.get('instituicao'):
-                        edu.instituicao = step2.get('instituicao')
-                    if step2.get('ano'):
-                        edu.ano = step2.get('ano')
-                    if 'curso' in step2:
-                        edu.curso = step2.get('curso') or ''
-                    edu.save()
-                elif step2.get('nivel') and step2.get('instituicao'):
-                    Education.objects.create(
-                        profile=profile,
-                        nivel=step2['nivel'],
-                        area_formacao=step2.get('area_formacao', ''),
-                        outra_area_formacao=step2.get('outra_area_formacao', ''),
-                        instituicao=step2['instituicao'],
-                        ano=step2.get('ano'),
-                        curso=step2.get('curso', '')
-                    )
-
-            # Skills (sincronizar selecao)
-            skills_ids = step2.get('skills', []) or []
-            if isinstance(skills_ids, str):
-                skills_ids = [skills_ids]
-            selected_ids = set()
-            for sid in skills_ids:
-                try:
-                    selected_ids.add(int(sid))
-                except (TypeError, ValueError):
-                    continue
-
-            existing_skills = YouthSkill.objects.filter(profile=profile)
-            existing_ids = set(existing_skills.values_list('skill_id', flat=True))
-            to_remove = existing_ids - selected_ids
-            if to_remove:
-                existing_skills.filter(skill_id__in=to_remove).delete()
-            to_add = selected_ids - existing_ids
-            for skill_id in to_add:
-                try:
-                    skill = Skill.objects.get(pk=skill_id)
-                    YouthSkill.objects.create(profile=profile, skill=skill, nivel=1)
-                except Skill.DoesNotExist:
-                    pass
-
-            outra_skill_nome = step2.get('outra_skill_nome', '')
-            outra_skill_tipo = step2.get('outra_skill_tipo')
-            nova_skill = get_or_create_skill_by_name(outra_skill_nome, outra_skill_tipo)
-            if nova_skill:
-                YouthSkill.objects.get_or_create(profile=profile, skill=nova_skill, defaults={'nivel': 1})
+            self._sync_step2_entities(profile, step2)
 
             # Experiência (atualiza ou cria)
             if self._to_bool(step3.get('tem_experiencia')) and step3.get('exp_entidade') and step3.get('exp_inicio'):
